@@ -69,6 +69,16 @@ export class AnnotationTool {
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
 
+  prevFrame() {
+    this.playbackFrame = Math.max(1, this.activeTimeFrame - 1);
+  }
+  nextFrame() {
+    this.playbackFrame = Math.min(
+      (this.videoElement as HTMLVideoElement).duration * this.fps,
+      this.activeTimeFrame + 1
+    );
+  }
+
   get selectedColor() {
     return this.colorPicker.value;
   }

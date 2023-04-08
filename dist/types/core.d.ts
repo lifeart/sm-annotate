@@ -34,6 +34,8 @@ export declare class AnnotationTool {
         y: number;
         frame: number;
     }[];
+    prevFrame(): void;
+    nextFrame(): void;
     get selectedColor(): string;
     get selectedStrokeSize(): number;
     get currentTool(): Tool | null;
