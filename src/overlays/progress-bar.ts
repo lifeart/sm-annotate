@@ -30,12 +30,12 @@ export function addProgressBarOverlay(this: AnnotationTool) {
 
   this.ctx.fillStyle = "#F3CE32";
 
-  const recSize = 8;
+  const recSize = this.isMobile ? 16 : 8;
 
   coordinatesOnProgressBar.forEach((coordinate, index) => {
     this.ctx.beginPath();
     const rx = x + coordinate;
-    const ry = this.canvasHeight - 5;
+    const ry = this.canvasHeight - (height/2);
     // draw square
     this.ctx.fillRect(rx - recSize / 2, ry - recSize / 2, recSize, recSize);
     // add to annotatedFrameCoordinates
@@ -54,7 +54,7 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   this.ctx.fillStyle = "white";
   this.ctx.beginPath();
   const ax = currentFrameCoordinate;
-  const ay = this.canvasHeight - 5;
+  const ay = this.canvasHeight - (height / 2);
   this.ctx.beginPath();
   this.ctx.fillRect(ax - recSize / 2, ay - recSize / 2, recSize, recSize);
   this.ctx.fill();

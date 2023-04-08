@@ -1,9 +1,12 @@
 body {
-  background-color: gray;
+  background-color: black;
+  margin: 0;
+  padding: 0;
 }
 .container {
-  float: left;
   width: 100vw;
+  max-width: 720px;
+  margin: 0 auto;
   position: relative;
 }
 canvas {
@@ -11,10 +14,13 @@ canvas {
   opacity: 1;
 }
 video {
-  width: auto;
-  height: calc(100vh - 70px);
-  margin: 0 auto;
+  width: 100%;
+  height: auto;
+  max-width: 720px;
   outline: none;
+}
+video::-webkit-media-controls-fullscreen-button {
+  display: none;
 }
 .container .active,
 .container button:active,
@@ -58,4 +64,23 @@ video {
   padding-left: 5px;
   background-color: rgba(255, 255, 255, 0.4);
   color: black;
+}
+
+.extra-buttons-container {
+  color:rgba(255, 255, 255, 0.6);
+  display: flex;
+  max-width: 720px;
+  margin: 20 auto;
+  align-items: stretch; /* Default */
+  justify-content: space-between;
+}
+.extra-buttons-container div {
+  display: block;
+  flex: 0 1 auto; /* Default */
+}
+
+@media screen and (min-width: 1280px) {
+  .container {
+    margin-top: 20px;
+  }
 }

@@ -136,15 +136,18 @@ export class AnnotationTool {
   get canvasHeight() {
     return this.canvas.height / this.pixelRatio;
   }
+  get isMobile() {
+    return window.innerWidth < 960;
+  }
   get progressBarCoordinates() {
+    const height = this.isMobile ? 30 : 10;
     const progressBarOffset = 5;
     const frameOverlayOffset = 55;
     const progressBarWidth =
       this.canvasWidth - progressBarOffset - frameOverlayOffset;
     const x = progressBarOffset;
-    const y = this.canvasHeight - 10;
+    const y = this.canvasHeight - height;
     const width = progressBarWidth;
-    const height = 10;
     return { x, y, width, height };
   }
 
@@ -251,7 +254,7 @@ export class AnnotationTool {
     this.setCanvasSize();
     this.fillCanvas();
     this.setCanvasSettings();
-    this.currentTool = "curve";
+    this.currentTool = this.isMobile ? null : "curve";
   }
   addEvent(
     node: HTMLInputElement,
@@ -540,15 +543,15 @@ export class AnnotationTool {
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
-  imageForCapture() {
+  frameToDataUrl() {
     try {
       this.clearCanvas();
       this.addVideoOverlay();
       this.addFrameSquareOverlay();
       this.drawShapesOverlay();
-      const image = new Image();
-      image.src = this.canvas.toDataURL("image/png");
-      return image;
+      const data = this.canvas.toDataURL("image/png");
+      this.redrawFullCanvas();
+      return data;
     } catch (e) {
       console.error(e);
       return null;
@@ -558,9 +561,9 @@ export class AnnotationTool {
   redrawFullCanvas() {
     this.clearCanvas();
     this.addVideoOverlay();
+    this.drawShapesOverlay();
     this.addFrameSquareOverlay();
     this.addProgressBarOverlay();
-    this.drawShapesOverlay();
   }
 
   replaceFrame(frame: number, shapes: IShape[]) {
@@ -631,7 +634,7 @@ export class AnnotationTool {
   getAnnotationFrame(event: PointerEvent) {
     const x = event.offsetX;
     const y = event.offsetY;
-    const offset = 5;
+    const offset = this.isMobile ? 10 : 5;
     const frame =
       this.annotatedFrameCoordinates.find((coordinate) => {
         return (

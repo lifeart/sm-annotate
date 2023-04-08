@@ -4,10 +4,31 @@ import { SmAnnotate } from "../src";
 
 const video = document.querySelector("video") as HTMLVideoElement;
 
-function initAnnotator() {
+async function initAnnotator() {
   // Video is ready to play
 
+
+  // preload video as blob
+
+
+  const blob = await fetch(video.currentSrc).then((r) => r.blob());
+
+  // set it to player 
+
+  const loadPromise = new Promise((resolve) => {
+
+    video.addEventListener("loadeddata", () => {
+      resolve(true);
+    });
+  });
+
+  video.src = URL.createObjectURL(blob);
+
+  await loadPromise;
+
   const tool = new SmAnnotate(video);
+
+  video.focus();
 
   setInterval(() => {
     tool.destroy();
@@ -31,6 +52,23 @@ function initAnnotator() {
   ) as HTMLButtonElement;
   const sampleButton = document.getElementById("sample") as HTMLButtonElement;
 
+  const saveImageButton = document.getElementById("save-image") as HTMLButtonElement;
+
+  saveImageButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const imgData = tool.frameToDataUrl();
+    if (!imgData) {
+      return;
+    }
+    const currentFrame = tool.activeTimeFrame;
+    // download the image
+    const a = document.createElement("a");
+    a.href = imgData;
+    a.download = `frame-${currentFrame}.png`;
+    a.click();
+  });
+
   sampleButton.addEventListener("click", (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -40,7 +78,7 @@ function initAnnotator() {
       .then((response) => response.json())
       .then((data) => {
         tool.loadAllFrames(data);
-        video.play();
+        tool.redrawFullCanvas();
       });
   });
   fileInput.addEventListener("change", (e) => {

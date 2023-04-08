@@ -47,6 +47,7 @@ export declare class AnnotationTool {
     set playbackFrame(frame: number);
     get canvasWidth(): number;
     get canvasHeight(): number;
+    get isMobile(): boolean;
     get progressBarCoordinates(): {
         x: number;
         y: number;
@@ -103,7 +104,7 @@ export declare class AnnotationTool {
     focusOnMediaNode(): void;
     drawShapesOverlay(): void;
     clearCanvas(): void;
-    imageForCapture(): HTMLImageElement | null;
+    frameToDataUrl(): string | null;
     redrawFullCanvas(): void;
     replaceFrame(frame: number, shapes: IShape[]): void;
     addShapesToFrame(frame: number, shapes: IShape[]): void;
