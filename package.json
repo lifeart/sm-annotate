@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "repository": "https://github.com/lifeart/sm-annotate.git",
   "author": "Alex Kanunnikov <lifeart92@gmail.com>",
-  "license": "MIT",
-  "private": true,
+  "license": "C-BY-NC-4.0",
+  "private": false,
   "type": "module",
   "types": "dist/types/index.d.ts",
   "devDependencies": {
