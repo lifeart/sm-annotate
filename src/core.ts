@@ -2,6 +2,7 @@
 
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
+import { detectFrameRate } from "./utils/detect-framerate";
 
 // @todo
 // - [ ] video may be resized not only on window resize
@@ -12,6 +13,13 @@ import { ToolPlugin } from "./plugins/base";
 // - [ ] add button to clear all shapes for current frame
 // - [ ] add button to export current frame as image
 // - [ ] add button to export all frames as images
+
+type FrameAnnotationV1 = {
+  frame: number;
+  fps: number;
+  version: 1;
+  shapes: IShape[];
+};
 
 type PointerEventNames =
   | "pointerdown"
@@ -82,9 +90,20 @@ export class AnnotationTool {
     }
   }
 
-  // https://stackoverflow.com/questions/72997777/how-do-i-get-the-frame-rate-of-an-html-video-with-javascript
-  get fps() {
-    return 25;
+  fps = 25;
+
+  enableFrameRateDetection() {
+    // check if we already have frame rate detector
+
+    if (this.destructors.find((d) => d.name === "frameRateDetector")) return;
+
+    const video = this.videoElement;
+    if (video.tagName === "IMG") return;
+    const destructor = detectFrameRate(video as HTMLVideoElement, (fps) => {
+      this.fps = fps;
+    });
+    Object.defineProperty(destructor, "name", { value: "frameRateDetector" });
+    this.destructors.push(destructor);
   }
 
   get playbackFrame() {
@@ -307,8 +326,7 @@ export class AnnotationTool {
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
     this._currentTool = null;
-    this.timeStack.clear();
-    this.undoTimeStack.clear();
+    this.cleanFrameStacks();
 
     // remove stroke
     const wrapper = this.strokeSizePicker.parentElement;
@@ -517,7 +535,22 @@ export class AnnotationTool {
     this.addProgressBarOverlay();
     this.drawShapesOverlay();
   }
-  saveCurrentFrame() {
+
+  replaceFrame(frame: number, shapes: IShape[]) {
+    this.timeStack.set(frame, shapes);
+  }
+
+  addShapesToFrame(frame: number, shapes: IShape[]) {
+    const existingShapes = this.timeStack.get(frame) || [];
+    this.timeStack.set(frame, [...existingShapes, ...shapes]);
+  }
+
+  setFrameRate(fps: number) {
+    this.destructors.find((d) => d.name === "frameRateDetector")?.();
+    this.fps = fps;
+  }
+
+  saveCurrentFrame(): FrameAnnotationV1 {
     return {
       frame: this.playbackFrame,
       version: 1,
@@ -534,17 +567,29 @@ export class AnnotationTool {
     throw new Error("Method not implemented.");
   }
 
-  saveAllFrames() {
+  cleanFrameStacks() {
+    this.timeStack.clear();
+    this.undoTimeStack.clear();
+  }
+
+  loadAllFrames(frames: FrameAnnotationV1[]) {
+    this.cleanFrameStacks();
+    frames.forEach((frame) => {
+      this.timeStack.set(frame.frame, frame.shapes);
+    });
+  }
+
+  saveAllFrames(): FrameAnnotationV1[] {
     const allFrames = Array.from(this.timeStack.keys());
     const annotatedFrames = allFrames.filter((frame) => {
       return this.timeStack.get(frame)?.length;
     });
-    const result = annotatedFrames.map((frame) => {
+    const result: FrameAnnotationV1[] = annotatedFrames.map((frame) => {
       return {
         frame,
         fps: this.fps,
         version: 1,
-        shapes: this.timeStack.get(frame),
+        shapes: this.timeStack.get(frame) ?? [],
       };
     });
     return result;
