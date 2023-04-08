@@ -5,7 +5,8 @@ import { ILine, LineToolPlugin } from "./line";
 import { ArrowToolPlugin, IArrow } from "./arrow";
 import { IText, TextToolPlugin } from "./text";
 import { EraserToolPlugin, IEraser } from "./eraser";
-export type IShape = IRectangle | ICircle | ILine | IArrow | IText | IEraser | ICurve;
+import { IMove, MoveToolPlugin } from "./move";
+export type IShape = IRectangle | ICircle | ILine | IArrow | IText | IEraser | ICurve | IMove;
 export type Tool = IShape["type"];
 export interface ShapeMap {
     rectangle: IRectangle;
@@ -15,6 +16,7 @@ export interface ShapeMap {
     text: IText;
     eraser: IEraser;
     curve: ICurve;
+    move: IMove;
 }
-export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin;
-export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin)[];
+export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin;
+export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof MoveToolPlugin)[];
