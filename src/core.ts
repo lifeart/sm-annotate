@@ -21,6 +21,8 @@ type FrameAnnotationV1 = {
   shapes: IShape[];
 };
 
+const DEFAULT_FPS = 25;
+
 type PointerEventNames =
   | "pointerdown"
   | "pointermove"
@@ -90,7 +92,7 @@ export class AnnotationTool {
     }
   }
 
-  fps = 25;
+  fps = DEFAULT_FPS;
 
   enableFrameRateDetection() {
     // check if we already have frame rate detector
@@ -323,9 +325,11 @@ export class AnnotationTool {
     this.destructors.forEach((destructor) => destructor());
     this.stopAnnotationsAsVideo();
     this.destructors = [];
+
+    this._currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
-    this._currentTool = null;
+    this.setFrameRate(DEFAULT_FPS);
     this.cleanFrameStacks();
 
     // remove stroke

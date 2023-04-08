@@ -1,5 +1,11 @@
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
+type FrameAnnotationV1 = {
+    frame: number;
+    fps: number;
+    version: 1;
+    shapes: IShape[];
+};
 type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover";
 type KeyboardEventNames = "keydown";
 type ButtonEventNames = "click";
@@ -32,7 +38,8 @@ export declare class AnnotationTool {
     get selectedStrokeSize(): number;
     get currentTool(): Tool | null;
     set currentTool(tool: Tool | null);
-    get fps(): number;
+    fps: number;
+    enableFrameRateDetection(): void;
     get playbackFrame(): number;
     set playbackFrame(frame: number);
     get canvasWidth(): number;
@@ -93,20 +100,15 @@ export declare class AnnotationTool {
     clearCanvas(): void;
     imageForCapture(): HTMLImageElement | null;
     redrawFullCanvas(): void;
-    saveCurrentFrame(): {
-        frame: number;
-        version: number;
-        fps: number;
-        shapes: IShape[];
-    };
+    replaceFrame(frame: number, shapes: IShape[]): void;
+    addShapesToFrame(frame: number, shapes: IShape[]): void;
+    setFrameRate(fps: number): void;
+    saveCurrentFrame(): FrameAnnotationV1;
     addFrameSquareOverlay(_?: number): void;
     addVideoOverlay(): void;
-    saveAllFrames(): {
-        frame: number;
-        fps: number;
-        version: number;
-        shapes: IShape[] | undefined;
-    }[];
+    cleanFrameStacks(): void;
+    loadAllFrames(frames: FrameAnnotationV1[]): void;
+    saveAllFrames(): FrameAnnotationV1[];
     getAnnotationFrame(event: PointerEvent): number | null;
     frameFromProgressBar(event: PointerEvent): number | null;
     addProgressBarOverlay(): void;
