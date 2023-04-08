@@ -54,6 +54,7 @@ export class CurveToolPlugin
     this.curvePoints.push({ x, y });
     this.drawCurve({
       points: this.curvePoints,
+      lineWidth: this.ctx.lineWidth,
     });
   }
   onPointerUp(event: PointerEvent) {
@@ -89,22 +90,43 @@ export class CurveToolPlugin
     this.curvePoints = []; // Reset curve points
     this.isDrawing = false;
   }
-  drawCurve(shape: Pick<ICurve, "points">) {
-    this.ctx.beginPath();
-    this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
+  drawCurve(shape: Pick<ICurve, "points" | "lineWidth">) {
+    // if only two points and they are the same, draw a circle
 
-    for (let i = 1; i < shape.points.length - 1; i++) {
-      const controlPoint = shape.points[i];
-      const endPoint = shape.points[i + 1];
-
-      this.ctx.quadraticCurveTo(
-        controlPoint.x,
-        controlPoint.y,
-        endPoint.x,
-        endPoint.y
+    if (
+      shape.points.length === 2 &&
+      shape.points[0].x === shape.points[1].x &&
+      shape.points[0].y === shape.points[1].y
+    ) {
+      const radius = shape.lineWidth / 4;
+      const startAngle = 0;
+      const endAngle = 2 * Math.PI;
+      this.ctx.beginPath();
+      this.ctx.arc(
+        shape.points[0].x,
+        shape.points[0].y,
+        radius,
+        startAngle,
+        endAngle
       );
-    }
+      this.ctx.stroke();
+    } else {
+      this.ctx.beginPath();
+      this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
 
-    this.ctx.stroke();
+      for (let i = 1; i < shape.points.length - 1; i++) {
+        const controlPoint = shape.points[i];
+        const endPoint = shape.points[i + 1];
+
+        this.ctx.quadraticCurveTo(
+          controlPoint.x,
+          controlPoint.y,
+          endPoint.x,
+          endPoint.y
+        );
+      }
+
+      this.ctx.stroke();
+    }
   }
 }

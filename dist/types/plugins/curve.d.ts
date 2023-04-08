@@ -16,5 +16,5 @@ export declare class CurveToolPlugin extends BasePlugin<ICurve> implements ToolP
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     onPointerUp(event: PointerEvent): void;
-    drawCurve(shape: Pick<ICurve, "points">): void;
+    drawCurve(shape: Pick<ICurve, "points" | "lineWidth">): void;
 }

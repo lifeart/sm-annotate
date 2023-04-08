@@ -16,11 +16,17 @@ video {
   margin: 0 auto;
   outline: none;
 }
-.active,
-button:active {
+.container .active,
+.container button:active,
+.container button:focus {
   background-color: #03a9f4;
 }
-button {
+
+.container button:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.container button {
   border: 0;
   cursor: pointer;
   margin: 5px;
@@ -31,7 +37,7 @@ button {
   transform: scale(0.8);
 }
 
-input[type="color"] {
+.container input[type="color"] {
   transform: translate(40px, -2px);
   cursor: pointer;
   border-radius: 3px;
@@ -41,7 +47,7 @@ input[type="color"] {
   padding: 0;
 }
 
-input[type="number"] {
+.container input[type="number"] {
   transform: translate(20px, -7px);
   cursor: pointer;
   z-index: -1;

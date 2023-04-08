@@ -606,6 +606,12 @@ export class AnnotationTool {
     });
   }
 
+  appendFrames(frames: FrameAnnotationV1[]) {
+    frames.forEach((frame) => {
+      this.addShapesToFrame(frame.frame, frame.shapes);
+    });
+  }
+
   saveAllFrames(): FrameAnnotationV1[] {
     const allFrames = Array.from(this.timeStack.keys());
     const annotatedFrames = allFrames.filter((frame) => {

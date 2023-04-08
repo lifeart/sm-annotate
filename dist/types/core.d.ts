@@ -113,6 +113,7 @@ export declare class AnnotationTool {
     addVideoOverlay(): void;
     cleanFrameStacks(): void;
     loadAllFrames(frames: FrameAnnotationV1[]): void;
+    appendFrames(frames: FrameAnnotationV1[]): void;
     saveAllFrames(): FrameAnnotationV1[];
     getAnnotationFrame(event: PointerEvent): number | null;
     frameFromProgressBar(event: PointerEvent): number | null;

@@ -39,7 +39,11 @@ export function initUI(this: AnnotationTool) {
     } else {
       button.dataset.tool = tool;
       const onClick = () => {
-        this.currentTool = tool;
+        if (this.currentTool === tool) {
+            this.currentTool = null;
+        } else {
+            this.currentTool = tool;
+        }
       };
 
       this.addEvent(button, "click", onClick);
