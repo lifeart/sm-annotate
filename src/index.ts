@@ -11,24 +11,4 @@ AnnotationTool.prototype.addFrameSquareOverlay = addFrameSquareOverlay;
 AnnotationTool.prototype.addVideoOverlay = addVideoOverlay;
 AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
 
-const video = document.querySelector("video") as HTMLVideoElement;
-const tool = new AnnotationTool(video);
-
-setInterval(() => {
-  tool.destroy();
-  tool.init(video);
-}, 100000000);
-
-setInterval(() => {
-  console.log(tool.saveAllFrames());
-}, 100000);
-
-
-
-
-// setInterval(() => {
-//   const img = tool.imageForCapture();
-//   if (img) {
-//     document.body.appendChild(img);
-//   }
-// }, 10000);
+export const SmAnnotate = AnnotationTool;

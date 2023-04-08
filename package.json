@@ -1,22 +1,25 @@
 {
-  "name": "sm-annotate",
+  "name": "@lifeart/sm-annotate",
   "version": "1.0.0",
   "description": "Vector Annotation Tool",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": "https://github.com/lifeart/sm-annotate.git",
   "author": "Alex Kanunnikov <lifeart92@gmail.com>",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "types": "dist/types/index.d.ts",
   "devDependencies": {
     "esbuild": "^0.17.15",
-    "http-server": "^14.1.1",
     "typescript": "^5.0.4"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "esbuild src/index.ts --bundle --minify --target=es2020 --outfile=dist/index.js",
-    "watch": "esbuild src/index.ts --bundle --outfile=demo/index.js --watch",
-    "serve": "http-server demo -p 4200",
-    "dev": "npm run watch | npm run serve"
+    "build-types": "tsc --emitDeclarationOnly",
+    "build-ts": "esbuild src/index.ts --bundle --minify --target=es2020 --outfile=dist/index.js --format=esm",
+    "watch": "esbuild demo/index.ts --bundle --outfile=demo/index.js --watch --servedir=demo --serve=4300",
+    "dev": "yarn run watch",
+    "build": "yarn clean && yarn build-ts && yarn run build-types",
+    "clean": "rm -rf dist"
   }
 }

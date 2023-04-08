@@ -32,9 +32,15 @@ Include the annotation-tool.js file in your HTML file and instantiate the Annota
 
 ## Usage
 
+```javascript
+import { SmAnnotate } from '@lifeart/sm-annotate';
+const video = document.getElementById('video');
+const annotationTool = new AnnotationTool(video);
+```
+
 Users can draw and annotate using the available tools (curve, rectangle, ellipse, and text) and customize the color and stroke size of the annotations. The tool also supports undo functionality and event handling for pointer events (mouse and touch).
 
-To save the current frame or all frames with annotations, use the saveCurrentFrame or saveAllFrames methods, respectively.
+To save the current frame or all frames with annotations, use the `saveCurrentFrame` or `saveAllFrames` methods, respectively.
 
 ## Contributing
 

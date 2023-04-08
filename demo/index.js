@@ -1288,8 +1288,11 @@
   AnnotationTool.prototype.addFrameSquareOverlay = addFrameSquareOverlay;
   AnnotationTool.prototype.addVideoOverlay = addVideoOverlay;
   AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
+  var SmAnnotation = AnnotationTool;
+
+  // demo/index.ts
   var video = document.querySelector("video");
-  var tool = new AnnotationTool(video);
+  var tool = new SmAnnotation(video);
   setInterval(() => {
     tool.destroy();
     tool.init(video);
