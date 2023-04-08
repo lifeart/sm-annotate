@@ -29,7 +29,20 @@ function initAnnotator() {
   const downloadButton = document.getElementById(
     "download"
   ) as HTMLButtonElement;
+  const sampleButton = document.getElementById("sample") as HTMLButtonElement;
 
+  sampleButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    // we need to download annotations-sample.json from the server using fetch
+    // and then load it into the tool
+    fetch("./annotations-sample.json")
+      .then((response) => response.json())
+      .then((data) => {
+        tool.loadAllFrames(data);
+        video.play();
+      });
+  });
   fileInput.addEventListener("change", (e) => {
     if (!fileInput.files || fileInput.files.length === 0) {
       return;
