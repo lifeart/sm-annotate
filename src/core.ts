@@ -32,6 +32,7 @@ type PointerEventNames =
 type KeyboardEventNames = "keydown";
 type ButtonEventNames = "click";
 type InputEventNames = "input" | "change";
+type ClipboardEventNames = "copy" | "paste" | "cut";
 type VideoEventNames =
   | "timeupdate"
   | "play"
@@ -48,7 +49,8 @@ type EventNames =
   | PointerEventNames
   | KeyboardEventNames
   | WindowEventNames
-  | ButtonEventNames;
+  | ButtonEventNames
+  | ClipboardEventNames;
 
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
@@ -257,6 +259,11 @@ export class AnnotationTool {
     callback: (e: Event) => void
   ): void;
   addEvent(
+    node: typeof document,
+    event: ClipboardEventNames,
+    callback: (e: ClipboardEvent) => void
+  ): void;
+  addEvent(
     node: HTMLVideoElement,
     event: VideoEventNames,
     callback: (e: Event) => void
@@ -299,11 +306,12 @@ export class AnnotationTool {
       | ((e: PointerEvent) => void)
       | ((e: KeyboardEvent) => void)
       | ((e: Event) => void)
+      | ((e: ClipboardEvent) => void)
   ) {
     type EventArgs = Parameters<typeof callback>;
     const safeCallback = (e: EventArgs[0]) => {
       if (this.isDestroyed) return;
-      callback(e as PointerEvent & KeyboardEvent & Event);
+      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent);
     };
 
     node.addEventListener(event, safeCallback);
@@ -551,12 +559,12 @@ export class AnnotationTool {
   }
 
   replaceFrame(frame: number, shapes: IShape[]) {
-    this.timeStack.set(frame, shapes);
+    this.timeStack.set(frame, JSON.parse(JSON.stringify(shapes)));
   }
 
   addShapesToFrame(frame: number, shapes: IShape[]) {
     const existingShapes = this.timeStack.get(frame) || [];
-    this.timeStack.set(frame, [...existingShapes, ...shapes]);
+    this.timeStack.set(frame, [...existingShapes, ...(JSON.parse(JSON.stringify(shapes)) as IShape[])]);
   }
 
   setFrameRate(fps: number) {
@@ -569,7 +577,7 @@ export class AnnotationTool {
       frame: this.playbackFrame,
       version: 1,
       fps: this.fps,
-      shapes: this.shapes,
+      shapes: JSON.parse(JSON.stringify(this.shapes)),
     };
   }
 

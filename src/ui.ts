@@ -189,10 +189,59 @@ export function initUI(this: AnnotationTool) {
       this.hideControls();
       this.playAnnotationsAsVideo();
     });
+
+    this.addEvent(document, "copy", (event: ClipboardEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      event.clipboardData?.setData(
+        "application/json",
+        JSON.stringify(this.saveCurrentFrame())
+      );
+    });
+    this.addEvent(document, "cut", (event: ClipboardEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      const data = this.saveCurrentFrame();
+      this.replaceFrame(this.playbackFrame, []);
+      this.redrawFullCanvas();
+      event.clipboardData?.setData("application/json", JSON.stringify(data));
+    });
+    this.addEvent(document, "paste", (event: ClipboardEvent) => {
+      const dataTypes = event.clipboardData?.types ?? [];
+      if (dataTypes.includes("application/json")) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      } else {
+        return;
+      }
+      const json = event.clipboardData?.getData("application/json");
+      if (!json) {
+        return;
+      }
+      const data = JSON.parse(json);
+      if (!data) {
+        return;
+      }
+      // check data for shapes
+      if (!data.shapes) {
+        return;
+      }
+      // check for version
+
+      if (data.version !== 1) {
+        return;
+      }
+      this.addShapesToFrame(this.playbackFrame, data.shapes);
+      this.redrawFullCanvas();
+    });
+
     // add event listener for frame by frame navigation from arrow keys
     this.addEvent(video, "keydown", (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        const videoElement = video;
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();

@@ -10,6 +10,7 @@ type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointerc
 type KeyboardEventNames = "keydown";
 type ButtonEventNames = "click";
 type InputEventNames = "input" | "change";
+type ClipboardEventNames = "copy" | "paste" | "cut";
 type VideoEventNames = "timeupdate" | "play" | "pause" | "ended" | "seek" | "stalled" | "waiting" | "error";
 type WindowEventNames = "resize";
 export declare class AnnotationTool {
@@ -72,6 +73,7 @@ export declare class AnnotationTool {
     initProperties(): void;
     init(videoElement: HTMLVideoElement | HTMLImageElement): void;
     addEvent(node: HTMLInputElement, event: InputEventNames, callback: (e: Event) => void): void;
+    addEvent(node: typeof document, event: ClipboardEventNames, callback: (e: ClipboardEvent) => void): void;
     addEvent(node: HTMLVideoElement, event: VideoEventNames, callback: (e: Event) => void): void;
     addEvent(node: HTMLVideoElement, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
     addEvent(node: HTMLButtonElement, event: ButtonEventNames, callback: (e: Event) => void): void;
