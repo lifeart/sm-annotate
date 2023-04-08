@@ -17,7 +17,6 @@ Demo: https://codepen.io/lifeart/pen/xxyxKYr
 * 🖱️ Event handling for pointer events (mouse and touch).
 * 🎞️ Playback of annotated frames as video.
 * 💾 Saving the current frame or all frames with annotations.
-* 🗑️ Destroying the annotation tool instance and cleaning up event listeners.
 
 ## Additional Benefits
 
@@ -42,5 +41,6 @@ To save the current frame or all frames with annotations, use the saveCurrentFra
 We welcome contributions to improve the project. Please feel free to submit issues or pull requests for consideration.
 
 ## License
-See the LICENSE file for license rights and limitations.
+
+This code is allowed for non-commercial use. For commercial use, users must contact the author.
 
