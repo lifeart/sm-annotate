@@ -1,0 +1,55 @@
+body {
+  background-color: gray;
+}
+.container {
+  float: left;
+  width: 100vw;
+  position: relative;
+}
+canvas {
+  touch-action: none;
+  opacity: 1;
+}
+video {
+  width: auto;
+  height: calc(100vh - 70px);
+  margin: 0 auto;
+  outline: none;
+}
+.active,
+button:active {
+  background-color: #03a9f4;
+}
+button {
+  border: 0;
+  cursor: pointer;
+  margin: 5px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  padding: 3px;
+  line-height: 0;
+  transform: scale(0.8);
+}
+
+input[type="color"] {
+  transform: translate(40px, -2px);
+  cursor: pointer;
+  border-radius: 3px;
+  border: 0;
+  line-height: 0;
+  background-color: transparent;
+  padding: 0;
+}
+
+input[type="number"] {
+  transform: translate(20px, -7px);
+  cursor: pointer;
+  z-index: -1;
+  border: 0;
+  border-radius: 3px;
+  line-height: 0;
+  padding: 0;
+  padding-left: 5px;
+  background-color: rgba(255, 255, 255, 0.4);
+  color: black;
+}

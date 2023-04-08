@@ -1,0 +1,22 @@
+{
+  "name": "sm-annotate",
+  "version": "1.0.0",
+  "description": "Vector Annotation Tool",
+  "main": "index.js",
+  "repository": "https://github.com/lifeart/sm-annotate.git",
+  "author": "Alex Kanunnikov <lifeart92@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.17.15",
+    "http-server": "^14.1.1",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/index.ts --bundle --minify --target=es2020 --outfile=dist/index.js",
+    "watch": "esbuild src/index.ts --bundle --outfile=demo/index.js --watch",
+    "serve": "http-server demo -p 4200",
+    "dev": "npm run watch | npm run serve"
+  }
+}
