@@ -82,6 +82,7 @@ export declare class AnnotationTool {
     addEvent(node: typeof window, event: WindowEventNames, callback: (e: Event) => void): void;
     initCanvas(): void;
     onKeyDown(event: KeyboardEvent): void;
+    removeLastShape(): void;
     handleUndo(): void;
     destroy(): void;
     setCanvasSize(): void;

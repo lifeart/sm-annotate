@@ -19,12 +19,11 @@ export class MoveToolPlugin
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
-    const lastShape =
-      this.annotationTool.shapes[this.annotationTool.shapes.length - 1];
+    const lastShape = this.annotationTool.saveCurrentFrame().shapes.pop();
     if (!lastShape) {
       return;
     }
-    this.annotationTool.handleUndo();
+    this.annotationTool.removeLastShape();
     this.shape = lastShape;
     this.lastDrawnShape = null;
     this.startX = x;
@@ -75,11 +74,12 @@ export class MoveToolPlugin
         shapeCopy.y += dy;
     }
 
+    this.lastDrawnShape = shapeCopy;
+
     if (!knownTypes.includes(shapeCopy.type)) {
       return;
     }
 
-    this.lastDrawnShape = shapeCopy;
     this.annotationTool.pluginForTool(shapeCopy.type).draw(shapeCopy);
   }
   onPointerUp(event: PointerEvent) {
@@ -99,5 +99,6 @@ export class MoveToolPlugin
   reset() {
     this.isDrawing = false;
     this.shape = null;
+    this.lastDrawnShape = null;
   }
 }

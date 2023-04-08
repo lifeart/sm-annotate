@@ -330,6 +330,11 @@ export class AnnotationTool {
     }
   }
 
+  removeLastShape() {
+    this.shapes.pop();
+    this.redrawFullCanvas();
+  }
+
   handleUndo() {
     if (this.undoStack.length > 0) {
       this.shapes = this.undoStack.pop() as IShape[];
