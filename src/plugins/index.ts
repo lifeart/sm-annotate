@@ -5,6 +5,7 @@ import { ILine, LineToolPlugin } from "./line";
 import { ArrowToolPlugin, IArrow } from "./arrow";
 import { IText, TextToolPlugin } from "./text";
 import { EraserToolPlugin, IEraser } from "./eraser";
+import { IMove, MoveToolPlugin } from "./move";
 
 export type IShape =
   | IRectangle
@@ -13,7 +14,9 @@ export type IShape =
   | IArrow
   | IText
   | IEraser
-  | ICurve;
+  | ICurve
+  | IMove;
+
 export type Tool = IShape["type"];
 
 export interface ShapeMap {
@@ -24,9 +27,10 @@ export interface ShapeMap {
   text: IText;
   eraser: IEraser;
   curve: ICurve;
+  move: IMove;
 }
 
-export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin;
+export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin;
 
 export const plugins = [
     RectangleToolPlugin,
@@ -36,4 +40,5 @@ export const plugins = [
     TextToolPlugin,
     EraserToolPlugin,
     CurveToolPlugin,
+    MoveToolPlugin,
 ]

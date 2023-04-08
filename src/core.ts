@@ -409,8 +409,8 @@ export class AnnotationTool {
   }
 
   serialize(shapes: IShape[] = this.shapes): IShape[] {
-    const canvasWidth = this.canvas.width;
-    const canvasHeight = this.canvas.height;
+    const canvasWidth = this.canvasWidth;
+    const canvasHeight = this.canvasHeight
     return shapes.map((shape) => {
       const pluginForShape = this.pluginForTool(shape.type);
       return pluginForShape.normalize(shape, canvasWidth, canvasHeight);
@@ -419,8 +419,8 @@ export class AnnotationTool {
 
   deserialize(shapes: IShape[]): IShape[] {
     // we need to scale the shapes to the current canvas size
-    const canvasWidth = 1 / this.canvas.width;
-    const canvasHeight = 1 / this.canvas.height;
+    const canvasWidth = 1 / this.canvasWidth;
+    const canvasHeight = 1 / this.canvasHeight;
     return shapes.map((shape) => {
       const pluginForShape = this.pluginForTool(shape.type);
       return pluginForShape.normalize(shape, canvasWidth, canvasHeight);

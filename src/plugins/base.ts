@@ -1,3 +1,5 @@
+import type { AnnotationTool  } from "./../core";
+
 export interface IShapeBase {
   type: string;
   strokeStyle: string | CanvasGradient | CanvasPattern;
@@ -19,19 +21,12 @@ export interface ToolPlugin<T extends IShapeBase> {
   normalize: (shape: T, canvasWidth: number, canvasHeight: number) => T;
 }
 
-interface AnnotationTool<T> {
-  ctx: CanvasRenderingContext2D;
-  addShape(shape: T): void;
-  canvas: HTMLCanvasElement;
-  getRelativeCoords(event: PointerEvent): { x: number; y: number };
-}
-
 export class BasePlugin<T extends IShapeBase> {
-  annotationTool!: AnnotationTool<T>;
+  annotationTool!: AnnotationTool;
   startX = 0;
   startY = 0;
   isDrawing = false;
-  constructor(annotationTool: AnnotationTool<T>) {
+  constructor(annotationTool: AnnotationTool) {
     this.annotationTool = annotationTool;
   }
   get ctx() {
@@ -47,6 +42,7 @@ export class BasePlugin<T extends IShapeBase> {
     this.isDrawing = false;
   }
   save(shape: T) {
-    this.annotationTool.addShape(shape);
+    // @todo - fix types here
+    this.annotationTool.addShape(shape as any);
   }
 }
