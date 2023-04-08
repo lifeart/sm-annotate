@@ -28,7 +28,11 @@ Demo: https://codepen.io/lifeart/pen/xxyxKYr
 
 ## Getting Started
 
-Include the annotation-tool.js file in your HTML file and instantiate the AnnotationTool class with the desired HTML video or image element.
+Add the package to your project using yarn:
+
+```bash
+yarn add https://github.com/lifeart/sm-annotate.git
+```
 
 ## Usage
 
