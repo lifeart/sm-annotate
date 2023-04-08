@@ -12,6 +12,7 @@ export class MoveToolPlugin
   name = "move";
   shape: IShape | null = null;
   lastDrawnShape: IShape | null = null;
+  shapeRemoved = false;
   normalize(shape: IMove): IMove {
     return {
       ...shape,
@@ -23,8 +24,8 @@ export class MoveToolPlugin
     if (!lastShape) {
       return;
     }
-    this.annotationTool.removeLastShape();
     this.shape = lastShape;
+    this.shapeRemoved = false;
     this.lastDrawnShape = null;
     this.startX = x;
     this.startY = y;
@@ -35,9 +36,17 @@ export class MoveToolPlugin
       return;
     }
 
+    if (!this.shapeRemoved) {
+      this.annotationTool.removeLastShape();
+      this.shapeRemoved = true;
+    }
+
     const { x, y } = this.annotationTool.getRelativeCoords(event);
-    const dx = x - this.startY;
+    const dx = x - this.startX;
     const dy = y - this.startY;
+
+    this.startX = x - dx;
+    this.startY = y - dy;
 
     const knownTypes = ["line", "circle", "rectangle", "text", "arrow", "curve", "eraser"];
 
@@ -91,6 +100,7 @@ export class MoveToolPlugin
     }
     this.isDrawing = false;
     this.shape = null;
+    this.shapeRemoved = false;
     this.lastDrawnShape = null;
   }
   draw() {
@@ -100,5 +110,6 @@ export class MoveToolPlugin
     this.isDrawing = false;
     this.shape = null;
     this.lastDrawnShape = null;
+    this.shapeRemoved = false;
   }
 }
