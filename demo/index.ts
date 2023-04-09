@@ -5,6 +5,31 @@ import { SmAnnotate } from "../src";
 const video = document.querySelector("video") as HTMLVideoElement;
 
 async function initAnnotator() {
+
+  // resize video to fit window
+
+
+  const computedVideoElementStyle = window.getComputedStyle(video);
+
+  const videoWidth = parseFloat(computedVideoElementStyle.width);
+  const videoHeight = parseFloat(computedVideoElementStyle.height);
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight - 80;
+
+  if (videoHeight > windowHeight) {
+    // change video style to fit window
+    
+    const videoRatio = videoWidth / videoHeight;
+    const windowRatio = windowWidth / windowHeight;
+
+    const optimalVideoHeight = windowHeight;
+    const optimalVideoWidth = optimalVideoHeight * videoRatio;
+
+    video.style.width = `${optimalVideoWidth}px`;
+    video.style.height = `${optimalVideoHeight}px`;
+  }
+  
+
   // Video is ready to play
 
 
@@ -16,7 +41,9 @@ async function initAnnotator() {
   // set it to player 
 
   const loadPromise = new Promise((resolve) => {
-
+    setTimeout(() => {
+      resolve(true);
+    }, 250);
     video.addEventListener("loadeddata", () => {
       resolve(true);
     }, {
@@ -27,11 +54,12 @@ async function initAnnotator() {
   if (!video.paused) {
     video.pause();
   }
-  video.src = URL.createObjectURL(blob);
+
+  const blobs = new Blob([blob], {type: 'video/mp4'});
+
+  video.src = window.URL.createObjectURL(blobs);
   
   await loadPromise;
-
-  await video.play();
 
   const tool = new SmAnnotate(video);
 

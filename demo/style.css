@@ -6,7 +6,7 @@ body {
 .container {
   width: 100vw;
   max-width: 720px;
-  margin: 0 auto;
+  margin: 40 auto;
   position: relative;
 }
 canvas {
@@ -81,6 +81,6 @@ video::-webkit-media-controls-fullscreen-button {
 
 @media screen and (min-width: 1280px) {
   .container {
-    margin-top: 20px;
+    margin-top: 40px;
   }
 }

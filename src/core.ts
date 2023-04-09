@@ -55,6 +55,7 @@ type EventNames =
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
   uiContainer!: HTMLDivElement;
+  playerControlsContainer!: HTMLDivElement;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
   isMouseDown = false;
@@ -127,6 +128,7 @@ export class AnnotationTool {
   set playbackFrame(frame: number) {
     if (this.videoElement instanceof HTMLImageElement) return;
     this.videoElement.currentTime = frame / this.fps;
+    this.show();
   }
   get canvasWidth() {
     return this.canvas.width / this.pixelRatio;
@@ -381,11 +383,13 @@ export class AnnotationTool {
 
     // remove canvas
     this.canvas.parentNode?.removeChild(this.canvas);
+    this.playerControlsContainer.parentElement?.removeChild(this.playerControlsContainer);
 
     const keysToDelete: Array<keyof typeof this> = [
       "strokeSizePicker",
       "colorPicker",
       "uiContainer",
+      "playerControlsContainer",
       "canvas",
       "ctx",
       "videoElement",
@@ -456,10 +460,14 @@ export class AnnotationTool {
     if (genericFrame) {
       this.isProgressBarNavigation = true;
       const frame = this.getAnnotationFrame(event);
-      if (frame !== null) {
-        this.playbackFrame = frame;
-      } else {
-        this.playbackFrame = genericFrame;
+      if (this.isVideoPaused) {
+        requestAnimationFrame(() => {
+          if (frame !== null) {
+            this.playbackFrame = frame;
+          } else {
+            this.playbackFrame = genericFrame;
+          }
+        })
       }
       return;
     }
@@ -480,6 +488,13 @@ export class AnnotationTool {
 
   isProgressBarNavigation = false;
 
+  get isVideoPaused() {
+    if (this.videoElement.tagName === "VIDEO") {
+      return (this.videoElement as HTMLVideoElement).paused;
+    }
+    return true;
+  }
+
   handleMouseMove(event: PointerEvent) {
     event.preventDefault();
 
@@ -494,7 +509,11 @@ export class AnnotationTool {
           return;
         }
         this.lastNavigatedFrame = maybeFrame;
-        this.playbackFrame = maybeFrame;
+        if (this.isVideoPaused) {
+          requestAnimationFrame(() => {
+            this.playbackFrame = maybeFrame;
+          })
+        }
         return;
       } else {
         this.hideControls();

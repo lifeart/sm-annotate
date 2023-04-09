@@ -16,6 +16,7 @@ type WindowEventNames = "resize";
 export declare class AnnotationTool {
     videoElement: HTMLVideoElement | HTMLImageElement;
     uiContainer: HTMLDivElement;
+    playerControlsContainer: HTMLDivElement;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isMouseDown: boolean;
@@ -100,6 +101,7 @@ export declare class AnnotationTool {
     get isDrawing(): boolean;
     lastNavigatedFrame: number;
     isProgressBarNavigation: boolean;
+    get isVideoPaused(): boolean;
     handleMouseMove(event: PointerEvent): void;
     getEventX(event: PointerEvent): number;
     getEventY(event: PointerEvent): number;

@@ -6,10 +6,21 @@ export function initUI(this: AnnotationTool) {
   // Create the container for the UI elements
   const uiContainer = document.createElement("div");
   uiContainer.style.position = "absolute";
-  uiContainer.style.top = "0";
+  uiContainer.style.top = "-40px";
   uiContainer.style.left = "0";
   uiContainer.style.zIndex = "2";
   this.canvas.parentNode?.insertBefore(uiContainer, this.canvas);
+
+
+  const playerControls = document.createElement("div");
+  playerControls.style.position = "relative";
+  playerControls.style.top = "0";
+  playerControls.style.left = "0";
+  playerControls.style.zIndex = "2";
+  // add player controls right after canvas
+  this.canvas.parentNode?.insertBefore(playerControls, this.canvas.nextSibling);
+
+  this.playerControlsContainer = playerControls;
 
   const video =
     this.videoElement.tagName === "VIDEO"
@@ -23,14 +34,15 @@ export function initUI(this: AnnotationTool) {
   // Create a helper function to generate buttons
   const createButton = (
     icon: string,
-    tool: Tool | ((e: Event) => void)
+    tool: Tool | ((e: Event) => void),
+    container: HTMLElement = uiContainer
   ): HTMLButtonElement => {
     const button = document.createElement("button");
 
     button.type = "button";
     button.innerHTML = icon;
     button.style.margin = "5px";
-    uiContainer.appendChild(button);
+    container.appendChild(button);
 
     this.buttons.push(button);
 
@@ -109,20 +121,34 @@ export function initUI(this: AnnotationTool) {
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>',
       () => {
         this.prevFrame();
-      }
+      },
+      this.playerControlsContainer
     );
     createButton(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
       () => {
         this.nextFrame();
-      }
+      },
+      this.playerControlsContainer
     );
+
+    const playIcon = 
+
     createButton(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+      (e) => {
+        if (video.paused) {
+          video.play();
+        }
+      },
+      this.playerControlsContainer
+    );
+    createButton(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect width="4" height="16" x="6" y="4"></rect><rect width="4" height="16" x="14" y="4"></rect></svg>',
       () => {
-        video.play();
-        video.focus();
-      }
+        video.pause();
+      },
+      this.playerControlsContainer
     );
   }
 
@@ -179,11 +205,10 @@ export function initUI(this: AnnotationTool) {
         this.show();
       }
     });
-    this.addEvent(video, "timeupdate", () => {
-      if (video.paused) {
-        this.show();
-      }
-    });
+
+    // this.addEvent(video, "timeupdate", () => {
+   
+    // });
     this.addEvent(video, "error", () => {
       this.hide();
     });
@@ -252,7 +277,10 @@ export function initUI(this: AnnotationTool) {
 
     // add onclick event to pause playback
     this.addEvent(document, "click", (event: PointerEvent) => {
-      if (this.uiContainer.contains(event.target as Node)) {
+
+      const isTool = this.uiContainer.contains(event.target as Node);
+      const isControl = this.playerControlsContainer.contains(event.target as Node);
+      if (isTool || isControl) {
         return;
       }
 
