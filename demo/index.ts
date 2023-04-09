@@ -19,22 +19,19 @@ async function initAnnotator() {
 
     video.addEventListener("loadeddata", () => {
       resolve(true);
-    });
-  });
-
-  const onplayPromise = new Promise((resolve) => {
-    video.addEventListener("play", () => {
-      resolve(true);
     }, {
-      once: true
+      once: true,
     });
   });
 
+  if (!video.paused) {
+    video.pause();
+  }
   video.src = URL.createObjectURL(blob);
-  video.play();
-
+  
   await loadPromise;
-  await onplayPromise;
+
+  await video.play();
 
   const tool = new SmAnnotate(video);
 

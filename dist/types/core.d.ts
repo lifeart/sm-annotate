@@ -75,6 +75,7 @@ export declare class AnnotationTool {
     init(videoElement: HTMLVideoElement | HTMLImageElement): void;
     addEvent(node: HTMLInputElement, event: InputEventNames, callback: (e: Event) => void): void;
     addEvent(node: typeof document, event: ClipboardEventNames, callback: (e: ClipboardEvent) => void): void;
+    addEvent(node: typeof document, event: ButtonEventNames, callback: (e: PointerEvent) => void): void;
     addEvent(node: HTMLVideoElement, event: VideoEventNames, callback: (e: Event) => void): void;
     addEvent(node: HTMLVideoElement, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
     addEvent(node: HTMLButtonElement, event: ButtonEventNames, callback: (e: Event) => void): void;
@@ -97,6 +98,8 @@ export declare class AnnotationTool {
     };
     handleMouseDown(event: PointerEvent): void;
     get isDrawing(): boolean;
+    lastNavigatedFrame: number;
+    isProgressBarNavigation: boolean;
     handleMouseMove(event: PointerEvent): void;
     getEventX(event: PointerEvent): number;
     getEventY(event: PointerEvent): number;
@@ -117,7 +120,7 @@ export declare class AnnotationTool {
     appendFrames(frames: FrameAnnotationV1[]): void;
     saveAllFrames(): FrameAnnotationV1[];
     getAnnotationFrame(event: PointerEvent): number | null;
-    frameFromProgressBar(event: PointerEvent): number | null;
+    frameFromProgressBar(event: PointerEvent, countY?: boolean): number | null;
     addProgressBarOverlay(): void;
     initUI(): void;
     stopAnnotationsAsVideo(): void;
