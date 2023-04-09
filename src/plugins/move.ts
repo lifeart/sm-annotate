@@ -96,6 +96,10 @@ export class MoveToolPlugin
       return;
     }
     if (this.lastDrawnShape) {
+      // enforce the current tool's fill and stroke style
+      this.lastDrawnShape.fillStyle = this.annotationTool.ctx.fillStyle;
+      this.lastDrawnShape.strokeStyle = this.annotationTool.ctx.strokeStyle;
+      this.lastDrawnShape.lineWidth = this.annotationTool.ctx.lineWidth;
       this.save(this.lastDrawnShape as IMove);
     }
     this.isDrawing = false;

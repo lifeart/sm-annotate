@@ -22,13 +22,25 @@ async function initAnnotator() {
     });
   });
 
+  const onplayPromise = new Promise((resolve) => {
+    video.addEventListener("play", () => {
+      resolve(true);
+    }, {
+      once: true
+    });
+  });
+
   video.src = URL.createObjectURL(blob);
+  video.play();
 
   await loadPromise;
+  await onplayPromise;
 
   const tool = new SmAnnotate(video);
 
-  video.focus();
+  if (!video.paused) {
+    video.pause();
+  }
 
   setInterval(() => {
     tool.destroy();

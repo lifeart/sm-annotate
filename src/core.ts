@@ -70,7 +70,6 @@ export class AnnotationTool {
   undoTimeStack = new Map<number, IShape[][]>(); // timeFrame -> shapes
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
-
   prevFrame() {
     this.playbackFrame = Math.max(1, this.activeTimeFrame - 1);
   }
@@ -129,7 +128,6 @@ export class AnnotationTool {
     if (this.videoElement instanceof HTMLImageElement) return;
     this.videoElement.currentTime = frame / this.fps;
   }
-
   get canvasWidth() {
     return this.canvas.width / this.pixelRatio;
   }
@@ -141,11 +139,11 @@ export class AnnotationTool {
   }
   get progressBarCoordinates() {
     const height = this.isMobile ? 30 : 10;
-    const progressBarOffset = 5;
+    const progressBarLeftMargin = 5;
     const frameOverlayOffset = 55;
     const progressBarWidth =
-      this.canvasWidth - progressBarOffset - frameOverlayOffset;
-    const x = progressBarOffset;
+      this.canvasWidth - progressBarLeftMargin - frameOverlayOffset;
+    const x = progressBarLeftMargin;
     const y = this.canvasHeight - height;
     const width = progressBarWidth;
     return { x, y, width, height };
@@ -241,6 +239,7 @@ export class AnnotationTool {
 
   initProperties() {
     this.isDestroyed = false;
+    this.isProgressBarNavigation = false;
     this.currentTool = null;
     this.shapes = [];
   }
@@ -265,6 +264,11 @@ export class AnnotationTool {
     node: typeof document,
     event: ClipboardEventNames,
     callback: (e: ClipboardEvent) => void
+  ): void;
+  addEvent(
+    node: typeof document,
+    event: ButtonEventNames,
+    callback: (e: PointerEvent) => void
   ): void;
   addEvent(
     node: HTMLVideoElement,
@@ -418,7 +422,7 @@ export class AnnotationTool {
 
   serialize(shapes: IShape[] = this.shapes): IShape[] {
     const canvasWidth = this.canvasWidth;
-    const canvasHeight = this.canvasHeight
+    const canvasHeight = this.canvasHeight;
     return shapes.map((shape) => {
       const pluginForShape = this.pluginForTool(shape.type);
       return pluginForShape.normalize(shape, canvasWidth, canvasHeight);
@@ -448,8 +452,9 @@ export class AnnotationTool {
     this.isMouseDown = true;
     if (this.isMultiTouch(event)) return;
 
-    const genericFrame = this.frameFromProgressBar(event);
+    const genericFrame = this.frameFromProgressBar(event, true);
     if (genericFrame) {
+      this.isProgressBarNavigation = true;
       const frame = this.getAnnotationFrame(event);
       if (frame !== null) {
         this.playbackFrame = frame;
@@ -471,14 +476,24 @@ export class AnnotationTool {
     return activePlugin.isDrawing;
   }
 
+  lastNavigatedFrame = 0;
+
+  isProgressBarNavigation = false;
+
   handleMouseMove(event: PointerEvent) {
     event.preventDefault();
 
     if (this.isMultiTouch(event)) return;
 
     if (this.isMouseDown) {
-      const maybeFrame = this.frameFromProgressBar(event);
+      const maybeFrame = this.isProgressBarNavigation
+        ? this.frameFromProgressBar(event, false)
+        : null;
       if (maybeFrame !== null && !this.isDrawing) {
+        if (maybeFrame === this.lastNavigatedFrame) {
+          return;
+        }
+        this.lastNavigatedFrame = maybeFrame;
         this.playbackFrame = maybeFrame;
         return;
       } else {
@@ -505,6 +520,8 @@ export class AnnotationTool {
 
   handleMouseUp(event: PointerEvent) {
     this.isMouseDown = false;
+    this.isProgressBarNavigation = false;
+
     this.showControls();
     if (this.isMultiTouch(event)) return;
 
@@ -572,7 +589,10 @@ export class AnnotationTool {
 
   addShapesToFrame(frame: number, shapes: IShape[]) {
     const existingShapes = this.timeStack.get(frame) || [];
-    this.timeStack.set(frame, [...existingShapes, ...(JSON.parse(JSON.stringify(shapes)) as IShape[])]);
+    this.timeStack.set(frame, [
+      ...existingShapes,
+      ...(JSON.parse(JSON.stringify(shapes)) as IShape[]),
+    ]);
   }
 
   setFrameRate(fps: number) {
@@ -647,7 +667,7 @@ export class AnnotationTool {
     return frame;
   }
 
-  frameFromProgressBar(event: PointerEvent) {
+  frameFromProgressBar(event: PointerEvent, countY: boolean = true) {
     const node = this.videoElement as HTMLVideoElement;
     if (node.tagName !== "VIDEO") {
       return null;
@@ -656,11 +676,24 @@ export class AnnotationTool {
     const { x, width, height, y } = this.progressBarCoordinates;
     const x1 = event.offsetX;
     const y1 = event.offsetY;
-    if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
-      const frame = Math.ceil(((x1 - x) / width) * (node.duration * this.fps));
-      return frame;
+
+    if (countY) {
+      if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
+        const frame = Math.ceil(
+          ((x1 - x) / width) * (node.duration * this.fps)
+        );
+        return frame;
+      }
+      return null;
+    } else {
+      if (x1 >= x && x1 <= x + width) {
+        const frame = Math.ceil(
+          ((x1 - x) / width) * (node.duration * this.fps)
+        );
+        return frame;
+      }
+      return null;
     }
-    return null;
   }
   addProgressBarOverlay() {
     throw new Error("Method not implemented.");

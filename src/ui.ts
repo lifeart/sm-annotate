@@ -161,9 +161,10 @@ export function initUI(this: AnnotationTool) {
 
   this.addEvent(colorPicker, "input", onColorChange);
 
-  this.addEvent(this.canvas, "pointerover", () => {
-    this.focusOnMediaNode();
-  });
+  // disabling for performance reasons
+  // this.addEvent(this.canvas, "pointerover", () => {
+  //   this.focusOnMediaNode();
+  // });
 
   this.colorPicker = colorPicker;
   this.strokeSizePicker = strokeWidthSlider;
@@ -249,8 +250,22 @@ export function initUI(this: AnnotationTool) {
       this.redrawFullCanvas();
     });
 
+    // add onclick event to pause playback
+    this.addEvent(document, "click", (event: PointerEvent) => {
+      if (this.uiContainer.contains(event.target as Node)) {
+        return;
+      }
+
+      if (video.paused) {
+        return;
+      }
+      this.currentTool = null;
+      video.pause();
+    });
+  
     // add event listener for frame by frame navigation from arrow keys
-    this.addEvent(video, "keydown", (event: KeyboardEvent) => {
+    this.addEvent(document, "keydown", (event: KeyboardEvent) => {
+      // space key to play/pause
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
         event.stopPropagation();
@@ -259,6 +274,15 @@ export function initUI(this: AnnotationTool) {
           this.prevFrame();
         } else if (event.key === "ArrowRight") {
           this.nextFrame();
+        }
+      } else  if (event.code === "Space") {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        if (video.paused) {
+          video.play();
+        } else {
+          video.pause();
         }
       }
     });
