@@ -13,12 +13,13 @@
     "esbuild": "^0.17.15",
     "typescript": "^5.0.4"
   },
+  "exports": "./dist/index.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build-types": "tsc --emitDeclarationOnly",
-    "build-ts": "esbuild src/index.ts --bundle --minify --target=es2020 --outfile=dist/index.js --format=esm",
+    "build-ts": "esbuild src/index.ts --bundle --minify --target=es2015 --outfile=dist/index.js --format=esm",
     "watch": "esbuild demo/index.ts --bundle --outfile=demo/index.js --watch --servedir=demo --serve=4300",
-    "build-demo": "esbuild demo/index.ts --bundle --minify --target=es2020 --outfile=demo/index.js",
+    "build-demo": "esbuild demo/index.ts --bundle --minify --target=es2015 --outfile=demo/index.js",
     "dev": "yarn run watch",
     "build": "yarn clean && yarn build-demo && yarn build-ts && yarn run build-types",
     "clean": "rm -rf dist"
