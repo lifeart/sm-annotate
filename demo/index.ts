@@ -63,6 +63,8 @@ async function initAnnotator() {
 
   const tool = new SmAnnotate(video);
 
+  console.log({tool});
+
   if (!video.paused) {
     video.pause();
   }

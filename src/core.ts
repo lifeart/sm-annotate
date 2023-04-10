@@ -72,13 +72,21 @@ export class AnnotationTool {
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
   prevFrame() {
-    this.playbackFrame = Math.max(1, this.activeTimeFrame - 1);
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
+    // may float +-1 frame
+    const activeTimeFrame = this.activeTimeFrame;
+    const newFrame = Math.max(1, activeTimeFrame - 1);
+    this.playbackFrame = newFrame;
   }
   nextFrame() {
-    this.playbackFrame = Math.min(
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
+    // may float +-1 frame
+    const activeTimeFrame = this.activeTimeFrame;
+    const newFrame = Math.min(
       (this.videoElement as HTMLVideoElement).duration * this.fps,
-      this.activeTimeFrame + 1
+      activeTimeFrame + 1
     );
+    this.playbackFrame = newFrame;
   }
 
   get selectedColor() {
@@ -127,7 +135,8 @@ export class AnnotationTool {
   }
   set playbackFrame(frame: number) {
     if (this.videoElement instanceof HTMLImageElement) return;
-    this.videoElement.currentTime = frame / this.fps;
+    const newTime = frame / this.fps;
+    this.videoElement.currentTime = newTime;
     this.show();
   }
   get canvasWidth() {
@@ -419,7 +428,6 @@ export class AnnotationTool {
 
   addShape(shape: IShape) {
     const serializedShape = this.serialize([shape])[0];
-    console.log("serializedShape", serializedShape);
     this.undoStack.push([...this.shapes]);
     this.shapes.push(serializedShape);
   }
@@ -461,13 +469,11 @@ export class AnnotationTool {
       this.isProgressBarNavigation = true;
       const frame = this.getAnnotationFrame(event);
       if (this.isVideoPaused) {
-        requestAnimationFrame(() => {
-          if (frame !== null) {
-            this.playbackFrame = frame;
-          } else {
-            this.playbackFrame = genericFrame;
-          }
-        })
+        if (frame !== null) {
+          this.playbackFrame = frame;
+        } else {
+          this.playbackFrame = genericFrame;
+        }
       }
       return;
     }
@@ -510,9 +516,7 @@ export class AnnotationTool {
         }
         this.lastNavigatedFrame = maybeFrame;
         if (this.isVideoPaused) {
-          requestAnimationFrame(() => {
-            this.playbackFrame = maybeFrame;
-          })
+          this.playbackFrame = maybeFrame;
         }
         return;
       } else {
