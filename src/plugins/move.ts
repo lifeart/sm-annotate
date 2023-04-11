@@ -51,8 +51,6 @@ export class MoveToolPlugin
     this.startX = x - dx;
     this.startY = y - dy;
 
-
-
     const lastShape = this.annotationTool.deserialize([this.shape])[0];
 
     const shapeCopy = lastShape.type === 'image' ? lastShape : JSON.parse(JSON.stringify(lastShape)) as typeof lastShape;
