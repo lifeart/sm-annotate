@@ -14,7 +14,7 @@ import { detectFrameRate } from "./utils/detect-framerate";
 // - [ ] add button to export current frame as image
 // - [ ] add button to export all frames as images
 
-type FrameAnnotationV1 = {
+export type FrameAnnotationV1 = {
   frame: number;
   fps: number;
   version: 1;

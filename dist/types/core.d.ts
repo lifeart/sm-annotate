@@ -1,6 +1,6 @@
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-type FrameAnnotationV1 = {
+export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
     version: 1;

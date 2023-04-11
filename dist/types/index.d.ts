@@ -1,2 +1,2 @@
-import { AnnotationTool } from "./core";
-export declare const SmAnnotate: typeof AnnotationTool;
+import { AnnotationTool, FrameAnnotationV1 } from "./core";
+export { AnnotationTool as SmAnnotate, FrameAnnotationV1 };
