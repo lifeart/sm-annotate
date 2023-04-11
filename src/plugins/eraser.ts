@@ -13,6 +13,11 @@ export class EraserToolPlugin
   implements ToolPlugin<IEraser>
 {
   name = "eraser";
+  move(shape: IEraser, dx: number, dy: number) {
+    shape.x += dx;
+    shape.y += dy;
+    return shape;
+  }
   normalize(
     shape: IEraser,
     canvasWidth: number,

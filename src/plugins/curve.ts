@@ -17,6 +17,13 @@ export class CurveToolPlugin
 {
   name = "curve";
   curvePoints: IPoint[] = [];
+  move(shape: ICurve, dx: number, dy: number) {
+    shape.points = shape.points.map((point) => ({
+      x: point.x + dx,
+      y: point.y + dy,
+    }));
+    return shape;
+  }
   normalize(shape: ICurve, canvasWidth: number, canvasHeight: number): ICurve {
     return {
       ...shape,

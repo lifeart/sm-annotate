@@ -12,6 +12,11 @@ export class TextToolPlugin
   implements ToolPlugin<IText>
 {
   name = "text";
+  move(shape: IText, dx: number, dy: number) {
+    shape.x += dx;
+    shape.y += dy;
+    return shape;
+  }
   onActivate() {
     this.annotationTool.canvas.style.cursor = "text";
     this.isDrawing = true;

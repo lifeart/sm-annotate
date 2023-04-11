@@ -13,6 +13,13 @@ export class LineToolPlugin
   implements ToolPlugin<ILine>
 {
   name = "line";
+  move(shape: ILine, dx: number, dy: number) {
+    shape.x1 += dx;
+    shape.y1 += dy;
+    shape.x2 += dx;
+    shape.y2 += dy;
+    return shape;
+  }
   normalize(shape: ILine, canvasWidth: number, canvasHeight: number): ILine {
     return {
       ...shape,

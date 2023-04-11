@@ -13,6 +13,11 @@ export class RectangleToolPlugin
   implements ToolPlugin<IRectangle>
 {
   name = "rectangle";
+  move(shape: IRectangle, dx: number, dy: number) {
+    shape.x += dx;
+    shape.y += dy;
+    return shape;
+  }
   normalize(
     shape: IRectangle,
     canvasWidth: number,

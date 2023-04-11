@@ -12,6 +12,11 @@ export class CircleToolPlugin
   implements ToolPlugin<ICircle>
 {
   name = "circle";
+  move(shape: ICircle, dx: number, dy: number) {
+    shape.x += dx;
+    shape.y += dy;
+    return shape;
+  }
   normalize(
     shape: ICircle,
     canvasWidth: number,

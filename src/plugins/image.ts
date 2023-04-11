@@ -14,6 +14,11 @@ export class ImageToolPlugin
   implements ToolPlugin<IImage>
 {
   name = "image";
+  move(shape: IImage, dx: number, dy: number) {
+    shape.x += dx;
+    shape.y += dy;
+    return shape;
+  }
   onPointerDown(event: PointerEvent) {
     // eol
   }

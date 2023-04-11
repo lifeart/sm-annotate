@@ -22,6 +22,13 @@ export class ArrowToolPlugin
       y2: shape.y2 / canvasHeight,
     };
   }
+  move(shape: IArrow, dx: number, dy: number) {
+    shape.x1 += dx;
+    shape.y1 += dy;
+    shape.x2 += dx;
+    shape.y2 += dy;
+    return shape;
+  }
   draw(shape: IArrow) {
     this.drawArrow(shape.x1, shape.y1, shape.x2, shape.y2);
   }

@@ -13,6 +13,9 @@ export class MoveToolPlugin
   shape: IShape | null = null;
   lastDrawnShape: IShape | null = null;
   shapeRemoved = false;
+  move(shape: IMove) {
+    return shape;
+  }
   normalize(shape: IMove): IMove {
     return {
       ...shape,
@@ -48,52 +51,17 @@ export class MoveToolPlugin
     this.startX = x - dx;
     this.startY = y - dy;
 
-    const knownTypes = ["line", "image", "circle", "rectangle", "text", "arrow", "curve", "eraser"];
 
 
     const lastShape = this.annotationTool.deserialize([this.shape])[0];
 
     const shapeCopy = lastShape.type === 'image' ? lastShape : JSON.parse(JSON.stringify(lastShape)) as typeof lastShape;
 
-    if (shapeCopy.type === "line") {
-      shapeCopy.x1 += dx;
-      shapeCopy.y1 += dy;
-      shapeCopy.x2 += dx;
-      shapeCopy.y2 += dy;
-    } else if (shapeCopy.type === "circle") {
-      shapeCopy.x += dx;
-      shapeCopy.y += dy;
-    } else if (shapeCopy.type === "rectangle") {
-      shapeCopy.x += dx;
-      shapeCopy.y += dy;
-    } else if (shapeCopy.type === "text") {
-      shapeCopy.x += dx;
-      shapeCopy.y += dy;
-    } else if (shapeCopy.type === "arrow") {
-        shapeCopy.x1 += dx;
-        shapeCopy.y1 += dy;
-        shapeCopy.x2 += dx;
-        shapeCopy.y2 += dy;
-    } else if (shapeCopy.type === "curve") {
-        shapeCopy.points.forEach((point) => {
-            point.x += dx;
-            point.y += dy;
-        });
-    } else if (shapeCopy.type === "eraser") {
-        shapeCopy.x += dx;
-        shapeCopy.y += dy;
-    } else if (shapeCopy.type === "image") {
-      shapeCopy.x += dx;
-      shapeCopy.y += dy;
-    }
+    const item = this.annotationTool.pluginForTool(shapeCopy.type).move(shapeCopy, dx, dy);
 
-    this.lastDrawnShape = shapeCopy;
+    this.lastDrawnShape = item;
 
-    if (!knownTypes.includes(shapeCopy.type)) {
-      return;
-    }
-
-    this.annotationTool.pluginForTool(shapeCopy.type).draw(shapeCopy);
+    this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
   }
   onPointerUp(event: PointerEvent) {
     if (!this.isDrawing || !this.lastDrawnShape) {
