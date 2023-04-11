@@ -22,7 +22,11 @@ export class TextToolPlugin
   }
 
   draw(shape: IText) {
-    this.drawText(shape.x, shape.y, shape.text);
+    // support multiline text
+    const lines = shape.text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      this.drawText(shape.x, shape.y + i * 20, lines[i]);
+    }
   }
   drawText(x: number, y: number, text: string) {
     const fontSize = 16 + this.ctx.lineWidth * 0.5;

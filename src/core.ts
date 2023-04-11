@@ -145,6 +145,9 @@ export class AnnotationTool {
   get canvasHeight() {
     return this.canvas.height / this.pixelRatio;
   }
+  get aspectRatio() {
+    return this.canvasWidth / this.canvasHeight;
+  }
   get isMobile() {
     return window.innerWidth < 960;
   }

@@ -34,7 +34,8 @@ export class ImageToolPlugin
   }
   draw(shape: IImage) {
     if (!(shape.image instanceof HTMLImageElement)) {
-        return;
+      console.error("Image is not an instance of HTMLImageElement");
+      return;
     }
     this.ctx.drawImage(
       shape.image,

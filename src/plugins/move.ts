@@ -20,7 +20,7 @@ export class MoveToolPlugin
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
-    const lastShape = this.annotationTool.saveCurrentFrame().shapes.pop();
+    const lastShape = this.annotationTool.shapes.slice(0).pop();
     if (!lastShape) {
       return;
     }
@@ -48,11 +48,12 @@ export class MoveToolPlugin
     this.startX = x - dx;
     this.startY = y - dy;
 
-    const knownTypes = ["line", "circle", "rectangle", "text", "arrow", "curve", "eraser"];
+    const knownTypes = ["line", "image", "circle", "rectangle", "text", "arrow", "curve", "eraser"];
+
 
     const lastShape = this.annotationTool.deserialize([this.shape])[0];
 
-    const shapeCopy = JSON.parse(JSON.stringify(lastShape)) as typeof lastShape;
+    const shapeCopy = lastShape.type === 'image' ? lastShape : JSON.parse(JSON.stringify(lastShape)) as typeof lastShape;
 
     if (shapeCopy.type === "line") {
       shapeCopy.x1 += dx;
@@ -81,6 +82,9 @@ export class MoveToolPlugin
     } else if (shapeCopy.type === "eraser") {
         shapeCopy.x += dx;
         shapeCopy.y += dy;
+    } else if (shapeCopy.type === "image") {
+      shapeCopy.x += dx;
+      shapeCopy.y += dy;
     }
 
     this.lastDrawnShape = shapeCopy;

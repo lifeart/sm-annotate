@@ -11,7 +11,6 @@ export function initUI(this: AnnotationTool) {
   uiContainer.style.zIndex = "2";
   this.canvas.parentNode?.insertBefore(uiContainer, this.canvas);
 
-
   const playerControls = document.createElement("div");
   playerControls.style.position = "relative";
   playerControls.style.top = "0";
@@ -52,9 +51,9 @@ export function initUI(this: AnnotationTool) {
       button.dataset.tool = tool;
       const onClick = () => {
         if (this.currentTool === tool) {
-            this.currentTool = null;
+          this.currentTool = null;
         } else {
-            this.currentTool = tool;
+          this.currentTool = tool;
         }
       };
 
@@ -132,9 +131,7 @@ export function initUI(this: AnnotationTool) {
       this.playerControlsContainer
     );
 
-    const playIcon = 
-
-    createButton(
+    const playIcon = createButton(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
       (e) => {
         if (video.paused) {
@@ -207,7 +204,7 @@ export function initUI(this: AnnotationTool) {
     });
 
     // this.addEvent(video, "timeupdate", () => {
-   
+
     // });
     this.addEvent(video, "error", () => {
       this.hide();
@@ -226,15 +223,18 @@ export function initUI(this: AnnotationTool) {
       this.playAnnotationsAsVideo();
     });
 
-    const isTargetBelongsToVideo = (event: PointerEvent | KeyboardEvent | ClipboardEvent) => {
+    const isTargetBelongsToVideo = (
+      event: PointerEvent | KeyboardEvent | ClipboardEvent
+    ) => {
       const isBody = event.target === document.body;
       const isTool = this.uiContainer.contains(event.target as Node);
-      const isControl = this.playerControlsContainer.contains(event.target as Node);
+      const isControl = this.playerControlsContainer.contains(
+        event.target as Node
+      );
       const isVideo = this.videoElement.contains(event.target as Node);
       const isCanvas = this.canvas.contains(event.target as Node);
       return isTool || isControl || isVideo || isCanvas || isBody;
     };
-  
 
     this.addEvent(document, "copy", (event: ClipboardEvent) => {
       if (!isTargetBelongsToVideo(event)) {
@@ -267,10 +267,73 @@ export function initUI(this: AnnotationTool) {
       }
 
       const dataTypes = event.clipboardData?.types ?? [];
+      console.log("dataTypes", JSON.stringify(dataTypes));
       if (dataTypes.includes("application/json")) {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
+      } else if (dataTypes.includes("Files")) {
+        const files = event.clipboardData?.files;
+        if (files && files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith("image/")) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            const img = new Image();
+            img.addEventListener("load", () => {
+              const imageRatio = img.naturalWidth / img.naturalHeight;
+              const pasteWidth = 0.25;
+              const pasteHeight = (pasteWidth / imageRatio) * this.aspectRatio;
+              this.addShapesToFrame(this.playbackFrame, [
+                {
+                  type: "image",
+                  image: img,
+                  x: 0,
+                  y: 0,
+                  width: pasteWidth,
+                  height: pasteHeight,
+                  strokeStyle: "red",
+                  fillStyle: "red",
+                  lineWidth: 2,
+                },
+              ]);
+              this.redrawFullCanvas();
+              requestAnimationFrame(() => {
+                this.show();
+              })
+              this.currentTool = 'move';
+            }, {
+              once: true
+            });
+
+            img.src = URL.createObjectURL(file);
+            this.redrawFullCanvas();
+          }
+        }
+      } else if (dataTypes.includes("text/plain")) {
+        const text = event.clipboardData?.getData("text/plain");
+        if (text) {
+          console.log("text", text);
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          this.addShapesToFrame(this.playbackFrame, [
+            {
+              type: "text",
+              text,
+              x: 0.4,
+              y: 0.4,
+              strokeStyle: this.ctx.strokeStyle,
+              fillStyle: this.ctx.fillStyle,
+              lineWidth: this.ctx.lineWidth,
+            },
+          ]);
+          this.show();
+          this.currentTool = 'move';
+          this.redrawFullCanvas();
+        }
+
       } else {
         return;
       }
@@ -302,7 +365,9 @@ export function initUI(this: AnnotationTool) {
       }
 
       const isTool = this.uiContainer.contains(event.target as Node);
-      const isControl = this.playerControlsContainer.contains(event.target as Node);
+      const isControl = this.playerControlsContainer.contains(
+        event.target as Node
+      );
       if (isTool || isControl) {
         return;
       }
@@ -330,7 +395,7 @@ export function initUI(this: AnnotationTool) {
         } else if (event.key === "ArrowRight") {
           this.nextFrame();
         }
-      } else  if (event.code === "Space") {
+      } else if (event.code === "Space") {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
