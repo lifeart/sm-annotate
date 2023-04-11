@@ -48,6 +48,7 @@ export declare class AnnotationTool {
     set playbackFrame(frame: number);
     get canvasWidth(): number;
     get canvasHeight(): number;
+    get aspectRatio(): number;
     get isMobile(): boolean;
     get progressBarCoordinates(): {
         x: number;
