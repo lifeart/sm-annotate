@@ -226,7 +226,20 @@ export function initUI(this: AnnotationTool) {
       this.playAnnotationsAsVideo();
     });
 
+    const isTargetBelongsToVideo = (event: PointerEvent | KeyboardEvent | ClipboardEvent) => {
+      const isBody = event.target === document.body;
+      const isTool = this.uiContainer.contains(event.target as Node);
+      const isControl = this.playerControlsContainer.contains(event.target as Node);
+      const isVideo = this.videoElement.contains(event.target as Node);
+      const isCanvas = this.canvas.contains(event.target as Node);
+      return isTool || isControl || isVideo || isCanvas || isBody;
+    };
+  
+
     this.addEvent(document, "copy", (event: ClipboardEvent) => {
+      if (!isTargetBelongsToVideo(event)) {
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
@@ -236,6 +249,9 @@ export function initUI(this: AnnotationTool) {
       );
     });
     this.addEvent(document, "cut", (event: ClipboardEvent) => {
+      if (!isTargetBelongsToVideo(event)) {
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
@@ -246,6 +262,10 @@ export function initUI(this: AnnotationTool) {
       event.clipboardData?.setData("application/json", JSON.stringify(data));
     });
     this.addEvent(document, "paste", (event: ClipboardEvent) => {
+      if (!isTargetBelongsToVideo(event)) {
+        return;
+      }
+
       const dataTypes = event.clipboardData?.types ?? [];
       if (dataTypes.includes("application/json")) {
         event.preventDefault();
@@ -277,6 +297,9 @@ export function initUI(this: AnnotationTool) {
 
     // add onclick event to pause playback
     this.addEvent(document, "click", (event: PointerEvent) => {
+      if (!isTargetBelongsToVideo(event)) {
+        return;
+      }
 
       const isTool = this.uiContainer.contains(event.target as Node);
       const isControl = this.playerControlsContainer.contains(event.target as Node);
@@ -290,9 +313,13 @@ export function initUI(this: AnnotationTool) {
       this.currentTool = null;
       video.pause();
     });
-  
+
     // add event listener for frame by frame navigation from arrow keys
     this.addEvent(document, "keydown", (event: KeyboardEvent) => {
+      if (!isTargetBelongsToVideo(event)) {
+        return;
+      }
+
       // space key to play/pause
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
