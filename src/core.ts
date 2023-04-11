@@ -571,7 +571,11 @@ export class AnnotationTool {
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
 
-      this.pluginForTool(shape.type).draw(shape);
+      try {
+        this.pluginForTool(shape.type).draw(shape);
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     this.ctx.strokeStyle = prevSettings.strokeStyle;
@@ -607,14 +611,14 @@ export class AnnotationTool {
   }
 
   replaceFrame(frame: number, shapes: IShape[]) {
-    this.timeStack.set(frame, JSON.parse(JSON.stringify(shapes)));
+    this.timeStack.set(frame, this.parseShapes(this.stringifyShapes(shapes)));
   }
 
   addShapesToFrame(frame: number, shapes: IShape[]) {
     const existingShapes = this.timeStack.get(frame) || [];
     this.timeStack.set(frame, [
       ...existingShapes,
-      ...(JSON.parse(JSON.stringify(shapes)) as IShape[]),
+      ...(this.parseShapes(this.stringifyShapes(shapes)) as IShape[]),
     ]);
   }
 
@@ -623,12 +627,41 @@ export class AnnotationTool {
     this.fps = fps;
   }
 
+  stringifyShapes(shapes: IShape[]) {
+    return JSON.stringify(shapes, (key, value) => {
+      if (key === "image") {
+        return (value as HTMLImageElement).src;
+      }
+      return value; 
+    });
+  }
+  parseShapes(shapes: string) {
+    return JSON.parse(shapes, (key, value) => {
+      if (key === "image") {
+        const img = new Image();
+        img.src = value;
+        return img;
+      }
+      return value;
+    });
+  }
+
+  filterNonSerializableShapes(shapes: IShape[]) {
+    return shapes.filter((shape) => {
+      if (shape.type === "image") {
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+
   saveCurrentFrame(): FrameAnnotationV1 {
     return {
       frame: this.playbackFrame,
       version: 1,
       fps: this.fps,
-      shapes: JSON.parse(JSON.stringify(this.shapes)),
+      shapes: this.parseShapes(this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))),
     };
   }
 
@@ -668,7 +701,7 @@ export class AnnotationTool {
         frame,
         fps: this.fps,
         version: 1,
-        shapes: this.timeStack.get(frame) ?? [],
+        shapes: this.filterNonSerializableShapes(this.timeStack.get(frame) ?? []),
       };
     });
     return result;

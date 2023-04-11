@@ -114,6 +114,9 @@ export declare class AnnotationTool {
     replaceFrame(frame: number, shapes: IShape[]): void;
     addShapesToFrame(frame: number, shapes: IShape[]): void;
     setFrameRate(fps: number): void;
+    stringifyShapes(shapes: IShape[]): string;
+    parseShapes(shapes: string): any;
+    filterNonSerializableShapes(shapes: IShape[]): IShape[];
     saveCurrentFrame(): FrameAnnotationV1;
     addFrameSquareOverlay(_?: number): void;
     addVideoOverlay(): void;

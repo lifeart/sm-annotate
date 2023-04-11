@@ -5,22 +5,18 @@ import { SmAnnotate } from "../src";
 const video = document.querySelector("video") as HTMLVideoElement;
 
 async function initAnnotator() {
-
   // resize video to fit window
-
 
   const computedVideoElementStyle = window.getComputedStyle(video);
 
   const videoWidth = parseFloat(computedVideoElementStyle.width);
   const videoHeight = parseFloat(computedVideoElementStyle.height);
-  const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight - 80;
 
   if (videoHeight > windowHeight) {
     // change video style to fit window
-    
+
     const videoRatio = videoWidth / videoHeight;
-    const windowRatio = windowWidth / windowHeight;
 
     const optimalVideoHeight = windowHeight;
     const optimalVideoWidth = optimalVideoHeight * videoRatio;
@@ -28,42 +24,78 @@ async function initAnnotator() {
     video.style.width = `${optimalVideoWidth}px`;
     video.style.height = `${optimalVideoHeight}px`;
   }
-  
 
   // Video is ready to play
 
-
   // preload video as blob
-
 
   const blob = await fetch(video.currentSrc).then((r) => r.blob());
 
-  // set it to player 
+  // set it to player
 
   const loadPromise = new Promise((resolve) => {
     setTimeout(() => {
       resolve(true);
     }, 250);
-    video.addEventListener("loadeddata", () => {
-      resolve(true);
-    }, {
-      once: true,
+    video.addEventListener(
+      "loadeddata",
+      () => {
+        resolve(true);
+      },
+      {
+        once: true,
+      }
+    );
+  });
+
+  const imageFrame = await fetch("./frame_29.png").then(async (r) => {
+    const blob = await r.blob();
+    const blobs = new Blob([blob], { type: "image/png" });
+
+    const img = new Image();
+    const imageLoadPromise = new Promise((resolve) => {
+      img.addEventListener(
+        "load",
+        () => {
+          resolve(true);
+        },
+        {
+          once: true,
+        }
+      );
     });
+    img.src = window.URL.createObjectURL(blobs);
+    await imageLoadPromise;
+    return img;
   });
 
   if (!video.paused) {
     video.pause();
   }
 
-  const blobs = new Blob([blob], {type: 'video/mp4'});
+  const blobs = new Blob([blob], { type: "video/mp4" });
 
   video.src = window.URL.createObjectURL(blobs);
-  
+
   await loadPromise;
 
   const tool = new SmAnnotate(video);
 
-  console.log({tool});
+  console.log({ tool });
+
+  tool.addShapesToFrame(29, [
+    {
+      type: "image",
+      image: imageFrame,
+      x: 0,
+      y: 0,
+      width: 1,
+      height: 1,
+      strokeStyle: "red",
+      lineWidth: 2,
+      fillStyle: "red",
+    },
+  ]);
 
   if (!video.paused) {
     video.pause();
@@ -91,7 +123,9 @@ async function initAnnotator() {
   ) as HTMLButtonElement;
   const sampleButton = document.getElementById("sample") as HTMLButtonElement;
 
-  const saveImageButton = document.getElementById("save-image") as HTMLButtonElement;
+  const saveImageButton = document.getElementById(
+    "save-image"
+  ) as HTMLButtonElement;
 
   saveImageButton.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -104,7 +138,7 @@ async function initAnnotator() {
     // download the image
     const a = document.createElement("a");
     a.href = imgData;
-    a.download = `frame-${currentFrame}.png`;
+    a.download = `frame_${String(currentFrame).padStart(3, '0')}.png`;
     a.click();
   });
 
