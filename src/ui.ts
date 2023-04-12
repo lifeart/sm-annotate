@@ -1,4 +1,7 @@
 import { AnnotationTool } from "./core";
+import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
+import { createPlayPauseButton } from "./ui/play-pause-button";
+import { createPlaybackSpeedControlButton } from "./ui/playback-speed-button";
 
 const defaultColor = "#F3CE32";
 
@@ -123,6 +126,10 @@ export function initUI(this: AnnotationTool) {
       },
       this.playerControlsContainer
     );
+    
+
+    createPlayPauseButton(video, this);
+
     createButton(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
       () => {
@@ -131,22 +138,8 @@ export function initUI(this: AnnotationTool) {
       this.playerControlsContainer
     );
 
-    const playIcon = createButton(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
-      (e) => {
-        if (video.paused) {
-          video.play();
-        }
-      },
-      this.playerControlsContainer
-    );
-    createButton(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect width="4" height="16" x="6" y="4"></rect><rect width="4" height="16" x="14" y="4"></rect></svg>',
-      () => {
-        video.pause();
-      },
-      this.playerControlsContainer
-    );
+    createMuteUnmuteButton(video, this);
+    createPlaybackSpeedControlButton(video, this);
   }
 
   // Create the color picker

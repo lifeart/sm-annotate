@@ -29,9 +29,21 @@ export class TextToolPlugin
   draw(shape: IText) {
     // support multiline text
     const lines = shape.text.split("\n");
+    // draw white background for text area with padding
+    // const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b));
+    // this.ctx.save();
+    // this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    // this.ctx.fillRect(
+    //   shape.x - 5,
+    //   shape.y - 20,
+    //   10 + this.ctx.measureText(longestLine).width,
+    //   10 + lines.length * 20
+    // );
+    // this.ctx.restore();
     for (let i = 0; i < lines.length; i++) {
       this.drawText(shape.x, shape.y + i * 20, lines[i]);
     }
+
   }
   drawText(x: number, y: number, text: string) {
     const fontSize = 16 + this.ctx.lineWidth * 0.5;

@@ -2,6 +2,7 @@
 
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
+import { ButtonEventNames, ClipboardEventNames, EventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
 import { detectFrameRate } from "./utils/detect-framerate";
 
 // @todo
@@ -23,34 +24,6 @@ export type FrameAnnotationV1 = {
 
 const DEFAULT_FPS = 25;
 
-type PointerEventNames =
-  | "pointerdown"
-  | "pointermove"
-  | "pointerup"
-  | "pointercancel"
-  | "pointerover";
-type KeyboardEventNames = "keydown";
-type ButtonEventNames = "click";
-type InputEventNames = "input" | "change";
-type ClipboardEventNames = "copy" | "paste" | "cut";
-type VideoEventNames =
-  | "timeupdate"
-  | "play"
-  | "pause"
-  | "ended"
-  | "seek"
-  | "stalled"
-  | "waiting"
-  | "error";
-type WindowEventNames = "resize";
-type EventNames =
-  | VideoEventNames
-  | InputEventNames
-  | PointerEventNames
-  | KeyboardEventNames
-  | WindowEventNames
-  | ButtonEventNames
-  | ClipboardEventNames;
 
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
