@@ -1,4 +1,5 @@
 import { AnnotationTool } from "./core";
+import { createDownloadCurrentFrameButton } from "./ui/download-current-frame-button";
 import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
 import { createPlaybackSpeedControlButton } from "./ui/playback-speed-button";
@@ -140,6 +141,8 @@ export function initUI(this: AnnotationTool) {
 
     createMuteUnmuteButton(video, this);
     createPlaybackSpeedControlButton(video, this);
+
+    createDownloadCurrentFrameButton(video, this);
   }
 
   // Create the color picker
