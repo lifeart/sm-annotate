@@ -8,6 +8,7 @@ export interface IRectangle extends IShapeBase {
 }
 export declare class RectangleToolPlugin extends BasePlugin<IRectangle> implements ToolPlugin<IRectangle> {
     name: string;
+    move(shape: IRectangle, dx: number, dy: number): IRectangle;
     normalize(shape: IRectangle, canvasWidth: number, canvasHeight: number): IRectangle;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;

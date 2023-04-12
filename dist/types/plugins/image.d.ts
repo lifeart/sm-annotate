@@ -9,6 +9,7 @@ export interface IImage extends IShapeBase {
 }
 export declare class ImageToolPlugin extends BasePlugin<IImage> implements ToolPlugin<IImage> {
     name: string;
+    move(shape: IImage, dx: number, dy: number): IImage;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     onPointerUp(event: PointerEvent): void;

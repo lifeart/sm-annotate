@@ -16,6 +16,7 @@ export interface ToolPlugin<T extends IShapeBase> {
     reset: () => void;
     draw: (shape: T) => void;
     save: (shape: T) => void;
+    move: (shape: T, deltaX: number, deltaY: number) => T;
     normalize: (shape: T, canvasWidth: number, canvasHeight: number) => T;
 }
 export declare class BasePlugin<T extends IShapeBase> {

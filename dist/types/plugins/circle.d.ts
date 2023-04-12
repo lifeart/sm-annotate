@@ -7,6 +7,7 @@ export interface ICircle extends IShapeBase {
 }
 export declare class CircleToolPlugin extends BasePlugin<ICircle> implements ToolPlugin<ICircle> {
     name: string;
+    move(shape: ICircle, dx: number, dy: number): ICircle;
     normalize(shape: ICircle, canvasWidth: number, canvasHeight: number): ICircle;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;

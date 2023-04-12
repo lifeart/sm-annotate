@@ -7,6 +7,7 @@ export interface IText extends IShapeBase {
 }
 export declare class TextToolPlugin extends BasePlugin<IText> implements ToolPlugin<IText> {
     name: string;
+    move(shape: IText, dx: number, dy: number): IText;
     onActivate(): void;
     onDeactivate(): void;
     draw(shape: IText): void;

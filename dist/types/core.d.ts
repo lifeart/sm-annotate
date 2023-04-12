@@ -1,18 +1,12 @@
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
+import { ButtonEventNames, ClipboardEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
 export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
     version: 1;
     shapes: IShape[];
 };
-type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover";
-type KeyboardEventNames = "keydown";
-type ButtonEventNames = "click";
-type InputEventNames = "input" | "change";
-type ClipboardEventNames = "copy" | "paste" | "cut";
-type VideoEventNames = "timeupdate" | "play" | "pause" | "ended" | "seek" | "stalled" | "waiting" | "error";
-type WindowEventNames = "resize";
 export declare class AnnotationTool {
     videoElement: HTMLVideoElement | HTMLImageElement;
     uiContainer: HTMLDivElement;
@@ -134,4 +128,3 @@ export declare class AnnotationTool {
     playAnnotationsAsVideo(): void;
     fillCanvas(): void;
 }
-export {};

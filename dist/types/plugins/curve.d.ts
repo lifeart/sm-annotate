@@ -10,6 +10,7 @@ export interface ICurve extends IShapeBase {
 export declare class CurveToolPlugin extends BasePlugin<ICurve> implements ToolPlugin<ICurve> {
     name: string;
     curvePoints: IPoint[];
+    move(shape: ICurve, dx: number, dy: number): ICurve;
     normalize(shape: ICurve, canvasWidth: number, canvasHeight: number): ICurve;
     draw(shape: ICurve): void;
     reset(): void;

@@ -9,6 +9,7 @@ export interface IArrow extends IShapeBase {
 export declare class ArrowToolPlugin extends BasePlugin<IArrow> implements ToolPlugin<IArrow> {
     name: string;
     normalize(shape: IArrow, canvasWidth: number, canvasHeight: number): IArrow;
+    move(shape: IArrow, dx: number, dy: number): IArrow;
     draw(shape: IArrow): void;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;

@@ -8,6 +8,7 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     shape: IShape | null;
     lastDrawnShape: IShape | null;
     shapeRemoved: boolean;
+    move(shape: IMove): IMove;
     normalize(shape: IMove): IMove;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;

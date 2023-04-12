@@ -8,6 +8,7 @@ export interface ILine extends IShapeBase {
 }
 export declare class LineToolPlugin extends BasePlugin<ILine> implements ToolPlugin<ILine> {
     name: string;
+    move(shape: ILine, dx: number, dy: number): ILine;
     normalize(shape: ILine, canvasWidth: number, canvasHeight: number): ILine;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
