@@ -1,5 +1,6 @@
 import type { IShape } from ".";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { IImage } from "./image";
 
 export interface IMove extends IShapeBase {
   type: "move";
@@ -13,6 +14,7 @@ export class MoveToolPlugin
   shape: IShape | null = null;
   lastDrawnShape: IShape | null = null;
   shapeRemoved = false;
+  isScale = false;
   move(shape: IMove) {
     return shape;
   }
@@ -33,6 +35,42 @@ export class MoveToolPlugin
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
+    this.isScale =
+      lastShape.type === "image"
+        ? this.isPointerAtCorner(lastShape, x, y)
+        : false;
+  }
+
+  isPointerAtCorner(rawShape: IImage, x: number, y: number) {
+    const shapeToResolve = this.annotationTool.deserialize([
+      rawShape,
+    ])[0] as IImage;
+    const tolerance = 15;
+
+    const isPointer5pxCloseToImageTop =
+      Math.abs(shapeToResolve.y - y) < tolerance;
+    const isPointer5pxCloseToImageLeft =
+      Math.abs(shapeToResolve.x - x) < tolerance;
+    const isPointer5pxCloseToImageRight =
+      Math.abs(shapeToResolve.x + shapeToResolve.width - x) < tolerance;
+    const isPointer5pxCloseToImageBottom =
+      Math.abs(shapeToResolve.y + shapeToResolve.height - y) < tolerance;
+
+    const isTopLeftCorner =
+      isPointer5pxCloseToImageTop && isPointer5pxCloseToImageLeft;
+    const isTopRightCorner =
+      isPointer5pxCloseToImageTop && isPointer5pxCloseToImageRight;
+    const isBottomLeftCorner =
+      isPointer5pxCloseToImageBottom && isPointer5pxCloseToImageLeft;
+    const isBottomRightCorner =
+      isPointer5pxCloseToImageBottom && isPointer5pxCloseToImageRight;
+    const isInCorner =
+      isTopLeftCorner ||
+      isTopRightCorner ||
+      isBottomLeftCorner ||
+      isBottomRightCorner;
+
+    return isInCorner;
   }
   onPointerMove(event: PointerEvent) {
     if (!this.isDrawing || !this.shape) {
@@ -53,13 +91,43 @@ export class MoveToolPlugin
 
     const lastShape = this.annotationTool.deserialize([this.shape])[0];
 
-    const shapeCopy = lastShape.type === 'image' ? lastShape : JSON.parse(JSON.stringify(lastShape)) as typeof lastShape;
+    const shapeCopy =
+      lastShape.type === "image"
+        ? lastShape
+        : (JSON.parse(JSON.stringify(lastShape)) as typeof lastShape);
 
-    const item = this.annotationTool.pluginForTool(shapeCopy.type).move(shapeCopy, dx, dy);
+    if (shapeCopy.type === "image") {
+      // if it's an image angle, we need to resize it, keeping the same proportions
 
-    this.lastDrawnShape = item;
+      if (this.isScale) {
+        const { width, height } = shapeCopy;
+        const ratio = width / height;
+        const newWidth = width + dx;
+        const newHeight = newWidth / ratio;
+        shapeCopy.width = newWidth;
+        shapeCopy.height = newHeight;
 
-    this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
+        this.lastDrawnShape = shapeCopy;
+
+        this.annotationTool.pluginForTool(shapeCopy.type).draw(shapeCopy);
+      } else {
+        const item = this.annotationTool
+          .pluginForTool(shapeCopy.type)
+          .move(shapeCopy, dx, dy);
+
+        this.lastDrawnShape = item;
+
+        this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
+      }
+    } else {
+      const item = this.annotationTool
+        .pluginForTool(shapeCopy.type)
+        .move(shapeCopy, dx, dy);
+
+      this.lastDrawnShape = item;
+
+      this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
+    }
   }
   onPointerUp(event: PointerEvent) {
     if (!this.isDrawing || !this.lastDrawnShape) {
@@ -73,6 +141,7 @@ export class MoveToolPlugin
       this.save(this.lastDrawnShape as IMove);
     }
     this.isDrawing = false;
+    this.isScale = false;
     this.shape = null;
     this.shapeRemoved = false;
     this.lastDrawnShape = null;
@@ -83,6 +152,7 @@ export class MoveToolPlugin
   reset() {
     this.isDrawing = false;
     this.shape = null;
+    this.isScale = false;
     this.lastDrawnShape = null;
     this.shapeRemoved = false;
   }
