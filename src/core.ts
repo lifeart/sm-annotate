@@ -2,7 +2,16 @@
 
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-import { ButtonEventNames, ClipboardEventNames, EventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
+import {
+  ButtonEventNames,
+  ClipboardEventNames,
+  EventNames,
+  InputEventNames,
+  KeyboardEventNames,
+  PointerEventNames,
+  VideoEventNames,
+  WindowEventNames,
+} from "./ui/events";
 import { detectFrameRate } from "./utils/detect-framerate";
 
 // @todo
@@ -24,9 +33,9 @@ export type FrameAnnotationV1 = {
 
 const DEFAULT_FPS = 25;
 
-
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
+  referenceVideoElement!: HTMLVideoElement | null;
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
   canvas!: HTMLCanvasElement;
@@ -40,6 +49,7 @@ export class AnnotationTool {
   destructors: (() => void)[] = [];
   plugins: PluginInstances[] = [];
   isDestroyed = false;
+  globalShapes: IShape[] = [];
   timeStack = new Map<number, IShape[]>(); // timeFrame -> shapes
   undoTimeStack = new Map<number, IShape[][]>(); // timeFrame -> shapes
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
@@ -60,6 +70,10 @@ export class AnnotationTool {
       activeTimeFrame + 1
     );
     this.playbackFrame = newFrame;
+  }
+
+  addGlobalShape(shape: IShape) {
+    this.globalShapes.push(shape);
   }
 
   get selectedColor() {
@@ -110,6 +124,7 @@ export class AnnotationTool {
     if (this.videoElement instanceof HTMLImageElement) return;
     const newTime = frame / this.fps;
     this.videoElement.currentTime = newTime;
+    this.syncTime();
     this.show();
   }
   get canvasWidth() {
@@ -229,6 +244,7 @@ export class AnnotationTool {
     this.isProgressBarNavigation = false;
     this.currentTool = null;
     this.shapes = [];
+    this.globalShapes = [];
   }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
@@ -342,6 +358,7 @@ export class AnnotationTool {
     this.destructors.forEach((destructor) => destructor());
     this.stopAnnotationsAsVideo();
     this.destructors = [];
+    this.globalShapes = [];
 
     this._currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
@@ -352,6 +369,13 @@ export class AnnotationTool {
     // remove stroke
     const wrapper = this.strokeSizePicker.parentElement;
     wrapper?.parentNode?.removeChild(wrapper);
+
+    // remove reference video
+    if (this.referenceVideoElement) {
+      const referenceVideoWrapper = this.referenceVideoElement.parentElement;
+      referenceVideoWrapper?.parentNode?.removeChild(referenceVideoWrapper);
+      this.referenceVideoElement = null;
+    }
 
     // remove color picker
     const colorPickerWrapper = this.colorPicker.parentElement;
@@ -368,7 +392,9 @@ export class AnnotationTool {
 
     // remove canvas
     this.canvas.parentNode?.removeChild(this.canvas);
-    this.playerControlsContainer.parentElement?.removeChild(this.playerControlsContainer);
+    this.playerControlsContainer.parentElement?.removeChild(
+      this.playerControlsContainer
+    );
 
     const keysToDelete: Array<keyof typeof this> = [
       "strokeSizePicker",
@@ -385,6 +411,7 @@ export class AnnotationTool {
     });
 
     this.activeTimeFrame = 0;
+    this.isDestroyed = true;
   }
 
   setCanvasSize() {
@@ -396,6 +423,7 @@ export class AnnotationTool {
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
     this.redrawFullCanvas();
     this.setCanvasSettings();
+    this.syncVideoSizes();
   }
 
   isMultiTouch(event: PointerEvent) {
@@ -406,6 +434,73 @@ export class AnnotationTool {
     const serializedShape = this.serialize([shape])[0];
     this.undoStack.push([...this.shapes]);
     this.shapes.push(serializedShape);
+  }
+
+  syncTime() {
+    const video = this.videoElement as HTMLVideoElement;
+    if (!video || video.tagName !== "VIDEO") {
+      return;
+    }
+    if (!this.referenceVideoElement) {
+      return;
+    }
+    if (this.referenceVideoElement.readyState < 4) {
+      return;
+    }
+    if (!this.globalShapes.length) {
+      return;
+    }
+    const diff = Math.abs(
+      this.referenceVideoElement.currentTime - video.currentTime
+    );
+    if (diff >= this.msPerFrame / 3) {
+      this.referenceVideoElement.currentTime = video.currentTime;
+    }
+  }
+
+  get msPerFrame() {
+    return this.fps / 1000;
+  }
+
+  syncVideoSizes() {
+    if (!this.referenceVideoElement) {
+      return;
+    }
+    const video = this.videoElement;
+
+    const videoPosition = video.getBoundingClientRect();
+    this.referenceVideoElement.style.position = "fixed";
+    this.referenceVideoElement.style.top = `${videoPosition.top}px`;
+    this.referenceVideoElement.style.left = `${videoPosition.left}px`;
+    // const s = getComputedStyle(video);
+    // this.referenceVideoElement.style.width = s.width;
+    // this.referenceVideoElement.style.height = s.height;
+  }
+
+  async addReferenceVideoByURL(url: string) {
+    const blob = await fetch(url).then((r) => r.blob());
+
+    const blobs = new Blob([blob], { type: "video/mp4" });
+
+    const mediaUrl = window.URL.createObjectURL(blobs);
+
+    if (!this.referenceVideoElement) {
+      this.referenceVideoElement = document.createElement("video");
+      this.referenceVideoElement.style.zIndex = `-1`;
+      this.referenceVideoElement.style.display = "none";
+      this.referenceVideoElement.muted = true;
+      this.referenceVideoElement.autoplay = false;
+      this.referenceVideoElement.loop = true;
+      this.videoElement.after(this.referenceVideoElement);
+      this.syncVideoSizes();
+    }
+    this.referenceVideoElement.src = mediaUrl;
+  }
+
+  addSingletonShape(shape: IShape) {
+    const serializedShape = this.serialize([shape])[0];
+    const filteredShapes = this.shapes.filter((s) => s.type !== shape.type);
+    this.replaceFrame(this.playbackFrame, [...filteredShapes, serializedShape]);
   }
 
   serialize(shapes: IShape[] = this.shapes): IShape[] {
@@ -542,6 +637,17 @@ export class AnnotationTool {
       lineWidth: this.ctx.lineWidth,
     };
 
+    this.deserialize(this.globalShapes).forEach((shape) => {
+      this.ctx.strokeStyle = shape.strokeStyle;
+      this.ctx.fillStyle = shape.fillStyle;
+      this.ctx.lineWidth = shape.lineWidth;
+      try {
+        this.pluginForTool(shape.type).draw(shape);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
     this.deserialize(this.shapes).forEach((shape) => {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
@@ -608,7 +714,7 @@ export class AnnotationTool {
       if (key === "image") {
         return (value as HTMLImageElement).src;
       }
-      return value; 
+      return value;
     });
   }
   parseShapes(shapes: string) {
@@ -637,7 +743,9 @@ export class AnnotationTool {
       frame: this.playbackFrame,
       version: 1,
       fps: this.fps,
-      shapes: this.parseShapes(this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))),
+      shapes: this.parseShapes(
+        this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))
+      ),
     };
   }
 
@@ -677,7 +785,9 @@ export class AnnotationTool {
         frame,
         fps: this.fps,
         version: 1,
-        shapes: this.filterNonSerializableShapes(this.timeStack.get(frame) ?? []),
+        shapes: this.filterNonSerializableShapes(
+          this.timeStack.get(frame) ?? []
+        ),
       };
     });
     return result;
@@ -739,6 +849,9 @@ export class AnnotationTool {
     clearTimeout(this.playTimeout);
   }
   hasAnnotationsForFrame(frame: number) {
+    if (this.globalShapes.length > 0) {
+      return true;
+    }
     if (this.timeStack.has(frame)) {
       const shapes = this.timeStack.get(frame);
       return shapes && shapes.length > 0;
@@ -752,21 +865,25 @@ export class AnnotationTool {
     if (this.hasAnnotationsForFrame(currentVideFrame)) {
       this.showCanvas();
       this.activeTimeFrame = currentVideFrame;
+      this.syncTime();
       this.clearCanvas();
       this.drawShapesOverlay();
     } else {
       this.hideCanvas();
     }
     const nextFrameDelay = 1000 / this.fps;
+    requestAnimationFrame(() => {
+      this.syncTime();
+    });
     this.playTimeout = window.setTimeout(() => {
       this.playAnnotationsAsVideo();
     }, nextFrameDelay) as number & ReturnType<typeof window.setTimeout>;
   }
 
   fillCanvas() {
-    this.ctx.save();
-    this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
-    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    this.ctx.restore();
+    // this.ctx.save();
+    // this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
+    // this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    // this.ctx.restore();
   }
 }

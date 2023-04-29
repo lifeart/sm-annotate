@@ -5,7 +5,8 @@ export function addVideoOverlay(this: AnnotationTool) {
       this.videoElement,
       0,
       0,
-      this.canvas.width / this.pixelRatio,
-      this.canvas.height / this.pixelRatio
+      this.canvasWidth,
+      this.canvasHeight,
+      0,0,this.canvasWidth,this.canvasHeight
     );
   }

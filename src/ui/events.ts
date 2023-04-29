@@ -11,6 +11,7 @@ export type ClipboardEventNames = "copy" | "paste" | "cut";
 export type VideoEventNames =
   | "timeupdate"
   | "volumechange"
+  | "seeking"
   | "play"
   | "pause"
   | "ended"
