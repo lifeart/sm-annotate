@@ -27,6 +27,7 @@ const DEFAULT_FPS = 25;
 
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
+  referenceVideoElement!: HTMLVideoElement;
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
   canvas!: HTMLCanvasElement;
@@ -110,6 +111,7 @@ export class AnnotationTool {
     if (this.videoElement instanceof HTMLImageElement) return;
     const newTime = frame / this.fps;
     this.videoElement.currentTime = newTime;
+    this.syncTime();
     this.show();
   }
   get canvasWidth() {
@@ -396,6 +398,7 @@ export class AnnotationTool {
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
     this.redrawFullCanvas();
     this.setCanvasSettings();
+    this.syncVideoSizes();
   }
 
   isMultiTouch(event: PointerEvent) {
@@ -406,6 +409,48 @@ export class AnnotationTool {
     const serializedShape = this.serialize([shape])[0];
     this.undoStack.push([...this.shapes]);
     this.shapes.push(serializedShape);
+  }
+
+  syncTime() {
+    if (!this.referenceVideoElement) {
+      return;
+    }
+    this.referenceVideoElement.currentTime = this.videoElement.currentTime;
+  }
+
+  syncVideoSizes() {
+    if (!this.referenceVideoElement) {
+      return;
+    }
+    const video = this.videoElement;
+
+    const videoPosition = video.getBoundingClientRect();
+    this.referenceVideoElement.style.position = "fixed";
+    this.referenceVideoElement.style.top = `${videoPosition.top}px`;
+    this.referenceVideoElement.style.left = `${videoPosition.left}px`;
+    // const s = getComputedStyle(video);
+    // this.referenceVideoElement.style.width = s.width;
+    // this.referenceVideoElement.style.height = s.height;
+  }
+
+  async addReferenceVideoByURL(url: string) {
+    const blob = await fetch(url).then((r) => r.blob());
+
+    const blobs = new Blob([blob], { type: "video/mp4" });
+  
+    const mediaUrl = window.URL.createObjectURL(blobs);
+  
+    if (!this.referenceVideoElement) {
+      this.referenceVideoElement = document.createElement("video");
+      this.referenceVideoElement.style.zIndex = `-1`;
+      this.referenceVideoElement.style.display = "none";
+      this.referenceVideoElement.muted = true;
+      this.referenceVideoElement.autoplay = false;
+      this.referenceVideoElement.loop = true;
+      this.videoElement.after(this.referenceVideoElement);
+      this.syncVideoSizes();
+    }
+    this.referenceVideoElement.src = mediaUrl;
   }
 
   addSingletonShape(shape: IShape) {
@@ -758,6 +803,7 @@ export class AnnotationTool {
     if (this.hasAnnotationsForFrame(currentVideFrame)) {
       this.showCanvas();
       this.activeTimeFrame = currentVideFrame;
+      this.syncTime();
       this.clearCanvas();
       this.drawShapesOverlay();
     } else {

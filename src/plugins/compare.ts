@@ -20,10 +20,13 @@ export class CompareToolPlugin
   }
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
-    this.leftOpacity = 0.7;
-    this.rightOpacity = 0.7;
+    this.leftOpacity = 1;
+    this.rightOpacity = 1;
+    this.annotationTool.canvas.style.cursor = "col-resize";
+    this.annotationTool.syncTime();
   }
   onDeactivate(): void {
+    this.annotationTool.canvas.style.cursor = "default";
     this.comparisonLine = 0;
     this.leftOpacity = 1;
     this.rightOpacity = 1;
@@ -47,14 +50,17 @@ export class CompareToolPlugin
     const { x } = this.annotationTool.getRelativeCoords(event);
 
     this.comparisonLine = x;
-    // this.startY = this.comparisonLine;
-    this.draw({
+
+    const item = {
       type: "compare",
       strokeStyle: this.ctx.strokeStyle,
       fillStyle: this.ctx.fillStyle,
       lineWidth: this.ctx.lineWidth,
       x: x,
-    });
+    } as ICompare;
+
+    this.draw(item);
+    this.drawDelimiter(item);
   }
   onPointerUp() {
     if (!this.isDrawing) {
@@ -75,22 +81,32 @@ export class CompareToolPlugin
     this.annotationTool.addSingletonShape(shape);
   }
 
+  drawDelimiter(shape: ICompare) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(shape.x, 0);
+    this.ctx.lineTo(shape.x, this.annotationTool.canvasWidth);
+    this.ctx.stroke();
+  }
+
   draw(shape: ICompare) {
     const video1 = this.annotationTool.videoElement;
+    const video2 = this.annotationTool.referenceVideoElement;
+
+    this.annotationTool.syncTime();
 
     const globalAlpha = this.ctx.globalAlpha;
     const w = this.annotationTool.canvasWidth;
     const h = this.annotationTool.canvasHeight;
     const x = shape.x;
 
-    const strokeStyle = this.ctx.strokeStyle;
+    // const strokeStyle = this.ctx.strokeStyle;
 
     this.ctx.globalAlpha = this.leftOpacity;
-    const filter = this.ctx.filter;
+    // const filter = this.ctx.filter;
 
     const cropWidth = x;
 
-    this.ctx.filter = "grayscale(80%) brightness(120%)";
+    // this.ctx.filter = "grayscale(80%) brightness(120%)";
 
     this.ctx.drawImage(
       video1,
@@ -104,13 +120,15 @@ export class CompareToolPlugin
       h // Destination position and size
     );
 
-    this.ctx.filter = "contrast(140%) blur(1px)";
+    // this.ctx.filter = "contrast(140%) blur(1px)";
 
     const cropX = x; // The X coordinate of the vertical crop line
     const cropWidth1 = w - cropX;
+    this.ctx.globalAlpha = this.rightOpacity;
+
 
     this.ctx.drawImage(
-      video1,
+      video2,
       cropX,
       0,
       cropWidth1,
@@ -121,12 +139,7 @@ export class CompareToolPlugin
       h // Destination position and size
     );
 
-    this.ctx.filter = filter;
+    // this.ctx.filter = filter;
     this.ctx.globalAlpha = globalAlpha;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x, 0);
-    this.ctx.lineTo(x, w);
-    this.ctx.strokeStyle = strokeStyle;
-    this.ctx.stroke();
   }
 }

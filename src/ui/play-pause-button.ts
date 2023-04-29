@@ -13,10 +13,12 @@ export function createPlayPauseButton(video: HTMLVideoElement, tool: AnnotationT
 
     tool.addEvent(video, "play", () => {
         button.innerHTML = pauseIcon;
+        tool.syncTime();
     });
 
     tool.addEvent(video, "pause", () => {
         button.innerHTML = playIcon;
+        tool.syncTime();
     });
 
     tool.addEvent(button, "click", () => {

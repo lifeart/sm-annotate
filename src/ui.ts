@@ -112,7 +112,7 @@ export function initUI(this: AnnotationTool) {
     "move"
   );
 
-  const isCompareEnabled = false;
+  const isCompareEnabled = true;
 
   if (isCompareEnabled) {
     createButton(
@@ -208,9 +208,11 @@ export function initUI(this: AnnotationTool) {
       }
     });
 
-    // this.addEvent(video, "timeupdate", () => {
-
-    // });
+    this.addEvent(video, "timeupdate", () => {
+      if (this.referenceVideoElement) {
+        this.referenceVideoElement.currentTime = video.currentTime;
+      }
+    });
     this.addEvent(video, "error", () => {
       this.hide();
     });

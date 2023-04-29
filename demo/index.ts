@@ -25,6 +25,8 @@ async function initAnnotator() {
     video.style.height = `${optimalVideoHeight}px`;
   }
 
+
+
   // Video is ready to play
 
   // preload video as blob
@@ -80,6 +82,8 @@ async function initAnnotator() {
   await loadPromise;
 
   const tool = new SmAnnotate(video);
+
+  await tool.addReferenceVideoByURL('./mov_bbb_g.mp4');
 
   console.log({ tool });
 
