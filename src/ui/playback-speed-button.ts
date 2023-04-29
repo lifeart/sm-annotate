@@ -7,11 +7,6 @@ function iconForSpeed(speed: number) {
     "0.75": "¾",
     "1": "1×",
   };
-  console.log(
-    ratioMap[String(speed) as keyof typeof ratioMap],
-    ratioMap,
-    speed
-  );
   return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-superscript">
         <style>
             .small {
