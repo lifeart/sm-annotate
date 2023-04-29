@@ -89,7 +89,7 @@ export declare class AnnotationTool {
     setCanvasSize(): void;
     isMultiTouch(event: PointerEvent): boolean;
     addShape(shape: IShape): void;
-    syncTime(): void;
+    syncTime(force?: boolean): void;
     get msPerFrame(): number;
     syncVideoSizes(): void;
     addReferenceVideoByURL(url: string): Promise<void>;

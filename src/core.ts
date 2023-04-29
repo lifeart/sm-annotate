@@ -438,7 +438,7 @@ export class AnnotationTool {
     this.shapes.push(serializedShape);
   }
 
-  syncTime() {
+  syncTime(force = false) {
     const video = this.videoElement as HTMLVideoElement;
     if (!video || video.tagName !== "VIDEO") {
       return;
@@ -449,7 +449,7 @@ export class AnnotationTool {
     if (this.referenceVideoElement.readyState < 4) {
       return;
     }
-    if (!this.globalShapes.length) {
+    if (!force && !this.globalShapes.length) {
       return;
     }
     const diff = Math.abs(
