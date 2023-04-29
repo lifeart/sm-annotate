@@ -495,6 +495,7 @@ export class AnnotationTool {
       this.referenceVideoElement.muted = true;
       this.referenceVideoElement.playsInline = true;
       this.referenceVideoElement.autoplay = false;
+      this.referenceVideoElement.controls = false;
       this.referenceVideoElement.loop = true;
       this.videoElement.after(this.referenceVideoElement);
       this.syncVideoSizes();
