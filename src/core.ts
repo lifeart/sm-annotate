@@ -495,6 +495,7 @@ export class AnnotationTool {
       this.syncVideoSizes();
     }
     this.referenceVideoElement.src = mediaUrl;
+    this.getButtonForTool('compare').style.display = '';
   }
 
   addSingletonShape(shape: IShape) {
