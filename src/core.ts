@@ -408,6 +408,12 @@ export class AnnotationTool {
     this.shapes.push(serializedShape);
   }
 
+  addSingletonShape(shape: IShape) {
+    const serializedShape = this.serialize([shape])[0];
+    const filteredShapes = this.shapes.filter((s) => s.type !== shape.type);
+    this.replaceFrame(this.playbackFrame, [...filteredShapes, serializedShape]);
+  }
+
   serialize(shapes: IShape[] = this.shapes): IShape[] {
     const canvasWidth = this.canvasWidth;
     const canvasHeight = this.canvasHeight;
