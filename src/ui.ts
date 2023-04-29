@@ -387,6 +387,10 @@ export function initUI(this: AnnotationTool) {
       }
       this.currentTool = null;
       video.pause();
+      requestAnimationFrame(() => {
+        this.syncTime();
+        this.redrawFullCanvas();
+      });
     });
 
     // add event listener for frame by frame navigation from arrow keys
@@ -413,6 +417,10 @@ export function initUI(this: AnnotationTool) {
           video.play();
         } else {
           video.pause();
+          requestAnimationFrame(() => {
+            this.syncTime();
+            this.redrawFullCanvas();
+          });
         }
       }
     });

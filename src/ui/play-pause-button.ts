@@ -44,10 +44,13 @@ export function createPlayPauseButton(
       refVideo((refVideo) => {
         if (!refVideo.paused) {
           refVideo.pause();
-          tool.syncTime();
         }
       });
       video.pause();
+      requestAnimationFrame(() => {
+        tool.syncTime();
+        tool.redrawFullCanvas();
+      });
     }
   });
 
