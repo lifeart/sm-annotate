@@ -47,6 +47,14 @@ export class CompareToolPlugin
   }
   onPointerMove(event: PointerEvent) {
     if (!this.isDrawing) {
+        if (this.annotationTool.globalShapes.length > 0) {
+            const shape = this.annotationTool.globalShapes[0];
+            if (shape.type === "compare") {
+                const deserialized = this.annotationTool.deserialize([shape])[0] as ICompare;
+                this.draw(deserialized);
+                this.annotationTool.addFrameSquareOverlay();
+            }
+        }
       return;
     }
     const { x } = this.annotationTool.getRelativeCoords(event);
@@ -96,7 +104,15 @@ export class CompareToolPlugin
   }
 
   draw(shape: ICompare) {
-    const video1 = this.annotationTool.videoElement;
+    const video1 = this.annotationTool.videoElement as HTMLVideoElement;
+
+    // if (video1.tagName === "VIDEO") {
+    //     const style = window.getComputedStyle(video1);
+    //     console.log(video1.videoWidth);
+    //     console.log(parseInt(style.getPropertyValue('width')));
+    //     console.log(this.annotationTool.canvasWidth);
+    // }
+
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {
       return;
@@ -113,6 +129,8 @@ export class CompareToolPlugin
     this.ctx.globalAlpha = this.leftOpacity;
     // const filter = this.ctx.filter;
 
+    const normalizedX = x / w;
+
     const cropWidth = x;
 
     // this.ctx.filter = "grayscale(80%) brightness(120%)";
@@ -121,8 +139,8 @@ export class CompareToolPlugin
       video1,
       0,
       0,
-      cropWidth,
-      h, // Source cropping parameters
+      normalizedX * video1.videoWidth,
+      video1.videoHeight, // Source cropping parameters
       0,
       0,
       cropWidth,
@@ -132,15 +150,17 @@ export class CompareToolPlugin
     // this.ctx.filter = "contrast(140%) blur(1px)";
 
     const cropX = x; // The X coordinate of the vertical crop line
-    const cropWidth1 = w - cropX;
+   
+    const cropWidth1 = (w - cropX);
+    const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
     this.ctx.drawImage(
       video2,
-      cropX,
+      (cropX / w) * video1.videoWidth,
       0,
-      cropWidth1,
-      h, // Source cropping parameters
+      normalizedCrop,
+      video1.videoHeight, // Source cropping parameters
       cropX,
       0,
       cropWidth1,

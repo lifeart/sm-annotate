@@ -249,6 +249,8 @@ export class AnnotationTool {
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
     this.videoElement = videoElement;
+    this.videoElement.style.objectFit = "cover";
+    this.videoElement.style.objectPosition = "left top";
     this.bindContext();
     this.initCanvas();
     this.initUI();
@@ -488,6 +490,8 @@ export class AnnotationTool {
       this.referenceVideoElement = document.createElement("video");
       this.referenceVideoElement.style.zIndex = `-1`;
       this.referenceVideoElement.style.display = "none";
+      this.referenceVideoElement.style.objectFit = "cover";
+      this.referenceVideoElement.style.objectPosition = "left top";
       this.referenceVideoElement.muted = true;
       this.referenceVideoElement.autoplay = false;
       this.referenceVideoElement.loop = true;
