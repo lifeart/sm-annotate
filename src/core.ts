@@ -493,6 +493,7 @@ export class AnnotationTool {
       this.referenceVideoElement.style.objectFit = "cover";
       this.referenceVideoElement.style.objectPosition = "left top";
       this.referenceVideoElement.muted = true;
+      this.referenceVideoElement.playsInline = true;
       this.referenceVideoElement.autoplay = false;
       this.referenceVideoElement.loop = true;
       this.videoElement.after(this.referenceVideoElement);
