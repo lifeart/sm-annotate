@@ -41,6 +41,7 @@ export class AnnotationTool {
   destructors: (() => void)[] = [];
   plugins: PluginInstances[] = [];
   isDestroyed = false;
+  globalShapes: IShape[] = [];
   timeStack = new Map<number, IShape[]>(); // timeFrame -> shapes
   undoTimeStack = new Map<number, IShape[][]>(); // timeFrame -> shapes
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
@@ -61,6 +62,10 @@ export class AnnotationTool {
       activeTimeFrame + 1
     );
     this.playbackFrame = newFrame;
+  }
+
+  addGlobalShape(shape: IShape) {
+    this.globalShapes.push(shape);
   }
 
   get selectedColor() {
@@ -231,6 +236,7 @@ export class AnnotationTool {
     this.isProgressBarNavigation = false;
     this.currentTool = null;
     this.shapes = [];
+    this.globalShapes = [];
   }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
@@ -344,6 +350,7 @@ export class AnnotationTool {
     this.destructors.forEach((destructor) => destructor());
     this.stopAnnotationsAsVideo();
     this.destructors = [];
+    this.globalShapes = [];
 
     this._currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
@@ -387,6 +394,7 @@ export class AnnotationTool {
     });
 
     this.activeTimeFrame = 0;
+    this.isDestroyed = true;
   }
 
   setCanvasSize() {
@@ -593,6 +601,17 @@ export class AnnotationTool {
       lineWidth: this.ctx.lineWidth,
     };
 
+    this.deserialize(this.globalShapes).forEach((shape) => {
+      this.ctx.strokeStyle = shape.strokeStyle;
+      this.ctx.fillStyle = shape.fillStyle;
+      this.ctx.lineWidth = shape.lineWidth;
+      try {
+        this.pluginForTool(shape.type).draw(shape);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
     this.deserialize(this.shapes).forEach((shape) => {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
@@ -790,6 +809,9 @@ export class AnnotationTool {
     clearTimeout(this.playTimeout);
   }
   hasAnnotationsForFrame(frame: number) {
+    if (this.globalShapes.length > 0) {
+      return true;
+    }
     if (this.timeStack.has(frame)) {
       const shapes = this.timeStack.get(frame);
       return shapes && shapes.length > 0;

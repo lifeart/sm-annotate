@@ -78,7 +78,10 @@ export class CompareToolPlugin
   }
 
   save(shape: ICompare) {
-    this.annotationTool.addSingletonShape(shape);
+    this.annotationTool.globalShapes = this.annotationTool.globalShapes.filter(
+        (s) => s.type !== "compare"
+    );
+    this.annotationTool.addGlobalShape(this.annotationTool.serialize([shape])[0]);
   }
 
   drawDelimiter(shape: ICompare) {
