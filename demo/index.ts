@@ -85,6 +85,10 @@ async function initAnnotator() {
 
   await tool.addReferenceVideoByURL('./mov_bbb_g.mp4');
 
+  requestAnimationFrame(() => {
+    tool.setCanvasSize();
+  });
+
   console.log({ tool });
 
   tool.addShapesToFrame(29, [

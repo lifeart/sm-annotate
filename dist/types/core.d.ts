@@ -9,6 +9,7 @@ export type FrameAnnotationV1 = {
 };
 export declare class AnnotationTool {
     videoElement: HTMLVideoElement | HTMLImageElement;
+    referenceVideoElement: HTMLVideoElement | null;
     uiContainer: HTMLDivElement;
     playerControlsContainer: HTMLDivElement;
     canvas: HTMLCanvasElement;
@@ -22,6 +23,7 @@ export declare class AnnotationTool {
     destructors: (() => void)[];
     plugins: PluginInstances[];
     isDestroyed: boolean;
+    globalShapes: IShape[];
     timeStack: Map<number, IShape[]>;
     undoTimeStack: Map<number, IShape[][]>;
     playTimeout: number & ReturnType<typeof window.setTimeout>;
@@ -32,6 +34,7 @@ export declare class AnnotationTool {
     }[];
     prevFrame(): void;
     nextFrame(): void;
+    addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
     get selectedStrokeSize(): number;
     get currentTool(): Tool | null;
@@ -86,6 +89,11 @@ export declare class AnnotationTool {
     setCanvasSize(): void;
     isMultiTouch(event: PointerEvent): boolean;
     addShape(shape: IShape): void;
+    syncTime(): void;
+    get msPerFrame(): number;
+    syncVideoSizes(): void;
+    addReferenceVideoByURL(url: string): Promise<void>;
+    addSingletonShape(shape: IShape): void;
     serialize(shapes?: IShape[]): IShape[];
     deserialize(shapes: IShape[]): IShape[];
     getRelativeCoords(event: PointerEvent): {

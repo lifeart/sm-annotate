@@ -2,7 +2,16 @@
 
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-import { ButtonEventNames, ClipboardEventNames, EventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
+import {
+  ButtonEventNames,
+  ClipboardEventNames,
+  EventNames,
+  InputEventNames,
+  KeyboardEventNames,
+  PointerEventNames,
+  VideoEventNames,
+  WindowEventNames,
+} from "./ui/events";
 import { detectFrameRate } from "./utils/detect-framerate";
 
 // @todo
@@ -24,10 +33,9 @@ export type FrameAnnotationV1 = {
 
 const DEFAULT_FPS = 25;
 
-
 export class AnnotationTool {
   videoElement!: HTMLVideoElement | HTMLImageElement;
-  referenceVideoElement!: HTMLVideoElement;
+  referenceVideoElement!: HTMLVideoElement | null;
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
   canvas!: HTMLCanvasElement;
@@ -362,6 +370,13 @@ export class AnnotationTool {
     const wrapper = this.strokeSizePicker.parentElement;
     wrapper?.parentNode?.removeChild(wrapper);
 
+    // remove reference video
+    if (this.referenceVideoElement) {
+      const referenceVideoWrapper = this.referenceVideoElement.parentElement;
+      referenceVideoWrapper?.parentNode?.removeChild(referenceVideoWrapper);
+      this.referenceVideoElement = null;
+    }
+
     // remove color picker
     const colorPickerWrapper = this.colorPicker.parentElement;
     colorPickerWrapper?.parentNode?.removeChild(colorPickerWrapper);
@@ -377,7 +392,9 @@ export class AnnotationTool {
 
     // remove canvas
     this.canvas.parentNode?.removeChild(this.canvas);
-    this.playerControlsContainer.parentElement?.removeChild(this.playerControlsContainer);
+    this.playerControlsContainer.parentElement?.removeChild(
+      this.playerControlsContainer
+    );
 
     const keysToDelete: Array<keyof typeof this> = [
       "strokeSizePicker",
@@ -420,10 +437,29 @@ export class AnnotationTool {
   }
 
   syncTime() {
+    const video = this.videoElement as HTMLVideoElement;
+    if (!video || video.tagName !== "VIDEO") {
+      return;
+    }
     if (!this.referenceVideoElement) {
       return;
     }
-    this.referenceVideoElement.currentTime = this.videoElement.currentTime;
+    if (this.referenceVideoElement.readyState < 4) {
+      return;
+    }
+    if (!this.globalShapes.length) {
+      return;
+    }
+    const diff = Math.abs(
+      this.referenceVideoElement.currentTime - video.currentTime
+    );
+    if (diff >= this.msPerFrame / 3) {
+      this.referenceVideoElement.currentTime = video.currentTime;
+    }
+  }
+
+  get msPerFrame() {
+    return this.fps / 1000;
   }
 
   syncVideoSizes() {
@@ -445,9 +481,9 @@ export class AnnotationTool {
     const blob = await fetch(url).then((r) => r.blob());
 
     const blobs = new Blob([blob], { type: "video/mp4" });
-  
+
     const mediaUrl = window.URL.createObjectURL(blobs);
-  
+
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
       this.referenceVideoElement.style.zIndex = `-1`;
@@ -678,7 +714,7 @@ export class AnnotationTool {
       if (key === "image") {
         return (value as HTMLImageElement).src;
       }
-      return value; 
+      return value;
     });
   }
   parseShapes(shapes: string) {
@@ -707,7 +743,9 @@ export class AnnotationTool {
       frame: this.playbackFrame,
       version: 1,
       fps: this.fps,
-      shapes: this.parseShapes(this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))),
+      shapes: this.parseShapes(
+        this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))
+      ),
     };
   }
 
@@ -747,7 +785,9 @@ export class AnnotationTool {
         frame,
         fps: this.fps,
         version: 1,
-        shapes: this.filterNonSerializableShapes(this.timeStack.get(frame) ?? []),
+        shapes: this.filterNonSerializableShapes(
+          this.timeStack.get(frame) ?? []
+        ),
       };
     });
     return result;
@@ -832,15 +872,18 @@ export class AnnotationTool {
       this.hideCanvas();
     }
     const nextFrameDelay = 1000 / this.fps;
+    requestAnimationFrame(() => {
+      this.syncTime();
+    });
     this.playTimeout = window.setTimeout(() => {
       this.playAnnotationsAsVideo();
     }, nextFrameDelay) as number & ReturnType<typeof window.setTimeout>;
   }
 
   fillCanvas() {
-    this.ctx.save();
-    this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
-    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    this.ctx.restore();
+    // this.ctx.save();
+    // this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
+    // this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    // this.ctx.restore();
   }
 }

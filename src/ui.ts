@@ -206,12 +206,17 @@ export function initUI(this: AnnotationTool) {
       if (video.paused) {
         this.show();
       }
+      this.syncTime();
     });
 
     this.addEvent(video, "timeupdate", () => {
-      if (this.referenceVideoElement) {
-        this.referenceVideoElement.currentTime = video.currentTime;
+      if (video.currentTime < 0.0002 && !video.paused) {
+        this.playAnnotationsAsVideo();
       }
+      this.syncTime();
+    });
+    this.addEvent(video, "seeking", () => {
+      this.syncTime();
     });
     this.addEvent(video, "error", () => {
       this.hide();

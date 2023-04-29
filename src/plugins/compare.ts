@@ -20,8 +20,8 @@ export class CompareToolPlugin
   }
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
-    this.leftOpacity = 1;
-    this.rightOpacity = 1;
+    this.leftOpacity = 0.7;
+    this.rightOpacity = 0.7;
     this.annotationTool.canvas.style.cursor = "col-resize";
     this.annotationTool.syncTime();
   }
@@ -30,6 +30,7 @@ export class CompareToolPlugin
     this.comparisonLine = 0;
     this.leftOpacity = 1;
     this.rightOpacity = 1;
+    this.isDrawing = false;
   }
   normalize(shape: ICompare, canvasWidth: number): ICompare {
     return {
@@ -42,6 +43,7 @@ export class CompareToolPlugin
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
+    this.onPointerMove(event);
   }
   onPointerMove(event: PointerEvent) {
     if (!this.isDrawing) {
@@ -79,9 +81,11 @@ export class CompareToolPlugin
 
   save(shape: ICompare) {
     this.annotationTool.globalShapes = this.annotationTool.globalShapes.filter(
-        (s) => s.type !== "compare"
+      (s) => s.type !== "compare"
     );
-    this.annotationTool.addGlobalShape(this.annotationTool.serialize([shape])[0]);
+    this.annotationTool.addGlobalShape(
+      this.annotationTool.serialize([shape])[0]
+    );
   }
 
   drawDelimiter(shape: ICompare) {
@@ -94,7 +98,9 @@ export class CompareToolPlugin
   draw(shape: ICompare) {
     const video1 = this.annotationTool.videoElement;
     const video2 = this.annotationTool.referenceVideoElement;
-
+    if (!video1 || !video2) {
+      return;
+    }
     this.annotationTool.syncTime();
 
     const globalAlpha = this.ctx.globalAlpha;
@@ -128,7 +134,6 @@ export class CompareToolPlugin
     const cropX = x; // The X coordinate of the vertical crop line
     const cropWidth1 = w - cropX;
     this.ctx.globalAlpha = this.rightOpacity;
-
 
     this.ctx.drawImage(
       video2,
