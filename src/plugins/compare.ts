@@ -43,6 +43,7 @@ export class CompareToolPlugin
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
+    this.annotationTool.syncTime(true);
     this.onPointerMove(event);
   }
   onPointerMove(event: PointerEvent) {
@@ -91,9 +92,11 @@ export class CompareToolPlugin
     this.annotationTool.globalShapes = this.annotationTool.globalShapes.filter(
       (s) => s.type !== "compare"
     );
-    this.annotationTool.addGlobalShape(
-      this.annotationTool.serialize([shape])[0]
-    );
+    const serialized = this.annotationTool.serialize([shape])[0] as ICompare;
+    if (serialized.x < 0.05 || serialized.x > 0.95) {
+      return;
+    }
+    this.annotationTool.addGlobalShape(serialized);
   }
 
   drawDelimiter(shape: ICompare) {
