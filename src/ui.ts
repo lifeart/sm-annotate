@@ -368,6 +368,12 @@ export function initUI(this: AnnotationTool) {
       this.redrawFullCanvas();
     });
 
+    const refVideo = (cb: (video: HTMLVideoElement) => void) => {
+      if (this.referenceVideoElement) {
+        cb(this.referenceVideoElement);
+      }
+    };
+
     // add onclick event to pause playback
     this.addEvent(document, "click", (event: PointerEvent) => {
       if (!isTargetBelongsToVideo(event)) {
@@ -387,6 +393,10 @@ export function initUI(this: AnnotationTool) {
       }
       this.currentTool = null;
       video.pause();
+      refVideo((v) => {
+        v.pause();
+      });
+
       requestAnimationFrame(() => {
         this.syncTime();
         this.redrawFullCanvas();
@@ -414,8 +424,18 @@ export function initUI(this: AnnotationTool) {
         event.stopPropagation();
         event.stopImmediatePropagation();
         if (video.paused) {
-          video.play();
+          refVideo((v) => {
+            v.play().then(() => {
+              this.syncTime();
+            })
+          });
+          video.play().then(() => {
+            this.syncTime();
+          })
         } else {
+          refVideo((v) => {
+            v.pause();
+          });
           video.pause();
           requestAnimationFrame(() => {
             this.syncTime();

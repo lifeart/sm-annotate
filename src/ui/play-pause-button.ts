@@ -35,11 +35,14 @@ export function createPlayPauseButton(
     if (video.paused) {
       refVideo((refVideo) => {
         if (refVideo.paused) {
-          refVideo.play();
-          tool.syncTime();
+          refVideo.play().then(() => {
+            tool.syncTime();
+          })
         }
       });
-      video.play();
+      video.play().then(() => {
+        tool.syncTime();
+      });
     } else {
       refVideo((refVideo) => {
         if (!refVideo.paused) {
