@@ -23,7 +23,7 @@ export class CompareToolPlugin
     this.leftOpacity = 0.7;
     this.rightOpacity = 0.7;
     this.annotationTool.canvas.style.cursor = "col-resize";
-    this.annotationTool.syncTime();
+    this.annotationTool.syncTime(true);
   }
   onDeactivate(): void {
     this.annotationTool.canvas.style.cursor = "default";
