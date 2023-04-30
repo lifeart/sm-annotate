@@ -427,10 +427,12 @@ export function initUI(this: AnnotationTool) {
           refVideo((v) => {
             v.play().then(() => {
               this.syncTime();
+              this.redrawFullCanvas();
             })
           });
           video.play().then(() => {
             this.syncTime();
+            this.redrawFullCanvas();
           })
         } else {
           refVideo((v) => {
