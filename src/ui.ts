@@ -226,12 +226,6 @@ export function initUI(this: AnnotationTool) {
     this.addEvent(video, "stalled", () => {
       this.hide();
     });
-    this.addEvent(video, "waiting", () => {
-      this.hide();
-    });
-    this.addEvent(video, "ended", () => {
-      this.hide();
-    });
     this.addEvent(video, "play", () => {
       this.hideControls();
       this.startAnnotationsAsVideo();
