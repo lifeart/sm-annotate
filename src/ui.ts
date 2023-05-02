@@ -1,4 +1,10 @@
 import { AnnotationTool } from "./core";
+import { onDocumentClick } from "./events/document-click";
+import { onDocumentCopy } from "./events/document-copy";
+import { onDocumentCut } from "./events/document-cut";
+import { onDocumentKeydown } from "./events/document-keydown";
+import { onDocumentPaste } from "./events/document-paste";
+import { isTargetBelongsToVideo } from "./events/utils";
 import { createDownloadCurrentFrameButton } from "./ui/download-current-frame-button";
 import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
@@ -132,7 +138,6 @@ export function initUI(this: AnnotationTool) {
       },
       this.playerControlsContainer
     );
-    
 
     createPlayPauseButton(video, this);
 
@@ -193,7 +198,7 @@ export function initUI(this: AnnotationTool) {
   this.colorPicker = colorPicker;
   this.strokeSizePicker = strokeWidthSlider;
 
-  this.getButtonForTool('compare').style.display = 'none';
+  this.hideButton("compare");
 
   if (video) {
     this.hide();
@@ -233,218 +238,20 @@ export function initUI(this: AnnotationTool) {
       this.playAnnotationsAsVideo();
     });
 
-    const isTargetBelongsToVideo = (
-      event: PointerEvent | KeyboardEvent | ClipboardEvent
-    ) => {
-      const isBody = event.target === document.body;
-      const isTool = this.uiContainer.contains(event.target as Node);
-      const isControl = this.playerControlsContainer.contains(
-        event.target as Node
-      );
-      const isVideo = this.videoElement.contains(event.target as Node);
-      const isCanvas = this.canvas.contains(event.target as Node);
-      return isTool || isControl || isVideo || isCanvas || isBody;
-    };
-
     this.addEvent(document, "copy", (event: ClipboardEvent) => {
-      if (!isTargetBelongsToVideo(event)) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      event.clipboardData?.setData(
-        "application/json",
-        JSON.stringify(this.saveCurrentFrame())
-      );
+      onDocumentCopy(event, this);
     });
     this.addEvent(document, "cut", (event: ClipboardEvent) => {
-      if (!isTargetBelongsToVideo(event)) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-
-      const data = this.saveCurrentFrame();
-      this.replaceFrame(this.playbackFrame, []);
-      this.redrawFullCanvas();
-      event.clipboardData?.setData("application/json", JSON.stringify(data));
+      onDocumentCut(event, this);
     });
     this.addEvent(document, "paste", (event: ClipboardEvent) => {
-      if (!isTargetBelongsToVideo(event)) {
-        return;
-      }
-
-      const dataTypes = event.clipboardData?.types ?? [];
-      console.log("dataTypes", JSON.stringify(dataTypes));
-      if (dataTypes.includes("application/json")) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-      } else if (dataTypes.includes("Files")) {
-        const files = event.clipboardData?.files;
-        if (files && files.length > 0) {
-          const file = files[0];
-          if (file.type.startsWith("image/")) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            const img = new Image();
-            img.addEventListener("load", () => {
-              const imageRatio = img.naturalWidth / img.naturalHeight;
-              const pasteWidth = 0.25;
-              const pasteHeight = (pasteWidth / imageRatio) * this.aspectRatio;
-              this.addShapesToFrame(this.playbackFrame, [
-                {
-                  type: "image",
-                  image: img,
-                  x: 0,
-                  y: 0,
-                  width: pasteWidth,
-                  height: pasteHeight,
-                  strokeStyle: "red",
-                  fillStyle: "red",
-                  lineWidth: 2,
-                },
-              ]);
-              this.redrawFullCanvas();
-              requestAnimationFrame(() => {
-                this.show();
-              })
-              this.currentTool = 'move';
-            }, {
-              once: true
-            });
-
-            img.src = URL.createObjectURL(file);
-            this.redrawFullCanvas();
-          }
-        }
-      } else if (dataTypes.includes("text/plain")) {
-        const text = event.clipboardData?.getData("text/plain");
-        if (text) {
-          console.log("text", text);
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          this.addShapesToFrame(this.playbackFrame, [
-            {
-              type: "text",
-              text,
-              x: 0.4,
-              y: 0.4,
-              strokeStyle: this.ctx.strokeStyle,
-              fillStyle: this.ctx.fillStyle,
-              lineWidth: this.ctx.lineWidth,
-            },
-          ]);
-          this.show();
-          this.currentTool = 'move';
-          this.redrawFullCanvas();
-        }
-
-      } else {
-        return;
-      }
-      const json = event.clipboardData?.getData("application/json");
-      if (!json) {
-        return;
-      }
-      const data = JSON.parse(json);
-      if (!data) {
-        return;
-      }
-      // check data for shapes
-      if (!data.shapes) {
-        return;
-      }
-      // check for version
-
-      if (data.version !== 1) {
-        return;
-      }
-      this.addShapesToFrame(this.playbackFrame, data.shapes);
-      this.redrawFullCanvas();
+      onDocumentPaste(event, this);
     });
-
-    const refVideo = (cb: (video: HTMLVideoElement) => void) => {
-      if (this.referenceVideoElement) {
-        cb(this.referenceVideoElement);
-      }
-    };
-
-    // add onclick event to pause playback
     this.addEvent(document, "click", (event: PointerEvent) => {
-      if (!isTargetBelongsToVideo(event)) {
-        return;
-      }
-
-      const isTool = this.uiContainer.contains(event.target as Node);
-      const isControl = this.playerControlsContainer.contains(
-        event.target as Node
-      );
-      if (isTool || isControl) {
-        return;
-      }
-
-      if (video.paused) {
-        return;
-      }
-      this.currentTool = null;
-      video.pause();
-      refVideo((v) => {
-        v.pause();
-      });
-
-      requestAnimationFrame(() => {
-        this.syncTime();
-        this.redrawFullCanvas();
-      });
+      onDocumentClick(event, this);
     });
-
-    // add event listener for frame by frame navigation from arrow keys
     this.addEvent(document, "keydown", (event: KeyboardEvent) => {
-      if (!isTargetBelongsToVideo(event)) {
-        return;
-      }
-
-      // space key to play/pause
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        if (event.key === "ArrowLeft") {
-          this.prevFrame();
-        } else if (event.key === "ArrowRight") {
-          this.nextFrame();
-        }
-      } else if (event.code === "Space") {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        if (video.paused) {
-          refVideo((v) => {
-            v.play().then(() => {
-              this.syncTime();
-              this.redrawFullCanvas();
-            })
-          });
-          video.play().then(() => {
-            this.syncTime();
-            this.redrawFullCanvas();
-          })
-        } else {
-          refVideo((v) => {
-            v.pause();
-          });
-          video.pause();
-          requestAnimationFrame(() => {
-            this.syncTime();
-            this.redrawFullCanvas();
-          });
-        }
-      }
+      onDocumentKeydown(event, this);
     });
   }
 }

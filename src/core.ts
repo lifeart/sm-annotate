@@ -1,17 +1,10 @@
 // https://codepen.io/lifeart/pen/xxyxKYr
 
+import { AnnotationToolBase } from "./base";
+import { isMultiTouch } from "./events/utils";
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-import {
-  ButtonEventNames,
-  ClipboardEventNames,
-  EventNames,
-  InputEventNames,
-  KeyboardEventNames,
-  PointerEventNames,
-  VideoEventNames,
-  WindowEventNames,
-} from "./ui/events";
+
 import { detectFrameRate } from "./utils/detect-framerate";
 
 // @todo
@@ -32,8 +25,7 @@ export type FrameAnnotationV1 = {
 };
 
 const DEFAULT_FPS = 25;
-
-export class AnnotationTool {
+export class AnnotationTool extends AnnotationToolBase<IShape> {
   videoElement!: HTMLVideoElement | HTMLImageElement;
   referenceVideoElement!: HTMLVideoElement | null;
   uiContainer!: HTMLDivElement;
@@ -42,16 +34,11 @@ export class AnnotationTool {
   ctx!: CanvasRenderingContext2D;
   isMouseDown = false;
   _currentTool!: Tool | null;
-  activeTimeFrame = 1;
   buttons: HTMLButtonElement[] = [];
   colorPicker!: HTMLInputElement;
   strokeSizePicker!: HTMLInputElement;
-  destructors: (() => void)[] = [];
   plugins: PluginInstances[] = [];
-  isDestroyed = false;
-  globalShapes: IShape[] = [];
-  timeStack = new Map<number, IShape[]>(); // timeFrame -> shapes
-  undoTimeStack = new Map<number, IShape[][]>(); // timeFrame -> shapes
+  
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
   prevFrame() {
@@ -60,6 +47,14 @@ export class AnnotationTool {
     const activeTimeFrame = this.activeTimeFrame;
     const newFrame = Math.max(1, activeTimeFrame - 1);
     this.playbackFrame = newFrame;
+  }
+  withRefVideo(cb: (video: HTMLVideoElement) => void) {
+    if (this.isDestroyed) {
+      return;
+    }
+    if (this.referenceVideoElement) {
+      cb(this.referenceVideoElement);
+    }
   }
   nextFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
@@ -75,7 +70,6 @@ export class AnnotationTool {
   addGlobalShape(shape: IShape) {
     this.globalShapes.push(shape);
   }
-
   get selectedColor() {
     return this.colorPicker.value;
   }
@@ -150,10 +144,6 @@ export class AnnotationTool {
     const width = progressBarWidth;
     return { x, y, width, height };
   }
-
-  get videoClientRect() {
-    return this.videoElement.getBoundingClientRect();
-  }
   get shapes() {
     if (!this.timeStack.has(this.activeTimeFrame)) {
       this.timeStack.set(this.activeTimeFrame, []);
@@ -163,7 +153,6 @@ export class AnnotationTool {
   set shapes(shapes: IShape[]) {
     this.timeStack.set(this.activeTimeFrame, shapes);
   }
-
   get undoStack() {
     if (!this.undoTimeStack.has(this.activeTimeFrame)) {
       this.undoTimeStack.set(this.activeTimeFrame, []);
@@ -178,6 +167,7 @@ export class AnnotationTool {
   }
 
   constructor(videoElement: HTMLVideoElement | HTMLImageElement) {
+    super();
     this.plugins = plugins.map((Plugin) => new Plugin(this));
     this.init(videoElement);
   }
@@ -242,98 +232,24 @@ export class AnnotationTool {
   initProperties() {
     this.isDestroyed = false;
     this.isProgressBarNavigation = false;
-    this.currentTool = null;
     this.shapes = [];
     this.globalShapes = [];
+    this.currentTool = this.isMobile ? null : "curve";
+  }
+
+  setVideoStyles() {
+    this.videoElement.style.objectFit = "cover";
+    this.videoElement.style.objectPosition = "left top";
   }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
     this.videoElement = videoElement;
-    this.videoElement.style.objectFit = "cover";
-    this.videoElement.style.objectPosition = "left top";
+    this.setVideoStyles();
     this.bindContext();
     this.initCanvas();
     this.initUI();
     this.initProperties();
     this.setCanvasSize();
-    this.fillCanvas();
-    this.setCanvasSettings();
-    this.currentTool = this.isMobile ? null : "curve";
-  }
-  addEvent(
-    node: HTMLInputElement,
-    event: InputEventNames,
-    callback: (e: Event) => void
-  ): void;
-  addEvent(
-    node: typeof document,
-    event: ClipboardEventNames,
-    callback: (e: ClipboardEvent) => void
-  ): void;
-  addEvent(
-    node: typeof document,
-    event: ButtonEventNames,
-    callback: (e: PointerEvent) => void
-  ): void;
-  addEvent(
-    node: HTMLVideoElement,
-    event: VideoEventNames,
-    callback: (e: Event) => void
-  ): void;
-  addEvent(
-    node: HTMLVideoElement,
-    event: KeyboardEventNames,
-    callback: (e: KeyboardEvent) => void
-  ): void;
-  addEvent(
-    node: HTMLButtonElement,
-    event: ButtonEventNames,
-    callback: (e: Event) => void
-  ): void;
-  addEvent(
-    node: HTMLCanvasElement,
-    event: PointerEventNames,
-    callback: (e: PointerEvent) => void
-  ): void;
-  addEvent(
-    node: typeof document,
-    event: KeyboardEventNames,
-    callback: (e: KeyboardEvent) => void
-  ): void;
-  addEvent(
-    node: typeof window,
-    event: WindowEventNames,
-    callback: (e: Event) => void
-  ): void;
-  addEvent(
-    node:
-      | HTMLInputElement
-      | HTMLVideoElement
-      | HTMLCanvasElement
-      | HTMLButtonElement
-      | typeof document
-      | typeof window,
-    event: EventNames,
-    callback:
-      | ((e: PointerEvent) => void)
-      | ((e: KeyboardEvent) => void)
-      | ((e: Event) => void)
-      | ((e: ClipboardEvent) => void)
-  ) {
-    type EventArgs = Parameters<typeof callback>;
-    const safeCallback = (e: EventArgs[0]) => {
-      if (this.isDestroyed) return;
-      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent);
-    };
-
-    node.addEventListener(event, safeCallback);
-    this.destructors.push(() => {
-      node.removeEventListener(event, safeCallback);
-    });
-  }
-
-  initCanvas() {
-    throw new Error("Method not implemented.");
   }
 
   onKeyDown(event: KeyboardEvent) {
@@ -357,16 +273,13 @@ export class AnnotationTool {
   destroy() {
     if (this.isDestroyed) return;
 
-    this.destructors.forEach((destructor) => destructor());
+    super.destroy();
     this.stopAnnotationsAsVideo();
-    this.destructors = [];
-    this.globalShapes = [];
-
+    
     this._currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
     this.setFrameRate(DEFAULT_FPS);
-    this.cleanFrameStacks();
 
     // remove stroke
     const wrapper = this.strokeSizePicker.parentElement;
@@ -417,7 +330,7 @@ export class AnnotationTool {
   }
 
   setCanvasSize() {
-    const videoOffset = this.videoClientRect;
+    const videoOffset = this.videoElement.getBoundingClientRect();
     this.canvas.width = videoOffset.width * this.pixelRatio;
     this.canvas.height = videoOffset.height * this.pixelRatio;
     this.canvas.style.width = `${videoOffset.width}px`;
@@ -426,10 +339,6 @@ export class AnnotationTool {
     this.redrawFullCanvas();
     this.setCanvasSettings();
     this.syncVideoSizes();
-  }
-
-  isMultiTouch(event: PointerEvent) {
-    return event.pointerType === "touch" && event.isPrimary === false;
   }
 
   addShape(shape: IShape) {
@@ -443,21 +352,18 @@ export class AnnotationTool {
     if (!video || video.tagName !== "VIDEO") {
       return;
     }
-    if (!this.referenceVideoElement) {
-      return;
-    }
-    if (this.referenceVideoElement.readyState < 4) {
-      return;
-    }
-    if (!force && !this.globalShapes.length) {
-      return;
-    }
-    const diff = Math.abs(
-      this.referenceVideoElement.currentTime - video.currentTime
-    );
-    if (diff >= this.msPerFrame / 3) {
-      this.referenceVideoElement.currentTime = video.currentTime;
-    }
+    this.withRefVideo((refVideo) => {
+      if (refVideo.readyState < 4) {
+        return;
+      }
+      if (!force && !this.globalShapes.length) {
+        return;
+      }
+      const diff = Math.abs(refVideo.currentTime - video.currentTime);
+      if (diff >= this.msPerFrame / 3) {
+        refVideo.currentTime = video.currentTime;
+      }
+    });
   }
 
   get msPerFrame() {
@@ -465,21 +371,16 @@ export class AnnotationTool {
   }
 
   syncVideoSizes() {
-    if (!this.referenceVideoElement) {
-      return;
-    }
-    const video = this.videoElement;
-
-    const videoPosition = video.getBoundingClientRect();
-    this.referenceVideoElement.style.position = "fixed";
-    this.referenceVideoElement.style.top = `${videoPosition.top}px`;
-    this.referenceVideoElement.style.left = `${videoPosition.left}px`;
-    // const s = getComputedStyle(video);
-    // this.referenceVideoElement.style.width = s.width;
-    // this.referenceVideoElement.style.height = s.height;
+    this.withRefVideo((refVideo) => {
+      const video = this.videoElement;
+      const videoPosition = video.getBoundingClientRect();
+      refVideo.style.position = "fixed";
+      refVideo.style.top = `${videoPosition.top}px`;
+      refVideo.style.left = `${videoPosition.left}px`;
+    });
   }
 
-  async addReferenceVideoByURL(url: string) {
+  async addReferenceVideoByURL(url: string | URL) {
     const blob = await fetch(url).then((r) => r.blob());
 
     const blobs = new Blob([blob], { type: "video/mp4" });
@@ -488,20 +389,31 @@ export class AnnotationTool {
 
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
-      this.referenceVideoElement.style.zIndex = `-1`;
-      this.referenceVideoElement.style.display = "none";
-      this.referenceVideoElement.style.objectFit = "cover";
-      this.referenceVideoElement.style.objectPosition = "left top";
-      this.referenceVideoElement.muted = true;
-      this.referenceVideoElement.playsInline = true;
-      this.referenceVideoElement.autoplay = false;
-      this.referenceVideoElement.controls = false;
-      this.referenceVideoElement.loop = true;
-      this.videoElement.after(this.referenceVideoElement);
+      this.withRefVideo((refVideo) => {
+        refVideo.style.zIndex = `-1`;
+        refVideo.style.display = "none";
+        refVideo.style.objectFit = "cover";
+        refVideo.style.objectPosition = "left top";
+        refVideo.muted = true;
+        refVideo.playsInline = true;
+        refVideo.autoplay = false;
+        refVideo.controls = false;
+        refVideo.loop = true;
+        this.videoElement.after(refVideo);
+      });
       this.syncVideoSizes();
     }
     this.referenceVideoElement.src = mediaUrl;
-    this.getButtonForTool('compare').style.display = '';
+    this.showButton("compare");
+  }
+
+  hideButton(tool: Tool) {
+    const button = this.getButtonForTool(tool);
+    button.style.display = "none";
+  }
+  showButton(tool: Tool) {
+    const button = this.getButtonForTool(tool);
+    button.style.display = "";
   }
 
   addSingletonShape(shape: IShape) {
@@ -540,7 +452,7 @@ export class AnnotationTool {
   handleMouseDown(event: PointerEvent) {
     event.preventDefault();
     this.isMouseDown = true;
-    if (this.isMultiTouch(event)) return;
+    if (isMultiTouch(event)) return;
 
     const genericFrame = this.frameFromProgressBar(event, true);
     if (genericFrame) {
@@ -582,7 +494,7 @@ export class AnnotationTool {
   handleMouseMove(event: PointerEvent) {
     event.preventDefault();
 
-    if (this.isMultiTouch(event)) return;
+    if (isMultiTouch(event)) return;
 
     if (this.isMouseDown) {
       const maybeFrame = this.isProgressBarNavigation
@@ -624,7 +536,7 @@ export class AnnotationTool {
     this.isProgressBarNavigation = false;
 
     this.showControls();
-    if (this.isMultiTouch(event)) return;
+    if (isMultiTouch(event)) return;
 
     if (this.currentTool) {
       this.pluginForTool(this.currentTool).onPointerUp(event);
@@ -756,19 +668,6 @@ export class AnnotationTool {
     };
   }
 
-  addFrameSquareOverlay(_ = this.activeTimeFrame) {
-    throw new Error("Method not implemented.");
-  }
-
-  addVideoOverlay() {
-    throw new Error("Method not implemented.");
-  }
-
-  cleanFrameStacks() {
-    this.timeStack.clear();
-    this.undoTimeStack.clear();
-  }
-
   loadAllFrames(frames: FrameAnnotationV1[]) {
     this.cleanFrameStacks();
     frames.forEach((frame) => {
@@ -844,14 +743,6 @@ export class AnnotationTool {
       return null;
     }
   }
-  addProgressBarOverlay() {
-    throw new Error("Method not implemented.");
-  }
-
-  initUI() {
-    throw new Error("Method not implemented.");
-  }
-
   stopAnnotationsAsVideo() {
     clearTimeout(this.playTimeout);
   }
@@ -879,18 +770,11 @@ export class AnnotationTool {
       this.hideCanvas();
     }
     const nextFrameDelay = 1000 / this.fps;
-    requestAnimationFrame(() => {
+    this.raf(() => {
       this.syncTime();
     });
     this.playTimeout = window.setTimeout(() => {
       this.playAnnotationsAsVideo();
     }, nextFrameDelay) as number & ReturnType<typeof window.setTimeout>;
-  }
-
-  fillCanvas() {
-    // this.ctx.save();
-    // this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
-    // this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    // this.ctx.restore();
   }
 }

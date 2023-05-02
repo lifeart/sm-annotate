@@ -1,4 +1,4 @@
-import { AnnotationTool } from "../core";
+import type { AnnotationTool } from "../core";
 
 export function addFrameSquareOverlay(
   this: AnnotationTool,

@@ -15,12 +15,6 @@ export function createPlayPauseButton(
   button.innerHTML = playIcon;
   button.style.margin = "5px";
 
-  const refVideo = function (cb: (video: HTMLVideoElement) => void) {
-    if (tool.referenceVideoElement) {
-      cb(tool.referenceVideoElement);
-    }
-  };
-
   tool.addEvent(video, "play", () => {
     button.innerHTML = pauseIcon;
     // tool.syncTime();
@@ -33,24 +27,24 @@ export function createPlayPauseButton(
 
   tool.addEvent(button, "click", () => {
     if (video.paused) {
-      refVideo((refVideo) => {
+      tool.withRefVideo((refVideo) => {
         if (refVideo.paused) {
           refVideo.play().then(() => {
             tool.syncTime();
-          })
+          });
         }
       });
       video.play().then(() => {
         tool.syncTime();
       });
     } else {
-      refVideo((refVideo) => {
+      tool.withRefVideo((refVideo) => {
         if (!refVideo.paused) {
           refVideo.pause();
         }
       });
       video.pause();
-      requestAnimationFrame(() => {
+      tool.raf(() => {
         tool.syncTime();
         tool.redrawFullCanvas();
       });

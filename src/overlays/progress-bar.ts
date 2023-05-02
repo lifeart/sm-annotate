@@ -1,4 +1,4 @@
-import { AnnotationTool } from "../core";
+import type { AnnotationTool } from "../core";
 
 export function addProgressBarOverlay(this: AnnotationTool) {
   const node = this.videoElement as HTMLVideoElement;
