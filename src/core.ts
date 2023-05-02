@@ -7,6 +7,71 @@ import { ToolPlugin } from "./plugins/base";
 
 import { detectFrameRate } from "./utils/detect-framerate";
 
+type VideoFrameCallbackMeta = {
+  expectedDisplayTime: number;
+  width: number;
+  height: number;
+  mediaTime: number;
+  presentationTime: number;
+  presentedFrames: number;
+  processingDuration: number;
+}
+
+
+class FrameSyncBucket {
+  promise!: Promise<any>;
+  resolve!: (value: any) => void;
+  reject!: (reason?: any) => void;
+  timeout!: number;
+  constructor() {
+    this.init();
+  }
+  release(time: number | undefined) {
+    clearTimeout(this.timeout);
+    if (time !== undefined) {
+      const now = performance.now();
+      const delay = time - now;
+      if (delay > 0) {
+        this.timeout = setTimeout(() => {
+          this.resolve(true);
+        }, delay);
+      } else {
+        this.resolve(true);
+      }
+    } else {
+      this.resolve(true);
+    }
+  }
+  init() {
+    clearTimeout(this.timeout);
+    if (this.resolve) {
+      this.resolve(true);
+    }
+    let resolve: (value: any) => void;
+    let reject: (reason?: any) => void;
+    let isResolved = false;
+    let t2!: number;
+    const p = new Promise((res, rej) => {
+      resolve = (v) => {
+        clearTimeout(t2);
+        if (isResolved) {
+          return;
+        }
+        isResolved = true;
+        res(v);
+        this.init();
+      }
+      reject = rej;
+    });
+    this.promise = p;
+    this.resolve = resolve!;
+    this.reject = reject!;
+    t2 = setTimeout(() => {
+      this.resolve(true);
+    }, 16);
+  }
+}
+
 // @todo
 // - [ ] video may be resized not only on window resize
 // - [ ] reset draw state on tool change
@@ -26,8 +91,6 @@ export type FrameAnnotationV1 = {
 
 const DEFAULT_FPS = 25;
 export class AnnotationTool extends AnnotationToolBase<IShape> {
-  videoElement!: HTMLVideoElement | HTMLImageElement;
-  referenceVideoElement!: HTMLVideoElement | null;
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
   canvas!: HTMLCanvasElement;
@@ -38,7 +101,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   colorPicker!: HTMLInputElement;
   strokeSizePicker!: HTMLInputElement;
   plugins: PluginInstances[] = [];
-  
+  frameSyncBucket = new FrameSyncBucket();
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
   prevFrame() {
@@ -48,14 +111,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const newFrame = Math.max(1, activeTimeFrame - 1);
     this.playbackFrame = newFrame;
   }
-  withRefVideo(cb: (video: HTMLVideoElement) => void) {
-    if (this.isDestroyed) {
-      return;
-    }
-    if (this.referenceVideoElement) {
-      cb(this.referenceVideoElement);
-    }
-  }
+
   nextFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -190,12 +246,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.canvas.style.display = "none";
   }
 
-  show() {
+  async show() {
     this.stopAnnotationsAsVideo();
     this.activeTimeFrame = this.playbackFrame;
     this.showCanvas();
     this.showControls();
-    this.redrawFullCanvas();
+    await this.redrawFullCanvas();
   }
 
   setCanvasSettings() {
@@ -241,10 +297,32 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.videoElement.style.objectFit = "cover";
     this.videoElement.style.objectPosition = "left top";
   }
+  
+  get frameCallbackSupported() {
+    return 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+  }
+  
+  initFrameCounter() {
+    if (!this.frameCallbackSupported) return;
+    this.videoElement.requestVideoFrameCallback((_: number, metadata1: VideoFrameCallbackMeta) => {
+      this.initFrameCounter();
+      this.withRefVideo((video) => {
+        video.currentTime = metadata1.mediaTime;
+        video.requestVideoFrameCallback((_: number, metadata2: VideoFrameCallbackMeta) => {
+          this.frameSyncBucket.release(Math.max(metadata1.presentationTime, metadata2.presentationTime));
+        });
+      });
+    });
+  }
+
+  waitForFrameSync() {
+    return this.frameSyncBucket.promise;
+  }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
     this.videoElement = videoElement;
     this.setVideoStyles();
+    this.initFrameCounter();
     this.bindContext();
     this.initCanvas();
     this.initUI();
@@ -258,15 +336,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
-  removeLastShape() {
+  async removeLastShape() {
     this.shapes.pop();
-    this.redrawFullCanvas();
+    await this.redrawFullCanvas();
   }
 
-  handleUndo() {
+  async handleUndo() {
     if (this.undoStack.length > 0) {
       this.shapes = this.undoStack.pop() as IShape[];
-      this.redrawFullCanvas();
+      await this.redrawFullCanvas();
     }
   }
 
@@ -329,14 +407,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.isDestroyed = true;
   }
 
-  setCanvasSize() {
+  async setCanvasSize() {
     const videoOffset = this.videoElement.getBoundingClientRect();
     this.canvas.width = videoOffset.width * this.pixelRatio;
     this.canvas.height = videoOffset.height * this.pixelRatio;
     this.canvas.style.width = `${videoOffset.width}px`;
     this.canvas.style.height = `${videoOffset.height}px`;
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
-    this.redrawFullCanvas();
+    await this.redrawFullCanvas();
     this.setCanvasSettings();
     this.syncVideoSizes();
   }
@@ -347,11 +425,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.shapes.push(serializedShape);
   }
 
-  syncTime(force = false) {
+  syncTime(force = false, newTime: null | number = null) {
     const video = this.videoElement as HTMLVideoElement;
     if (!video || video.tagName !== "VIDEO") {
       return;
     }
+    const currentTime = newTime === null ? video.currentTime : newTime;
     this.withRefVideo((refVideo) => {
       if (refVideo.readyState < 4) {
         return;
@@ -359,9 +438,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       if (!force && !this.globalShapes.length) {
         return;
       }
-      const diff = Math.abs(refVideo.currentTime - video.currentTime);
+      const diff = Math.abs(refVideo.currentTime - currentTime);
       if (diff >= this.msPerFrame / 3) {
-        refVideo.currentTime = video.currentTime;
+        refVideo.currentTime = currentTime;
       }
     });
   }
@@ -491,7 +570,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return true;
   }
 
-  handleMouseMove(event: PointerEvent) {
+  async handleMouseMove(event: PointerEvent) {
     event.preventDefault();
 
     if (isMultiTouch(event)) return;
@@ -513,10 +592,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         this.hideControls();
         this.clearCanvas();
         this.addVideoOverlay();
-        this.drawShapesOverlay();
+        await this.drawShapesOverlay();
       }
     } else {
-      this.redrawFullCanvas();
+      await this.redrawFullCanvas();
     }
 
     if (this.currentTool) {
@@ -531,7 +610,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return event.clientY;
   }
 
-  handleMouseUp(event: PointerEvent) {
+  async handleMouseUp(event: PointerEvent) {
     this.isMouseDown = false;
     this.isProgressBarNavigation = false;
 
@@ -542,42 +621,42 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.pluginForTool(this.currentTool).onPointerUp(event);
     }
 
-    this.redrawFullCanvas();
+    await this.redrawFullCanvas();
   }
 
   focusOnMediaNode() {
     this.videoElement.focus();
   }
 
-  drawShapesOverlay() {
+  async drawShapesOverlay() {
     const prevSettings = {
       strokeStyle: this.ctx.strokeStyle,
       fillStyle: this.ctx.fillStyle,
       lineWidth: this.ctx.lineWidth,
     };
 
-    this.deserialize(this.globalShapes).forEach((shape) => {
+    for (let shape of this.deserialize(this.globalShapes)) {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
       try {
-        this.pluginForTool(shape.type).draw(shape);
+        await this.pluginForTool(shape.type).draw(shape);
       } catch (e) {
         console.error(e);
       }
-    });
+    }
 
-    this.deserialize(this.shapes).forEach((shape) => {
+    for (let shape of this.deserialize(this.shapes)) {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
 
       try {
-        this.pluginForTool(shape.type).draw(shape);
+        await this.pluginForTool(shape.type).draw(shape);
       } catch (e) {
         console.error(e);
       }
-    });
+    }
 
     this.ctx.strokeStyle = prevSettings.strokeStyle;
     this.ctx.fillStyle = prevSettings.fillStyle;
@@ -588,14 +667,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
-  frameToDataUrl() {
+  async frameToDataUrl() {
     try {
       this.clearCanvas();
       this.addVideoOverlay();
       this.addFrameSquareOverlay();
-      this.drawShapesOverlay();
+      await this.drawShapesOverlay();
       const data = this.canvas.toDataURL("image/png");
-      this.redrawFullCanvas();
+      await this.redrawFullCanvas();
       return data;
     } catch (e) {
       console.error(e);
@@ -603,10 +682,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
-  redrawFullCanvas() {
+  async redrawFullCanvas() {
     this.clearCanvas();
     this.addVideoOverlay();
-    this.drawShapesOverlay();
+    await this.drawShapesOverlay();
     this.addFrameSquareOverlay();
     this.addProgressBarOverlay();
   }
@@ -743,9 +822,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       return null;
     }
   }
-  stopAnnotationsAsVideo() {
-    clearTimeout(this.playTimeout);
-  }
+
   hasAnnotationsForFrame(frame: number) {
     if (this.globalShapes.length > 0) {
       return true;
@@ -756,8 +833,19 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
     return false;
   }
-  playAnnotationsAsVideo() {
-    this.stopAnnotationsAsVideo();
+  isAnnotationsAsVideoActive = false;
+  stopAnnotationsAsVideo() {
+    this.isAnnotationsAsVideoActive = false;
+  }
+  startAnnotationsAsVideo() {
+    this.isAnnotationsAsVideoActive = true;
+    this.playAnnotationsAsVideo();
+  }
+  async playAnnotationsAsVideo() {
+    if (!this.isAnnotationsAsVideoActive) {
+      return;
+    }
+    
     const currentVideFrame = this.playbackFrame;
 
     if (this.hasAnnotationsForFrame(currentVideFrame)) {
@@ -765,16 +853,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.activeTimeFrame = currentVideFrame;
       this.syncTime();
       this.clearCanvas();
-      this.drawShapesOverlay();
+      await this.drawShapesOverlay();
     } else {
       this.hideCanvas();
     }
-    const nextFrameDelay = 1000 / this.fps;
     this.raf(() => {
       this.syncTime();
     });
-    this.playTimeout = window.setTimeout(() => {
+    this.waitForFrameSync().then(() => {
       this.playAnnotationsAsVideo();
-    }, nextFrameDelay) as number & ReturnType<typeof window.setTimeout>;
+    });
   }
 }

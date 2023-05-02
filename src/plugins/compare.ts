@@ -106,21 +106,18 @@ export class CompareToolPlugin
     this.ctx.stroke();
   }
 
-  draw(shape: ICompare) {
+  async draw(shape: ICompare) {
     const video1 = this.annotationTool.videoElement as HTMLVideoElement;
-
-    // if (video1.tagName === "VIDEO") {
-    //     const style = window.getComputedStyle(video1);
-    //     console.log(video1.videoWidth);
-    //     console.log(parseInt(style.getPropertyValue('width')));
-    //     console.log(this.annotationTool.canvasWidth);
-    // }
-
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {
       return;
     }
+    const bothPaused = video1.paused && video2.paused;
     this.annotationTool.syncTime();
+
+    if (!bothPaused) {
+      await this.annotationTool.waitForFrameSync();
+    }
 
     const globalAlpha = this.ctx.globalAlpha;
     const w = this.annotationTool.canvasWidth;

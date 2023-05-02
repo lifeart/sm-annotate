@@ -26,7 +26,7 @@ export function onDocumentClick(event: PointerEvent, tool: SmAnnotate) {
     v.pause();
   });
 
-  tool.raf(() => {
+  tool.raf(async () => {
     tool.syncTime();
     tool.redrawFullCanvas();
   });
