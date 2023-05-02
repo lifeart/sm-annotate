@@ -4,20 +4,7 @@ import { AnnotationToolBase } from "./base";
 import { isMultiTouch } from "./events/utils";
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-
 import { detectFrameRate } from "./utils/detect-framerate";
-
-type VideoFrameCallbackMeta = {
-  expectedDisplayTime: number;
-  width: number;
-  height: number;
-  mediaTime: number;
-  presentationTime: number;
-  presentedFrames: number;
-  processingDuration: number;
-}
-
-
 class FrameSyncBucket {
   promise!: Promise<any>;
   resolve!: (value: any) => void;
@@ -26,7 +13,7 @@ class FrameSyncBucket {
   constructor() {
     this.init();
   }
-  release(time: number | undefined) {
+  release(time: number | undefined = undefined) {
     clearTimeout(this.timeout);
     if (time !== undefined) {
       const now = performance.now();
@@ -118,7 +105,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     // may float +-1 frame
     const activeTimeFrame = this.activeTimeFrame;
     const newFrame = Math.max(1, activeTimeFrame - 1);
-    this.playbackFrame = newFrame;
+    if (newFrame === this.playbackFrame) {
+      this.playbackFrame = this.totalFrames;
+    } else {
+      this.playbackFrame = newFrame;
+    }
   }
 
   nextFrame() {
@@ -126,10 +117,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     // may float +-1 frame
     const activeTimeFrame = this.activeTimeFrame;
     const newFrame = Math.min(
-      (this.videoElement as HTMLVideoElement).duration * this.fps,
+      this.totalFrames,
       activeTimeFrame + 1
     );
-    this.playbackFrame = newFrame;
+
+    if (newFrame === this.totalFrames) {
+      this.playbackFrame = 1;
+    } else {
+      this.playbackFrame = newFrame;
+    }
   }
 
   addGlobalShape(shape: IShape) {
@@ -314,32 +310,85 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   get frameCallbackSupported() {
     return 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
   }
+
+  ct = 0;
   
   initFrameCounter() {
-    if (!this.frameCallbackSupported) return;
-    this.videoElement.requestVideoFrameCallback((_: number, metadata1: VideoFrameCallbackMeta) => {
+    if (!this.frameCallbackSupported) {
+      setTimeout(() => {
+        this.updateActiveTimeFrame();
+        this.frameSyncBucket.release();
+        this.initFrameCounter();
+      } , 1000 / this.fps);
+      return;
+    }
 
-      this.withRefVideo((video) => {
-        // video.currentTime = metadata1.mediaTime;
-        video.requestVideoFrameCallback((_: number, metadata2: VideoFrameCallbackMeta) => {
-          if (metadata1.mediaTime !== metadata2.mediaTime) {
-            if (metadata2.mediaTime > metadata1.mediaTime) {
-              video.currentTime = this.videoElement.currentTime;
-            } else {
-              video.currentTime = this.videoElement.currentTime + (1 / this.fps);
-            }
-          } else {
-            this.updateActiveTimeFrame();
-            this.frameSyncBucket.release(Math.max(metadata1.expectedDisplayTime, metadata2.expectedDisplayTime));
+    let syncPromise = new Promise(async (resolve) => {
+    const [metadata1, metadata2]: VideoFrameCallbackMetadata[] = await Promise.all([
+        new Promise((r1) => {
+          this.withVideo((video) => {
+            video.requestVideoFrameCallback((_: number, metadata) => {
+              r1(metadata);
+            })
+          })
+        }),
+        new Promise((r2) => {
+          this.withRefVideo((video) => {
+            video.requestVideoFrameCallback((_: number, metadata) => {
+              r2(metadata);
+            })
+          });
+          if (!this.referenceVideoElement) {
+            r2({ mediaTime: 0 });
           }
-        });
-      });
-      this.initFrameCounter();
+        })
+      ]);
+
       if (!this.referenceVideoElement) {
         this.updateActiveTimeFrame();
         this.frameSyncBucket.release(metadata1.expectedDisplayTime);
+        return resolve(true);
       }
+
+      const video = this.videoElement;
+      const mainVideo = this.referenceVideoElement;
+
+      const fSyncDiff = metadata2.mediaTime - metadata1.mediaTime;
+      const frameTime = 1 / this.fps;
+      if (metadata1.mediaTime !== metadata2.mediaTime) {
+        if (fSyncDiff > 0) {
+          this.ct++;
+          console.log('frame sync >', fSyncDiff, frameTime, this.ct);
+          if (this.ct > 10) {
+            video.currentTime = Math.max(metadata1.mediaTime, metadata2.mediaTime);
+          } else if (this.ct >= 3) {
+            video.currentTime = mainVideo.currentTime - fSyncDiff;
+          } else if (this.ct < 3 && this.ct > 0) {
+            video.currentTime = mainVideo.currentTime + frameTime;
+          } else {
+            video.currentTime = mainVideo.currentTime;
+          }
+        } else {
+          this.ct--;
+          console.log('frame sync <', fSyncDiff, frameTime, this.ct);
+          if (this.ct < -10) {
+            video.currentTime = Math.max(metadata2.mediaTime, metadata1.mediaTime);
+          } else {
+            video.currentTime = mainVideo.currentTime + frameTime + Math.abs(fSyncDiff);
+          }
+        }
+        this.updateActiveTimeFrame();
+      } else {
+        this.ct = 0;
+        this.updateActiveTimeFrame();
+        this.frameSyncBucket.release(Math.max(metadata1.expectedDisplayTime, metadata2.expectedDisplayTime));
+      }
+      resolve(true);
+      this.initFrameCounter();
+
     });
+
+    return syncPromise;
   }
 
   waitForFrameSync() {
@@ -832,6 +881,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         );
       })?.frame ?? null;
     return frame;
+  }
+
+  get totalFrames() {
+    const node = this.videoElement as HTMLVideoElement;
+    if (node.tagName !== "VIDEO") {
+      return 1;
+    }
+    return Math.ceil(node.duration * this.fps);
   }
 
   frameFromProgressBar(event: PointerEvent, countY: boolean = true) {
