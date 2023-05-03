@@ -25,7 +25,6 @@ export class CompareToolPlugin
     this.leftOpacity = 1;
     this.rightOpacity = ACTIVE_OPACITY;
     this.annotationTool.canvas.style.cursor = "col-resize";
-    this.annotationTool.syncTime(true);
   }
   onDeactivate(): void {
     this.annotationTool.canvas.style.cursor = "default";
@@ -45,7 +44,6 @@ export class CompareToolPlugin
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
-    this.annotationTool.syncTime(true);
     this.onPointerMove(event);
   }
   onPointerMove(event: PointerEvent) {
@@ -72,9 +70,7 @@ export class CompareToolPlugin
       x: x,
     } as ICompare;
 
-    this.draw(item).then(() => {
-      this.drawDelimiter(item);
-    });
+    this.draw(item);
     this.drawDelimiter(item);
   }
   onPointerUp() {
@@ -159,43 +155,57 @@ export class CompareToolPlugin
     // this.ctx.filter = "contrast(140%) blur(1px)";
 
     const cropX = x; // The X coordinate of the vertical crop line
-   
     const cropWidth1 = (w - cropX);
     const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
-    this.ctx.drawImage(
-      video2,
-      (cropX / w) * video1.videoWidth,
-      0,
-      normalizedCrop,
-      video1.videoHeight, // Source cropping parameters
-      cropX,
-      0,
-      cropWidth1,
-      h // Destination position and size
-    );
+    const frameNumber = this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(video1.currentTime);
+    const videoFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrame(frameNumber || 0);
+    if (videoFrame) {
+      this.ctx.drawImage(
+        videoFrame,
+        (cropX / w) * video1.videoWidth,
+        0,
+        normalizedCrop,
+        video1.videoHeight, // Source cropping parameters
+        cropX,
+        0,
+        cropWidth1,
+        h // Destination position and size
+      );
+      // ,
+      //   videoData.width,
+      //   videoData.height,
+      //   0,0,
+      //   w,
+      //   h
+      // console.log(videoData);
+      // this.ctx.drawImage(
+      //   videoData,
+      //   0,
+      //   0,
+      //   videoData.width * pixelRatio,
+      //   videoData.height * pixelRatio,
+      //   0,
+      //   0,
+      //   w * pixelRatio * pixelRatio,
+      //   h * pixelRatio * pixelRatio, // Source cropping parameters
+      // );
+    } else {
+      // console.log("no video data", frameNumber);
+    }
+  
 
     // this.ctx.filter = filter;
     this.ctx.globalAlpha = globalAlpha;
   }
 
-  async draw(shape: ICompare) {
+  draw(shape: ICompare) {
     const video1 = this.annotationTool.videoElement as HTMLVideoElement;
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {
       return;
     }
-    this.annotationTool.syncTime();
-
     this.drawShape(shape);
-
-    const bothPaused = video1.paused && video2.paused;
-
-    if (!bothPaused) {
-      await this.annotationTool.waitForFrameSync();
-      this.drawShape(shape);
-    }
-
   }
 }

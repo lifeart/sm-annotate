@@ -5,68 +5,9 @@ import { isMultiTouch } from "./events/utils";
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
-class FrameSyncBucket {
-  promise!: Promise<any>;
-  resolve!: (value: any) => void;
-  reject!: (reason?: any) => void;
-  timeout!: number;
-  constructor() {
-    this.init();
-  }
-  release(time: number | undefined = undefined) {
-    clearTimeout(this.timeout);
-    if (time !== undefined) {
-      const now = performance.now();
-      const delay = time - now;
-      if (delay > 0) {
-        this.timeout = setTimeout(() => {
-          this.resolve(true);
-        }, delay);
-      } else {
-        this.resolve(true);
-      }
-    } else {
-      this.resolve(true);
-    }
-  }
-  init() {
-    clearTimeout(this.timeout);
-    if (this.reject) {
-      this.reject(true);
-    }
-    let resolve: (value: any) => void;
-    let reject: (reason?: any) => void;
-    let isResolved = false;
-    let t2!: number;
-    const p = new Promise((res, rej) => {
-      resolve = (v) => {
-        clearTimeout(t2);
-        if (isResolved) {
-          return;
-        }
-        isResolved = true;
-        res(v);
-        this.init();
-      };
-      reject = () => {
-        clearTimeout(this.timeout);
-        clearTimeout(t2);
-        if (isResolved) {
-          return;
-        }
-        isResolved = true;
-        rej(true);
-        this.init();
-      };
-    });
-    this.promise = p;
-    this.resolve = resolve!;
-    this.reject = reject!;
-    t2 = setTimeout(() => {
-      this.resolve(true);
-    }, 32);
-  }
-}
+import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
+
+const pixelRatio = window.devicePixelRatio || 1;
 
 // @todo
 // - [ ] video may be resized not only on window resize
@@ -89,6 +30,7 @@ const DEFAULT_FPS = 25;
 export class AnnotationTool extends AnnotationToolBase<IShape> {
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
+  referenceVideoFrameBuffer: VideoFrameBuffer | null = null;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
   isMouseDown = false;
@@ -97,7 +39,6 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   colorPicker!: HTMLInputElement;
   strokeSizePicker!: HTMLInputElement;
   plugins: PluginInstances[] = [];
-  frameSyncBucket = new FrameSyncBucket();
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
   prevFrame() {
@@ -167,19 +108,18 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.destructors.push(destructor);
   }
 
+  timeToFrame(time: number) {
+    return Math.max(1, Math.round(time * this.fps));
+  }
+
   get playbackFrame() {
     if (this.videoElement instanceof HTMLImageElement) return 1;
-    const result = Math.round(this.videoElement.currentTime * this.fps);
-    return Math.max(1, result);
+    return this.timeToFrame(this.videoElement.currentTime);
   }
   set playbackFrame(frame: number) {
     if (this.videoElement instanceof HTMLImageElement) return;
     const newTime = frame / this.fps;
     this.videoElement.currentTime = newTime;
-    this.withRefVideo((video) => {
-      video.currentTime = newTime;
-    });
-    this.syncTime();
     this.show();
   }
   get canvasWidth() {
@@ -224,7 +164,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.undoTimeStack.set(this.activeTimeFrame, shapes);
   }
   get pixelRatio() {
-    return window.devicePixelRatio || 1;
+    return pixelRatio;
   }
 
   constructor(videoElement: HTMLVideoElement | HTMLImageElement) {
@@ -251,16 +191,18 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.canvas.style.display = "none";
   }
 
-  updateActiveTimeFrame() {
-    this.activeTimeFrame = this.playbackFrame;
+  updateActiveTimeFrame(mediaTime: number | undefined = undefined) {
+    this.activeTimeFrame = mediaTime
+      ? this.timeToFrame(mediaTime)
+      : this.playbackFrame;
   }
 
-  async show() {
+  show() {
     this.stopAnnotationsAsVideo();
     this.updateActiveTimeFrame();
     this.showCanvas();
     this.showControls();
-    await this.redrawFullCanvas();
+    this.redrawFullCanvas();
   }
 
   setCanvasSettings() {
@@ -316,75 +258,20 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   initFrameCounter() {
     if (!this.frameCallbackSupported) {
       setTimeout(() => {
-        this.updateActiveTimeFrame();
-        this.frameSyncBucket.release();
         this.initFrameCounter();
+        this.updateActiveTimeFrame();
+        this.playAnnotationsAsVideo();
       }, 1000 / this.fps);
       return;
     }
 
-    let syncPromise = new Promise(async (resolve) => {
-      const [metadata1, metadata2] = (await Promise.all([
-        new Promise((r1) => {
-          this.withVideo((video) => {
-            video.requestVideoFrameCallback((_: number, metadata) => {
-              r1(metadata);
-            });
-          });
-        }),
-        new Promise((r2) => {
-          this.withRefVideo((video) => {
-            video.requestVideoFrameCallback((_: number, metadata) => {
-              r2(metadata);
-            });
-          });
-          if (!this.referenceVideoElement) {
-            r2({ mediaTime: 0 });
-          }
-        }),
-      ])) as [VideoFrameCallbackMetadata, VideoFrameCallbackMetadata];
-
-      if (!this.referenceVideoElement) {
-        this.updateActiveTimeFrame();
-        this.frameSyncBucket.release(metadata1.expectedDisplayTime);
+    this.withVideo((video) => {
+      video.requestVideoFrameCallback((_: number, metadata) => {
         this.initFrameCounter();
-        return resolve(true);
-      }
-
-      const video = this.videoElement as HTMLVideoElement;
-      const fSyncDiff = parseFloat(
-        (metadata2.mediaTime - metadata1.mediaTime).toFixed(5)
-      );
-      const frameTime = parseFloat((1 / this.fps).toFixed(5));
-      const frameDiff = Math.ceil(fSyncDiff / frameTime);
-      const frameOffsetTime = parseFloat((frameDiff * frameTime).toFixed(5));
-      if (metadata1.mediaTime !== metadata2.mediaTime) {
-        // apply frame sync for odd frame diff
-        if (frameDiff % 2 === 0) {
-          const fixedTime = video.currentTime - frameOffsetTime + frameTime;
-          video.currentTime = fixedTime;
-        }
-        this.ct++;
-        if (this.ct > this.fps) {
-          this.restartPlayback();
-        }
-        this.updateActiveTimeFrame();
-      } else {
-        this.ct = 0;
-        this.updateActiveTimeFrame();
-        this.frameSyncBucket.release(
-          Math.max(metadata1.expectedDisplayTime, metadata2.expectedDisplayTime)
-        );
-      }
-      resolve(true);
-      this.initFrameCounter();
+        this.updateActiveTimeFrame(metadata.mediaTime);
+        this.playAnnotationsAsVideo();
+      });
     });
-
-    return syncPromise;
-  }
-
-  waitForFrameSync() {
-    return this.frameSyncBucket.promise;
   }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
@@ -404,21 +291,20 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
-  async removeLastShape() {
+  removeLastShape() {
     this.shapes.pop();
-    await this.redrawFullCanvas();
+    this.redrawFullCanvas();
   }
 
-  async handleUndo() {
+  handleUndo() {
     if (this.undoStack.length > 0) {
       this.shapes = this.undoStack.pop() as IShape[];
-      await this.redrawFullCanvas();
+      this.redrawFullCanvas();
     }
   }
 
   destroy() {
     if (this.isDestroyed) return;
-
     super.destroy();
     this.stopAnnotationsAsVideo();
 
@@ -473,9 +359,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     this.activeTimeFrame = 0;
     this.isDestroyed = true;
+    this.referenceVideoFrameBuffer?.destroy();
+    this.referenceVideoFrameBuffer = null;
   }
 
-  async setCanvasSize() {
+  setCanvasSize() {
     const videoOffset = this.videoElement.getBoundingClientRect();
     this.canvas.width = videoOffset.width * this.pixelRatio;
     this.canvas.height = videoOffset.height * this.pixelRatio;
@@ -484,38 +372,13 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
     this.setCanvasSettings();
     this.syncVideoSizes();
-    await this.redrawFullCanvas();
+    this.redrawFullCanvas();
   }
 
   addShape(shape: IShape) {
     const serializedShape = this.serialize([shape])[0];
     this.undoStack.push([...this.shapes]);
     this.shapes.push(serializedShape);
-  }
-
-  syncTime(force = false, newTime: null | number = null) {
-    const video = this.videoElement as HTMLVideoElement;
-    if (!video || video.tagName !== "VIDEO") {
-      return;
-    }
-    if (this.frameCallbackSupported) {
-      if (!video.paused) {
-        return;
-      }
-    }
-    const currentTime = newTime === null ? video.currentTime : newTime;
-    this.withRefVideo((refVideo) => {
-      if (refVideo.readyState < 4) {
-        return;
-      }
-      if (!force && !this.globalShapes.length) {
-        return;
-      }
-      const diff = Math.abs(refVideo.currentTime - currentTime);
-      if (diff >= this.msPerFrame / 3) {
-        refVideo.currentTime = currentTime;
-      }
-    });
   }
 
   get msPerFrame() {
@@ -552,51 +415,24 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         refVideo.controls = false;
         refVideo.loop = true;
         this.videoElement.after(refVideo);
+        this.referenceVideoFrameBuffer = new VideoFrameBuffer(
+          refVideo,
+          this.fps
+        );
       });
       this.syncVideoSizes();
+    } else {
+      this.referenceVideoFrameBuffer?.destroy();
+      this.referenceVideoFrameBuffer = new VideoFrameBuffer(
+        this.referenceVideoElement,
+        this.fps
+      );
     }
     this.referenceVideoElement.src = mediaUrl;
+    this.referenceVideoElement.play().then(() => {
+      this.referenceVideoFrameBuffer?.setCanvasSize();
+    });
     this.showButton("compare");
-  }
-
-  isPlaybackRestarting = false;
-
-  async restartPlayback() {
-    if (this.isPlaybackRestarting) {
-      return;
-    }
-    this.isPlaybackRestarting = true;
-    let isVideoPlaying = false;
-    let isRefVideoPlaying = false;
-    this.withRefVideo((refVideo) => {
-      isRefVideoPlaying = !refVideo.paused;
-    });
-    this.withVideo((video) => {
-      isVideoPlaying = !video.paused;
-    });
-
-    const promiseList: Promise<void>[] = [];
-    if (isVideoPlaying) {
-      this.withVideo((video) => {
-        video.pause();
-      });
-    }
-    if (isRefVideoPlaying) {
-      this.withRefVideo((refVideo) => {
-        refVideo.pause();
-      });
-    }
-    if (isRefVideoPlaying && isVideoPlaying) {
-      this.withVideo((video) => {
-        this.withRefVideo((refVideo) => {
-          promiseList.push(video.play(), refVideo.play());
-        });
-      });
-    }
-
-    await Promise.all(promiseList).finally(() => {
-      this.isPlaybackRestarting = false;
-    });
   }
 
   hideButton(tool: Tool) {
@@ -687,7 +523,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return this.globalShapes.length > 0;
   }
 
-  async handleMouseMove(event: PointerEvent) {
+  handleMouseMove(event: PointerEvent) {
     event.preventDefault();
 
     if (isMultiTouch(event)) return;
@@ -711,10 +547,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         if (!this.hasGlobalOverlays) {
           this.addVideoOverlay();
         }
-        await this.drawShapesOverlay();
+        this.drawShapesOverlay();
       }
     } else {
-      await this.redrawFullCanvas();
+      this.redrawFullCanvas();
     }
 
     if (this.currentTool) {
@@ -729,7 +565,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return event.clientY;
   }
 
-  async handleMouseUp(event: PointerEvent) {
+  handleMouseUp(event: PointerEvent) {
     this.isMouseDown = false;
     this.isProgressBarNavigation = false;
 
@@ -740,14 +576,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.pluginForTool(this.currentTool).onPointerUp(event);
     }
 
-    await this.redrawFullCanvas();
+    this.redrawFullCanvas();
   }
 
   focusOnMediaNode() {
     this.videoElement.focus();
   }
 
-  async drawShapesOverlay() {
+  drawShapesOverlay() {
     const prevSettings = {
       strokeStyle: this.ctx.strokeStyle,
       fillStyle: this.ctx.fillStyle,
@@ -759,7 +595,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
       try {
-        await this.pluginForTool(shape.type).draw(shape);
+        this.pluginForTool(shape.type).draw(shape);
       } catch (e) {
         console.error(e);
       }
@@ -771,7 +607,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.ctx.lineWidth = shape.lineWidth;
 
       try {
-        await this.pluginForTool(shape.type).draw(shape);
+        this.pluginForTool(shape.type).draw(shape);
       } catch (e) {
         console.error(e);
       }
@@ -786,14 +622,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
-  async frameToDataUrl() {
+  frameToDataUrl() {
     try {
       this.clearCanvas();
       this.addVideoOverlay();
       this.addFrameSquareOverlay();
-      await this.drawShapesOverlay();
+      this.drawShapesOverlay();
       const data = this.canvas.toDataURL("image/png");
-      await this.redrawFullCanvas();
+      this.redrawFullCanvas();
       return data;
     } catch (e) {
       console.error(e);
@@ -801,12 +637,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
-  async redrawFullCanvas() {
+  redrawFullCanvas() {
     this.clearCanvas();
     if (!this.hasGlobalOverlays) {
       this.addVideoOverlay();
     }
-    await this.drawShapesOverlay();
+    this.drawShapesOverlay();
     this.addFrameSquareOverlay();
     this.addProgressBarOverlay();
   }
@@ -970,21 +806,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.isAnnotationsAsVideoActive = true;
     this.playAnnotationsAsVideo();
   }
-  async playAnnotationsAsVideo() {
+  playAnnotationsAsVideo() {
     if (!this.isAnnotationsAsVideoActive) {
       return;
     }
 
-    this.updateActiveTimeFrame();
-    this.syncTime();
     this.clearCanvas();
-    await this.drawShapesOverlay();
-
-    this.raf(() => {
-      this.syncTime();
-    });
-    this.waitForFrameSync().finally(() => {
-      this.playAnnotationsAsVideo();
-    });
+    this.drawShapesOverlay();
   }
 }

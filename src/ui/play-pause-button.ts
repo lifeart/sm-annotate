@@ -17,35 +17,20 @@ export function createPlayPauseButton(
 
   tool.addEvent(video, "play", () => {
     button.innerHTML = pauseIcon;
-    // tool.syncTime();
   });
 
   tool.addEvent(video, "pause", () => {
     button.innerHTML = playIcon;
-    tool.syncTime();
   });
 
   tool.addEvent(button, "click", () => {
     if (video.paused) {
-      tool.withRefVideo((refVideo) => {
-        if (refVideo.paused) {
-          refVideo.play().then(() => {
-            tool.syncTime();
-          });
-        }
-      });
       video.play().then(() => {
-        tool.syncTime();
+        tool.redrawFullCanvas();
       });
     } else {
-      tool.withRefVideo((refVideo) => {
-        if (!refVideo.paused) {
-          refVideo.pause();
-        }
-      });
       video.pause();
       tool.raf(() => {
-        tool.syncTime();
         tool.redrawFullCanvas();
       });
     }

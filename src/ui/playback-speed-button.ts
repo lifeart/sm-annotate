@@ -32,9 +32,6 @@ export function createPlaybackSpeedControlButton(
   const defaultState: number = states[states.length - 1];
   button.type = "button";
   video.playbackRate = defaultState;
-  tool.withRefVideo((refVideo) => {
-    refVideo.playbackRate = defaultState;
-  });
 
   button.innerHTML = iconForSpeed(defaultState);
   button.style.margin = "5px";
@@ -43,9 +40,6 @@ export function createPlaybackSpeedControlButton(
     const currentState = states.indexOf(video.playbackRate);
     const nextState = currentState + 1 >= states.length ? 0 : currentState + 1;
     video.playbackRate = states[nextState];
-    tool.withRefVideo((refVideo) => {
-      refVideo.playbackRate = states[nextState];
-    });
     button.innerHTML = iconForSpeed(states[nextState]);
   });
 

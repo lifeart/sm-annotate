@@ -22,12 +22,8 @@ export function onDocumentClick(event: PointerEvent, tool: SmAnnotate) {
   }
   tool.currentTool = null;
   video.pause();
-  tool.withRefVideo((v) => {
-    v.pause();
-  });
 
   tool.raf(async () => {
-    tool.syncTime();
     tool.redrawFullCanvas();
   });
 }
