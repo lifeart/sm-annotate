@@ -1,15 +1,7 @@
 import { AnnotationToolBase } from "./base";
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
-declare class FrameSyncBucket {
-    promise: Promise<any>;
-    resolve: (value: any) => void;
-    reject: (reason?: any) => void;
-    timeout: number;
-    constructor();
-    release(time?: number | undefined): void;
-    init(): void;
-}
+import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
@@ -19,6 +11,7 @@ export type FrameAnnotationV1 = {
 export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     uiContainer: HTMLDivElement;
     playerControlsContainer: HTMLDivElement;
+    referenceVideoFrameBuffer: VideoFrameBuffer | null;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isMouseDown: boolean;
@@ -27,7 +20,6 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     colorPicker: HTMLInputElement;
     strokeSizePicker: HTMLInputElement;
     plugins: PluginInstances[];
-    frameSyncBucket: FrameSyncBucket;
     playTimeout: number & ReturnType<typeof window.setTimeout>;
     annotatedFrameCoordinates: {
         x: number;
@@ -43,6 +35,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     set currentTool(tool: Tool | null);
     fps: number;
     enableFrameRateDetection(): void;
+    timeToFrame(time: number): number;
     get playbackFrame(): number;
     set playbackFrame(frame: number);
     get canvasWidth(): number;
@@ -66,8 +59,8 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     hideControls(): void;
     showCanvas(): void;
     hideCanvas(): void;
-    updateActiveTimeFrame(): void;
-    show(): Promise<void>;
+    updateActiveTimeFrame(mediaTime?: number | undefined): void;
+    show(): void;
     setCanvasSettings(): void;
     pluginForTool<T extends Tool>(tool: T): ToolPlugin<ShapeMap[T]>;
     getButtonForTool(tool: Tool): HTMLButtonElement;
@@ -76,21 +69,17 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     setVideoStyles(): void;
     get frameCallbackSupported(): boolean;
     ct: number;
-    initFrameCounter(): Promise<unknown> | undefined;
-    waitForFrameSync(): Promise<any>;
+    initFrameCounter(): void;
     init(videoElement: HTMLVideoElement | HTMLImageElement): void;
     onKeyDown(event: KeyboardEvent): void;
-    removeLastShape(): Promise<void>;
-    handleUndo(): Promise<void>;
+    removeLastShape(): void;
+    handleUndo(): void;
     destroy(): void;
-    setCanvasSize(): Promise<void>;
+    setCanvasSize(): void;
     addShape(shape: IShape): void;
-    syncTime(force?: boolean, newTime?: null | number): void;
     get msPerFrame(): number;
     syncVideoSizes(): void;
     addReferenceVideoByURL(url: string | URL): Promise<void>;
-    isPlaybackRestarting: boolean;
-    restartPlayback(): Promise<void>;
     hideButton(tool: Tool): void;
     showButton(tool: Tool): void;
     addSingletonShape(shape: IShape): void;
@@ -106,15 +95,15 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     isProgressBarNavigation: boolean;
     get isVideoPaused(): boolean;
     get hasGlobalOverlays(): boolean;
-    handleMouseMove(event: PointerEvent): Promise<void>;
+    handleMouseMove(event: PointerEvent): void;
     getEventX(event: PointerEvent): number;
     getEventY(event: PointerEvent): number;
-    handleMouseUp(event: PointerEvent): Promise<void>;
+    handleMouseUp(event: PointerEvent): void;
     focusOnMediaNode(): void;
-    drawShapesOverlay(): Promise<void>;
+    drawShapesOverlay(): void;
     clearCanvas(): void;
-    frameToDataUrl(): Promise<string | null>;
-    redrawFullCanvas(): Promise<void>;
+    frameToDataUrl(): string | null;
+    redrawFullCanvas(): void;
     replaceFrame(frame: number, shapes: IShape[]): void;
     addShapesToFrame(frame: number, shapes: IShape[]): void;
     setFrameRate(fps: number): void;
@@ -132,6 +121,5 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     isAnnotationsAsVideoActive: boolean;
     stopAnnotationsAsVideo(): void;
     startAnnotationsAsVideo(): void;
-    playAnnotationsAsVideo(): Promise<void>;
+    playAnnotationsAsVideo(): void;
 }
-export {};

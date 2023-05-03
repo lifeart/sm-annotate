@@ -19,5 +19,5 @@ export declare class CompareToolPlugin extends BasePlugin<ICompare> implements T
     save(shape: ICompare): void;
     drawDelimiter(shape: ICompare): void;
     drawShape(shape: ICompare): void;
-    draw(shape: ICompare): Promise<void>;
+    draw(shape: ICompare): void;
 }

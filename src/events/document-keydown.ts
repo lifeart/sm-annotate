@@ -27,23 +27,12 @@ export function onDocumentKeydown(event: KeyboardEvent, tool: SmAnnotate) {
     event.stopPropagation();
     event.stopImmediatePropagation();
     if (video.paused) {
-      tool.withRefVideo((v) => {
-        v.play().then(() => {
-          tool.syncTime();
-          tool.redrawFullCanvas();
-        });
-      });
       video.play().then(() => {
-        tool.syncTime();
         tool.redrawFullCanvas();
       });
     } else {
-      tool.withRefVideo((v) => {
-        v.pause();
-      });
       video.pause();
       tool.raf(() => {
-        tool.syncTime();
         tool.redrawFullCanvas();
       });
     }

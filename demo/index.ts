@@ -83,9 +83,10 @@ async function initAnnotator() {
 
   const tool = new SmAnnotate(video);
 
+  tool.setFrameRate(30);
+
   await tool.addReferenceVideoByURL('./mov_bbb_g.mp4');
   
-  tool.setFrameRate(30);
 
   requestAnimationFrame(() => {
     tool.setCanvasSize();
