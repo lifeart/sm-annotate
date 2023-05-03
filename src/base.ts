@@ -14,6 +14,9 @@ export class AnnotationToolBase<T> {
   isDestroyed = false;
   activeTimeFrame = 1;
 
+  referenceVideoElement!: HTMLVideoElement | null;
+  videoElement!: HTMLVideoElement | HTMLImageElement;
+
   globalShapes: T[] = [];
   timeStack = new Map<number, T[]>(); // timeFrame -> shapes
   undoTimeStack = new Map<number, T[][]>(); // timeFrame -> shapes
@@ -124,5 +127,25 @@ export class AnnotationToolBase<T> {
 
   addVideoOverlay() {
     throw new Error("Method not implemented.");
+  }
+
+  withRefVideo(cb: (video: HTMLVideoElement) => void) {
+    if (this.isDestroyed) {
+      return;
+    }
+    if (this.referenceVideoElement) {
+      cb(this.referenceVideoElement);
+    }
+  }
+
+  withVideo(cb: (video: HTMLVideoElement) => void) {
+    if (this.isDestroyed) {
+      return;
+    }
+    const video = this.videoElement as HTMLVideoElement;
+    if (!video || video.tagName !== "VIDEO") {
+        return;
+    }
+    cb(video);
   }
 }

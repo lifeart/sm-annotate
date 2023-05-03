@@ -4,7 +4,6 @@ import { onDocumentCopy } from "./events/document-copy";
 import { onDocumentCut } from "./events/document-cut";
 import { onDocumentKeydown } from "./events/document-keydown";
 import { onDocumentPaste } from "./events/document-paste";
-import { isTargetBelongsToVideo } from "./events/utils";
 import { createDownloadCurrentFrameButton } from "./ui/download-current-frame-button";
 import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
@@ -214,7 +213,7 @@ export function initUI(this: AnnotationTool) {
 
     this.addEvent(video, "timeupdate", () => {
       if (video.currentTime < 0.0002 && !video.paused) {
-        this.playAnnotationsAsVideo();
+        this.startAnnotationsAsVideo();
       }
       this.syncTime();
     });
@@ -227,15 +226,9 @@ export function initUI(this: AnnotationTool) {
     this.addEvent(video, "stalled", () => {
       this.hide();
     });
-    this.addEvent(video, "waiting", () => {
-      this.hide();
-    });
-    this.addEvent(video, "ended", () => {
-      this.hide();
-    });
     this.addEvent(video, "play", () => {
       this.hideControls();
-      this.playAnnotationsAsVideo();
+      this.startAnnotationsAsVideo();
     });
 
     this.addEvent(document, "copy", (event: ClipboardEvent) => {

@@ -14,11 +14,10 @@ export type VideoEventNames =
   | "seeking"
   | "play"
   | "pause"
-  | "ended"
   | "seek"
   | "stalled"
-  | "waiting"
-  | "error";
+  | "error"
+  | "requestVideoFrameCallback";
 export type WindowEventNames = "resize";
 export type EventNames =
   | VideoEventNames

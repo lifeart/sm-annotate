@@ -5,6 +5,8 @@ export interface ICompare extends IShapeBase {
   x: number;
 }
 
+const ACTIVE_OPACITY = 0.7;
+
 export class CompareToolPlugin
   extends BasePlugin<ICompare>
   implements ToolPlugin<ICompare>
@@ -20,8 +22,8 @@ export class CompareToolPlugin
   }
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
-    this.leftOpacity = 0.7;
-    this.rightOpacity = 0.7;
+    this.leftOpacity = 1;
+    this.rightOpacity = ACTIVE_OPACITY;
     this.annotationTool.canvas.style.cursor = "col-resize";
     this.annotationTool.syncTime(true);
   }
@@ -70,7 +72,9 @@ export class CompareToolPlugin
       x: x,
     } as ICompare;
 
-    this.draw(item);
+    this.draw(item).then(() => {
+      this.drawDelimiter(item);
+    });
     this.drawDelimiter(item);
   }
   onPointerUp() {
@@ -106,22 +110,12 @@ export class CompareToolPlugin
     this.ctx.stroke();
   }
 
-  draw(shape: ICompare) {
+  drawShape(shape: ICompare) {
     const video1 = this.annotationTool.videoElement as HTMLVideoElement;
-
-    // if (video1.tagName === "VIDEO") {
-    //     const style = window.getComputedStyle(video1);
-    //     console.log(video1.videoWidth);
-    //     console.log(parseInt(style.getPropertyValue('width')));
-    //     console.log(this.annotationTool.canvasWidth);
-    // }
-
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {
       return;
-    }
-    this.annotationTool.syncTime();
-
+    } 
     const globalAlpha = this.ctx.globalAlpha;
     const w = this.annotationTool.canvasWidth;
     const h = this.annotationTool.canvasHeight;
@@ -132,9 +126,9 @@ export class CompareToolPlugin
     this.ctx.globalAlpha = this.leftOpacity;
     // const filter = this.ctx.filter;
 
-    const normalizedX = x / w;
+    // const normalizedX = x / w;
 
-    const cropWidth = x;
+    // const cropWidth = x;
 
     // this.ctx.filter = "grayscale(80%) brightness(120%)";
 
@@ -142,13 +136,25 @@ export class CompareToolPlugin
       video1,
       0,
       0,
-      normalizedX * video1.videoWidth,
-      video1.videoHeight, // Source cropping parameters
+      video1.videoWidth,
+      video1.videoHeight,
       0,
       0,
-      cropWidth,
-      h // Destination position and size
+      w,
+      h
     );
+
+    // this.ctx.drawImage(
+    //   video1,
+    //   0,
+    //   0,
+    //   normalizedX * video1.videoWidth,
+    //   video1.videoHeight, // Source cropping parameters
+    //   0,
+    //   0,
+    //   cropWidth,
+    //   h // Destination position and size
+    // );
 
     // this.ctx.filter = "contrast(140%) blur(1px)";
 
@@ -172,5 +178,24 @@ export class CompareToolPlugin
 
     // this.ctx.filter = filter;
     this.ctx.globalAlpha = globalAlpha;
+  }
+
+  async draw(shape: ICompare) {
+    const video1 = this.annotationTool.videoElement as HTMLVideoElement;
+    const video2 = this.annotationTool.referenceVideoElement;
+    if (!video1 || !video2) {
+      return;
+    }
+    this.annotationTool.syncTime();
+
+    this.drawShape(shape);
+
+    const bothPaused = video1.paused && video2.paused;
+
+    if (!bothPaused) {
+      await this.annotationTool.waitForFrameSync();
+      this.drawShape(shape);
+    }
+
   }
 }
