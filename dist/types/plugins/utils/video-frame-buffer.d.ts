@@ -4,6 +4,7 @@ export declare class VideoFrameBuffer {
     destroy(): void;
     addRequestFrameCallback(): void;
     createCanvas(): void;
+    seenFrames: number;
     setCanvasSize(): void;
     fps: number;
     frames: Map<number, ImageBitmap>;

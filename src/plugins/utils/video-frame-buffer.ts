@@ -19,6 +19,16 @@ export class VideoFrameBuffer {
       if (this.isDestroyed) {
         return;
       }
+      if (this.seenFrames >= this.totalFrames) {
+        // if we've seen all the frames, pause the video and hide it
+        try {
+          this.video.pause();
+          this.video.style.display = "none";
+        } catch(e) {
+          // EOL
+        }
+        return;
+      }
       if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
         this.addRequestFrameCallback();
         return;
@@ -54,6 +64,8 @@ export class VideoFrameBuffer {
             this.setFrame(frameNumber, imageBitmap);
           }
         );
+      } else {
+        this.seenFrames++;
       }
       this.addRequestFrameCallback();
     });
@@ -65,6 +77,7 @@ export class VideoFrameBuffer {
       alpha: false,
     });
   }
+  seenFrames = 0;
   setCanvasSize() {
     this.canvas.width = this.video.videoWidth;
     this.canvas.height = this.video.videoHeight;
