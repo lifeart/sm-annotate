@@ -38,6 +38,8 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     timeToFrame(time: number): number;
     get playbackFrame(): number;
     set playbackFrame(frame: number);
+    plannedFn: (() => void) | null;
+    rvf(fn: () => void): void;
     get canvasWidth(): number;
     get canvasHeight(): number;
     get aspectRatio(): number;

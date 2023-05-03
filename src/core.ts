@@ -44,10 +44,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
-    const activeTimeFrame = this.activeTimeFrame;
+    const activeTimeFrame = this.playbackFrame;
     const newFrame = Math.max(1, activeTimeFrame - 1);
     if (newFrame === this.playbackFrame) {
-      this.playbackFrame = this.totalFrames;
+      this.playbackFrame = this.totalFrames - 1;
     } else {
       this.playbackFrame = newFrame;
     }
@@ -56,9 +56,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   nextFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
-    const activeTimeFrame = this.activeTimeFrame;
+    const activeTimeFrame = this.playbackFrame;
     const newFrame = Math.min(this.totalFrames, activeTimeFrame + 1);
-
     if (newFrame === this.totalFrames) {
       this.playbackFrame = 1;
     } else {
@@ -120,7 +119,13 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (this.videoElement instanceof HTMLImageElement) return;
     const newTime = frame / this.fps;
     this.videoElement.currentTime = newTime;
-    this.show();
+    this.rvf(() => {
+      this.show();
+    });
+  }
+  plannedFn: (() => void) | null = null;
+  rvf(fn: () => void) {
+    this.plannedFn = fn;
   }
   get canvasWidth() {
     return this.canvas.width / this.pixelRatio;
@@ -258,6 +263,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   initFrameCounter() {
     if (!this.frameCallbackSupported) {
       setTimeout(() => {
+        this.plannedFn?.();
+        this.plannedFn = null;
         this.initFrameCounter();
         this.updateActiveTimeFrame();
         this.playAnnotationsAsVideo();
@@ -267,6 +274,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     this.withVideo((video) => {
       video.requestVideoFrameCallback((_: number, metadata) => {
+        this.plannedFn?.();
+        this.plannedFn = null;
         this.initFrameCounter();
         this.updateActiveTimeFrame(metadata.mediaTime);
         this.playAnnotationsAsVideo();
@@ -638,8 +647,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   redrawFullCanvas() {
-    this.clearCanvas();
     if (!this.hasGlobalOverlays) {
+      this.clearCanvas();
       this.addVideoOverlay();
     }
     this.drawShapesOverlay();
@@ -810,8 +819,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.isAnnotationsAsVideoActive) {
       return;
     }
-
-    this.clearCanvas();
+    if (!this.hasGlobalOverlays) {
+      this.clearCanvas();
+    }
     this.drawShapesOverlay();
   }
 }

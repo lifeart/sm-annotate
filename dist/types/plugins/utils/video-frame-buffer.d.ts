@@ -15,5 +15,6 @@ export declare class VideoFrameBuffer {
     hasFrame(frame: number): boolean;
     getFrame(frame: number): ImageBitmap | null;
     setFrame(frame: number, data: ImageBitmap): void;
+    get totalFrames(): number;
     frameNumberFromTime(time: number): number;
 }

@@ -25,6 +25,12 @@ export class VideoFrameBuffer {
       }
       const video = this.video;
       const frameNumber = this.frameNumberFromTime(metadata.mediaTime);
+      const expectedFrame = Math.max(1, metadata.presentedFrames > this.totalFrames ? metadata.presentedFrames % this.totalFrames : metadata.presentedFrames);
+      if (!expectedFrame) {
+        throw new Error("expectedFrame is 0");
+      }
+      // console.log(frameNumber, expectedFrame, metadata.presentedFrames, this.totalFrames);
+
       if (!this.hasFrame(frameNumber)) {
         this.ctx.drawImage(
           video,
@@ -86,6 +92,9 @@ export class VideoFrameBuffer {
   }
   setFrame(frame: number, data: ImageBitmap) {
     this.frames.set(frame, data);
+  }
+  get totalFrames() {
+    return Math.round(this.video.duration * this.fps);
   }
   frameNumberFromTime(time: number) {
     return Math.max(1, Math.round(time * this.fps));

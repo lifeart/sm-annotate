@@ -23,7 +23,7 @@ export class CompareToolPlugin
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
     this.leftOpacity = 1;
-    this.rightOpacity = ACTIVE_OPACITY;
+    this.rightOpacity = this.annotationTool.isMobile ? 1 : ACTIVE_OPACITY;
     this.annotationTool.canvas.style.cursor = "col-resize";
   }
   onDeactivate(): void {
@@ -48,14 +48,16 @@ export class CompareToolPlugin
   }
   onPointerMove(event: PointerEvent) {
     if (!this.isDrawing) {
-        if (this.annotationTool.globalShapes.length > 0) {
-            const shape = this.annotationTool.globalShapes[0];
-            if (shape.type === "compare") {
-                const deserialized = this.annotationTool.deserialize([shape])[0] as ICompare;
-                this.draw(deserialized);
-                this.annotationTool.addFrameSquareOverlay();
-            }
+      if (this.annotationTool.globalShapes.length > 0) {
+        const shape = this.annotationTool.globalShapes[0];
+        if (shape.type === "compare") {
+          const deserialized = this.annotationTool.deserialize([
+            shape,
+          ])[0] as ICompare;
+          this.draw(deserialized);
+          this.annotationTool.addFrameSquareOverlay();
         }
+      }
       return;
     }
     const { x } = this.annotationTool.getRelativeCoords(event);
@@ -111,56 +113,64 @@ export class CompareToolPlugin
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {
       return;
-    } 
+    }
     const globalAlpha = this.ctx.globalAlpha;
     const w = this.annotationTool.canvasWidth;
     const h = this.annotationTool.canvasHeight;
     const x = shape.x;
+
+    const isMobile = this.annotationTool.isMobile;
 
     // const strokeStyle = this.ctx.strokeStyle;
 
     this.ctx.globalAlpha = this.leftOpacity;
     // const filter = this.ctx.filter;
 
-    // const normalizedX = x / w;
-
-    // const cropWidth = x;
-
     // this.ctx.filter = "grayscale(80%) brightness(120%)";
 
-    this.ctx.drawImage(
-      video1,
-      0,
-      0,
-      video1.videoWidth,
-      video1.videoHeight,
-      0,
-      0,
-      w,
-      h
-    );
+    if (isMobile) {
+      const normalizedX = x / w;
 
-    // this.ctx.drawImage(
-    //   video1,
-    //   0,
-    //   0,
-    //   normalizedX * video1.videoWidth,
-    //   video1.videoHeight, // Source cropping parameters
-    //   0,
-    //   0,
-    //   cropWidth,
-    //   h // Destination position and size
-    // );
+      const cropWidth = x;
+      this.ctx.drawImage(
+        video1,
+        0,
+        0,
+        normalizedX * video1.videoWidth,
+        video1.videoHeight, // Source cropping parameters
+        0,
+        0,
+        cropWidth,
+        h // Destination position and size
+      );
+    } else {
+      this.ctx.drawImage(
+        video1,
+        0,
+        0,
+        video1.videoWidth,
+        video1.videoHeight,
+        0,
+        0,
+        w,
+        h
+      );
+    }
 
     // this.ctx.filter = "contrast(140%) blur(1px)";
 
     const cropX = x; // The X coordinate of the vertical crop line
-    const cropWidth1 = (w - cropX);
+    const cropWidth1 = w - cropX;
     const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
-    const frameNumber = this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(video1.currentTime);
-    const videoFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrame(frameNumber || 0);
+    const frameNumber =
+      this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+        video1.currentTime
+      );
+    const videoFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrame(
+      frameNumber || 0
+    );
     if (videoFrame) {
       this.ctx.drawImage(
         videoFrame,
@@ -173,28 +183,9 @@ export class CompareToolPlugin
         cropWidth1,
         h // Destination position and size
       );
-      // ,
-      //   videoData.width,
-      //   videoData.height,
-      //   0,0,
-      //   w,
-      //   h
-      // console.log(videoData);
-      // this.ctx.drawImage(
-      //   videoData,
-      //   0,
-      //   0,
-      //   videoData.width * pixelRatio,
-      //   videoData.height * pixelRatio,
-      //   0,
-      //   0,
-      //   w * pixelRatio * pixelRatio,
-      //   h * pixelRatio * pixelRatio, // Source cropping parameters
-      // );
     } else {
-      // console.log("no video data", frameNumber);
+      console.log("no video data", frameNumber);
     }
-  
 
     // this.ctx.filter = filter;
     this.ctx.globalAlpha = globalAlpha;
