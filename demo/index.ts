@@ -137,10 +137,10 @@ async function initAnnotator() {
     "save-image"
   ) as HTMLButtonElement;
 
-  saveImageButton.addEventListener("click", (e) => {
+  saveImageButton.addEventListener("click", async (e) => {
     e.stopPropagation();
     e.preventDefault();
-    const imgData = tool.frameToDataUrl();
+    const imgData = await tool.frameToDataUrl();
     if (!imgData) {
       return;
     }
