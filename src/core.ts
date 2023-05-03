@@ -414,11 +414,24 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
       this.withRefVideo((refVideo) => {
-        refVideo.style.zIndex = "-1";
-        refVideo.style.display = "none";
+  
+        if (this.isMobile) {
+          // for mobile safari we need to have this video visible to be able to play it with normal fps
+          refVideo.style.zIndex = "2";
+          refVideo.style.display = "block";
+          refVideo.style.top = "0";
+          refVideo.style.left = "0";
+          refVideo.style.opacity = "0.25";
+          refVideo.style.width = '20px';
+          refVideo.style.height = '15px';
+        } else {
+          refVideo.style.zIndex = "-1";
+          refVideo.style.display = "none";
+          refVideo.style.width = '100px';
+          refVideo.style.height = '70px';
+        }
+       
         refVideo.style.objectFit = "cover";
-        refVideo.style.width = '100px';
-        refVideo.style.height = '70px';
         refVideo.style.objectPosition = "left top";
         refVideo.muted = true;
         refVideo.volume = 0;
