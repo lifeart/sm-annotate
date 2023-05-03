@@ -47,7 +47,7 @@ class FrameSyncBucket {
         isResolved = true;
         res(v);
         this.init();
-      }
+      };
       reject = () => {
         clearTimeout(this.timeout);
         clearTimeout(t2);
@@ -57,7 +57,7 @@ class FrameSyncBucket {
         isResolved = true;
         rej(true);
         this.init();
-      }
+      };
     });
     this.promise = p;
     this.resolve = resolve!;
@@ -116,10 +116,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
     const activeTimeFrame = this.activeTimeFrame;
-    const newFrame = Math.min(
-      this.totalFrames,
-      activeTimeFrame + 1
-    );
+    const newFrame = Math.min(this.totalFrames, activeTimeFrame + 1);
 
     if (newFrame === this.totalFrames) {
       this.playbackFrame = 1;
@@ -179,6 +176,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (this.videoElement instanceof HTMLImageElement) return;
     const newTime = frame / this.fps;
     this.videoElement.currentTime = newTime;
+    this.withRefVideo((video) => {
+      video.currentTime = newTime;
+    });
     this.syncTime();
     this.show();
   }
@@ -306,86 +306,78 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.videoElement.style.objectFit = "cover";
     this.videoElement.style.objectPosition = "left top";
   }
-  
+
   get frameCallbackSupported() {
-    return 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+    return "requestVideoFrameCallback" in HTMLVideoElement.prototype;
   }
 
   ct = 0;
-  
+
   initFrameCounter() {
     if (!this.frameCallbackSupported) {
       setTimeout(() => {
         this.updateActiveTimeFrame();
         this.frameSyncBucket.release();
         this.initFrameCounter();
-      } , 1000 / this.fps);
+      }, 1000 / this.fps);
       return;
     }
 
     let syncPromise = new Promise(async (resolve) => {
-    const [metadata1, metadata2]: VideoFrameCallbackMetadata[] = await Promise.all([
+      const [metadata1, metadata2] = (await Promise.all([
         new Promise((r1) => {
           this.withVideo((video) => {
             video.requestVideoFrameCallback((_: number, metadata) => {
               r1(metadata);
-            })
-          })
+            });
+          });
         }),
         new Promise((r2) => {
           this.withRefVideo((video) => {
             video.requestVideoFrameCallback((_: number, metadata) => {
               r2(metadata);
-            })
+            });
           });
           if (!this.referenceVideoElement) {
             r2({ mediaTime: 0 });
           }
-        })
-      ]);
+        }),
+      ])) as [VideoFrameCallbackMetadata, VideoFrameCallbackMetadata];
 
       if (!this.referenceVideoElement) {
         this.updateActiveTimeFrame();
         this.frameSyncBucket.release(metadata1.expectedDisplayTime);
+        this.initFrameCounter();
         return resolve(true);
       }
 
-      const video = this.videoElement;
-      const mainVideo = this.referenceVideoElement;
-
-      const fSyncDiff = metadata2.mediaTime - metadata1.mediaTime;
-      const frameTime = 1 / this.fps;
+      const video = this.videoElement as HTMLVideoElement;
+      const fSyncDiff = parseFloat(
+        (metadata2.mediaTime - metadata1.mediaTime).toFixed(5)
+      );
+      const frameTime = parseFloat((1 / this.fps).toFixed(5));
+      const frameDiff = Math.ceil(fSyncDiff / frameTime);
+      const frameOffsetTime = parseFloat((frameDiff * frameTime).toFixed(5));
       if (metadata1.mediaTime !== metadata2.mediaTime) {
-        if (fSyncDiff > 0) {
-          this.ct++;
-          console.log('frame sync >', fSyncDiff, frameTime, this.ct);
-          if (this.ct > 10) {
-            video.currentTime = Math.max(metadata1.mediaTime, metadata2.mediaTime);
-          } else if (this.ct >= 3) {
-            video.currentTime = mainVideo.currentTime - fSyncDiff;
-          } else if (this.ct < 3 && this.ct > 0) {
-            video.currentTime = mainVideo.currentTime + frameTime;
-          } else {
-            video.currentTime = mainVideo.currentTime;
-          }
-        } else {
-          this.ct--;
-          console.log('frame sync <', fSyncDiff, frameTime, this.ct);
-          if (this.ct < -10) {
-            video.currentTime = Math.max(metadata2.mediaTime, metadata1.mediaTime);
-          } else {
-            video.currentTime = mainVideo.currentTime + frameTime + Math.abs(fSyncDiff);
-          }
+        // apply frame sync for odd frame diff
+        if (frameDiff % 2 === 0) {
+          const fixedTime = video.currentTime - frameOffsetTime + frameTime;
+          video.currentTime = fixedTime;
+        }
+        this.ct++;
+        if (this.ct > this.fps) {
+          this.restartPlayback();
         }
         this.updateActiveTimeFrame();
       } else {
         this.ct = 0;
         this.updateActiveTimeFrame();
-        this.frameSyncBucket.release(Math.max(metadata1.expectedDisplayTime, metadata2.expectedDisplayTime));
+        this.frameSyncBucket.release(
+          Math.max(metadata1.expectedDisplayTime, metadata2.expectedDisplayTime)
+        );
       }
       resolve(true);
       this.initFrameCounter();
-
     });
 
     return syncPromise;
@@ -429,7 +421,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     super.destroy();
     this.stopAnnotationsAsVideo();
-    
+
     this._currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
@@ -490,9 +482,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.canvas.style.width = `${videoOffset.width}px`;
     this.canvas.style.height = `${videoOffset.height}px`;
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
-    await this.redrawFullCanvas();
     this.setCanvasSettings();
     this.syncVideoSizes();
+    await this.redrawFullCanvas();
   }
 
   addShape(shape: IShape) {
@@ -565,6 +557,46 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
     this.referenceVideoElement.src = mediaUrl;
     this.showButton("compare");
+  }
+
+  isPlaybackRestarting = false;
+
+  async restartPlayback() {
+    if (this.isPlaybackRestarting) {
+      return;
+    }
+    this.isPlaybackRestarting = true;
+    let isVideoPlaying = false;
+    let isRefVideoPlaying = false;
+    this.withRefVideo((refVideo) => {
+      isRefVideoPlaying = !refVideo.paused;
+    });
+    this.withVideo((video) => {
+      isVideoPlaying = !video.paused;
+    });
+
+    const promiseList: Promise<void>[] = [];
+    if (isVideoPlaying) {
+      this.withVideo((video) => {
+        video.pause();
+      });
+    }
+    if (isRefVideoPlaying) {
+      this.withRefVideo((refVideo) => {
+        refVideo.pause();
+      });
+    }
+    if (isRefVideoPlaying && isVideoPlaying) {
+      this.withVideo((video) => {
+        this.withRefVideo((refVideo) => {
+          promiseList.push(video.play(), refVideo.play());
+        });
+      });
+    }
+
+    await Promise.all(promiseList).finally(() => {
+      this.isPlaybackRestarting = false;
+    });
   }
 
   hideButton(tool: Tool) {
@@ -942,12 +974,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.isAnnotationsAsVideoActive) {
       return;
     }
-      
+
     this.updateActiveTimeFrame();
     this.syncTime();
     this.clearCanvas();
     await this.drawShapesOverlay();
-  
+
     this.raf(() => {
       this.syncTime();
     });
