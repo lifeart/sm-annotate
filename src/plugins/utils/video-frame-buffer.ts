@@ -16,6 +16,10 @@ export class VideoFrameBuffer {
       return;
     }
     this.video.requestVideoFrameCallback((_: number, metadata) => {
+      const delta = metadata.expectedDisplayTime - performance.now();
+      if (delta > 10) {
+        console.log("looks like frame is not yet rendered");
+      }
       if (this.isDestroyed) {
         return;
       }
