@@ -1,0 +1,30 @@
+import { ButtonEventNames, ClipboardEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
+export declare class AnnotationToolBase<T> {
+    destructors: (() => void)[];
+    isDestroyed: boolean;
+    activeTimeFrame: number;
+    referenceVideoElement: HTMLVideoElement | null;
+    videoElement: HTMLVideoElement | HTMLImageElement;
+    globalShapes: T[];
+    timeStack: Map<number, T[]>;
+    undoTimeStack: Map<number, T[][]>;
+    cleanFrameStacks(): void;
+    destroy(): void;
+    raf(cb: () => void): number;
+    addEvent(node: HTMLInputElement, event: InputEventNames, callback: (e: Event) => void): void;
+    addEvent(node: typeof document, event: ClipboardEventNames, callback: (e: ClipboardEvent) => void): void;
+    addEvent(node: typeof document, event: ButtonEventNames, callback: (e: PointerEvent) => void): void;
+    addEvent(node: HTMLVideoElement, event: VideoEventNames, callback: (e: Event) => void): void;
+    addEvent(node: HTMLVideoElement, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
+    addEvent(node: HTMLButtonElement, event: ButtonEventNames, callback: (e: Event) => void): void;
+    addEvent(node: HTMLCanvasElement, event: PointerEventNames, callback: (e: PointerEvent) => void): void;
+    addEvent(node: typeof document, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
+    addEvent(node: typeof window, event: WindowEventNames, callback: (e: Event) => void): void;
+    addProgressBarOverlay(): void;
+    initUI(): void;
+    initCanvas(): void;
+    addFrameSquareOverlay(_?: number): void;
+    addVideoOverlay(): void;
+    withRefVideo(cb: (video: HTMLVideoElement) => void): void;
+    withVideo(cb: (video: HTMLVideoElement) => void): void;
+}
