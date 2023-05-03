@@ -24,6 +24,16 @@ export function createPlayPauseButton(
   });
 
   tool.addEvent(button, "click", () => {
+
+    tool.withRefVideo((refVideo) => {
+      if (refVideo.paused) {
+        refVideo.play().then(() => {
+          tool.referenceVideoFrameBuffer?.setCanvasSize();
+          tool.showButton("compare");
+        });
+      }
+    });
+
     if (video.paused) {
       video.play().then(() => {
         tool.redrawFullCanvas();

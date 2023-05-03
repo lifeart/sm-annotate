@@ -414,11 +414,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
       this.withRefVideo((refVideo) => {
-        refVideo.style.zIndex = `-1`;
+        refVideo.style.zIndex = "-1";
         refVideo.style.display = "none";
         refVideo.style.objectFit = "cover";
+        refVideo.style.width = '100px';
+        refVideo.style.height = '70px';
         refVideo.style.objectPosition = "left top";
         refVideo.muted = true;
+        refVideo.volume = 0;
         refVideo.playsInline = true;
         refVideo.autoplay = false;
         refVideo.controls = false;
@@ -440,8 +443,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.referenceVideoElement.src = mediaUrl;
     this.referenceVideoElement.play().then(() => {
       this.referenceVideoFrameBuffer?.setCanvasSize();
-    });
-    this.showButton("compare");
+      this.showButton("compare");
+    }).catch(() => {
+      this.hideButton("compare");
+    })
   }
 
   hideButton(tool: Tool) {
