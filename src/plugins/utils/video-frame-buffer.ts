@@ -22,9 +22,11 @@ export class VideoFrameBuffer {
       if (this.seenFrames >= this.totalFrames) {
         // if we've seen all the frames, pause the video and hide it
         try {
-          this.video.pause();
+          if (!this.video.paused) {
+            this.video.pause();
+          }
           this.video.style.display = "none";
-        } catch(e) {
+        } catch (e) {
           // EOL
         }
         return;
@@ -35,7 +37,12 @@ export class VideoFrameBuffer {
       }
       const video = this.video;
       const frameNumber = this.frameNumberFromTime(metadata.mediaTime);
-      const expectedFrame = Math.max(1, metadata.presentedFrames > this.totalFrames ? metadata.presentedFrames % this.totalFrames : metadata.presentedFrames);
+      const expectedFrame = Math.max(
+        1,
+        metadata.presentedFrames > this.totalFrames
+          ? metadata.presentedFrames % this.totalFrames
+          : metadata.presentedFrames
+      );
       if (!expectedFrame) {
         throw new Error("expectedFrame is 0");
       }
