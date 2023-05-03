@@ -31,6 +31,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
   referenceVideoFrameBuffer: VideoFrameBuffer | null = null;
+  videoFrameBuffer: VideoFrameBuffer | null = null;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
   isMouseDown = false;
@@ -178,6 +179,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.init(videoElement);
   }
 
+  enableVideoFrameBuffer() {
+    if (this.videoElement instanceof HTMLImageElement) return;
+    this.videoFrameBuffer = new VideoFrameBuffer(this.videoElement, this.fps, false);
+  }
+
   hide() {
     this.stopAnnotationsAsVideo();
     this.hideControls();
@@ -274,11 +280,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     this.withVideo((video) => {
       video.requestVideoFrameCallback((_: number, metadata) => {
+        this.videoFrameBuffer?.tick(_, metadata);
         this.plannedFn?.();
         this.plannedFn = null;
-        this.initFrameCounter();
-        this.updateActiveTimeFrame(metadata.mediaTime);
-        this.playAnnotationsAsVideo();
+        this.raf(() => {
+          this.initFrameCounter();
+          this.updateActiveTimeFrame(metadata.mediaTime);
+          this.playAnnotationsAsVideo();
+        });
       });
     });
   }
@@ -370,6 +379,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.isDestroyed = true;
     this.referenceVideoFrameBuffer?.destroy();
     this.referenceVideoFrameBuffer = null;
+    this.videoFrameBuffer?.destroy();
+    this.videoFrameBuffer = null;
   }
 
   setCanvasSize() {
@@ -444,6 +455,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
           refVideo,
           this.fps
         );
+        this.referenceVideoFrameBuffer.start();
       });
       this.syncVideoSizes();
     } else {
@@ -452,10 +464,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         this.referenceVideoElement,
         this.fps
       );
+      this.referenceVideoFrameBuffer.start();
     }
     this.referenceVideoElement.src = mediaUrl;
     this.referenceVideoElement.play().then(() => {
-      this.referenceVideoFrameBuffer?.setCanvasSize();
       this.showButton("compare");
     }).catch(() => {
       this.hideButton("compare");
@@ -840,6 +852,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.hasGlobalOverlays) {
       this.clearCanvas();
     }
+    this.addVideoOverlay();
     this.drawShapesOverlay();
+    this.addFrameSquareOverlay();
+    this.addProgressBarOverlay();
   }
 }

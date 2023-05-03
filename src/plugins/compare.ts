@@ -126,14 +126,23 @@ export class CompareToolPlugin
     this.ctx.globalAlpha = this.leftOpacity;
     // const filter = this.ctx.filter;
 
-    // this.ctx.filter = "grayscale(80%) brightness(120%)";
+    const frameNumber =
+      this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+        video1.currentTime
+      );
+    const referenceVideoFrame =
+      this.annotationTool.referenceVideoFrameBuffer?.getFrame(frameNumber || 0);
+
+    const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(
+      frameNumber || 0
+    );
 
     if (isMobile) {
       const normalizedX = x / w;
 
       const cropWidth = x;
       this.ctx.drawImage(
-        video1,
+        videoFrame ?? video1,
         0,
         0,
         normalizedX * video1.videoWidth,
@@ -144,17 +153,10 @@ export class CompareToolPlugin
         h // Destination position and size
       );
     } else {
-      this.ctx.drawImage(
-        video1,
-        0,
-        0,
-        video1.videoWidth,
-        video1.videoHeight,
-        0,
-        0,
-        w,
-        h
-      );
+      // console.log("drawing", videoFrame);
+      const vw = videoFrame ? videoFrame.width : video1.videoWidth;
+      const vh = videoFrame ? videoFrame.height : video1.videoHeight;
+      this.ctx.drawImage(videoFrame ?? video1, 0, 0, vw, vh, 0, 0, w, h);
     }
 
     // this.ctx.filter = "contrast(140%) blur(1px)";
@@ -164,16 +166,9 @@ export class CompareToolPlugin
     const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
-    const frameNumber =
-      this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
-        video1.currentTime
-      );
-    const videoFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrame(
-      frameNumber || 0
-    );
-    if (videoFrame) {
+    if (referenceVideoFrame) {
       this.ctx.drawImage(
-        videoFrame,
+        referenceVideoFrame,
         (cropX / w) * video1.videoWidth,
         0,
         normalizedCrop,

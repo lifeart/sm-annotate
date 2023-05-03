@@ -28,7 +28,6 @@ export function createPlayPauseButton(
     tool.withRefVideo((refVideo) => {
       if (refVideo.paused) {
         refVideo.play().then(() => {
-          tool.referenceVideoFrameBuffer?.setCanvasSize();
           tool.showButton("compare");
         });
       }

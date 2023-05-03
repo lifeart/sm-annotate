@@ -92,6 +92,8 @@ async function initAnnotator() {
     tool.setCanvasSize();
   });
 
+  tool.enableVideoFrameBuffer();
+
   console.log({ tool });
 
   tool.addShapesToFrame(29, [

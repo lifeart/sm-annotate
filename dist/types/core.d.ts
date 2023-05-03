@@ -12,6 +12,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     uiContainer: HTMLDivElement;
     playerControlsContainer: HTMLDivElement;
     referenceVideoFrameBuffer: VideoFrameBuffer | null;
+    videoFrameBuffer: VideoFrameBuffer | null;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isMouseDown: boolean;
@@ -56,6 +57,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     set undoStack(shapes: IShape[][]);
     get pixelRatio(): number;
     constructor(videoElement: HTMLVideoElement | HTMLImageElement);
+    enableVideoFrameBuffer(): void;
     hide(): void;
     showControls(): void;
     hideControls(): void;

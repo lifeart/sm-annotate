@@ -7,12 +7,19 @@ export function addVideoOverlay(this: AnnotationTool) {
     return;
   }
 
+  const frameNumber = this.videoFrameBuffer?.frameNumberFromTime(
+    node.currentTime
+  );
+
+  const videoFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0) ?? node;
+  const vw = videoFrame ? videoFrame.width : node.videoWidth;
+  const vh = videoFrame ? videoFrame.height : node.videoHeight;
   this.ctx.drawImage(
-    node,
+    videoFrame,
     0,
     0,
-    node.videoWidth,
-    node.videoHeight,
+    vw,
+    vh,
     0,
     0,
     this.canvasWidth,

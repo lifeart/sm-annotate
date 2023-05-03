@@ -1,10 +1,14 @@
 export declare class VideoFrameBuffer {
     isDestroyed: boolean;
-    constructor(video: HTMLVideoElement, fps: number);
+    autoHide: boolean;
+    constructor(video: HTMLVideoElement, fps: number, autoHide?: boolean);
+    start(): void;
     destroy(): void;
+    tick(_: number, metadata: VideoFrameCallbackMetadata): boolean;
     addRequestFrameCallback(): void;
     createCanvas(): void;
     seenFrames: number;
+    isCanvasSizeSet: boolean;
     setCanvasSize(): void;
     fps: number;
     frames: Map<number, ImageBitmap>;

@@ -10,6 +10,7 @@ export function initCanvas(this: AnnotationTool) {
     );
 
     this.canvas.style.position = "absolute";
+    this.canvas.style.backgroundColor = 'transparent';
     this.canvas.style.top = "0";
     this.canvas.style.left = "0";
     this.canvas.style.zIndex = "1";
