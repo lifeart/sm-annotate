@@ -413,6 +413,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const trueAspectRatio = video.videoWidth / video.videoHeight;
     if (isNaN(rawWidth) || !video.videoWidth || !video.videoHeight) {
       this.isCanvasInitialized = false;
+      this.setCanvasSettings();
       return false;
     }
     const width = Math.min(rawWidth, video.videoWidth);
@@ -426,11 +427,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.canvas.style.height = `${height}px`;
     this.enforcedCanvasSize = { width, height };
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
+    this.setCanvasSettings();
     return true;
   }
   setCanvasSize() {
     if (this._setCanvasSize()) {
-      this.setCanvasSettings();
       this.syncVideoSizes();
       this.redrawFullCanvas();
     }
