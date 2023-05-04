@@ -25,8 +25,6 @@ async function initAnnotator() {
     video.style.height = `${optimalVideoHeight}px`;
   }
 
-
-
   // Video is ready to play
 
   // preload video as blob
@@ -85,8 +83,7 @@ async function initAnnotator() {
 
   tool.setFrameRate(30);
 
-  await tool.addReferenceVideoByURL('./mov_bbb_g.mp4');
-  
+  await tool.addReferenceVideoByURL("./mov_bbb_g.mp4");
 
   requestAnimationFrame(() => {
     tool.setCanvasSize();
@@ -135,24 +132,39 @@ async function initAnnotator() {
     "download"
   ) as HTMLButtonElement;
   const sampleButton = document.getElementById("sample") as HTMLButtonElement;
+  const videoInput = document.getElementById("video") as HTMLInputElement;
+  const refVideoInput = document.getElementById(
+    "ref-video"
+  ) as HTMLInputElement;
 
-  const saveImageButton = document.getElementById(
-    "save-image"
-  ) as HTMLButtonElement;
-
-  saveImageButton.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const imgData = await tool.frameToDataUrl();
-    if (!imgData) {
+  videoInput.addEventListener("change", async (e) => {
+    if (!videoInput.files || videoInput.files.length === 0) {
       return;
     }
-    const currentFrame = tool.activeTimeFrame;
-    // download the image
-    const a = document.createElement("a");
-    a.href = imgData;
-    a.download = `frame_${String(currentFrame).padStart(3, '0')}.png`;
-    a.click();
+    const fps = prompt("Enter FPS", "30");
+    if (!fps) {
+      return;
+    }
+    const file = videoInput.files[0];
+    const blobs = new Blob([file], { type: file.type });
+
+    const mediaUrl = window.URL.createObjectURL(blobs);
+
+    await tool.setVideoUrl(mediaUrl, parseInt(fps, 10));
+  });
+
+  refVideoInput.addEventListener("change", async (e) => {
+    if (!refVideoInput.files || refVideoInput.files.length === 0) {
+      return;
+    }
+    const fps = prompt("Enter FPS", "30");
+    if (!fps) {
+      return;
+    }
+    const file = refVideoInput.files[0];
+    const blobs = new Blob([file], { type: file.type });
+    const url = window.URL.createObjectURL(blobs);
+    await tool.addReferenceVideoByURL(url, parseInt(fps, 10), file.type);
   });
 
   sampleButton.addEventListener("click", (e) => {

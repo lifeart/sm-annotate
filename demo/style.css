@@ -69,7 +69,7 @@ video::-webkit-media-controls-fullscreen-button {
 }
 
 .extra-buttons-container {
-  color:rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.6);
   display: flex;
   max-width: 720px;
   margin: 20 auto;
@@ -85,4 +85,41 @@ video::-webkit-media-controls-fullscreen-button {
   .container {
     margin-top: 40px;
   }
+}
+
+input[type="file"] {
+  height: 0;
+  overflow: hidden;
+  width: 0;
+}
+
+.extra-buttons-container label[for],
+.extra-buttons-container button {
+  background: #424242;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Rubik", sans-serif;
+  font-size: inherit;
+  font-weight: 500;
+  outline: none;
+  margin-bottom: 10px;
+  padding: 10px;
+  position: relative;
+  transition: all 0.3s;
+  vertical-align: middle;
+}
+.extra-buttons-container label[for]:hover,
+.extra-buttons-container button:hover {
+  background-color: #d3460d;
+}
+ul {
+  list-style: none;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 0;
 }

@@ -97,7 +97,7 @@ export class VideoFrameBuffer {
     this.ctx = this.canvas.getContext("2d", {
       willReadFrequently: true,
       alpha: false,
-    });
+    }) as CanvasRenderingContext2D;
   }
   seenFrames = 0;
   isCanvasSizeSet = false;

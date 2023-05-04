@@ -57,6 +57,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     set undoStack(shapes: IShape[][]);
     get pixelRatio(): number;
     constructor(videoElement: HTMLVideoElement | HTMLImageElement);
+    setVideoUrl(url: string, fps?: number): Promise<void>;
     enableVideoFrameBuffer(): void;
     hide(): void;
     showControls(): void;
@@ -83,7 +84,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     addShape(shape: IShape): void;
     get msPerFrame(): number;
     syncVideoSizes(): void;
-    addReferenceVideoByURL(url: string | URL): Promise<void>;
+    addReferenceVideoByURL(url: string, fps?: number, type?: string): Promise<void>;
     hideButton(tool: Tool): void;
     showButton(tool: Tool): void;
     addSingletonShape(shape: IShape): void;

@@ -179,9 +179,26 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.init(videoElement);
   }
 
+  async setVideoUrl(url: string, fps = this.fps) {
+    if (this.videoElement instanceof HTMLImageElement) return;
+    const video = this.videoElement as HTMLVideoElement;
+    video.src = url;
+    await this.videoElement.load();
+    this.setFrameRate(fps);
+    if (this.videoFrameBuffer) {
+      this.videoFrameBuffer.destroy();
+      this.videoFrameBuffer = new VideoFrameBuffer(video, fps, false);
+    }
+    this.setCanvasSize();
+  }
+
   enableVideoFrameBuffer() {
     if (this.videoElement instanceof HTMLImageElement) return;
-    this.videoFrameBuffer = new VideoFrameBuffer(this.videoElement, this.fps, false);
+    this.videoFrameBuffer = new VideoFrameBuffer(
+      this.videoElement,
+      this.fps,
+      false
+    );
   }
 
   hide() {
@@ -384,11 +401,13 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   setCanvasSize() {
-    const videoOffset = this.videoElement.getBoundingClientRect();
-    this.canvas.width = videoOffset.width * this.pixelRatio;
-    this.canvas.height = videoOffset.height * this.pixelRatio;
-    this.canvas.style.width = `${videoOffset.width}px`;
-    this.canvas.style.height = `${videoOffset.height}px`;
+    const style = getComputedStyle(this.videoElement);
+    const width = parseInt(style.width, 10);
+    const height = parseInt(style.height, 10);
+    this.canvas.width = width * this.pixelRatio;
+    this.canvas.height = height * this.pixelRatio;
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
     this.setCanvasSettings();
     this.syncVideoSizes();
@@ -415,17 +434,16 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     });
   }
 
-  async addReferenceVideoByURL(url: string | URL) {
+  async addReferenceVideoByURL(url: string, fps = this.fps, type = "video/mp4") {
     const blob = await fetch(url).then((r) => r.blob());
 
-    const blobs = new Blob([blob], { type: "video/mp4" });
+    const blobs = new Blob([blob], { type });
 
     const mediaUrl = window.URL.createObjectURL(blobs);
 
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
       this.withRefVideo((refVideo) => {
-  
         if (this.isMobile) {
           // for mobile safari we need to have this video visible to be able to play it with normal fps
           refVideo.style.zIndex = "2";
@@ -433,15 +451,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
           refVideo.style.top = "0";
           refVideo.style.left = "0";
           refVideo.style.opacity = "0.25";
-          refVideo.style.width = '20px';
-          refVideo.style.height = '15px';
+          refVideo.style.width = "20px";
+          refVideo.style.height = "15px";
         } else {
           refVideo.style.zIndex = "-1";
           refVideo.style.display = "none";
-          refVideo.style.width = '100px';
-          refVideo.style.height = '70px';
+          refVideo.style.width = "100px";
+          refVideo.style.height = "70px";
         }
-       
+
         refVideo.style.objectFit = "cover";
         refVideo.style.objectPosition = "left top";
         refVideo.muted = true;
@@ -451,10 +469,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         refVideo.controls = false;
         refVideo.loop = true;
         this.videoElement.after(refVideo);
-        this.referenceVideoFrameBuffer = new VideoFrameBuffer(
-          refVideo,
-          this.fps
-        );
+        this.referenceVideoFrameBuffer = new VideoFrameBuffer(refVideo, fps);
         this.referenceVideoFrameBuffer.start();
       });
       this.syncVideoSizes();
@@ -462,16 +477,19 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.referenceVideoFrameBuffer?.destroy();
       this.referenceVideoFrameBuffer = new VideoFrameBuffer(
         this.referenceVideoElement,
-        this.fps
+        fps
       );
       this.referenceVideoFrameBuffer.start();
     }
     this.referenceVideoElement.src = mediaUrl;
-    this.referenceVideoElement.play().then(() => {
-      this.showButton("compare");
-    }).catch(() => {
-      this.hideButton("compare");
-    })
+    this.referenceVideoElement
+      .play()
+      .then(() => {
+        this.showButton("compare");
+      })
+      .catch(() => {
+        this.hideButton("compare");
+      });
   }
 
   hideButton(tool: Tool) {
