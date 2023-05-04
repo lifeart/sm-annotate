@@ -80,6 +80,12 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     removeLastShape(): void;
     handleUndo(): void;
     destroy(): void;
+    isCanvasInitialized: boolean;
+    enforcedCanvasSize: {
+        width: number;
+        height: number;
+    } | null;
+    _setCanvasSize(): boolean;
     setCanvasSize(): void;
     addShape(shape: IShape): void;
     get msPerFrame(): number;

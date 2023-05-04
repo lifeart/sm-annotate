@@ -129,10 +129,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.plannedFn = fn;
   }
   get canvasWidth() {
-    return this.canvas.width / this.pixelRatio;
+    return this.enforcedCanvasSize?.width ?? 0;
   }
   get canvasHeight() {
-    return this.canvas.height / this.pixelRatio;
+    return this.enforcedCanvasSize?.height ?? 0;
   }
   get aspectRatio() {
     return this.canvasWidth / this.canvasHeight;
@@ -297,6 +297,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     this.withVideo((video) => {
       video.requestVideoFrameCallback((_: number, metadata) => {
+        if (!this.isCanvasInitialized) {
+          this._setCanvasSize();
+        }
         this.videoFrameBuffer?.tick(_, metadata);
         this.plannedFn?.();
         this.plannedFn = null;
@@ -400,18 +403,37 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.videoFrameBuffer = null;
   }
 
-  setCanvasSize() {
+  isCanvasInitialized = false;
+  enforcedCanvasSize: { width: number; height: number } | null = null;
+
+  _setCanvasSize() {
     const style = getComputedStyle(this.videoElement);
-    const width = parseInt(style.width, 10);
-    const height = parseInt(style.height, 10);
+    const rawWidth = parseInt(style.width, 10);
+    const video = this.videoElement as HTMLVideoElement;
+    const trueAspectRatio = video.videoWidth / video.videoHeight;
+    if (isNaN(rawWidth) || !video.videoWidth || !video.videoHeight) {
+      this.isCanvasInitialized = false;
+      return false;
+    }
+    const width = Math.min(rawWidth, video.videoWidth);
+    const height = Math.floor(width / trueAspectRatio);
+    video.style.width = `${width}px`;
+    video.style.height = `${height}px`;
+    this.isCanvasInitialized = video.videoWidth > 0 && video.videoHeight > 0;
     this.canvas.width = width * this.pixelRatio;
     this.canvas.height = height * this.pixelRatio;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
+    this.enforcedCanvasSize = { width, height };
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
-    this.setCanvasSettings();
-    this.syncVideoSizes();
-    this.redrawFullCanvas();
+    return true;
+  }
+  setCanvasSize() {
+    if (this._setCanvasSize()) {
+      this.setCanvasSettings();
+      this.syncVideoSizes();
+      this.redrawFullCanvas();
+    }
   }
 
   addShape(shape: IShape) {

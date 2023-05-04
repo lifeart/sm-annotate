@@ -166,15 +166,46 @@ export class CompareToolPlugin
     const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
+    let topCrop = 0;
+    let topOffset = 0;
+    const heightDiff = video2.videoHeight - video1.videoHeight;
+    const widthDiff = video2.videoWidth - video1.videoWidth;
+
+    let xDiff = 0;
+    if (widthDiff > 10) {
+      xDiff = widthDiff / 2;
+    } else if (widthDiff < -10) {
+      xDiff = widthDiff / 2;
+    } else {
+      if (xDiff < 0) {
+        console.log(xDiff);
+      }
+    }
+
+    if (heightDiff === 0) {
+      topCrop = 0;
+    } else if (heightDiff > 0) {
+      topCrop = heightDiff / 2;
+      if (topCrop <= 10) {
+        topCrop = 0;
+      }
+    } else {
+      topOffset = Math.abs(heightDiff / 2);
+      const mainVideoPixelToCanvasRatio = video1.videoHeight / h;
+      topOffset = topOffset / mainVideoPixelToCanvasRatio;
+      if (topOffset <= 10) {
+        topOffset = 0;
+      }
+    }
     if (referenceVideoFrame) {
       this.ctx.drawImage(
         referenceVideoFrame,
         (cropX / w) * video1.videoWidth,
-        0,
+        topCrop,
         normalizedCrop,
         video1.videoHeight, // Source cropping parameters
         cropX,
-        0,
+        topOffset,
         cropWidth1,
         h // Destination position and size
       );
