@@ -161,9 +161,6 @@ export class CompareToolPlugin
 
     // this.ctx.filter = "contrast(140%) blur(1px)";
 
-    const cropX = x; // The X coordinate of the vertical crop line
-    const cropWidth1 = w - cropX;
-    const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
     this.ctx.globalAlpha = this.rightOpacity;
 
     let topCrop = 0;
@@ -171,14 +168,14 @@ export class CompareToolPlugin
     const heightDiff = video2.videoHeight - video1.videoHeight;
     const widthDiff = video2.videoWidth - video1.videoWidth;
 
-    let xDiff = 0;
-    if (widthDiff > 10) {
-      xDiff = widthDiff / 2;
-    } else if (widthDiff < -10) {
-      xDiff = widthDiff / 2;
-    } else {
-      if (xDiff < 0) {
-        console.log(xDiff);
+    // put small reference video in X center;
+    let xOffset = 0;
+    if (widthDiff < -10) {
+      const mainVideoPixelToCanvasRatio = video1.videoWidth / w;
+      xOffset = Math.abs(widthDiff / 2);
+      xOffset = xOffset / mainVideoPixelToCanvasRatio;
+      if (xOffset <= 10) {
+        xOffset = 0;
       }
     }
 
@@ -197,6 +194,11 @@ export class CompareToolPlugin
         topOffset = 0;
       }
     }
+
+    const cropX = x - xOffset; // The X coordinate of the vertical crop line
+    const cropWidth1 = w - cropX;
+    const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
+
     if (referenceVideoFrame) {
       this.ctx.drawImage(
         referenceVideoFrame,
@@ -204,7 +206,7 @@ export class CompareToolPlugin
         topCrop,
         normalizedCrop,
         video1.videoHeight, // Source cropping parameters
-        cropX,
+        cropX + xOffset,
         topOffset,
         cropWidth1,
         h // Destination position and size
