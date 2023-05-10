@@ -1,3 +1,5 @@
+import { vFromRGB } from "./image-grayscale";
+
 let fId = 0;
 export class HistogramFrame extends Array<number> {
   id: number;
@@ -16,9 +18,11 @@ export function sobelOperator(imgData: ImageData) {
   // convert to grayscale
   let ii = 0;
   for (let i = 0; i < imgData.data.length; i += 4) {
-    let gray =
-      (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2]) / 3;
-    grayscale[ii] = gray;
+    grayscale[ii] = vFromRGB(
+      imgData.data[i],
+      imgData.data[i + 1],
+      imgData.data[i + 2]
+    );
     ii++;
   }
 
