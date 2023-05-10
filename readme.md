@@ -3,7 +3,7 @@
 This project provides an annotation tool for HTML video and image elements. The tool allows users to draw and annotate over video and images using various drawing tools, including curves, rectangles, ellipses, and texts. Users can also customize the color and stroke size of their annotations.
 
 
-Demo: https://codepen.io/lifeart/pen/xxyxKYr
+Demo: [https://lifeart.github.io/sm-annotate/](lifeart.github.io/sm-annotate/)
 
 
 ## Features
@@ -17,6 +17,7 @@ Demo: https://codepen.io/lifeart/pen/xxyxKYr
 * 🖱️ Event handling for pointer events (mouse and touch).
 * 🎞️ Playback of annotated frames as video.
 * 💾 Saving the current frame or all frames with annotations.
+* 🎞️ Video Overlay comparsion
 
 ## Additional Benefits
 
