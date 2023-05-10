@@ -1,7 +1,4 @@
-declare class HistogramFrame extends Array<number> {
-    id: number;
-    constructor();
-}
+import { HistogramFrame } from "./sobel-operator";
 export declare class VideoFrameBuffer {
     isDestroyed: boolean;
     autoHide: boolean;
@@ -37,4 +34,3 @@ export declare class VideoFrameBuffer {
     get totalFrames(): number;
     frameNumberFromTime(time: number): number;
 }
-export {};
