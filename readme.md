@@ -3,7 +3,7 @@
 This project provides an annotation tool for HTML video and image elements. The tool allows users to draw and annotate over video and images using various drawing tools, including curves, rectangles, ellipses, and texts. Users can also customize the color and stroke size of their annotations.
 
 
-Demo: [https://lifeart.github.io/sm-annotate/](lifeart.github.io/sm-annotate/)
+Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 
 
 ## Features
