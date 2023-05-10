@@ -188,6 +188,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (this.videoFrameBuffer) {
       this.videoFrameBuffer.destroy();
       this.videoFrameBuffer = new VideoFrameBuffer(video, fps, false);
+      this.videoFrameBuffer.isMobile = this.isMobile;
     }
     this.setCanvasSize();
   }
@@ -199,6 +200,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.fps,
       false
     );
+    this.videoFrameBuffer.isMobile = this.isMobile;
   }
 
   hide() {
@@ -493,6 +495,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         refVideo.loop = true;
         this.videoElement.after(refVideo);
         this.referenceVideoFrameBuffer = new VideoFrameBuffer(refVideo, fps);
+        this.referenceVideoFrameBuffer.isMobile = this.isMobile;
         this.referenceVideoFrameBuffer.start();
       });
       this.syncVideoSizes();
@@ -502,6 +505,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         this.referenceVideoElement,
         fps
       );
+      this.referenceVideoFrameBuffer.isMobile = this.isMobile;
       this.referenceVideoFrameBuffer.start();
     }
     this.referenceVideoElement.src = mediaUrl;
@@ -893,7 +897,13 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.hasGlobalOverlays) {
       this.clearCanvas();
     }
-    this.addVideoOverlay();
+    if (this.isMobile) {
+      if (!this.hasGlobalOverlays) {
+        this.addVideoOverlay();
+      }
+    } else {
+      this.addVideoOverlay();
+    }
     this.drawShapesOverlay();
     this.addFrameSquareOverlay();
     this.addProgressBarOverlay();

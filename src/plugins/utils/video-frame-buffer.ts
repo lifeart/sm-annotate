@@ -1,9 +1,14 @@
-import { HistogramFrame, calculateSimilarity, sobelOperator } from "./sobel-operator";
+import {
+  HistogramFrame,
+  calculateSimilarity,
+  sobelOperator,
+} from "./sobel-operator";
 
 const SIGNATURE_SCALE = 64;
 export class VideoFrameBuffer {
   isDestroyed = false;
   autoHide = true;
+  isMobile = false;
   transformCanvas!: HTMLCanvasElement;
   transformCanvasCtx!: CanvasRenderingContext2D;
   constructor(video: HTMLVideoElement, fps: number, autoHide = true) {
@@ -115,7 +120,9 @@ export class VideoFrameBuffer {
       createImageBitmap(imageData, 0, 0, this.width, this.height).then(
         async (imageBitmap) => {
           this.setFrame(frameNumber, imageBitmap);
-          this.setHistogram(frameNumber, this.toHistogram(imageBitmap));
+          if (!this.isMobile) {
+            this.setHistogram(frameNumber, this.toHistogram(imageBitmap));
+          }
         }
       );
     } else {

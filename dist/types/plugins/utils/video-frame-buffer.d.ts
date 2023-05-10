@@ -2,6 +2,7 @@ import { HistogramFrame } from "./sobel-operator";
 export declare class VideoFrameBuffer {
     isDestroyed: boolean;
     autoHide: boolean;
+    isMobile: boolean;
     transformCanvas: HTMLCanvasElement;
     transformCanvasCtx: CanvasRenderingContext2D;
     constructor(video: HTMLVideoElement, fps: number, autoHide?: boolean);

@@ -158,7 +158,7 @@ export class CompareToolPlugin
     let referenceVideoFrameNumber = frameNumber;
 
     const CUSTOM_FSYNC =
-      widthDiff > video1.videoWidth && heightDiff > video1.videoHeight;
+      widthDiff > video1.videoWidth && heightDiff > video1.videoHeight && !this.annotationTool.isMobile;
 
     if (CUSTOM_FSYNC) {
       const bestFrame =
@@ -184,8 +184,8 @@ export class CompareToolPlugin
       this.annotationTool.videoFrameBuffer?.getFrame(frameNumber);
 
     if (isMobile) {
+      this.ctx.imageSmoothingQuality = "low";
       const normalizedX = x / w;
-
       const cropWidth = x;
       this.ctx.drawImage(
         videoFrame ?? video1,
@@ -273,6 +273,9 @@ export class CompareToolPlugin
     const normalizedCrop = (cropWidth1 / w) * sourceWidth;
 
     if (referenceVideoFrame) {
+      if (isMobile) {
+        this.ctx.imageSmoothingQuality = "low";
+      }
       this.ctx.drawImage(
         referenceVideoFrame,
         (cropX / w) * sourceWidth,
