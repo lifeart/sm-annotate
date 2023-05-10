@@ -3,6 +3,7 @@ import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 export interface ICompare extends IShapeBase {
   type: "compare";
   x: number;
+  disabled: boolean;
 }
 
 const ACTIVE_OPACITY = 0.7;
@@ -44,6 +45,7 @@ export class CompareToolPlugin
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
+    this.disablePreviousCompare();
     this.onPointerMove(event);
   }
   onPointerMove(event: PointerEvent) {
@@ -85,15 +87,34 @@ export class CompareToolPlugin
       strokeStyle: this.ctx.strokeStyle,
       fillStyle: this.ctx.fillStyle,
       lineWidth: this.ctx.lineWidth,
+      disabled: false,
       x: this.comparisonLine,
     });
     this.isDrawing = false;
   }
 
-  save(shape: ICompare) {
+  removePreviousCompare() {
     this.annotationTool.globalShapes = this.annotationTool.globalShapes.filter(
       (s) => s.type !== "compare"
     );
+  }
+
+  disablePreviousCompare() {
+    this.annotationTool.globalShapes = this.annotationTool.globalShapes.map(
+      (s) => {
+        if (s.type === "compare") {
+          return {
+            ...s,
+            disabled: true,
+          };
+        }
+        return s;
+      }
+    );
+  }
+
+  save(shape: ICompare) {
+    this.removePreviousCompare();
     const serialized = this.annotationTool.serialize([shape])[0] as ICompare;
     if (serialized.x < 0.05 || serialized.x > 0.95) {
       return;
@@ -119,6 +140,9 @@ export class CompareToolPlugin
     const h = this.annotationTool.canvasHeight;
     const x = shape.x;
 
+    const heightDiff = video2.videoHeight - video1.videoHeight;
+    const widthDiff = video2.videoWidth - video1.videoWidth;
+
     const isMobile = this.annotationTool.isMobile;
 
     // const strokeStyle = this.ctx.strokeStyle;
@@ -129,13 +153,35 @@ export class CompareToolPlugin
     const frameNumber =
       this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
         video1.currentTime
-      );
-    const referenceVideoFrame =
-      this.annotationTool.referenceVideoFrameBuffer?.getFrame(frameNumber || 0);
+      ) ?? 1;
 
-    const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(
-      frameNumber || 0
-    );
+    let referenceVideoFrameNumber = frameNumber;
+
+    const CUSTOM_FSYNC =
+      widthDiff > video1.videoWidth && heightDiff > video1.videoHeight;
+
+    if (CUSTOM_FSYNC) {
+      const bestFrame =
+        this.annotationTool.referenceVideoFrameBuffer?.getFrameNumberBySignature(
+          this.annotationTool.videoFrameBuffer?.getHistogram(frameNumber) ??
+            null,
+          frameNumber
+        ) ?? frameNumber;
+
+      const fDiff = Math.abs(frameNumber - bestFrame);
+
+      if (fDiff >= 1 && fDiff <= 3) {
+        referenceVideoFrameNumber = bestFrame;
+      }
+    }
+
+    const referenceVideoFrame =
+      this.annotationTool.referenceVideoFrameBuffer?.getFrame(
+        referenceVideoFrameNumber
+      );
+
+    const videoFrame =
+      this.annotationTool.videoFrameBuffer?.getFrame(frameNumber);
 
     if (isMobile) {
       const normalizedX = x / w;
@@ -165,47 +211,74 @@ export class CompareToolPlugin
 
     let topCrop = 0;
     let topOffset = 0;
-    const heightDiff = video2.videoHeight - video1.videoHeight;
-    const widthDiff = video2.videoWidth - video1.videoWidth;
+
+    const ar1 = video1.videoWidth / video1.videoHeight;
+    const ar2 = video2.videoWidth / video2.videoHeight;
+    const arDiff = Math.abs(ar1 - ar2);
+    const isAspectRatioDifferent = arDiff > 0.1;
+    const acceptablePixelDiff = 10;
+    const isHeightDifferent = Math.abs(heightDiff) > acceptablePixelDiff;
+    // 0.05 is the threshold for aspect ratio difference
+
+    let sourceWidth = video1.videoWidth;
+    let sourceHeight = video1.videoHeight;
 
     // put small reference video in X center;
     let xOffset = 0;
-    if (widthDiff < -10) {
-      const mainVideoPixelToCanvasRatio = video1.videoWidth / w;
-      xOffset = Math.abs(widthDiff / 2);
-      xOffset = xOffset / mainVideoPixelToCanvasRatio;
-      if (xOffset <= 10) {
-        xOffset = 0;
+    if (widthDiff < -acceptablePixelDiff) {
+      if (isAspectRatioDifferent) {
+        const mainVideoPixelToCanvasRatio = video1.videoWidth / w;
+        xOffset = Math.abs(widthDiff / 2);
+        xOffset = xOffset / mainVideoPixelToCanvasRatio;
+        if (xOffset <= acceptablePixelDiff) {
+          xOffset = 0;
+        }
+      } else {
+        sourceWidth = video2.videoWidth;
       }
+    } else if (widthDiff > acceptablePixelDiff) {
+      sourceWidth = video2.videoWidth;
     }
 
     if (heightDiff === 0) {
       topCrop = 0;
     } else if (heightDiff > 0) {
-      topCrop = heightDiff / 2;
-      if (topCrop <= 10) {
-        topCrop = 0;
+      if (!isAspectRatioDifferent) {
+        sourceHeight = isHeightDifferent
+          ? video2.videoHeight
+          : video1.videoHeight;
+      } else {
+        topCrop = heightDiff / 2;
+        if (topCrop <= acceptablePixelDiff) {
+          topCrop = 0;
+        }
       }
     } else {
-      topOffset = Math.abs(heightDiff / 2);
-      const mainVideoPixelToCanvasRatio = video1.videoHeight / h;
-      topOffset = topOffset / mainVideoPixelToCanvasRatio;
-      if (topOffset <= 10) {
-        topOffset = 0;
+      if (!isAspectRatioDifferent) {
+        sourceHeight = isHeightDifferent
+          ? video2.videoHeight
+          : video1.videoHeight;
+      } else {
+        topOffset = Math.abs(heightDiff / 2);
+        const mainVideoPixelToCanvasRatio = video1.videoHeight / h;
+        topOffset = topOffset / mainVideoPixelToCanvasRatio;
+        if (topOffset <= acceptablePixelDiff) {
+          topOffset = 0;
+        }
       }
     }
 
     const cropX = x - xOffset; // The X coordinate of the vertical crop line
     const cropWidth1 = w - cropX;
-    const normalizedCrop = (cropWidth1 / w) * video1.videoWidth;
+    const normalizedCrop = (cropWidth1 / w) * sourceWidth;
 
     if (referenceVideoFrame) {
       this.ctx.drawImage(
         referenceVideoFrame,
-        (cropX / w) * video1.videoWidth,
+        (cropX / w) * sourceWidth,
         topCrop,
         normalizedCrop,
-        video1.videoHeight, // Source cropping parameters
+        sourceHeight, // Source cropping parameters
         cropX + xOffset,
         topOffset,
         cropWidth1,
@@ -220,6 +293,9 @@ export class CompareToolPlugin
   }
 
   draw(shape: ICompare) {
+    if (shape.disabled) {
+      return;
+    }
     const video1 = this.annotationTool.videoElement as HTMLVideoElement;
     const video2 = this.annotationTool.referenceVideoElement;
     if (!video1 || !video2) {

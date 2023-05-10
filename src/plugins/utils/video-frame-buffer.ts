@@ -1,11 +1,118 @@
+const SIGNATURE_SCALE = 64;
+let fId = 0;
+class HistogramFrame extends Array<number> {
+  id: number;
+  constructor() {
+    super(...arguments);
+    this.id = fId++;
+  }
+}
+
+function sobelOperator(imgData: ImageData) {
+  let width = imgData.width;
+  let height = imgData.height;
+  let grayscale = new Array(width * height);
+  let edges = new HistogramFrame();
+
+  // convert to grayscale
+  let ii = 0;
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    let gray =
+      (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2]) / 3;
+    grayscale[ii] = gray;
+    ii++;
+  }
+
+  // apply sobel operator
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      let i = y * width + x;
+      let gx =
+        -grayscale[i - width - 1] +
+        grayscale[i - width + 1] -
+        2 * grayscale[i - 1] +
+        2 * grayscale[i + 1] -
+        grayscale[i + width - 1] +
+        grayscale[i + width + 1];
+      let gy =
+        grayscale[i - width - 1] +
+        2 * grayscale[i - width] +
+        grayscale[i - width + 1] -
+        grayscale[i + width - 1] -
+        2 * grayscale[i + width] -
+        grayscale[i + width + 1];
+      let magnitude = Math.sqrt(gx * gx + gy * gy);
+      edges.push(magnitude);
+    }
+  }
+
+  return edges;
+}
+
+const simCache = new Map<string, number>();
+const cacheKeyForArrays = (arr1: HistogramFrame, arr2: HistogramFrame) => {
+  return Math.max(arr1.id, arr2.id) + "-" + Math.min(arr1.id, arr2.id);
+}
+function calculateSimilarity(edges1: HistogramFrame, edges2: HistogramFrame) {
+  const key = cacheKeyForArrays(edges1, edges2);
+  if (simCache.has(key)) {
+    return simCache.get(key)!;
+  }
+  let score = 0;
+  for (let i = 0; i < edges1.length; i++) {
+    score += (edges1[i] - edges2[i]) * (edges1[i] - edges2[i]);
+  }
+  let result = 1 / (1 + Math.sqrt(score));
+  simCache.set(key, result);
+  return result;
+}
+
 export class VideoFrameBuffer {
   isDestroyed = false;
   autoHide = true;
+  transformCanvas!: HTMLCanvasElement;
+  transformCanvasCtx!: CanvasRenderingContext2D;
   constructor(video: HTMLVideoElement, fps: number, autoHide = true) {
     this.video = video;
     this.fps = fps;
     this.autoHide = autoHide;
     this.createCanvas();
+    this.createTransformCanvas();
+  }
+  createTransformCanvas() {
+    this.transformCanvas = document.createElement("canvas");
+    this.transformCanvasCtx = this.canvas.getContext("2d", {
+      willReadFrequently: true,
+      alpha: false,
+    }) as CanvasRenderingContext2D;
+    this.transformCanvas.width = SIGNATURE_SCALE;
+    this.transformCanvas.height = SIGNATURE_SCALE;
+  }
+  normalizeImage(image: ImageBitmap): ImageData {
+    this.transformCanvasCtx.drawImage(
+      image,
+      0,
+      0,
+      image.width,
+      image.height,
+      0,
+      0,
+      SIGNATURE_SCALE,
+      SIGNATURE_SCALE
+    );
+    return this.transformCanvasCtx.getImageData(
+      0,
+      0,
+      SIGNATURE_SCALE,
+      SIGNATURE_SCALE
+    );
+  }
+  toHistogram(image: ImageBitmap) {
+    return this.imageHistogram(this.normalizeImage(image));
+  }
+  imageHistogram(image: ImageData): HistogramFrame {
+    let grayscaleHistogram = sobelOperator(image);
+    return grayscaleHistogram;
   }
   start() {
     this.addRequestFrameCallback();
@@ -74,6 +181,7 @@ export class VideoFrameBuffer {
       createImageBitmap(imageData, 0, 0, this.width, this.height).then(
         async (imageBitmap) => {
           this.setFrame(frameNumber, imageBitmap);
+          this.setHistogram(frameNumber, this.toHistogram(imageBitmap));
         }
       );
     } else {
@@ -111,6 +219,7 @@ export class VideoFrameBuffer {
   }
   fps: number;
   frames: Map<number, ImageBitmap> = new Map();
+  histograms: Map<number, HistogramFrame> = new Map();
   video!: HTMLVideoElement;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
@@ -130,8 +239,43 @@ export class VideoFrameBuffer {
       return null;
     }
   }
+  getFrameNumberBySignature(signature: HistogramFrame | null, refFrameNumber: number) {
+    if (!signature) {
+      return refFrameNumber;
+    }
+    let bestSimilarityScore = 0;
+    let bestFrameNumber = refFrameNumber;
+    let frameNumbers = [
+      refFrameNumber - 3,
+      refFrameNumber - 2,
+      refFrameNumber - 1,
+      refFrameNumber,
+      refFrameNumber + 1,
+      refFrameNumber + 2,
+      refFrameNumber + 3,
+    ].filter(
+      (frameNumber) => frameNumber > 0 && frameNumber <= this.totalFrames
+    );
+    frameNumbers.forEach((frameNumber) => {
+      const histogram = this.getHistogram(frameNumber);
+      if (histogram) {
+        const result = calculateSimilarity(signature, histogram);
+        if (result > bestSimilarityScore) {
+          bestSimilarityScore = result;
+          bestFrameNumber = frameNumber;
+        }
+      }
+    });
+    return bestFrameNumber;
+  }
   setFrame(frame: number, data: ImageBitmap) {
     this.frames.set(frame, data);
+  }
+  setHistogram(frame: number, data: HistogramFrame) {
+    this.histograms.set(frame, data);
+  }
+  getHistogram(frame: number) {
+    return this.histograms.get(frame) ?? null;
   }
   get totalFrames() {
     return Math.round(this.video.duration * this.fps);

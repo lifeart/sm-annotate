@@ -2,6 +2,7 @@ import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 export interface ICompare extends IShapeBase {
     type: "compare";
     x: number;
+    disabled: boolean;
 }
 export declare class CompareToolPlugin extends BasePlugin<ICompare> implements ToolPlugin<ICompare> {
     name: string;
@@ -16,6 +17,8 @@ export declare class CompareToolPlugin extends BasePlugin<ICompare> implements T
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     onPointerUp(): void;
+    removePreviousCompare(): void;
+    disablePreviousCompare(): void;
     save(shape: ICompare): void;
     drawDelimiter(shape: ICompare): void;
     drawShape(shape: ICompare): void;
