@@ -30,10 +30,11 @@ export class AudioPeaksPlugin
     annotationTool.setVideoBlob = (blob: Blob) => {
       const fileReader = new FileReader();
       fileReader.onload = (event) => {
-        setTimeout(() => {
-          this.init(event.target?.result as ArrayBuffer);
-        }, 3000);
+        this.init(event.target?.result as ArrayBuffer);
       };
+      fileReader.onerror = (error) => {
+        console.error(error);
+      }
       fileReader.readAsArrayBuffer(blob);
     };
   }
@@ -70,6 +71,8 @@ export class AudioPeaksPlugin
       });
       this.initCanvas();
       console.log(peaks);
+    }, (e) => {
+        console.error(e);
     });
   }
   initCanvas() {
