@@ -154,6 +154,8 @@ async function initAnnotator() {
     const mediaUrl = window.URL.createObjectURL(blobs);
 
     await tool.setVideoUrl(mediaUrl, parseInt(fps, 10));
+    tool.setVideoBlob(file);
+
   });
 
   refVideoInput.addEventListener("change", async (e) => {

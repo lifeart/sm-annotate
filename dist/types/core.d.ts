@@ -29,6 +29,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     }[];
     prevFrame(): void;
     nextFrame(): void;
+    removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
     get selectedStrokeSize(): number;

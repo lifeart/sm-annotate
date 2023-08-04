@@ -65,7 +65,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.playbackFrame = newFrame;
     }
   }
-
+  removeGlobalShape(shapeType: IShape['type']) {
+    this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
+  }
   addGlobalShape(shape: IShape) {
     this.globalShapes.push(shape);
   }

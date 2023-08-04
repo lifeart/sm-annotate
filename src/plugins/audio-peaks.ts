@@ -61,6 +61,7 @@ export class AudioPeaksPlugin
       });
       this.props.bits = peaks.bits;
       //   peaks.data[0][0]
+      this.annotationTool.removeGlobalShape('audio-peaks');
       this.annotationTool.addGlobalShape({
         x: 0,
         y: 0,
@@ -167,6 +168,13 @@ export class AudioPeaksPlugin
     return this.annotationTool.progressBarCoordinates;
   }
   drawOnCanvas() {
+    this.drawCtx.clearRect(
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height
+      );
+  
     const { peaks, bits, waveHeight, theme } = this.props;
     const cc = this.drawCtx;
     let offset = 0;
@@ -179,7 +187,11 @@ export class AudioPeaksPlugin
     const peakSegmentLength =
       this.progressBarCoordinates.width * this.pixelRatio;
 
+    // cc.fillStyle = 'white';
+    // theme.waveOutlineColor;
     cc.fillStyle = theme.waveOutlineColor;
+
+
     for (let i = 0; i < peakSegmentLength; i += 1) {
       const minPeak = peaks[(i + offset) * 2] / maxValue;
       const maxPeak = peaks[(i + offset) * 2 + 1] / maxValue;
