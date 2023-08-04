@@ -15,9 +15,9 @@ export function createMuteUnmuteButton(
   button.style.margin = "5px";
 
   if (video.muted || video.volume === 0) {
-    button.innerHTML = unmuteIcon;
-  } else {
     button.innerHTML = muteIcon;
+  } else {
+    button.innerHTML = unmuteIcon;
   }
 
   tool.addEvent(video, "volumechange", () => {
@@ -31,6 +31,7 @@ export function createMuteUnmuteButton(
   tool.addEvent(button, "click", () => {
     if (video.muted) {
       video.muted = false;
+      return;
     }
     if (video.volume === 0) {
       video.volume = 1;

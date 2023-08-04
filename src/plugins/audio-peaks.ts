@@ -7,13 +7,13 @@ export interface IAudioPeaks extends IShapeBase {
 }
 
 function findMinMaxNumbers(array: Int8Array): [number, number] {
-    let min = array[0];
-    let max = array[0];
-    for (let i = 1; i < array.length; i++) {
-        if (array[i] < min) min = array[i];
-        if (array[i] > max) max = array[i];
-    }
-    return [min, max];
+  let min = array[0];
+  let max = array[0];
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] < min) min = array[i];
+    if (array[i] > max) max = array[i];
+  }
+  return [min, max];
 }
 
 export class AudioPeaksPlugin
@@ -21,8 +21,12 @@ export class AudioPeaksPlugin
   implements ToolPlugin<IAudioPeaks>
 {
   name = "audio-peaks";
+  canvas = document.createElement("canvas");
+  drawCtx!: CanvasRenderingContext2D;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   constructor(annotationTool: AnnotationTool) {
     super(annotationTool);
+    this.drawCtx = this.canvas.getContext("2d")!;
     annotationTool.setVideoBlob = (blob: Blob) => {
       const fileReader = new FileReader();
       fileReader.onload = (event) => {
@@ -48,12 +52,12 @@ export class AudioPeaksPlugin
       const maxNumber = Math.pow(2, peaks.bits - 1) - 1;
       const minNumber = -Math.pow(2, peaks.bits - 1);
       this.props.peaks = peaks.data[0].map((peak) => {
-            if (peak < 0) {
-                return Math.round((peak / min) * minNumber);
-            } else {
-                return Math.round((peak / max) * maxNumber);
-            }
-        });
+        if (peak < 0) {
+          return Math.round((peak / min) * minNumber);
+        } else {
+          return Math.round((peak / max) * maxNumber);
+        }
+      });
       this.props.bits = peaks.bits;
       //   peaks.data[0][0]
       this.annotationTool.addGlobalShape({
@@ -64,8 +68,20 @@ export class AudioPeaksPlugin
         lineWidth: 1,
         type: "audio-peaks",
       });
+      this.initCanvas();
       console.log(peaks);
     });
+  }
+  initCanvas() {
+    this.canvas.width =
+      this.annotationTool.progressBarCoordinates.width *
+      this.annotationTool.pixelRatio;
+    this.canvas.height = this.props.waveHeight * this.annotationTool.pixelRatio;
+    this.drawCtx.scale(
+      this.annotationTool.pixelRatio,
+      this.annotationTool.pixelRatio
+    );
+    this.drawOnCanvas();
   }
   move(shape: IAudioPeaks, dx: number, dy: number) {
     shape.x += dx;
@@ -93,11 +109,10 @@ export class AudioPeaksPlugin
     return;
   }
   props = {
-    scale: 1,
     peaks: new Int8Array() as Int8Array | Int16Array | Int32Array,
     theme: {
       // color of the waveform outline
-      waveOutlineColor: 'rgba(255,192,203,0.7)',
+      waveOutlineColor: "rgba(255,192,203,0.7)",
       waveFillColor: "grey",
       waveProgressColor: "orange",
     },
@@ -105,60 +120,71 @@ export class AudioPeaksPlugin
     bits: 16,
   };
   draw(shape: IAudioPeaks) {
-    const maybeVideoElement =  this.annotationTool.videoElement as HTMLVideoElement;
+    const maybeVideoElement = this.annotationTool
+      .videoElement as HTMLVideoElement;
     if (!maybeVideoElement || maybeVideoElement.tagName !== "VIDEO") {
-        return;
+      return;
     }
 
     const isMuded = maybeVideoElement.muted;
     if (isMuded || maybeVideoElement.volume === 0) {
-        return;
+      return;
     }
-    this.ctx.clearRect(0, 0, this.annotationTool.canvasWidth, this.annotationTool.canvasHeight)
-    // console.log("draw", shape);
-    const { peaks, bits, waveHeight, theme } = this.props;
+
+    this.ctx.clearRect(
+      0,
+      0,
+      this.annotationTool.canvasWidth,
+      this.annotationTool.canvasHeight
+    );
+
+    const { waveHeight, theme } = this.props;
     const cc = this.ctx;
-    let offset = 0;
-    let shift = this.annotationTool.progressBarCoordinates.x;
 
     const h2 = waveHeight / 2;
-    const maxValue = 2 ** (bits - 1);
-    let y = this.annotationTool.progressBarCoordinates.y - 40;
+    let y = this.progressBarCoordinates.y - 40;
 
-    cc.fillStyle = theme.waveOutlineColor;
-
-    const peakSegmentLength = this.annotationTool.progressBarCoordinates.width * this.annotationTool.pixelRatio;
-
-    const { x, width } = this.annotationTool.progressBarCoordinates;
+    const { x, width } = this.progressBarCoordinates;
     const currentFrame = this.annotationTool.playbackFrame;
     const totalFrames = maybeVideoElement.duration * this.annotationTool.fps;
 
     const currentFrameCoordinate =
       Math.ceil((currentFrame / totalFrames) * width) + x;
-  
 
+    //call its drawImage() function passing it the source canvas directly
+    this.ctx.drawImage(this.canvas, x, y, width, waveHeight);
+    cc.fillStyle = theme.waveProgressColor;
+
+    cc.fillRect(currentFrameCoordinate, y + 0, 1, h2 * 2);
+  }
+  get pixelRatio() {
+    return this.annotationTool.pixelRatio;
+  }
+  get progressBarCoordinates() {
+    return this.annotationTool.progressBarCoordinates;
+  }
+  drawOnCanvas() {
+    const { peaks, bits, waveHeight, theme } = this.props;
+    const cc = this.drawCtx;
+    let offset = 0;
+    let shift = 0;
+
+    const h2 = waveHeight / 2;
+    const maxValue = 2 ** (bits - 1);
+    let y = 0;
+
+    const peakSegmentLength =
+      this.progressBarCoordinates.width * this.pixelRatio;
+
+    cc.fillStyle = theme.waveOutlineColor;
     for (let i = 0; i < peakSegmentLength; i += 1) {
       const minPeak = peaks[(i + offset) * 2] / maxValue;
       const maxPeak = peaks[(i + offset) * 2 + 1] / maxValue;
 
       const min = Math.abs(minPeak * h2);
       const max = Math.abs(maxPeak * h2);
-      if (i + shift === currentFrameCoordinate) {
-        cc.fillStyle = theme.waveProgressColor;
-        cc.fillRect(i + shift, y + 0, 1, h2 * 2);
-      } else {
-        cc.fillStyle = theme.waveOutlineColor;
-        cc.fillRect(i + shift, y + 0 + h2 - max, 1, max + min);
 
-      }
-
-      // inverse this two fill rects:
-
-      // draw max
-    //   cc.fillRect(i + shift, 0, 1, h2 - max);
-      // draw min
-    //   cc.fillRect(i + shift, h2 + min, 1, h2 - min);
-      
+      cc.fillRect(i + shift, y + 0 + h2 - max, 1, max + min);
     }
   }
 }
