@@ -74,12 +74,15 @@ async function initAnnotator() {
   }
 
   const blobs = new Blob([blob], { type: "video/mp4" });
+  const bl = new Blob([blob], { type: "video/mp4" });
 
   video.src = window.URL.createObjectURL(blobs);
 
   await loadPromise;
 
   const tool = new SmAnnotate(video);
+
+  tool.setVideoBlob(bl);
 
   tool.setFrameRate(30);
 

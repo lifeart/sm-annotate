@@ -8,6 +8,7 @@ import { EraserToolPlugin, IEraser } from "./eraser";
 import { IMove, MoveToolPlugin } from "./move";
 import { IImage, ImageToolPlugin } from "./image";
 import { ICompare, CompareToolPlugin } from "./compare";
+import { IAudioPeaks, AudioPeaksPlugin } from "./audio-peaks";
 
 export type IShape =
   | IRectangle
@@ -19,7 +20,8 @@ export type IShape =
   | ICurve
   | IMove
   | IImage
-  | ICompare;
+  | ICompare
+  | IAudioPeaks;
 
 export type Tool = IShape["type"];
 
@@ -34,9 +36,10 @@ export interface ShapeMap {
   move: IMove;
   image: IImage;
   compare: ICompare;
+  "audio-peaks": IAudioPeaks;
 }
 
-export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin;
+export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin;
 
 export const plugins = [
     RectangleToolPlugin,
@@ -49,4 +52,5 @@ export const plugins = [
     MoveToolPlugin,
     ImageToolPlugin,
     CompareToolPlugin,
+    AudioPeaksPlugin,
 ]
