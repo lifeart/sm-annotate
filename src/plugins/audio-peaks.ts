@@ -128,6 +128,12 @@ export class AudioPeaksPlugin
     waveHeight: 40,
     bits: 16,
   };
+  reset() {
+    this.clearLocalCanvas();
+    this.props.peaks = new Int8Array();
+    this.annotationTool.removeGlobalShape("audio-peaks");
+    delete this.annotationTool.setVideoBlob;
+  }
   draw(_: IAudioPeaks) {
     const maybeVideoElement = this.annotationTool
       .videoElement as HTMLVideoElement;
