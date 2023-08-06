@@ -30,6 +30,9 @@ export class BasePlugin<T extends IShapeBase> {
   constructor(annotationTool: AnnotationTool) {
     this.annotationTool = annotationTool;
   }
+  on(event: string, arg: unknown) {
+    // noop
+  }
   get ctx() {
     return this.annotationTool.ctx;
   }

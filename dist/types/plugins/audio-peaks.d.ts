@@ -1,5 +1,6 @@
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 import { AnnotationTool } from "../core";
+import type { PeakData } from "webaudio-peaks";
 export interface IAudioPeaks extends IShapeBase {
     x: number;
     y: number;
@@ -9,6 +10,10 @@ export declare class AudioPeaksPlugin extends BasePlugin<IAudioPeaks> implements
     canvas: HTMLCanvasElement;
     drawCtx: CanvasRenderingContext2D;
     constructor(annotationTool: AnnotationTool);
+    onVideoBlobSet(blob: Blob): Promise<void>;
+    on(event: string, arg: unknown): void;
+    extractPeaks(decodedData: AudioBuffer): Promise<PeakData>;
+    setProps(peaks: PeakData): void;
     init(blob: ArrayBuffer): Promise<void>;
     initCanvas(): void;
     move(shape: IAudioPeaks, dx: number, dy: number): IAudioPeaks;
@@ -26,7 +31,8 @@ export declare class AudioPeaksPlugin extends BasePlugin<IAudioPeaks> implements
         waveHeight: number;
         bits: number;
     };
-    draw(shape: IAudioPeaks): void;
+    reset(): void;
+    draw(_: IAudioPeaks): void;
     get pixelRatio(): number;
     get progressBarCoordinates(): {
         x: number;
@@ -34,5 +40,6 @@ export declare class AudioPeaksPlugin extends BasePlugin<IAudioPeaks> implements
         width: number;
         height: number;
     };
+    clearLocalCanvas(): void;
     drawOnCanvas(): void;
 }

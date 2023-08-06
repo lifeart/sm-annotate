@@ -1,5 +1,6 @@
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 import { AnnotationTool } from "../core";
+import type { PeakData } from "webaudio-peaks";
 
 export interface IAudioPeaks extends IShapeBase {
   x: number;
@@ -27,65 +28,66 @@ export class AudioPeaksPlugin
   constructor(annotationTool: AnnotationTool) {
     super(annotationTool);
     this.drawCtx = this.canvas.getContext("2d")!;
-    annotationTool.setVideoBlob = (blob: Blob) => {
-      const fileReader = new FileReader();
-      fileReader.onload = (event) => {
-        this.init(event.target?.result as ArrayBuffer);
-      };
-      fileReader.onerror = (error) => {
-        console.error(error);
-      };
-      fileReader.readAsArrayBuffer(blob);
-    };
+  }
+  async onVideoBlobSet(blob: Blob) {
+    const buffer = await blob.arrayBuffer();
+    this.init(buffer);
+  }
+  on(event: string, arg: unknown) {
+    if (event === "videoBlobSet") {
+      this.onVideoBlobSet(arg as Blob);
+    }
+  }
+  async extractPeaks(decodedData: AudioBuffer) {
+    const { default: extractPeaks } = await import("webaudio-peaks");
+    const progressBarWidth = this.progressBarCoordinates.width;
+    const perPixel = Math.ceil(decodedData.length / progressBarWidth);
+
+    //calculate peaks from an AudioBuffer
+    const peaks = extractPeaks(decodedData, perPixel, true);
+    return peaks;
+  }
+  setProps(peaks: PeakData) {
+    // normalize peaks to bits
+    const [min, max] = findMinMaxNumbers(peaks.data[0] as Int8Array);
+    const maxNumber = Math.pow(2, peaks.bits - 1) - 1;
+    const minNumber = -Math.pow(2, peaks.bits - 1);
+    this.props.peaks = peaks.data[0].map((peak) => {
+      if (peak < 0) {
+        return Math.round((peak / min) * minNumber);
+      } else {
+        return Math.round((peak / max) * maxNumber);
+      }
+    });
+    this.props.bits = peaks.bits;
   }
   async init(blob: ArrayBuffer) {
-    const { AudioContext } = await import("standardized-audio-context");
-    const { default: extractPeaks } = await import("webaudio-peaks");
-    const audioContext = new AudioContext();
-    audioContext.decodeAudioData(
-      blob,
-      (decodedData) => {
-        this.initCanvas();
-        const width = this.progressBarCoordinates.width;
-        const size = width;
-        const perPixel = Math.ceil(decodedData.length / size);
+    try {
+      const audioContext = new AudioContext();
+      const decodedData = await audioContext.decodeAudioData(blob);
+      const peaks = await this.extractPeaks(decodedData);
 
-        //calculate peaks from an AudioBuffer
-        const peaks = extractPeaks(decodedData, perPixel, true);
+      this.initCanvas();
+      this.setProps(peaks);
 
-        // normalize peaks to bits
-        const [min, max] = findMinMaxNumbers(peaks.data[0] as Int8Array);
-        const maxNumber = Math.pow(2, peaks.bits - 1) - 1;
-        const minNumber = -Math.pow(2, peaks.bits - 1);
-        this.props.peaks = peaks.data[0].map((peak) => {
-          if (peak < 0) {
-            return Math.round((peak / min) * minNumber);
-          } else {
-            return Math.round((peak / max) * maxNumber);
-          }
-        });
-        this.props.bits = peaks.bits;
-        //   peaks.data[0][0]
-        this.annotationTool.removeGlobalShape("audio-peaks");
-        this.annotationTool.addGlobalShape({
-          x: 0,
-          y: 0,
-          strokeStyle: "red",
-          fillStyle: "red",
-          lineWidth: 1,
-          type: "audio-peaks",
-        });
-        this.clearLocalCanvas();
-        this.drawOnCanvas();
-      },
-      (e) => {
-        this.initCanvas();
-        this.props.peaks = new Int8Array();
-        this.annotationTool.removeGlobalShape("audio-peaks");
-        this.clearLocalCanvas();
-        console.error(e);
-      }
-    );
+      this.annotationTool.removeGlobalShape("audio-peaks");
+      this.annotationTool.addGlobalShape({
+        x: 0,
+        y: 0,
+        strokeStyle: "red",
+        fillStyle: "red",
+        lineWidth: 1,
+        type: "audio-peaks",
+      });
+      this.clearLocalCanvas();
+      this.drawOnCanvas();
+    } catch (e) {
+      this.initCanvas();
+      this.props.peaks = new Int8Array();
+      this.annotationTool.removeGlobalShape("audio-peaks");
+      this.clearLocalCanvas();
+      console.error(e);
+    }
   }
   initCanvas() {
     this.canvas.width = this.progressBarCoordinates.width * this.pixelRatio;
@@ -132,7 +134,6 @@ export class AudioPeaksPlugin
     this.clearLocalCanvas();
     this.props.peaks = new Int8Array();
     this.annotationTool.removeGlobalShape("audio-peaks");
-    delete this.annotationTool.setVideoBlob;
   }
   draw(_: IAudioPeaks) {
     const maybeVideoElement = this.annotationTool
@@ -157,7 +158,7 @@ export class AudioPeaksPlugin
     const cc = this.ctx;
 
     const h2 = waveHeight / 2;
-    let y = this.progressBarCoordinates.y - 40;
+    let y = this.progressBarCoordinates.y - 20;
 
     const { x, width } = this.progressBarCoordinates;
     const currentFrame = this.annotationTool.playbackFrame;
@@ -199,13 +200,14 @@ export class AudioPeaksPlugin
     cc.fillStyle = theme.waveOutlineColor;
 
     for (let i = 0; i < peakSegmentLength; i += 1) {
-      const minPeak = peaks[(i + offset) * 2] / maxValue;
+      // const minPeak = peaks[(i + offset) * 2] / maxValue;
       const maxPeak = peaks[(i + offset) * 2 + 1] / maxValue;
 
-      const min = Math.abs(minPeak * h2);
+      // const min = Math.abs(minPeak * h2);
       const max = Math.abs(maxPeak * h2);
+      // cc.fillRect(i + shift, y + 0 + h2 - max, 1, max + min); // 
 
-      cc.fillRect(i + shift, y + 0 + h2 - max, 1, max + min);
+      cc.fillRect(i + shift, y + 0 + h2 - max, 1, max ); // + min
     }
   }
 }
