@@ -25,6 +25,7 @@ export declare class BasePlugin<T extends IShapeBase> {
     startY: number;
     isDrawing: boolean;
     constructor(annotationTool: AnnotationTool);
+    on(event: string, arg: unknown): void;
     get ctx(): CanvasRenderingContext2D;
     onDeactivate(): void;
     onActivate(): void;

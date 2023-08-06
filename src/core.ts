@@ -65,7 +65,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.playbackFrame = newFrame;
     }
   }
-
+  removeGlobalShape(shapeType: IShape['type']) {
+    this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
+  }
   addGlobalShape(shape: IShape) {
     this.globalShapes.push(shape);
   }
@@ -179,10 +181,19 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.init(videoElement);
   }
 
+
+  async setVideoBlob(blob: Blob, fps = this.fps) {
+    const url = URL.createObjectURL(blob);
+    await this.setVideoUrl(url, fps);
+    this.plugins.forEach((p) => {
+      p.on('videoBlobSet', blob);
+    });
+  }
+
   async setVideoUrl(url: string, fps = this.fps) {
     if (this.videoElement instanceof HTMLImageElement) return;
     const video = this.videoElement as HTMLVideoElement;
-    video.src = url;
+    video.src = url.toString();
     await this.videoElement.load();
     this.setFrameRate(fps);
     if (this.videoFrameBuffer) {

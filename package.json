@@ -11,7 +11,8 @@
   "types": "dist/types/index.d.ts",
   "devDependencies": {
     "esbuild": "^0.17.15",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "webaudio-peaks": "^1.0.0"
   },
   "exports": "./dist/index.js",
   "scripts": {

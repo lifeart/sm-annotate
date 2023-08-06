@@ -73,15 +73,13 @@ async function initAnnotator() {
     video.pause();
   }
 
-  const blobs = new Blob([blob], { type: "video/mp4" });
-
-  video.src = window.URL.createObjectURL(blobs);
-
-  await loadPromise;
+  const bl = new Blob([blob], { type: "video/mp4" });
 
   const tool = new SmAnnotate(video);
 
-  tool.setFrameRate(30);
+  await tool.setVideoBlob(bl, 30);
+
+  await loadPromise;
 
   await tool.addReferenceVideoByURL("./mov_bbb_g.mp4");
 
@@ -148,9 +146,8 @@ async function initAnnotator() {
     const file = videoInput.files[0];
     const blobs = new Blob([file], { type: file.type });
 
-    const mediaUrl = window.URL.createObjectURL(blobs);
+    await tool.setVideoBlob(blobs,  parseInt(fps, 10));
 
-    await tool.setVideoUrl(mediaUrl, parseInt(fps, 10));
   });
 
   refVideoInput.addEventListener("change", async (e) => {

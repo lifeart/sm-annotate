@@ -29,6 +29,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     }[];
     prevFrame(): void;
     nextFrame(): void;
+    removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
     get selectedStrokeSize(): number;
@@ -57,6 +58,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     set undoStack(shapes: IShape[][]);
     get pixelRatio(): number;
     constructor(videoElement: HTMLVideoElement | HTMLImageElement);
+    setVideoBlob(blob: Blob, fps?: number): Promise<void>;
     setVideoUrl(url: string, fps?: number): Promise<void>;
     enableVideoFrameBuffer(): void;
     hide(): void;
