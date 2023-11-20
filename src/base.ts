@@ -1,6 +1,7 @@
 import {
   ButtonEventNames,
   ClipboardEventNames,
+  DropEventNames,
   EventNames,
   InputEventNames,
   KeyboardEventNames,
@@ -37,6 +38,11 @@ export class AnnotationToolBase<T> {
     return requestAnimationFrame(cb);
   }
 
+  addEvent(
+    node: HTMLDivElement,
+    event: DropEventNames,
+    callback: (e: DragEvent) => void,
+  ): void;
   addEvent(
     node: HTMLInputElement,
     event: InputEventNames,
@@ -85,6 +91,7 @@ export class AnnotationToolBase<T> {
   addEvent(
     node:
       | HTMLInputElement
+      | HTMLDivElement
       | HTMLVideoElement
       | HTMLCanvasElement
       | HTMLButtonElement
@@ -95,12 +102,13 @@ export class AnnotationToolBase<T> {
       | ((e: PointerEvent) => void)
       | ((e: KeyboardEvent) => void)
       | ((e: Event) => void)
+      | ((e: DragEvent) => void)
       | ((e: ClipboardEvent) => void)
   ) {
     type EventArgs = Parameters<typeof callback>;
     const safeCallback = (e: EventArgs[0]) => {
       if (this.isDestroyed) return;
-      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent);
+      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent & DragEvent);
     };
 
     node.addEventListener(event, safeCallback);
