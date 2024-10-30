@@ -121,10 +121,9 @@ export class CurveToolPlugin
       this.ctx.beginPath();
       this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
 
-      for (let i = 1; i < shape.points.length - 1; i++) {
+      for (let i = 0; i < shape.points.length - 1; i++) {
         const controlPoint = shape.points[i];
         const endPoint = shape.points[i + 1];
-
         this.ctx.quadraticCurveTo(
           controlPoint.x,
           controlPoint.y,
@@ -132,7 +131,6 @@ export class CurveToolPlugin
           endPoint.y
         );
       }
-
       this.ctx.stroke();
     }
   }
