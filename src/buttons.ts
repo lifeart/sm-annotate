@@ -17,7 +17,7 @@ export class ButtonConstructor {
     return this.tool.buttons;
   }
   get addEvent() {
-    return this.tool.addEvent;
+    return this.tool.addEvent.bind(this.tool);
   }
   get currentTool() {
     return this.tool.currentTool;
