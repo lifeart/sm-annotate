@@ -19,6 +19,12 @@ export function initCanvas(this: AnnotationTool) {
     this.addEvent(this.canvas, "pointermove", this.handleMouseMove);
     this.addEvent(this.canvas, "pointerup", this.handleMouseUp);
     this.addEvent(this.canvas, "pointercancel", this.handleMouseUp);
+    // better mobile workflow
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      e.preventDefault();
+    });
     this.addEvent(window, "resize", this.setCanvasSize);
     this.addEvent(document, "keydown", this.onKeyDown);
 }
