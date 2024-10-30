@@ -1,6 +1,7 @@
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 import { AnnotationTool } from "../core";
 import type { PeakData } from "webaudio-peaks";
+import type { ShapeMap } from ".";
 
 export interface IAudioPeaks extends IShapeBase {
   x: number;
@@ -21,7 +22,7 @@ export class AudioPeaksPlugin
   extends BasePlugin<IAudioPeaks>
   implements ToolPlugin<IAudioPeaks>
 {
-  name = "audio-peaks";
+  name = "audio-peaks" as keyof ShapeMap;
   canvas = document.createElement("canvas");
   drawCtx!: CanvasRenderingContext2D;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

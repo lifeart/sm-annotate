@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 export type IPoint = {
     x: number;
     y: number;
@@ -8,7 +9,7 @@ export interface ICurve extends IShapeBase {
     points: IPoint[];
 }
 export declare class CurveToolPlugin extends BasePlugin<ICurve> implements ToolPlugin<ICurve> {
-    name: string;
+    name: keyof ShapeMap;
     curvePoints: IPoint[];
     move(shape: ICurve, dx: number, dy: number): ICurve;
     normalize(shape: ICurve, canvasWidth: number, canvasHeight: number): ICurve;

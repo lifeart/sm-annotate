@@ -1,6 +1,7 @@
+import type { ShapeMap } from ".";
 import type { AnnotationTool } from "./../core";
 export interface IShapeBase {
-    type: string;
+    type: keyof ShapeMap;
     strokeStyle: string | CanvasGradient | CanvasPattern;
     fillStyle: string | CanvasPattern | CanvasGradient;
     lineWidth: number;

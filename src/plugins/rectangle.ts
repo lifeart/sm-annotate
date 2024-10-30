@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export interface IRectangle extends IShapeBase {
   type: "rectangle";
@@ -12,7 +13,7 @@ export class RectangleToolPlugin
   extends BasePlugin<IRectangle>
   implements ToolPlugin<IRectangle>
 {
-  name = "rectangle";
+  name = "rectangle" as keyof ShapeMap;
   move(shape: IRectangle, dx: number, dy: number) {
     shape.x += dx;
     shape.y += dy;

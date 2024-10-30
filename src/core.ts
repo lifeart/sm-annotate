@@ -252,7 +252,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.lineWidth = this.selectedStrokeSize;
   }
 
-  pluginForTool<T extends Tool>(tool: T): ToolPlugin<ShapeMap[T]> {
+  pluginForTool<T extends keyof ShapeMap>(tool: T): ToolPlugin<ShapeMap[T]> {
     if (this.isDestroyed) {
       throw new Error("AnnotationTool is destroyed");
     }

@@ -1,3 +1,4 @@
+import type { ShapeMap } from ".";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 
 export interface IArrow extends IShapeBase {
@@ -12,7 +13,7 @@ export class ArrowToolPlugin
   extends BasePlugin<IArrow>
   implements ToolPlugin<IArrow>
 {
-  name = "arrow";
+  name = "arrow" as keyof ShapeMap;
   normalize(shape: IArrow, canvasWidth: number, canvasHeight: number): IArrow {
     return {
       ...shape,

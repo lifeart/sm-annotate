@@ -25,4 +25,4 @@ export interface ShapeMap {
     "audio-peaks": IAudioPeaks;
 }
 export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin;
-export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof ImageToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin | typeof AudioPeaksPlugin)[];
+export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof AudioPeaksPlugin | typeof ImageToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin)[];

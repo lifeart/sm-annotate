@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export interface IEraser extends IShapeBase {
   type: "eraser";
@@ -12,7 +13,7 @@ export class EraserToolPlugin
   extends BasePlugin<IEraser>
   implements ToolPlugin<IEraser>
 {
-  name = "eraser";
+  name = "eraser" as keyof ShapeMap;
   move(shape: IEraser, dx: number, dy: number) {
     shape.x += dx;
     shape.y += dy;

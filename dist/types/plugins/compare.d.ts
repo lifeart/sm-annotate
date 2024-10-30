@@ -1,3 +1,4 @@
+import type { ShapeMap } from ".";
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 export interface ICompare extends IShapeBase {
     type: "compare";
@@ -5,7 +6,7 @@ export interface ICompare extends IShapeBase {
     disabled: boolean;
 }
 export declare class CompareToolPlugin extends BasePlugin<ICompare> implements ToolPlugin<ICompare> {
-    name: string;
+    name: keyof ShapeMap;
     comparisonLine: number;
     leftOpacity: number;
     rightOpacity: number;

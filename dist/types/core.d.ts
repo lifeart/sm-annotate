@@ -69,7 +69,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     updateActiveTimeFrame(mediaTime?: number | undefined): void;
     show(): void;
     setCanvasSettings(): void;
-    pluginForTool<T extends Tool>(tool: T): ToolPlugin<ShapeMap[T]>;
+    pluginForTool<T extends keyof ShapeMap>(tool: T): ToolPlugin<ShapeMap[T]>;
     getButtonForTool(tool: Tool): HTMLButtonElement;
     bindContext(): void;
     initProperties(): void;

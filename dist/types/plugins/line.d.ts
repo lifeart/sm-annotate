@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 export interface ILine extends IShapeBase {
     type: "line";
     x1: number;
@@ -7,7 +8,7 @@ export interface ILine extends IShapeBase {
     y2: number;
 }
 export declare class LineToolPlugin extends BasePlugin<ILine> implements ToolPlugin<ILine> {
-    name: string;
+    name: keyof ShapeMap;
     move(shape: ILine, dx: number, dy: number): ILine;
     normalize(shape: ILine, canvasWidth: number, canvasHeight: number): ILine;
     onPointerDown(event: PointerEvent): void;

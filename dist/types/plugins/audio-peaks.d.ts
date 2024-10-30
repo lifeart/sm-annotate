@@ -1,12 +1,13 @@
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 import { AnnotationTool } from "../core";
 import type { PeakData } from "webaudio-peaks";
+import type { ShapeMap } from ".";
 export interface IAudioPeaks extends IShapeBase {
     x: number;
     y: number;
 }
 export declare class AudioPeaksPlugin extends BasePlugin<IAudioPeaks> implements ToolPlugin<IAudioPeaks> {
-    name: string;
+    name: keyof ShapeMap;
     canvas: HTMLCanvasElement;
     drawCtx: CanvasRenderingContext2D;
     constructor(annotationTool: AnnotationTool);

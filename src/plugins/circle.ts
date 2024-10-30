@@ -1,3 +1,4 @@
+import type { ShapeMap } from ".";
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
 
 export interface ICircle extends IShapeBase {
@@ -11,7 +12,7 @@ export class CircleToolPlugin
   extends BasePlugin<ICircle>
   implements ToolPlugin<ICircle>
 {
-  name = "circle";
+  name = "circle"  as keyof ShapeMap;
   move(shape: ICircle, dx: number, dy: number) {
     shape.x += dx;
     shape.y += dy;

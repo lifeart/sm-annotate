@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export interface IImage extends IShapeBase {
   type: "image";
@@ -13,7 +14,7 @@ export class ImageToolPlugin
   extends BasePlugin<IImage>
   implements ToolPlugin<IImage>
 {
-  name = "image";
+  name = "image" as keyof ShapeMap;
   move(shape: IImage, dx: number, dy: number) {
     shape.x += dx;
     shape.y += dy;

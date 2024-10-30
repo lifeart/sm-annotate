@@ -1,6 +1,8 @@
 import type { IShape } from ".";
+import { IAudioPeaks } from "./audio-peaks";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 import type { IImage } from "./image";
+import type { ShapeMap } from ".";
 
 export interface IMove extends IShapeBase {
   type: "move";
@@ -10,7 +12,7 @@ export class MoveToolPlugin
   extends BasePlugin<IMove>
   implements ToolPlugin<IMove>
 {
-  name = "move";
+  name = "move" as keyof ShapeMap;
   shape: IShape | null = null;
   lastDrawnShape: IShape | null = null;
   shapeRemoved = false;
@@ -41,7 +43,10 @@ export class MoveToolPlugin
         : false;
   }
 
-  isPointerAtCorner(rawShape: IImage, x: number, y: number) {
+  isPointerAtCorner(rawShape: IImage | IAudioPeaks, x: number, y: number) {
+    if (!('type' in rawShape)) {
+      return false;
+    }
     const shapeToResolve = this.annotationTool.deserialize([
       rawShape,
     ])[0] as IImage;
@@ -96,23 +101,27 @@ export class MoveToolPlugin
         ? lastShape
         : (JSON.parse(JSON.stringify(lastShape)) as typeof lastShape);
 
+    if (shapeCopy.type === 'audio-peaks') {
+      return;
+    }
     if (shapeCopy.type === "image") {
       // if it's an image angle, we need to resize it, keeping the same proportions
 
       if (this.isScale) {
-        const { width, height } = shapeCopy;
+        const { width, height } = shapeCopy as IImage;
         const ratio = width / height;
         const newWidth = width + dx;
         const newHeight = newWidth / ratio;
-        shapeCopy.width = newWidth;
-        shapeCopy.height = newHeight;
+        (shapeCopy as IImage).width = newWidth;
+        (shapeCopy as IImage).height = newHeight;
 
         this.lastDrawnShape = shapeCopy;
 
-        this.annotationTool.pluginForTool(shapeCopy.type).draw(shapeCopy);
+        this.annotationTool.pluginForTool((shapeCopy as IImage).type).draw(shapeCopy as IImage);
       } else {
         const item = this.annotationTool
           .pluginForTool(shapeCopy.type)
+          // @ts-expect-error copy
           .move(shapeCopy, dx, dy);
 
         this.lastDrawnShape = item;
@@ -122,6 +131,7 @@ export class MoveToolPlugin
     } else {
       const item = this.annotationTool
         .pluginForTool(shapeCopy.type)
+        // @ts-expect-error copy
         .move(shapeCopy, dx, dy);
 
       this.lastDrawnShape = item;

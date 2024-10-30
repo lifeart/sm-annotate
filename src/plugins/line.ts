@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export interface ILine extends IShapeBase {
   type: "line";
@@ -12,7 +13,7 @@ export class LineToolPlugin
   extends BasePlugin<ILine>
   implements ToolPlugin<ILine>
 {
-  name = "line";
+  name = "line" as keyof ShapeMap;
   move(shape: ILine, dx: number, dy: number) {
     shape.x1 += dx;
     shape.y1 += dy;

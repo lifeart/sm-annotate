@@ -37,7 +37,7 @@ export interface ShapeMap {
   image: IImage;
   compare: ICompare;
   "audio-peaks": IAudioPeaks;
-}
+};
 
 export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin;
 

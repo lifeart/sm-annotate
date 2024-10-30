@@ -10,7 +10,7 @@
   "type": "module",
   "types": "dist/types/index.d.ts",
   "devDependencies": {
-    "esbuild": "^0.17.15",
+    "esbuild": "0.24.0",
     "typescript": "^5.0.4",
     "webaudio-peaks": "^1.0.0"
   },

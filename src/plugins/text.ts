@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export interface IText extends IShapeBase {
   type: "text";
@@ -11,7 +12,7 @@ export class TextToolPlugin
   extends BasePlugin<IText>
   implements ToolPlugin<IText>
 {
-  name = "text";
+  name = "text" as keyof ShapeMap;
   move(shape: IText, dx: number, dy: number) {
     shape.x += dx;
     shape.y += dy;

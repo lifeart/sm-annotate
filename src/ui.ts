@@ -15,6 +15,7 @@ const addStyle = (node: HTMLElement, style: StylePojo) => {
     const styleKey = key as unknown as keyof StylePojo;
     const value = style[styleKey];
     if (typeof value === 'string') {
+      // @ts-expect-error style key
       node.style[styleKey] = value;
     }
   })

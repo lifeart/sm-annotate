@@ -1,4 +1,5 @@
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 export interface IImage extends IShapeBase {
     type: "image";
     image: HTMLImageElement;
@@ -8,7 +9,7 @@ export interface IImage extends IShapeBase {
     height: number;
 }
 export declare class ImageToolPlugin extends BasePlugin<IImage> implements ToolPlugin<IImage> {
-    name: string;
+    name: keyof ShapeMap;
     move(shape: IImage, dx: number, dy: number): IImage;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;

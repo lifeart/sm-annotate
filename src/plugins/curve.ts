@@ -1,5 +1,6 @@
 import { Point, douglasPeucker } from "./utils/douglas-peucker";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
+import type { ShapeMap } from ".";
 
 export type IPoint = {
   x: number;
@@ -15,7 +16,7 @@ export class CurveToolPlugin
   extends BasePlugin<ICurve>
   implements ToolPlugin<ICurve>
 {
-  name = "curve";
+  name = "curve" as keyof ShapeMap;
   curvePoints: IPoint[] = [];
   move(shape: ICurve, dx: number, dy: number) {
     shape.points = shape.points.map((point) => ({

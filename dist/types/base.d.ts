@@ -1,4 +1,4 @@
-import { ButtonEventNames, ClipboardEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
+import { ButtonEventNames, ClipboardEventNames, DropEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
 export declare class AnnotationToolBase<T> {
     destructors: (() => void)[];
     isDestroyed: boolean;
@@ -11,6 +11,7 @@ export declare class AnnotationToolBase<T> {
     cleanFrameStacks(): void;
     destroy(): void;
     raf(cb: () => void): number;
+    addEvent(node: HTMLDivElement, event: DropEventNames, callback: (e: DragEvent) => void): void;
     addEvent(node: HTMLInputElement, event: InputEventNames, callback: (e: Event) => void): void;
     addEvent(node: typeof document, event: ClipboardEventNames, callback: (e: ClipboardEvent) => void): void;
     addEvent(node: typeof document, event: ButtonEventNames, callback: (e: PointerEvent) => void): void;
