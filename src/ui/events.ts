@@ -8,6 +8,7 @@ export type KeyboardEventNames = "keydown";
 export type ButtonEventNames = "click";
 export type InputEventNames = "input" | "change";
 export type ClipboardEventNames = "copy" | "paste" | "cut";
+export type DropEventNames = "drop" | "dragover" | "dragenter" | "dragleave";
 export type VideoEventNames =
   | "timeupdate"
   | "volumechange"
@@ -26,4 +27,5 @@ export type EventNames =
   | KeyboardEventNames
   | WindowEventNames
   | ButtonEventNames
-  | ClipboardEventNames;
+  | ClipboardEventNames
+  | DropEventNames

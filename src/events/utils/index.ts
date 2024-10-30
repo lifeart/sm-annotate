@@ -13,5 +13,8 @@ export const isTargetBelongsToVideo = (
 };
 
 export function isMultiTouch(event: PointerEvent) {
+  if (event.pointerType === "pen") {
+    return false;
+  }
   return event.pointerType === "touch" && event.isPrimary === false;
 }
