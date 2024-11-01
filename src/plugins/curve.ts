@@ -18,6 +18,10 @@ export class CurveToolPlugin
 {
   name = "curve" as keyof ShapeMap;
   curvePoints: IPoint[] = [];
+  zoomScale = 1.6; // Controls the magnification level
+  zoomRadius = 100; // Radius of the zoom circle
+  zoomCtx: CanvasRenderingContext2D | null = null; // Context for the zoom canvas
+  zoomCanvas: HTMLCanvasElement | null = null; // Zoom canvas element
   move(shape: ICurve, dx: number, dy: number) {
     shape.points = shape.points.map((point) => ({
       x: point.x + dx,
@@ -25,6 +29,15 @@ export class CurveToolPlugin
     }));
     return shape;
   }
+
+  onActivate() {
+    this.initZoomCanvas();
+  }
+  onDeactivate(): void {
+    this.zoomCtx = null;
+    this.zoomCanvas = null;
+  }
+
   normalize(shape: ICurve, canvasWidth: number, canvasHeight: number): ICurve {
     return {
       ...shape,
@@ -54,22 +67,28 @@ export class CurveToolPlugin
     this.curvePoints.push({ x, y });
   }
   onPointerMove(event: PointerEvent) {
-    if (!this.isDrawing) {
-      return;
-    }
     const { x, y } = this.annotationTool.getRelativeCoords(event);
+
+    if (!this.isDrawing) {
+      this.drawZoomCircle(x, y); // Call the zoom functionality
+      return
+    }
 
     this.curvePoints.push({ x, y });
     this.drawCurve({
       points: this.curvePoints,
       lineWidth: this.ctx.lineWidth,
     });
+    this.drawZoomCircle(x, y); // Call the zoom functionality
   }
+
   onPointerUp(event: PointerEvent) {
+
+    const { x, y } = this.annotationTool.getRelativeCoords(event);
+    this.drawZoomCircle(x, y);
     if (!this.isDrawing) {
       return;
     }
-    const { x, y } = this.annotationTool.getRelativeCoords(event);
 
     this.curvePoints.push({ x, y });
 
@@ -77,11 +96,8 @@ export class CurveToolPlugin
       (pt) => new Point(pt.x, pt.y)
     );
 
-    // Optimize the points using the Douglas-Peucker algorithm
-    const epsilon = 2; // Adjust the epsilon value to control the level of simplification
+    const epsilon = 0.5; // Adjust the epsilon value to control the level of simplification
     const optimizedPoints = douglasPeucker(curvePointsAsPoints, epsilon);
-
-    // Convert the optimized points back to the original point format
     const optimizedCurvePoints = optimizedPoints.map((pt) => ({
       x: pt.x,
       y: pt.y,
@@ -95,12 +111,11 @@ export class CurveToolPlugin
       lineWidth: this.ctx.lineWidth,
     };
     this.save(shape);
-    this.curvePoints = []; // Reset curve points
+    this.curvePoints = [];
     this.isDrawing = false;
   }
-  drawCurve(shape: Pick<ICurve, "points" | "lineWidth">) {
-    // if only two points and they are the same, draw a circle
 
+  drawCurve(shape: Pick<ICurve, "points" | "lineWidth">) {
     if (
       shape.points.length === 2 &&
       shape.points[0].x === shape.points[1].x &&
@@ -135,4 +150,69 @@ export class CurveToolPlugin
       this.ctx.stroke();
     }
   }
+
+  initZoomCanvas() {
+    const zoomCanvas = document.createElement("canvas");
+    const zoomResolutionMultiplier = 2; // Factor to increase resolution for sharpness
+  
+    zoomCanvas.width = this.zoomRadius * 2 * zoomResolutionMultiplier; // diameter
+    zoomCanvas.height = this.zoomRadius * 2 * zoomResolutionMultiplier; // diameter
+    const zoomCtx = zoomCanvas.getContext("2d");
+    if (!zoomCtx) return;
+    zoomCtx.imageSmoothingQuality = 'high'; // Improve sharpness
+    zoomCtx.imageSmoothingEnabled = true; // Improve sharpness
+    this.zoomCtx = zoomCtx;
+    this.zoomCanvas = zoomCanvas;
+    // zoomCtx.scale(this.zoomScale, this.zoomScale); // Increase resolution for sharpness
+  
+    // zoomCtx.scale(this.zoomScale, this.zoomScale);
+  }
+
+// Function to draw the zoomed circle centered on the current event coordinates without any visible offset
+drawZoomCircle(x: number, y: number) {
+  // Create a temporary canvas for the zoom effect
+  const zoomCtx = this.zoomCtx;
+  if (!zoomCtx) return;
+
+  // Calculate the area to capture, centered exactly on (x, y) for zoom alignment
+  const captureWidth = this.zoomRadius * 2;
+  const captureHeight = this.zoomRadius * 2;
+  const captureX = 2 * x - captureWidth / 2;
+  const captureY = 2 * y - captureHeight / 2;
+
+  // console.log(captureX, captureY, captureWidth, captureHeight);
+
+  // Draw the magnified area from the main canvas onto the zoomCanvas
+  zoomCtx.drawImage(
+    this.ctx.canvas,
+    captureX,               // Starting x coordinate on main canvas
+    captureY,               // Starting y coordinate on main canvas
+    captureWidth,           // Width of area to capture
+    captureHeight,          // Height of area to capture
+    0,                      // Destination x on zoomCanvas
+    0,                      // Destination y on zoomCanvas
+    this.zoomRadius * 2,    // Width on zoomCanvas (magnified)
+    this.zoomRadius * 2     // Height on zoomCanvas (magnified)
+  );
+
+  // this.ctx.drawImage(zoomCanvas, 0, 0);
+
+  // console.log(zoomCanvas.width, zoomCanvas.height);
+  // applySharpenFilter(zoomCtx, zoomCanvas.width, zoomCanvas.height);
+
+  // Draw the zoomCanvas content as a circular clipping region on the main canvas
+  this.ctx.save();
+  this.ctx.beginPath();
+  this.ctx.arc(x, y, this.zoomRadius, 0, 2 * Math.PI); // Define zoom circle centered on (x, y)
+  this.ctx.closePath();
+  this.ctx.clip();
+
+  // Draw the zoomed-in content centered exactly on (x, y)
+  this.ctx.drawImage(this.zoomCanvas!, x - this.zoomRadius, y - this.zoomRadius);
+
+  this.ctx.restore();
+}
+
+
+
 }
