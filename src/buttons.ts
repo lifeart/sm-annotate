@@ -51,7 +51,14 @@ export class ButtonConstructor {
         }
       };
 
-      this.addEvent(button, "click", onClick);
+      try {
+        this.tool.pluginForTool(tool);
+        this.addEvent(button, "click", onClick);
+      } catch (e) {
+        console.error(e);
+        button.disabled = true;
+      }
+
     }
 
     return button;
@@ -111,6 +118,11 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
     () => {
       tool.handleUndo();
     }
+  );
+
+  Button.create(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',
+    "zoom-draw"
   );
 
   if (video) {
