@@ -47,6 +47,20 @@ Users can draw and annotate using the available tools (curve, rectangle, ellipse
 
 To save the current frame or all frames with annotations, use the `saveCurrentFrame` or `saveAllFrames` methods, respectively.
 
+
+## Hotkeys
+
+### Curve tool
+
+| KeyCode | Result |
+| - | - |
+| `Shift` | Magnifier x2 |
+| `r` | Red color |
+| `g` | Green color |
+| `b` | Blue color |
+| `y` | Yellow color |
+| `1` - `9` | Tool size |
+
 ## Contributing
 
 We welcome contributions to improve the project. Please feel free to submit issues or pull requests for consideration.

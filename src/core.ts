@@ -359,7 +359,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     super.destroy();
     this.stopAnnotationsAsVideo();
 
-    this._currentTool = null;
+    this.currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
     this.setFrameRate(DEFAULT_FPS);
