@@ -41,6 +41,12 @@ export class MoveToolPlugin
       lastShape.type === "image"
         ? this.isPointerAtCorner(lastShape, x, y)
         : false;
+
+    if (this.isScale) {
+      this.annotationTool.canvas.style.cursor = 'nw-resize';
+    } else {
+      this.annotationTool.canvas.style.cursor = 'move';
+    }
   }
 
   isPointerAtCorner(rawShape: IImage | IAudioPeaks, x: number, y: number) {
@@ -155,6 +161,7 @@ export class MoveToolPlugin
     this.shape = null;
     this.shapeRemoved = false;
     this.lastDrawnShape = null;
+    this.annotationTool.canvas.style.cursor = 'default';
   }
   draw() {
     throw new Error("Method not implemented.");
@@ -165,5 +172,6 @@ export class MoveToolPlugin
     this.isScale = false;
     this.lastDrawnShape = null;
     this.shapeRemoved = false;
+    this.annotationTool.canvas.style.cursor = 'default';
   }
 }

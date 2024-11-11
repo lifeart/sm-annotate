@@ -18,7 +18,7 @@ export class CurveToolPlugin
 {
   name = "curve" as keyof ShapeMap;
   curvePoints: IPoint[] = [];
-  zoomScale = 1.6; // Controls the magnification level
+  zoomScale = 2; // Controls the magnification level
   zoomRadius = 100; // Radius of the zoom circle
   zoomCtx: CanvasRenderingContext2D | null = null; // Context for the zoom canvas
   zoomCanvas: HTMLCanvasElement | null = null; // Zoom canvas element
@@ -30,11 +30,11 @@ export class CurveToolPlugin
     return shape;
   }
   colorMap = {
-    'r': '#d31a3b',
-    'g': '#15d33b',
-    'b': '#0085CA',
-    'y': '#F3CE32',
-  }
+    r: "#d31a3b",
+    g: "#15d33b",
+    b: "#0085CA",
+    y: "#F3CE32",
+  };
   onKeyPress = (e: KeyboardEvent) => {
     const key = e.key;
     if (key === null || key === " " || e.isComposing) {
@@ -201,43 +201,39 @@ export class CurveToolPlugin
       this.annotationTool.drawShapesOverlay();
     }
 
-    // Create a temporary canvas for the zoom effect
     const zoomCtx = this.zoomCtx;
     if (!zoomCtx) return;
 
-    // Calculate the area to capture, centered exactly on (x, y) for zoom alignment
-    const captureWidth = this.zoomRadius * 2;
-    const captureHeight = this.zoomRadius * 2;
-    const captureX = 2 * x - captureWidth / 2;
-    const captureY = 2 * y - captureHeight / 2;
+    const pixelRatio = this.annotationTool.pixelRatio;
 
-    // console.log(captureX, captureY, captureWidth, captureHeight);
-    // Draw the magnified area from the main canvas onto the zoomCanvas
+    // Calculate the source area to capture
+    const sourceSize = (this.zoomRadius * 2) / this.zoomScale;
+    const sourceX = x - sourceSize / 2;
+    const sourceY = y - sourceSize / 2;
+
+    // Clear the zoom canvas first
+    zoomCtx.clearRect(0, 0, this.zoomCanvas!.width, this.zoomCanvas!.height);
+
+    // Draw the zoomed area
     zoomCtx.drawImage(
       this.ctx.canvas,
-      captureX, // Starting x coordinate on main canvas
-      captureY, // Starting y coordinate on main canvas
-      captureWidth, // Width of area to capture
-      captureHeight, // Height of area to capture
-      0, // Destination x on zoomCanvas
-      0, // Destination y on zoomCanvas
-      this.zoomRadius * 2, // Width on zoomCanvas (magnified)
-      this.zoomRadius * 2 // Height on zoomCanvas (magnified)
+      sourceX * pixelRatio, // Source X, adjusted for pixel ratio
+      sourceY * pixelRatio, // Source Y, adjusted for pixel ratio
+      sourceSize * pixelRatio, // Source width, adjusted for pixel ratio
+      sourceSize * pixelRatio, // Source height, adjusted for pixel ratio
+      0, // Destination X
+      0, // Destination Y
+      this.zoomRadius * 2, // Destination width
+      this.zoomRadius * 2 // Destination height
     );
 
-    // this.ctx.drawImage(zoomCanvas, 0, 0);
-
-    // console.log(zoomCanvas.width, zoomCanvas.height);
-    // applySharpenFilter(zoomCtx, zoomCanvas.width, zoomCanvas.height);
-
-    // Draw the zoomCanvas content as a circular clipping region on the main canvas
+    // Draw the zoomed circle on the main canvas
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.arc(x, y, this.zoomRadius, 0, 2 * Math.PI); // Define zoom circle centered on (x, y)
+    this.ctx.arc(x, y, this.zoomRadius, 0, 2 * Math.PI);
     this.ctx.closePath();
     this.ctx.clip();
 
-    // Draw the zoomed-in content centered exactly on (x, y)
     this.ctx.drawImage(
       this.zoomCanvas!,
       x - this.zoomRadius,

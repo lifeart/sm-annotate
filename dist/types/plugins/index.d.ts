@@ -9,7 +9,8 @@ import { IMove, MoveToolPlugin } from "./move";
 import { IImage, ImageToolPlugin } from "./image";
 import { ICompare, CompareToolPlugin } from "./compare";
 import { IAudioPeaks, AudioPeaksPlugin } from "./audio-peaks";
-export type IShape = IRectangle | ICircle | ILine | IArrow | IText | IEraser | ICurve | IMove | IImage | ICompare | IAudioPeaks;
+import { SelectionToolPlugin, ISelection } from "./selection";
+export type IShape = IRectangle | ICircle | ILine | IArrow | IText | IEraser | ICurve | IMove | IImage | ICompare | IAudioPeaks | ISelection;
 export type Tool = IShape["type"];
 export interface ShapeMap {
     rectangle: IRectangle;
@@ -23,6 +24,7 @@ export interface ShapeMap {
     image: IImage;
     compare: ICompare;
     "audio-peaks": IAudioPeaks;
+    selection: ISelection;
 }
-export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin;
-export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof AudioPeaksPlugin | typeof ImageToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin)[];
+export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin | SelectionToolPlugin;
+export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof AudioPeaksPlugin | typeof ImageToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin | typeof SelectionToolPlugin)[];

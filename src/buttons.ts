@@ -149,4 +149,9 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
 
     createDownloadCurrentFrameButton(video, tool);
   }
+
+  Button.create(`<svg viewBox="0 0 24 24" width="24" height="24">
+      <path fill="currentColor" d="M3 3h18v18H3V3m2 2v14h14V5H5z"/>
+      <path fill="currentColor" d="M7 7h10v10H7V7m2 2v6h6V9H9z"/>
+    </svg>`, "selection");
 }
