@@ -6,6 +6,7 @@ import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
+import { playerControlsDefaultStyle, playerControlsFullScreenStyle, uiContainerDefaultStyle, uiContainerFullScreenStyle } from "./ui";
 
 const pixelRatio = window.devicePixelRatio || 1;
 
@@ -424,23 +425,77 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const rawWidth = parseInt(style.width, 10);
     const video = this.videoElement as HTMLVideoElement;
     const trueAspectRatio = video.videoWidth / video.videoHeight;
+
     if (isNaN(rawWidth) || !video.videoWidth || !video.videoHeight) {
-      this.isCanvasInitialized = false;
-      this.setCanvasSettings();
-      return false;
+        this.isCanvasInitialized = false;
+        this.setCanvasSettings();
+        return false;
     }
-    const width = Math.min(rawWidth, video.videoWidth);
-    const height = Math.floor(width / trueAspectRatio);
-    video.style.width = `${width}px`;
-    video.style.height = `${height}px`;
+
+    // Get the container dimensions
+    const container = video.parentElement;
+    const isFullscreen = !!document.fullscreenElement;
+    let width = Math.min(rawWidth, video.videoWidth);
+    let height = Math.floor(width / trueAspectRatio);
+
+    if (isFullscreen && container) {
+        // Calculate dimensions maintaining aspect ratio in fullscreen
+        const CONTROLS_HEIGHT = 50;
+        const TOOLS_HEIGHT = 40;
+        const containerWidth = window.innerWidth;
+        const containerHeight = window.innerHeight - (CONTROLS_HEIGHT + TOOLS_HEIGHT);
+        const containerRatio = containerWidth / containerHeight;
+
+        if (containerRatio > trueAspectRatio) {
+            // Container is wider than video
+            height = containerHeight;
+            width = height * trueAspectRatio;
+        } else {
+            // Container is taller than video
+            width = containerWidth;
+            height = width / trueAspectRatio;
+        }
+
+        // Ensure video is centered and sized correctly
+        video.style.width = `${width}px`;
+        video.style.height = `${height}px`;
+        video.style.marginTop = `${TOOLS_HEIGHT}px`;
+        video.style.marginBottom = `${CONTROLS_HEIGHT}px`;
+    } else {
+        // Normal mode sizing
+        video.style.width = `${width}px`;
+        video.style.height = `${height}px`;
+        video.style.marginTop = '';
+        video.style.marginBottom = '';
+    }
+
+    if (isFullscreen) { 
+      this.playerControlsContainer.style.cssText = playerControlsFullScreenStyle;
+      this.uiContainer.style.cssText = uiContainerFullScreenStyle;
+    } else {
+      this.playerControlsContainer.style.cssText = playerControlsDefaultStyle;
+      this.uiContainer.style.cssText = uiContainerDefaultStyle;
+    }
+
+    // Update canvas dimensions
     this.isCanvasInitialized = video.videoWidth > 0 && video.videoHeight > 0;
     this.canvas.width = width * this.pixelRatio;
     this.canvas.height = height * this.pixelRatio;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
+    
+    // Match canvas position to video
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = video.style.marginTop || '0';
+    this.canvas.style.left = '0';
+
+    // Store enforced size for other calculations
     this.enforcedCanvasSize = { width, height };
+    
+    // Set up the canvas context
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
     this.setCanvasSettings();
+
     return true;
   }
   setCanvasSize() {
