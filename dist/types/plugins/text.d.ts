@@ -8,6 +8,8 @@ export interface IText extends IShapeBase {
 }
 export declare class TextToolPlugin extends BasePlugin<IText> implements ToolPlugin<IText> {
     name: keyof ShapeMap;
+    private activePopup;
+    handleKeyDown: (_e: KeyboardEvent) => undefined;
     move(shape: IText, dx: number, dy: number): IText;
     onActivate(): void;
     onDeactivate(): void;
@@ -16,5 +18,7 @@ export declare class TextToolPlugin extends BasePlugin<IText> implements ToolPlu
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     normalize(shape: IText, canvasWidth: number, canvasHeight: number): IText;
+    private destroyPopup;
+    private createTextInputPopup;
     onPointerUp(event: PointerEvent): void;
 }
