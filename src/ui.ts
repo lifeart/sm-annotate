@@ -7,6 +7,7 @@ import { onDocumentKeydown } from "./events/document-keydown";
 import { onDocumentPaste } from "./events/document-paste";
 import { createColorPicker } from "./ui/color-picker";
 import { createStrokeWidthSlider } from "./ui/stroke-width-slider";
+import { createFullscreenButton } from "./ui/toggle-fullscreen-button";
 
 type StylePojo = Omit<Partial<CSSStyleDeclaration>, 'length' | 'parentRule' | typeof Symbol.iterator>;
 
@@ -22,26 +23,21 @@ const addStyle = (node: HTMLElement, style: StylePojo) => {
 }
 const defaultColor = "#F3CE32";
 
+export const playerControlsDefaultStyle = `position: relative; top: 0px; left: 0px; z-index: 2;`;
+export const uiContainerDefaultStyle = `position: absolute; top: -40px; left: 0px; z-index: 2; display: block;`;
+
+export const playerControlsFullScreenStyle = 'position: absolute;left: 0px;bottom: 5px;width: 100%;z-index: 2;';
+export const uiContainerFullScreenStyle = 'position: absolute; top: 0; left: 0px; z-index: 2; display: block;';
+
 export function initUI(this: AnnotationTool) {
   // Create the container for the UI elements
   const uiContainer = document.createElement("div");
-  addStyle(uiContainer, {
-    position: 'absolute',
-    top: '-40px',
-    left: '0',
-    zIndex: '2',
-  });
-  uiContainer.style.position = "absolute";
-  uiContainer.style.top = "-40px";
-  uiContainer.style.left = "0";
-  uiContainer.style.zIndex = "2";
+  uiContainer.style.cssText = uiContainerDefaultStyle;
+
   this.canvas.parentNode?.insertBefore(uiContainer, this.canvas);
 
   const playerControls = document.createElement("div");
-  playerControls.style.position = "relative";
-  playerControls.style.top = "0";
-  playerControls.style.left = "0";
-  playerControls.style.zIndex = "2";
+  playerControls.style.cssText = playerControlsDefaultStyle;
   // add player controls right after canvas
   this.canvas.parentNode?.insertBefore(playerControls, this.canvas.nextSibling);
 
@@ -138,5 +134,12 @@ export function initUI(this: AnnotationTool) {
         // fine
       }
     })
+
+    // Add fullscreen button to player controls
+    const fullscreenButton = createFullscreenButton(this);
+    fullscreenButton.style.position = 'absolute';
+    fullscreenButton.style.right = '40px';
+    fullscreenButton.style.bottom = '10px';
+    playerControls.appendChild(fullscreenButton);
   }
 }
