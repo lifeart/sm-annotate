@@ -16,12 +16,6 @@ export declare class CurveToolPlugin extends BasePlugin<ICurve> implements ToolP
     zoomCtx: CanvasRenderingContext2D | null;
     zoomCanvas: HTMLCanvasElement | null;
     move(shape: ICurve, dx: number, dy: number): ICurve;
-    colorMap: {
-        r: string;
-        g: string;
-        b: string;
-        y: string;
-    };
     onKeyPress: (e: KeyboardEvent) => void;
     onActivate(): void;
     onDeactivate(): void;

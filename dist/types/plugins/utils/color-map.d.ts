@@ -1,0 +1,28 @@
+export declare const colorMap: {
+    r: string;
+    g: string;
+    b: string;
+    y: string;
+    a: string;
+    c: string;
+    d: string;
+    e: string;
+    f: string;
+    h: string;
+    i: string;
+    j: string;
+    k: string;
+    l: string;
+    m: string;
+    n: string;
+    o: string;
+    p: string;
+    q: string;
+    s: string;
+    t: string;
+    u: string;
+    v: string;
+    w: string;
+    x: string;
+    z: string;
+};
