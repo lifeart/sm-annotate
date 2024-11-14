@@ -90,18 +90,33 @@ export class SelectionToolPlugin
     if (!(video instanceof HTMLVideoElement)) {
       return;
     }
-    // Calculate video scale factors
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-    const displayWidth = video.offsetWidth;
-    const displayHeight = video.offsetHeight;
 
-    const scaleX = videoWidth / displayWidth;
-    const scaleY = videoHeight / displayHeight;
+    // Calculate video and canvas proportions
+    const videoAspectRatio = video.videoWidth / video.videoHeight;
+    const canvasAspectRatio = this.annotationTool.canvasWidth / this.annotationTool.canvasHeight;
+    
+    let scaledVideoWidth = this.annotationTool.canvasWidth;
+    let scaledVideoHeight = this.annotationTool.canvasHeight;
+    let offsetX = 0;
+    let offsetY = 0;
 
-    // Scale the coordinates to match the actual video dimensions
-    const scaledStartX = startX * scaleX;
-    const scaledStartY = startY * scaleY;
+    if (videoAspectRatio > canvasAspectRatio) {
+      // Video is wider than canvas
+      scaledVideoHeight = this.annotationTool.canvasWidth / videoAspectRatio;
+      offsetY = (this.annotationTool.canvasHeight - scaledVideoHeight) / 2;
+    } else {
+      // Video is taller than canvas
+      scaledVideoWidth = this.annotationTool.canvasHeight * videoAspectRatio;
+      offsetX = (this.annotationTool.canvasWidth - scaledVideoWidth) / 2;
+    }
+
+    // Calculate scale factors based on actual video dimensions
+    const scaleX = video.videoWidth / scaledVideoWidth;
+    const scaleY = video.videoHeight / scaledVideoHeight;
+
+    // Adjust coordinates to account for letterboxing offset and scale
+    const scaledStartX = (startX - offsetX) * scaleX;
+    const scaledStartY = (startY - offsetY) * scaleY;
     const scaledWidth = width * scaleX;
     const scaledHeight = height * scaleY;
 

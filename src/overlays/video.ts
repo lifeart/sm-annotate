@@ -7,6 +7,14 @@ export function addVideoOverlay(this: AnnotationTool) {
     return;
   }
 
+  // Get video element's bounding rectangle
+  const videoRect = node.getBoundingClientRect();
+  const canvasRect = this.canvas.getBoundingClientRect();
+
+  // Calculate offset relative to canvas
+  const offsetX = videoRect.left - canvasRect.left;
+  const offsetY = videoRect.top - canvasRect.top;
+
   const frameNumber = this.videoFrameBuffer?.frameNumberFromTime(
     node.currentTime
   );
@@ -14,14 +22,15 @@ export function addVideoOverlay(this: AnnotationTool) {
   const videoFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0) ?? node;
   const vw = videoFrame ? videoFrame.width : node.videoWidth;
   const vh = videoFrame ? videoFrame.height : node.videoHeight;
+
   this.ctx.drawImage(
     videoFrame,
     0,
     0,
     vw,
     vh,
-    0,
-    0,
+    offsetX,
+    offsetY,
     this.canvasWidth,
     this.canvasHeight
   );
