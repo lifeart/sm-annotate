@@ -1,6 +1,7 @@
 import { Point, douglasPeucker } from "./utils/douglas-peucker";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 import type { ShapeMap } from ".";
+import { colorMap } from "./utils/color-map";
 
 export type IPoint = {
   x: number;
@@ -29,12 +30,6 @@ export class CurveToolPlugin
     }));
     return shape;
   }
-  colorMap = {
-    r: "#d31a3b",
-    g: "#15d33b",
-    b: "#0085CA",
-    y: "#F3CE32",
-  };
   onKeyPress = (e: KeyboardEvent) => {
     const key = e.key;
     if (key === null || key === " " || e.isComposing) {
@@ -42,9 +37,9 @@ export class CurveToolPlugin
     }
     const maybeNumeric = Number(key);
     if (isNaN(maybeNumeric) || !maybeNumeric) {
-      if (key in this.colorMap) {
+      if (key in colorMap) {
         // @ts-expect-error
-        this.annotationTool.colorPicker.value = this.colorMap[key];
+        this.annotationTool.colorPicker.value = colorMap[key];
         this.annotationTool.setCanvasSettings();
       }
       return;

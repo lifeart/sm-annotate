@@ -5,6 +5,7 @@ import { onDocumentCopy } from "./events/document-copy";
 import { onDocumentCut } from "./events/document-cut";
 import { onDocumentKeydown } from "./events/document-keydown";
 import { onDocumentPaste } from "./events/document-paste";
+import { colorMap } from "./plugins/utils/color-map";
 import { createColorPicker } from "./ui/color-picker";
 import { createStrokeWidthSlider } from "./ui/stroke-width-slider";
 import { createFullscreenButton } from "./ui/toggle-fullscreen-button";
@@ -21,7 +22,9 @@ const addStyle = (node: HTMLElement, style: StylePojo) => {
     }
   })
 }
-const defaultColor = "#F3CE32";
+
+
+const defaultColor = colorMap.r;
 
 export const playerControlsDefaultStyle = `position: relative; top: 0px; left: 0px; z-index: 2;`;
 export const uiContainerDefaultStyle = `position: absolute; top: -40px; left: 0px; z-index: 2; display: block;`;

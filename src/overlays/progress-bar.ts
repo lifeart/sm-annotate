@@ -1,4 +1,5 @@
 import type { AnnotationTool } from "../core";
+import { colorMap } from "../plugins/utils/color-map";
 
 export function addProgressBarOverlay(this: AnnotationTool) {
   const node = this.videoElement as HTMLVideoElement;
@@ -28,7 +29,7 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   this.ctx.fillRect(x, y, width, height);
 
-  this.ctx.fillStyle = "#F3CE32";
+  this.ctx.fillStyle = colorMap.y;
 
   const recSize = this.isMobile ? 16 : 8;
 
