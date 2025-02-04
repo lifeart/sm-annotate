@@ -27,25 +27,54 @@ export class MoveToolPlugin
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
-    const lastShape = this.annotationTool.shapes.slice(0).pop();
-    if (!lastShape) {
+    const shapes = this.annotationTool.shapes.slice().reverse();
+    for (const shape of shapes) {
+      if (this.isPointerInsideShape(shape, x, y)) {
+        this.shape = shape;
+        break;
+      }
+    }
+    if (!this.shape) {
       return;
     }
-    this.shape = lastShape;
     this.shapeRemoved = false;
     this.lastDrawnShape = null;
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
     this.isScale =
-      lastShape.type === "image"
-        ? this.isPointerAtCorner(lastShape, x, y)
+      this.shape.type === "image"
+        ? this.isPointerAtCorner(this.shape, x, y)
         : false;
 
     if (this.isScale) {
       this.annotationTool.canvas.style.cursor = 'nw-resize';
     } else {
       this.annotationTool.canvas.style.cursor = 'move';
+    }
+  }
+
+  isPointerInsideShape(shape: IShape, x: number, y: number): boolean {
+    const deserializedShape = this.annotationTool.deserialize([shape])[0];
+    switch (deserializedShape.type) {
+      case "rectangle":
+      case "image":
+        return (
+          x >= deserializedShape.x &&
+          x <= deserializedShape.x + deserializedShape.width &&
+          y >= deserializedShape.y &&
+          y <= deserializedShape.y + deserializedShape.height
+        );
+      case "circle":
+        const dx = x - deserializedShape.x;
+        const dy = y - deserializedShape.y;
+        return dx * dx + dy * dy <= deserializedShape.radius * deserializedShape.radius;
+      case "line":
+      case "arrow":
+        // Implement line/arrow hit detection if needed
+        return false;
+      default:
+        return false;
     }
   }
 

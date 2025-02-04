@@ -84,4 +84,12 @@ export class RectangleToolPlugin
   draw(shape: IRectangle) {
     this.drawRectangle(shape.x, shape.y, shape.width, shape.height);
   }
+  isPointerInsideShape(shape: IRectangle, x: number, y: number): boolean {
+    return (
+      x >= shape.x &&
+      x <= shape.x + shape.width &&
+      y >= shape.y &&
+      y <= shape.y + shape.height
+    );
+  }
 }

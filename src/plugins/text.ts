@@ -234,4 +234,17 @@ export class TextToolPlugin
     const { x, y } = this.annotationTool.getRelativeCoords(event);
     this.createTextInputPopup(x, y);
   }
+
+  isPointerInsideShape(shape: IText, x: number, y: number): boolean {
+    const lines = shape.text.split("\n");
+    const fontSize = 16 + this.ctx.lineWidth * 0.5;
+    const textHeight = lines.length * fontSize;
+    const textWidth = Math.max(...lines.map(line => this.ctx.measureText(line).width));
+    return (
+      x >= shape.x &&
+      x <= shape.x + textWidth &&
+      y >= shape.y - fontSize &&
+      y <= shape.y + textHeight - fontSize
+    );
+  }
 }

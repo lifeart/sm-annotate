@@ -93,4 +93,19 @@ export class ArrowToolPlugin
     );
     this.ctx.stroke();
   }
+  isPointerInsideShape(shape: IArrow, x: number, y: number): boolean {
+    const { x1, y1, x2, y2 } = shape;
+    const tolerance = 5; // Adjust as needed
+
+    const distance = (x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1);
+    const lengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+
+    return (
+      Math.abs(distance) / Math.sqrt(lengthSquared) <= tolerance &&
+      x >= Math.min(x1, x2) - tolerance &&
+      x <= Math.max(x1, x2) + tolerance &&
+      y >= Math.min(y1, y2) - tolerance &&
+      y <= Math.max(y1, y2) + tolerance
+    );
+  }
 }

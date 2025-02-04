@@ -51,4 +51,12 @@ export class ImageToolPlugin
       shape.height
     );
   }
+  isPointerInsideShape(shape: IImage, x: number, y: number): boolean {
+    return (
+      x >= shape.x &&
+      x <= shape.x + shape.width &&
+      y >= shape.y &&
+      y <= shape.y + shape.height
+    );
+  }
 }
