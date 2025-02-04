@@ -93,7 +93,7 @@ export class ArrowToolPlugin
     );
     this.ctx.stroke();
   }
-  isPointerInsideShape(shape: IArrow, x: number, y: number): boolean {
+  isPointerAtShape(shape: IArrow, x: number, y: number): boolean {
     const { x1, y1, x2, y2 } = shape;
     const tolerance = 5; // Adjust as needed
 

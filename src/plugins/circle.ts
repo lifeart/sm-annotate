@@ -76,7 +76,7 @@ export class CircleToolPlugin
   draw(shape: ICircle) {
     this.drawCircle(shape.x, shape.y, shape.radius);
   }
-  isPointerInsideShape(shape: ICircle, x: number, y: number): boolean {
+  isPointerAtShape(shape: ICircle, x: number, y: number): boolean {
     const dx = x - shape.x;
     const dy = y - shape.y;
     return dx * dx + dy * dy <= shape.radius * shape.radius;

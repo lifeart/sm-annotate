@@ -73,7 +73,7 @@ export class LineToolPlugin
   draw(shape: ILine) {
     this.drawLine(shape.x1, shape.y1, shape.x2, shape.y2);
   }
-  isPointerInsideShape(shape: ILine, x: number, y: number): boolean {
+  isPointerAtShape(shape: ILine, x: number, y: number): boolean {
     const { x1, y1, x2, y2 } = shape;
     const tolerance = 5; // Adjust as needed
 

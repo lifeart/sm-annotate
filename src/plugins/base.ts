@@ -14,6 +14,7 @@ export interface ToolPlugin<T extends IShapeBase> {
   onPointerDown: (event: PointerEvent) => void;
   onPointerUp: (event: PointerEvent) => void;
   onPointerMove: (event: PointerEvent) => void;
+  isPointerAtShape: (shape: T, x: number, y: number) => boolean;
   onActivate: () => void;
   onDeactivate: () => void;
   reset: () => void;

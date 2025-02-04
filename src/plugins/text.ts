@@ -235,7 +235,7 @@ export class TextToolPlugin
     this.createTextInputPopup(x, y);
   }
 
-  isPointerInsideShape(shape: IText, x: number, y: number): boolean {
+  isPointerAtShape(shape: IText, x: number, y: number): boolean {
     const lines = shape.text.split("\n");
     const fontSize = 16 + this.ctx.lineWidth * 0.5;
     const textHeight = lines.length * fontSize;
