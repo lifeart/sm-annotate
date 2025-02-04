@@ -15,4 +15,5 @@ export declare class CircleToolPlugin extends BasePlugin<ICircle> implements Too
     onPointerUp(event: PointerEvent): void;
     drawCircle(x: number, y: number, radius: number): void;
     draw(shape: ICircle): void;
+    isPointerAtShape(shape: ICircle, x: number, y: number): boolean;
 }

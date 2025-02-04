@@ -16,4 +16,5 @@ export declare class ImageToolPlugin extends BasePlugin<IImage> implements ToolP
     onPointerUp(event: PointerEvent): void;
     normalize(shape: IImage, canvasWidth: number, canvasHeight: number): IImage;
     draw(shape: IImage): void;
+    isPointerAtShape(shape: IImage, x: number, y: number): boolean;
 }

@@ -184,6 +184,51 @@ export class CurveToolPlugin
 
     // zoomCtx.scale(this.zoomScale, this.zoomScale);
   }
+  isPointerAtShape(shape: ICurve, x: number, y: number) {
+    const threshold = this.ctx.lineWidth / 2;
+    
+    for (let i = 0; i < shape.points.length - 1; i++) {
+      const point = shape.points[i];
+      const nextPoint = shape.points[i + 1];
+      
+      // Calculate distances
+      const A = x - point.x;
+      const B = y - point.y;
+      const C = nextPoint.x - point.x;
+      const D = nextPoint.y - point.y;
+      
+      const dot = A * C + B * D;
+      const lenSq = C * C + D * D;
+      let param = -1;
+      
+      if (lenSq !== 0) {
+        param = dot / lenSq;
+      }
+      
+      let xx, yy;
+      
+      if (param < 0) {
+        xx = point.x;
+        yy = point.y;
+      } else if (param > 1) {
+        xx = nextPoint.x;
+        yy = nextPoint.y;
+      } else {
+        xx = point.x + param * C;
+        yy = point.y + param * D;
+      }
+      
+      const dx = x - xx;
+      const dy = y - yy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < threshold) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 
   // Function to draw the zoomed circle centered on the current event coordinates without any visible offset
   drawZoomCircle(x: number, y: number, isEnabled = false) {

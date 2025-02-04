@@ -16,4 +16,5 @@ export declare class RectangleToolPlugin extends BasePlugin<IRectangle> implemen
     onPointerUp(event: PointerEvent): void;
     drawRectangle(x: number, y: number, width: number, height: number): void;
     draw(shape: IRectangle): void;
+    isPointerAtShape(shape: IRectangle, x: number, y: number): boolean;
 }

@@ -14,8 +14,8 @@ export class MoveToolPlugin
 {
   name = "move" as keyof ShapeMap;
   shape: IShape | null = null;
+  shapeIndex: number = -1;
   lastDrawnShape: IShape | null = null;
-  shapeRemoved = false;
   isScale = false;
   move(shape: IMove) {
     return shape;
@@ -27,19 +27,27 @@ export class MoveToolPlugin
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
-    const lastShape = this.annotationTool.shapes.slice(0).pop();
-    if (!lastShape) {
+    const originalShapes = this.annotationTool.shapes;
+    const shapes = originalShapes.slice().reverse();
+    for (const shape of shapes) {
+      if (this.isPointerAtShape(shape, x, y)) {
+        this.shape = {...shape};
+        shape.fillStyle = 'rgba(0, 0, 0, 0)';
+        shape.strokeStyle = 'rgba(0, 0, 0, 0)';
+        this.shapeIndex = originalShapes.indexOf(shape);
+        break;
+      }
+    }
+    if (!this.shape) {
       return;
     }
-    this.shape = lastShape;
-    this.shapeRemoved = false;
     this.lastDrawnShape = null;
     this.startX = x;
     this.startY = y;
     this.isDrawing = true;
     this.isScale =
-      lastShape.type === "image"
-        ? this.isPointerAtCorner(lastShape, x, y)
+      this.shape.type === "image"
+        ? this.isPointerAtCorner(this.shape, x, y)
         : false;
 
     if (this.isScale) {
@@ -47,6 +55,12 @@ export class MoveToolPlugin
     } else {
       this.annotationTool.canvas.style.cursor = 'move';
     }
+  }
+
+  isPointerAtShape(shape: IShape, x: number, y: number): boolean {
+    const deserializedShape = this.annotationTool.deserialize([shape])[0];
+    const plugin = this.annotationTool.pluginForTool(deserializedShape.type);
+    return plugin.isPointerAtShape(deserializedShape, x, y);
   }
 
   isPointerAtCorner(rawShape: IImage | IAudioPeaks, x: number, y: number) {
@@ -86,11 +100,6 @@ export class MoveToolPlugin
   onPointerMove(event: PointerEvent) {
     if (!this.isDrawing || !this.shape) {
       return;
-    }
-
-    if (!this.shapeRemoved) {
-      this.annotationTool.removeLastShape();
-      this.shapeRemoved = true;
     }
 
     const { x, y } = this.annotationTool.getRelativeCoords(event);
@@ -159,7 +168,6 @@ export class MoveToolPlugin
     this.isDrawing = false;
     this.isScale = false;
     this.shape = null;
-    this.shapeRemoved = false;
     this.lastDrawnShape = null;
     this.annotationTool.canvas.style.cursor = 'default';
   }
@@ -171,7 +179,10 @@ export class MoveToolPlugin
     this.shape = null;
     this.isScale = false;
     this.lastDrawnShape = null;
-    this.shapeRemoved = false;
+    this.shapeIndex = -1;
     this.annotationTool.canvas.style.cursor = 'default';
+  }
+  save(shape: IShape) {
+    this.annotationTool.replaceShape(shape, this.shapeIndex);
   }
 }

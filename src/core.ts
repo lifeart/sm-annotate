@@ -343,11 +343,6 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
-  removeLastShape() {
-    this.shapes.pop();
-    this.redrawFullCanvas();
-  }
-
   handleUndo() {
     if (this.undoStack.length > 0) {
       this.shapes = this.undoStack.pop() as IShape[];
@@ -505,6 +500,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
+  replaceShape(shape: IShape, index: number) {
+    const serializedShape = this.serialize([shape])[0];
+    this.undoStack.push([...this.shapes]);
+    this.shapes[index] = serializedShape;
+  }
   addShape(shape: IShape) {
     const serializedShape = this.serialize([shape])[0];
     this.undoStack.push([...this.shapes]);

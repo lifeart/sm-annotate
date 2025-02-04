@@ -16,4 +16,5 @@ export declare class ArrowToolPlugin extends BasePlugin<IArrow> implements ToolP
     onPointerMove(event: PointerEvent): void;
     onPointerUp(event: PointerEvent): void;
     drawArrow(x1: number, y1: number, x2: number, y2: number): void;
+    isPointerAtShape(shape: IArrow, x: number, y: number): boolean;
 }
