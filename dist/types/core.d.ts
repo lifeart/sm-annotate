@@ -79,7 +79,6 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     initFrameCounter(): void;
     init(videoElement: HTMLVideoElement | HTMLImageElement): void;
     onKeyDown(event: KeyboardEvent): void;
-    removeLastShape(): void;
     handleUndo(): void;
     destroy(): void;
     isCanvasInitialized: boolean;
@@ -89,6 +88,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     } | null;
     _setCanvasSize(): boolean;
     setCanvasSize(): void;
+    replaceShape(shape: IShape, index: number): void;
     addShape(shape: IShape): void;
     get msPerFrame(): number;
     syncVideoSizes(): void;

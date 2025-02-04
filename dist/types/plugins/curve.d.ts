@@ -27,5 +27,6 @@ export declare class CurveToolPlugin extends BasePlugin<ICurve> implements ToolP
     onPointerUp(event: PointerEvent): void;
     drawCurve(shape: Pick<ICurve, "points" | "lineWidth">): void;
     initZoomCanvas(): void;
+    isPointerAtShape(shape: ICurve, x: number, y: number): boolean;
     drawZoomCircle(x: number, y: number, isEnabled?: boolean): void;
 }
