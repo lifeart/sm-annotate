@@ -16,4 +16,5 @@ export declare class LineToolPlugin extends BasePlugin<ILine> implements ToolPlu
     onPointerUp(event: PointerEvent): void;
     drawLine(x1: number, y1: number, x2: number, y2: number): void;
     draw(shape: ILine): void;
+    isPointerAtShape(shape: ILine, x: number, y: number): boolean;
 }

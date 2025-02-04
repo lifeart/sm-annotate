@@ -21,4 +21,5 @@ export declare class TextToolPlugin extends BasePlugin<IText> implements ToolPlu
     private destroyPopup;
     private createTextInputPopup;
     onPointerUp(event: PointerEvent): void;
+    isPointerAtShape(shape: IText, x: number, y: number): boolean;
 }

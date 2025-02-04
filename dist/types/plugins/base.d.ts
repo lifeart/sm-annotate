@@ -12,6 +12,7 @@ export interface ToolPlugin<T extends IShapeBase> {
     onPointerDown: (event: PointerEvent) => void;
     onPointerUp: (event: PointerEvent) => void;
     onPointerMove: (event: PointerEvent) => void;
+    isPointerAtShape: (shape: T, x: number, y: number) => boolean;
     onActivate: () => void;
     onDeactivate: () => void;
     reset: () => void;
@@ -26,6 +27,7 @@ export declare class BasePlugin<T extends IShapeBase> {
     startY: number;
     isDrawing: boolean;
     constructor(annotationTool: AnnotationTool);
+    isPointerAtShape(_shape: T, _x: number, _y: number): boolean;
     on(event: string, arg: unknown): void;
     get ctx(): CanvasRenderingContext2D;
     onDeactivate(): void;
