@@ -21,6 +21,7 @@ var fe=Object.create;var ct=Object.defineProperty,ge=Object.defineProperties,ye=
       display: inline-flex;
       align-items: center;
       flex-wrap: nowrap;
+      flex-direction: row;
       gap: 2px;
       padding: 4px;
       background: var(--${d}-bg-primary);
@@ -31,6 +32,8 @@ var fe=Object.create;var ct=Object.defineProperty,ge=Object.defineProperties,ye=
       white-space: nowrap;
       z-index: 10;
       margin-top: 8px;
+      width: max-content;
+      height: 40px;
     }
 
     .${d}-player-controls {
@@ -41,6 +44,7 @@ var fe=Object.create;var ct=Object.defineProperty,ge=Object.defineProperties,ye=
       display: inline-flex;
       align-items: center;
       flex-wrap: nowrap;
+      flex-direction: row;
       gap: 2px;
       padding: 4px;
       background: var(--${d}-bg-primary);
@@ -51,6 +55,8 @@ var fe=Object.create;var ct=Object.defineProperty,ge=Object.defineProperties,ye=
       white-space: nowrap;
       z-index: 10;
       margin-bottom: 8px;
+      width: max-content;
+      height: 40px;
     }
 
     /* Fullscreen mode - toolbars inside the fullscreen container */
