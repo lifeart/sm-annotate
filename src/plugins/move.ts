@@ -666,9 +666,8 @@ export class MoveToolPlugin
     let foundShape = false;
     for (const shape of shapes) {
       if (this.isPointerAtShape(shape, x, y)) {
-        this.shape = {...shape};
-        shape.fillStyle = 'rgba(0, 0, 0, 0)';
-        shape.strokeStyle = 'rgba(0, 0, 0, 0)';
+        // Deep clone to preserve original styles
+        this.shape = JSON.parse(JSON.stringify(shape));
         this.shapeIndex = originalShapes.indexOf(shape);
         this.selectedShapeIndex = this.shapeIndex;
         foundShape = true;
@@ -839,11 +838,14 @@ export class MoveToolPlugin
       this.annotationTool.redrawFullCanvas();
       return;
     }
-    if (this.lastDrawnShape) {
-      // enforce the current tool's fill and stroke style
-      this.lastDrawnShape.fillStyle = this.annotationTool.ctx.fillStyle;
-      this.lastDrawnShape.strokeStyle = this.annotationTool.ctx.strokeStyle;
-      this.lastDrawnShape.lineWidth = this.annotationTool.ctx.lineWidth;
+    if (this.lastDrawnShape && this.shape) {
+      // Preserve original shape's styles
+      this.lastDrawnShape.fillStyle = this.shape.fillStyle;
+      this.lastDrawnShape.strokeStyle = this.shape.strokeStyle;
+      this.lastDrawnShape.lineWidth = this.shape.lineWidth;
+      if (this.shape.opacity !== undefined) {
+        this.lastDrawnShape.opacity = this.shape.opacity;
+      }
       this.save(this.lastDrawnShape as IMove);
     }
     this.isDrawing = false;

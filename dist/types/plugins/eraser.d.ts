@@ -16,4 +16,5 @@ export declare class EraserToolPlugin extends BasePlugin<IEraser> implements Too
     onPointerMove(event: PointerEvent): void;
     onPointerUp(event: PointerEvent): void;
     drawEraser(x: number, y: number, width: number, height: number): void;
+    isPointerAtShape(shape: IEraser, x: number, y: number): boolean;
 }

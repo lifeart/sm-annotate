@@ -18,4 +18,5 @@ export declare class SelectionToolPlugin extends BasePlugin<ISelection> implemen
     drawSelectionRect(x: number, y: number, width: number, height: number): void;
     draw(shape: ISelection): void;
     reset(): void;
+    isPointerAtShape(shape: ISelection, x: number, y: number): boolean;
 }

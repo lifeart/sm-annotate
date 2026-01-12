@@ -14,7 +14,7 @@ export declare class CompareToolPlugin extends BasePlugin<ICompare> implements T
     move(shape: ICompare, dx: number, dy: number): ICompare;
     onActivate(): void;
     onDeactivate(): void;
-    normalize(shape: ICompare, canvasWidth: number): ICompare;
+    normalize(shape: ICompare, canvasWidth: number, _canvasHeight: number): ICompare;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     onPointerUp(): void;

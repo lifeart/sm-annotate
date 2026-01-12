@@ -116,4 +116,64 @@ describe('LineToolPlugin', () => {
       expect(plugin.isPointerAtShape(diagonalShape, 20, 80)).toBe(false);
     });
   });
+
+  describe('isPointerAtShape - lineWidth tolerance', () => {
+    const plugin = Object.create(LineToolPlugin.prototype);
+
+    it('should use shape lineWidth for tolerance calculation', () => {
+      const thinLine: ILine = {
+        type: 'line',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      };
+
+      const thickLine: ILine = {
+        type: 'line',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 20,
+      };
+
+      // At y=108, thin line should not be detected (tolerance ~5)
+      expect(plugin.isPointerAtShape(thinLine, 150, 108)).toBe(false);
+      // At y=108, thick line should be detected (tolerance ~10)
+      expect(plugin.isPointerAtShape(thickLine, 150, 108)).toBe(true);
+    });
+  });
+
+  describe('isPointerAtShape - zero-length line', () => {
+    const plugin = Object.create(LineToolPlugin.prototype);
+
+    const pointShape: ILine = {
+      type: 'line',
+      x1: 100,
+      y1: 100,
+      x2: 100,
+      y2: 100, // Zero-length (point)
+      strokeStyle: '#000',
+      fillStyle: '#fff',
+      lineWidth: 1,
+    };
+
+    it('should return true when pointer is at the point', () => {
+      expect(plugin.isPointerAtShape(pointShape, 100, 100)).toBe(true);
+    });
+
+    it('should return true when pointer is near the point (within tolerance)', () => {
+      expect(plugin.isPointerAtShape(pointShape, 103, 100)).toBe(true);
+    });
+
+    it('should return false when pointer is far from the point', () => {
+      expect(plugin.isPointerAtShape(pointShape, 120, 100)).toBe(false);
+    });
+  });
 });

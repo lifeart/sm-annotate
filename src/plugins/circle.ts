@@ -79,6 +79,9 @@ export class CircleToolPlugin
   isPointerAtShape(shape: ICircle, x: number, y: number): boolean {
     const dx = x - shape.x;
     const dy = y - shape.y;
-    return dx * dx + dy * dy <= shape.radius * shape.radius;
+    const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+    const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
+    // Check if inside circle or near the edge (stroke)
+    return distanceFromCenter <= shape.radius + tolerance;
   }
 }

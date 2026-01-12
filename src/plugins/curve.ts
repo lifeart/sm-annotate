@@ -185,7 +185,7 @@ export class CurveToolPlugin
     // zoomCtx.scale(this.zoomScale, this.zoomScale);
   }
   isPointerAtShape(shape: ICurve, x: number, y: number) {
-    const threshold = this.ctx.lineWidth / 2;
+    const threshold = Math.max((shape.lineWidth ?? this.ctx.lineWidth) / 2, 5);
     
     for (let i = 0; i < shape.points.length - 1; i++) {
       const point = shape.points[i];

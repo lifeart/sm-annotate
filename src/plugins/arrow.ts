@@ -31,7 +31,7 @@ export class ArrowToolPlugin
     return shape;
   }
   draw(shape: IArrow) {
-    this.drawArrow(shape.x1, shape.y1, shape.x2, shape.y2);
+    this.drawArrow(shape.x1, shape.y1, shape.x2, shape.y2, shape.lineWidth);
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
@@ -52,7 +52,6 @@ export class ArrowToolPlugin
     if (!this.isDrawing) {
       return;
     }
-    this.isDrawing = false;
     const { x, y } = this.annotationTool.getRelativeCoords(event);
 
     this.save({
@@ -65,9 +64,11 @@ export class ArrowToolPlugin
       fillStyle: this.ctx.fillStyle,
       lineWidth: this.ctx.lineWidth,
     });
+    this.drawArrow(this.startX, this.startY, x, y);
+    this.isDrawing = false;
   }
-  drawArrow(x1: number, y1: number, x2: number, y2: number) {
-    const headLength = 10 + 2.5 * this.ctx.lineWidth; // Length of the arrowhead
+  drawArrow(x1: number, y1: number, x2: number, y2: number, lineWidth?: number) {
+    const headLength = 10 + 2.5 * (lineWidth ?? this.ctx.lineWidth); // Length of the arrowhead
     const headAngle = Math.PI / 6; // Angle of arrowhead from the line
 
     // Calculate the angle of the line
@@ -95,10 +96,17 @@ export class ArrowToolPlugin
   }
   isPointerAtShape(shape: IArrow, x: number, y: number): boolean {
     const { x1, y1, x2, y2 } = shape;
-    const tolerance = 5; // Adjust as needed
+    const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
 
     const distance = (x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1);
     const lengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+
+    // Handle zero-length arrows (point)
+    if (lengthSquared === 0) {
+      const dx = x - x1;
+      const dy = y - y1;
+      return Math.sqrt(dx * dx + dy * dy) <= tolerance;
+    }
 
     return (
       Math.abs(distance) / Math.sqrt(lengthSquared) <= tolerance &&

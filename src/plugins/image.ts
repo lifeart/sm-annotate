@@ -52,11 +52,12 @@ export class ImageToolPlugin
     );
   }
   isPointerAtShape(shape: IImage, x: number, y: number): boolean {
-    return (
-      x >= shape.x &&
-      x <= shape.x + shape.width &&
-      y >= shape.y &&
-      y <= shape.y + shape.height
-    );
+    // Normalize coordinates to handle negative width/height
+    const minX = Math.min(shape.x, shape.x + shape.width);
+    const maxX = Math.max(shape.x, shape.x + shape.width);
+    const minY = Math.min(shape.y, shape.y + shape.height);
+    const maxY = Math.max(shape.y, shape.y + shape.height);
+
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 }

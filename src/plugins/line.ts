@@ -75,10 +75,17 @@ export class LineToolPlugin
   }
   isPointerAtShape(shape: ILine, x: number, y: number): boolean {
     const { x1, y1, x2, y2 } = shape;
-    const tolerance = 5; // Adjust as needed
+    const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
 
     const distance = (x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1);
     const lengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+
+    // Handle zero-length lines (point)
+    if (lengthSquared === 0) {
+      const dx = x - x1;
+      const dy = y - y1;
+      return Math.sqrt(dx * dx + dy * dy) <= tolerance;
+    }
 
     return (
       Math.abs(distance) / Math.sqrt(lengthSquared) <= tolerance &&

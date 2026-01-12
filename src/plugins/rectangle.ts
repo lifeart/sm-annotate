@@ -86,18 +86,24 @@ export class RectangleToolPlugin
   }
   isPointerAtShape(shape: IRectangle, x: number, y: number): boolean {
     const tolerance = 5;
-    
+
+    // Normalize coordinates to handle negative width/height
+    const minX = Math.min(shape.x, shape.x + shape.width);
+    const maxX = Math.max(shape.x, shape.x + shape.width);
+    const minY = Math.min(shape.y, shape.y + shape.height);
+    const maxY = Math.max(shape.y, shape.y + shape.height);
+
     // Check if point is near any of the rectangle edges
-    const nearLeftEdge = Math.abs(x - shape.x) <= tolerance;
-    const nearRightEdge = Math.abs(x - (shape.x + shape.width)) <= tolerance;
-    const nearTopEdge = Math.abs(y - shape.y) <= tolerance;
-    const nearBottomEdge = Math.abs(y - (shape.y + shape.height)) <= tolerance;
-    
+    const nearLeftEdge = Math.abs(x - minX) <= tolerance;
+    const nearRightEdge = Math.abs(x - maxX) <= tolerance;
+    const nearTopEdge = Math.abs(y - minY) <= tolerance;
+    const nearBottomEdge = Math.abs(y - maxY) <= tolerance;
+
     // Point must be within the vertical range of rectangle for left/right edges
-    const withinVerticalBounds = y >= shape.y && y <= shape.y + shape.height;
+    const withinVerticalBounds = y >= minY - tolerance && y <= maxY + tolerance;
     // Point must be within the horizontal range of rectangle for top/bottom edges
-    const withinHorizontalBounds = x >= shape.x && x <= shape.x + shape.width;
-    
+    const withinHorizontalBounds = x >= minX - tolerance && x <= maxX + tolerance;
+
     return (
       (nearLeftEdge || nearRightEdge) && withinVerticalBounds ||
       (nearTopEdge || nearBottomEdge) && withinHorizontalBounds

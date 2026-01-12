@@ -90,4 +90,14 @@ export class EraserToolPlugin
   drawEraser(x: number, y: number, width: number, height: number) {
     this.ctx.clearRect(x, y, width, height);
   }
+
+  isPointerAtShape(shape: IEraser, x: number, y: number): boolean {
+    // Normalize coordinates to handle negative width/height
+    const minX = Math.min(shape.x, shape.x + shape.width);
+    const maxX = Math.max(shape.x, shape.x + shape.width);
+    const minY = Math.min(shape.y, shape.y + shape.height);
+    const maxY = Math.max(shape.y, shape.y + shape.height);
+
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
+  }
 }

@@ -287,4 +287,14 @@ export class SelectionToolPlugin
     super.reset();
     this.selectedArea = null;
   }
+
+  isPointerAtShape(shape: ISelection, x: number, y: number): boolean {
+    // Normalize coordinates to handle negative width/height
+    const minX = Math.min(shape.x, shape.x + shape.width);
+    const maxX = Math.max(shape.x, shape.x + shape.width);
+    const minY = Math.min(shape.y, shape.y + shape.height);
+    const maxY = Math.max(shape.y, shape.y + shape.height);
+
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
+  }
 }

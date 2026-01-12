@@ -34,24 +34,18 @@ export class TextToolPlugin
   draw(shape: IText) {
     // support multiline text
     const lines = shape.text.split("\n");
-    // draw white background for text area with padding
-    // const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b));
-    // this.ctx.save();
-    // this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-    // this.ctx.fillRect(
-    //   shape.x - 5,
-    //   shape.y - 20,
-    //   10 + this.ctx.measureText(longestLine).width,
-    //   10 + lines.length * 20
-    // );
-    // this.ctx.restore();
+    const fontSize = 16 + (shape.lineWidth ?? this.ctx.lineWidth) * 0.5;
+    const lineHeight = fontSize * 1.25;
     for (let i = 0; i < lines.length; i++) {
-      this.drawText(shape.x, shape.y + i * 20, lines[i]);
+      this.drawTextLine(shape.x, shape.y + i * lineHeight, lines[i], fontSize);
     }
-
   }
   drawText(x: number, y: number, text: string) {
     const fontSize = 16 + this.ctx.lineWidth * 0.5;
+    this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+    this.ctx.fillText(text, x, y);
+  }
+  private drawTextLine(x: number, y: number, text: string, fontSize: number) {
     this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
     this.ctx.fillText(text, x, y);
   }
@@ -237,8 +231,11 @@ export class TextToolPlugin
 
   isPointerAtShape(shape: IText, x: number, y: number): boolean {
     const lines = shape.text.split("\n");
-    const fontSize = 16 + this.ctx.lineWidth * 0.5;
-    const textHeight = lines.length * fontSize;
+    const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
+    const lineHeight = fontSize * 1.25;
+    const textHeight = lines.length * lineHeight;
+    // Set font to measure text width correctly
+    this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
     const textWidth = Math.max(...lines.map(line => this.ctx.measureText(line).width));
     return (
       x >= shape.x &&

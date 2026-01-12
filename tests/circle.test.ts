@@ -76,4 +76,35 @@ describe('CircleToolPlugin', () => {
       expect(plugin.isPointerAtShape(shape, 100, 200)).toBe(false);
     });
   });
+
+  describe('isPointerAtShape - lineWidth tolerance', () => {
+    const plugin = Object.create(CircleToolPlugin.prototype);
+
+    it('should use shape lineWidth for tolerance calculation', () => {
+      const thinCircle: ICircle = {
+        type: 'circle',
+        x: 100,
+        y: 100,
+        radius: 50,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      };
+
+      const thickCircle: ICircle = {
+        type: 'circle',
+        x: 100,
+        y: 100,
+        radius: 50,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 20,
+      };
+
+      // At distance 58 from center, thin circle should not be detected (radius 50 + tolerance ~5 = 55)
+      expect(plugin.isPointerAtShape(thinCircle, 158, 100)).toBe(false);
+      // At distance 58 from center, thick circle should be detected (radius 50 + tolerance ~10 = 60)
+      expect(plugin.isPointerAtShape(thickCircle, 158, 100)).toBe(true);
+    });
+  });
 });

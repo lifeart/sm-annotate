@@ -33,7 +33,7 @@ export class CompareToolPlugin
     this.leftOpacity = 1;
     this.isDrawing = false;
   }
-  normalize(shape: ICompare, canvasWidth: number): ICompare {
+  normalize(shape: ICompare, canvasWidth: number, _canvasHeight: number): ICompare {
     return {
       ...shape,
       x: shape.x / canvasWidth,

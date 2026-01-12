@@ -15,6 +15,7 @@ export declare class TextToolPlugin extends BasePlugin<IText> implements ToolPlu
     onDeactivate(): void;
     draw(shape: IText): void;
     drawText(x: number, y: number, text: string): void;
+    private drawTextLine;
     onPointerDown(event: PointerEvent): void;
     onPointerMove(event: PointerEvent): void;
     normalize(shape: IText, canvasWidth: number, canvasHeight: number): IText;
