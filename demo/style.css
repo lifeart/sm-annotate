@@ -103,6 +103,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   min-width: 0;
 }
 
@@ -110,17 +112,22 @@ body {
   position: relative;
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 32px var(--shadow);
   border: 1px solid var(--border);
+  max-width: 100%;
+  margin-top: 50px; /* Space for top toolbar */
 }
 
 video {
   display: block;
   width: 100%;
   height: auto;
+  max-height: calc(100vh - 250px); /* Limit height for vertical videos */
+  object-fit: contain;
   outline: none;
   background: #000;
+  border-radius: var(--radius-lg);
 }
 
 video::-webkit-media-controls-fullscreen-button {
@@ -129,6 +136,7 @@ video::-webkit-media-controls-fullscreen-button {
 
 canvas {
   touch-action: none;
+  border-radius: var(--radius-lg);
 }
 
 /* Sidebar */
@@ -393,13 +401,19 @@ kbd {
   position: absolute !important;
   top: auto !important;
   bottom: 100%;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   margin-bottom: 8px;
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
 }
 
 .video-container .sm-annotate-player-controls {
   position: absolute !important;
-  bottom: 8px;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  margin-top: 8px;
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
 }

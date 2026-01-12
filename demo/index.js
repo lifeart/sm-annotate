@@ -16,6 +16,7 @@
     .${u}-container {
       display: inline-flex;
       align-items: center;
+      flex-wrap: nowrap;
       gap: 2px;
       padding: 4px;
       background: var(--${u}-bg-primary);
@@ -23,11 +24,13 @@
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${u}-shadow);
+      white-space: nowrap;
     }
 
     .${u}-player-controls {
       display: inline-flex;
       align-items: center;
+      flex-wrap: nowrap;
       gap: 2px;
       padding: 4px;
       background: var(--${u}-bg-primary);
@@ -35,6 +38,7 @@
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${u}-shadow);
+      white-space: nowrap;
     }
 
     .${u}-btn {
