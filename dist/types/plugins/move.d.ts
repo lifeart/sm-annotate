@@ -14,6 +14,14 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     isScale: boolean;
     selectedShapeIndex: number;
     private boundHandleKeyDown;
+    /**
+     * Get the currently selected shape, if any
+     */
+    getSelectedShape(): IShape | null;
+    /**
+     * Set opacity for the currently selected shape
+     */
+    setSelectedShapeOpacity(opacity: number): boolean;
     move(shape: IMove): IMove;
     normalize(shape: IMove): IMove;
     onActivate(): void;
