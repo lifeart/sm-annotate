@@ -857,12 +857,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       strokeStyle: this.ctx.strokeStyle,
       fillStyle: this.ctx.fillStyle,
       lineWidth: this.ctx.lineWidth,
+      globalAlpha: this.ctx.globalAlpha,
     };
 
     for (let shape of this.deserialize(this.globalShapes)) {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
+      this.ctx.globalAlpha = shape.opacity ?? 1;
       try {
         this.pluginForTool(shape.type).draw(shape);
       } catch (e) {
@@ -874,6 +876,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
       this.ctx.lineWidth = shape.lineWidth;
+      this.ctx.globalAlpha = shape.opacity ?? 1;
 
       try {
         this.pluginForTool(shape.type).draw(shape);
@@ -885,6 +888,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.strokeStyle = prevSettings.strokeStyle;
     this.ctx.fillStyle = prevSettings.fillStyle;
     this.ctx.lineWidth = prevSettings.lineWidth;
+    this.ctx.globalAlpha = prevSettings.globalAlpha;
   }
 
   clearCanvas() {

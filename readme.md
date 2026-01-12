@@ -84,6 +84,9 @@ await annotationTool.addReferenceVideoByURL(referenceUrl, fps);
 
 // Adjust overlay opacity for compare mode (0 = off, 0.25, 0.5, 0.7, 1)
 annotationTool.overlayOpacity = 0.7;
+
+// Shapes can have individual opacity (0 to 1)
+// Use the opacity button when a shape is selected in move tool
 ```
 
 ### Frame Navigation
@@ -142,10 +145,10 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Curve | Freehand drawing |
 | Text | Add text annotations |
 | Eraser | Remove annotations |
-| Move | Reposition and resize shapes |
+| Move | Reposition, resize shapes, and adjust opacity |
 | Selection | Crop and capture video frame area |
 | Compare | Split-view video comparison |
-| Overlay Opacity | Adjust reference video opacity (off/25%/50%/70%/100%) |
+| Opacity | Adjust overlay or selected shape opacity (off/25%/50%/70%/100%) |
 
 ## Development
 
