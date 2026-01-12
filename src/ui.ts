@@ -9,6 +9,7 @@ import { colorMap } from "./plugins/utils/color-map";
 import { createColorPicker } from "./ui/color-picker";
 import { createStrokeWidthSlider } from "./ui/stroke-width-slider";
 import { createFullscreenButton } from "./ui/toggle-fullscreen-button";
+import { applyContainerStyle, applyPlayerControlsStyle, createThemeToggleButton, applyInputStyle, applySliderStyle, applyColorPickerStyle } from "./ui/theme";
 
 type StylePojo = Omit<Partial<CSSStyleDeclaration>, 'length' | 'parentRule' | typeof Symbol.iterator>;
 
@@ -36,11 +37,13 @@ export function initUI(this: AnnotationTool) {
   // Create the container for the UI elements
   const uiContainer = document.createElement("div");
   uiContainer.style.cssText = uiContainerDefaultStyle;
+  applyContainerStyle(uiContainer);
 
   this.canvas.parentNode?.insertBefore(uiContainer, this.canvas);
 
   const playerControls = document.createElement("div");
   playerControls.style.cssText = playerControlsDefaultStyle;
+  applyPlayerControlsStyle(playerControls);
   // add player controls right after canvas
   this.canvas.parentNode?.insertBefore(playerControls, this.canvas.nextSibling);
 
@@ -74,14 +77,20 @@ export function initUI(this: AnnotationTool) {
 
   this.hideButton("compare");
 
-  this.colorPicker = createColorPicker(defaultColor, this);;
+  this.colorPicker = createColorPicker(defaultColor, this);
+  applyColorPickerStyle(this.colorPicker);
   uiContainer.appendChild(this.colorPicker);
 
   // Create the wrapper for stroke controls
   const strokeControlWrapper = createWrapper();
   this.strokeSizePicker = createStrokeWidthSlider(this);
+  applySliderStyle(this.strokeSizePicker);
   strokeControlWrapper.appendChild(this.strokeSizePicker);
   uiContainer.appendChild(strokeControlWrapper);
+
+  // Add theme toggle button
+  const themeToggleBtn = createThemeToggleButton(this);
+  uiContainer.appendChild(themeToggleBtn);
 
   // disabling for performance reasons
   // this.addEvent(this.canvas, "pointerover", () => {

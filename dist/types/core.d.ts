@@ -2,6 +2,7 @@ import { AnnotationToolBase } from "./base";
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
+import { Theme } from "./ui/theme";
 export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
@@ -33,6 +34,8 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     private _enforcedTotalFrames;
     isCursorOverCanvas: boolean;
     overlayOpacity: number;
+    private _theme;
+    private themeChangeListeners;
     prevFrame(): void;
     nextFrame(): void;
     /**
@@ -47,6 +50,9 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
      * Jump to the next annotated frame
      */
     nextAnnotatedFrame(): void;
+    get theme(): Theme;
+    setTheme(theme: Theme): void;
+    onThemeChange(listener: (theme: Theme) => void): () => void;
     removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;

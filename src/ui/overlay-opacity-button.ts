@@ -1,4 +1,5 @@
 import type { AnnotationTool } from "../core";
+import { applyButtonStyle } from "./theme";
 
 type OpacityState = {
   value: number;
@@ -40,7 +41,7 @@ export function createOverlayOpacityButton(tool: AnnotationTool) {
   }
 
   button.innerHTML = iconForOpacity(OPACITY_STATES[currentIndex]);
-  button.style.margin = "5px";
+  applyButtonStyle(button);
 
   tool.addEvent(button, "click", () => {
     currentIndex = (currentIndex + 1) % OPACITY_STATES.length;

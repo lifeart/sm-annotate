@@ -1,4 +1,5 @@
 import type { AnnotationTool } from "../core";
+import { applyButtonStyle } from "./theme";
 
 function iconForSpeed(speed: number) {
   const ratioMap = {
@@ -34,7 +35,7 @@ export function createPlaybackSpeedControlButton(
   video.playbackRate = defaultState;
 
   button.innerHTML = iconForSpeed(defaultState);
-  button.style.margin = "5px";
+  applyButtonStyle(button);
 
   tool.addEvent(button, "click", () => {
     const currentState = states.indexOf(video.playbackRate);

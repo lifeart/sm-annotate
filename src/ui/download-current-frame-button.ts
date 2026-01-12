@@ -1,4 +1,5 @@
 import type { AnnotationTool } from "../core";
+import { applyButtonStyle } from "./theme";
 
 
 export function createDownloadCurrentFrameButton(
@@ -9,7 +10,7 @@ export function createDownloadCurrentFrameButton(
     const button = document.createElement("button");
 
     button.type = "button";
-    button.style.margin = "5px";
+    applyButtonStyle(button);
     button.style.float = "right";
     button.title = "Download current frame";
 

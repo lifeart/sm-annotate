@@ -7,6 +7,7 @@ import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { playerControlsDefaultStyle, playerControlsFullScreenStyle, uiContainerDefaultStyle, uiContainerFullScreenStyle } from "./ui";
+import { Theme, injectThemeStyles } from "./ui/theme";
 
 const pixelRatio = window.devicePixelRatio || 1;
 
@@ -53,6 +54,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   isCursorOverCanvas = false;
   // Overlay opacity for compare mode (0 = off, 0.25, 0.5, 0.7, 1)
   overlayOpacity: number = 0.7;
+  // Theme for UI elements
+  private _theme: Theme = 'dark';
+  // Listeners for theme changes
+  private themeChangeListeners: ((theme: Theme) => void)[] = [];
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -126,6 +131,26 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
     // Wrap around to the first annotated frame
     this.playbackFrame = annotatedFrames[0];
+  }
+
+  get theme(): Theme {
+    return this._theme;
+  }
+
+  setTheme(theme: Theme) {
+    this._theme = theme;
+    injectThemeStyles(theme);
+    this.themeChangeListeners.forEach(listener => listener(theme));
+  }
+
+  onThemeChange(listener: (theme: Theme) => void) {
+    this.themeChangeListeners.push(listener);
+    return () => {
+      const index = this.themeChangeListeners.indexOf(listener);
+      if (index !== -1) {
+        this.themeChangeListeners.splice(index, 1);
+      }
+    };
   }
 
   removeGlobalShape(shapeType: IShape['type']) {
@@ -354,6 +379,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.shapes = [];
     this.globalShapes = [];
     this.currentTool = this.isMobile ? null : "curve";
+    // Initialize theme
+    injectThemeStyles(this._theme);
   }
 
   setVideoStyles() {
