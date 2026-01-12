@@ -20,6 +20,32 @@ export class MoveToolPlugin
   // Track selected shape for deletion with Backspace
   selectedShapeIndex: number = -1;
   private boundHandleKeyDown: ((e: KeyboardEvent) => void) | null = null;
+
+  /**
+   * Get the currently selected shape, if any
+   */
+  getSelectedShape(): IShape | null {
+    if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+      return null;
+    }
+    return this.annotationTool.shapes[this.selectedShapeIndex];
+  }
+
+  /**
+   * Set opacity for the currently selected shape
+   */
+  setSelectedShapeOpacity(opacity: number): boolean {
+    if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+      return false;
+    }
+    // Save current state for undo
+    this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+    // Update opacity
+    this.annotationTool.shapes[this.selectedShapeIndex].opacity = opacity;
+    // Redraw canvas
+    this.annotationTool.redrawFullCanvas();
+    return true;
+  }
   move(shape: IMove) {
     return shape;
   }

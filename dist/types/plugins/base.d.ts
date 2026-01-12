@@ -5,6 +5,7 @@ export interface IShapeBase {
     strokeStyle: string | CanvasGradient | CanvasPattern;
     fillStyle: string | CanvasPattern | CanvasGradient;
     lineWidth: number;
+    opacity?: number;
 }
 export interface ToolPlugin<T extends IShapeBase> {
     name: IShapeBase["type"];
