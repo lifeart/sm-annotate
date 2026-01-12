@@ -51,6 +51,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private _enforcedTotalFrames: number | null = null;
   // Track cursor hover state for showing progress bar during playback
   isCursorOverCanvas = false;
+  // Overlay opacity for compare mode (0 = off, 0.25, 0.5, 0.7, 1)
+  overlayOpacity: number = 0.7;
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame

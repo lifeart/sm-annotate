@@ -32,6 +32,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     private frameCounterTimeoutId;
     private _enforcedTotalFrames;
     isCursorOverCanvas: boolean;
+    overlayOpacity: number;
     prevFrame(): void;
     nextFrame(): void;
     /**

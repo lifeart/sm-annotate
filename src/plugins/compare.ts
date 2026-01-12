@@ -7,8 +7,6 @@ export interface ICompare extends IShapeBase {
   disabled: boolean;
 }
 
-const ACTIVE_OPACITY = 0.7;
-
 export class CompareToolPlugin
   extends BasePlugin<ICompare>
   implements ToolPlugin<ICompare>
@@ -16,8 +14,10 @@ export class CompareToolPlugin
   name = "compare" as keyof ShapeMap;
   comparisonLine = 0;
   leftOpacity = 1;
-  rightOpacity = 1;
   isDrawing = false;
+  get rightOpacity() {
+    return this.annotationTool.overlayOpacity;
+  }
   move(shape: ICompare, dx: number, dy: number) {
     shape.x += dx;
     return shape;
@@ -25,14 +25,12 @@ export class CompareToolPlugin
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
     this.leftOpacity = 1;
-    this.rightOpacity = this.annotationTool.isMobile ? 1 : ACTIVE_OPACITY;
     this.annotationTool.canvas.style.cursor = "col-resize";
   }
   onDeactivate(): void {
     this.annotationTool.canvas.style.cursor = "default";
     this.comparisonLine = 0;
     this.leftOpacity = 1;
-    this.rightOpacity = 1;
     this.isDrawing = false;
   }
   normalize(shape: ICompare, canvasWidth: number): ICompare {
@@ -273,7 +271,8 @@ export class CompareToolPlugin
     const cropWidth1 = w - cropX;
     const normalizedCrop = (cropWidth1 / w) * sourceWidth;
 
-    if (referenceVideoFrame) {
+    // Skip drawing reference video if opacity is 0 (off)
+    if (referenceVideoFrame && this.rightOpacity > 0) {
       if (isMobile) {
         this.ctx.imageSmoothingQuality = "low";
       }

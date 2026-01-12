@@ -9,8 +9,8 @@ export declare class CompareToolPlugin extends BasePlugin<ICompare> implements T
     name: keyof ShapeMap;
     comparisonLine: number;
     leftOpacity: number;
-    rightOpacity: number;
     isDrawing: boolean;
+    get rightOpacity(): number;
     move(shape: ICompare, dx: number, dy: number): ICompare;
     onActivate(): void;
     onDeactivate(): void;
