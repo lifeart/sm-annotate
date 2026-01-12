@@ -6,6 +6,68 @@ import { createPlaybackSpeedControlButton } from "./ui/playback-speed-button";
 
 type Tool = NonNullable<AnnotationTool["currentTool"]>;
 
+const LONG_PRESS_DURATION = 500; // ms
+
+/**
+ * Setup long press detection on a button.
+ * Long press triggers onLongPress callback and prevents the normal click.
+ */
+function setupLongPress(
+  button: HTMLButtonElement,
+  tool: AnnotationTool,
+  onLongPress: () => void
+) {
+  let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+  let isLongPress = false;
+
+  const onPointerDown = () => {
+    isLongPress = false;
+    longPressTimer = setTimeout(() => {
+      isLongPress = true;
+      onLongPress();
+      tool.redrawFullCanvas();
+    }, LONG_PRESS_DURATION);
+  };
+
+  const onPointerUp = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  const onPointerLeave = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  const onClick = (e: Event) => {
+    // Prevent click if it was a long press
+    if (isLongPress) {
+      e.preventDefault();
+      e.stopPropagation();
+      isLongPress = false;
+    }
+  };
+
+  tool.addEvent(button, "click", onClick);
+  button.addEventListener("pointerdown", onPointerDown);
+  button.addEventListener("pointerup", onPointerUp);
+  button.addEventListener("pointerleave", onPointerLeave);
+
+  // Add cleanup to tool destructors
+  tool.destructors.push(() => {
+    button.removeEventListener("pointerdown", onPointerDown);
+    button.removeEventListener("pointerup", onPointerUp);
+    button.removeEventListener("pointerleave", onPointerLeave);
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+    }
+  });
+}
+
 export class ButtonConstructor {
   tool!: AnnotationTool;
   uiContainer!: HTMLElement;
@@ -126,23 +188,27 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
   // );
 
   if (video) {
-    Button.create(
+    // Previous frame button with long press support for jumping to previous annotation
+    const prevFrameBtn = Button.create(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>',
       () => {
         tool.prevFrame();
       },
       tool.playerControlsContainer
     );
+    setupLongPress(prevFrameBtn, tool, () => tool.prevAnnotatedFrame());
 
     createPlayPauseButton(video, tool);
 
-    Button.create(
+    // Next frame button with long press support for jumping to next annotation
+    const nextFrameBtn = Button.create(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
       () => {
         tool.nextFrame();
       },
       tool.playerControlsContainer
     );
+    setupLongPress(nextFrameBtn, tool, () => tool.nextAnnotatedFrame());
 
     createMuteUnmuteButton(video, tool);
     createPlaybackSpeedControlButton(video, tool);

@@ -50,9 +50,15 @@ export class SelectionToolPlugin
     }
     const { x, y } = this.annotationTool.getRelativeCoords(event);
 
-    // Clear previous drawing and redraw video frame
+    // Clear previous drawing and redraw full canvas content (including compare overlay)
     this.annotationTool.clearCanvas();
-    this.annotationTool.addVideoOverlay();
+    if (this.annotationTool.globalShapes.length > 0) {
+      // If there are global shapes (like compare), draw them
+      this.annotationTool.drawShapesOverlay();
+    } else {
+      // Otherwise just draw the video
+      this.annotationTool.addVideoOverlay();
+    }
 
     // Draw selection rectangle
     this.drawSelectionRect(
@@ -205,6 +211,24 @@ export class SelectionToolPlugin
     const rectWidth = Math.abs(width);
     const rectHeight = Math.abs(height);
 
+    // Save the current canvas content in the selection area BEFORE drawing overlay
+    // This works for any content: video, compare mode, shapes, etc.
+    const pixelRatio = this.annotationTool.pixelRatio;
+    let savedImageData: ImageData | null = null;
+    if (rectWidth > 0 && rectHeight > 0) {
+      try {
+        savedImageData = this.ctx.getImageData(
+          startX * pixelRatio,
+          startY * pixelRatio,
+          rectWidth * pixelRatio,
+          rectHeight * pixelRatio
+        );
+      } catch (e) {
+        // getImageData may fail due to CORS, fall back to video redraw
+        savedImageData = null;
+      }
+    }
+
     // Draw semi-transparent overlay
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     this.ctx.fillRect(
@@ -214,8 +238,35 @@ export class SelectionToolPlugin
       this.annotationTool.canvasHeight
     );
 
-    // Clear selection area
-    this.ctx.clearRect(startX, startY, rectWidth, rectHeight);
+    // Restore the saved content in the selection area
+    if (savedImageData && rectWidth > 0 && rectHeight > 0) {
+      this.ctx.putImageData(savedImageData, startX * pixelRatio, startY * pixelRatio);
+    } else if (rectWidth > 0 && rectHeight > 0) {
+      // Fallback: redraw video content if getImageData failed
+      const video = this.annotationTool.videoElement;
+      if (video instanceof HTMLVideoElement) {
+        const frameNumber = this.annotationTool.videoFrameBuffer?.frameNumberFromTime(
+          video.currentTime
+        );
+        const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(frameNumber || 0) ?? video;
+        const vw = videoFrame ? videoFrame.width : video.videoWidth;
+        const vh = videoFrame ? videoFrame.height : video.videoHeight;
+        const scaleX = vw / this.annotationTool.canvasWidth;
+        const scaleY = vh / this.annotationTool.canvasHeight;
+
+        this.ctx.drawImage(
+          videoFrame,
+          startX * scaleX,
+          startY * scaleY,
+          rectWidth * scaleX,
+          rectHeight * scaleY,
+          startX,
+          startY,
+          rectWidth,
+          rectHeight
+        );
+      }
+    }
 
     // Draw selection border
     this.ctx.beginPath();

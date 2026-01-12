@@ -43,6 +43,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   plugins: PluginInstances[] = [];
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
+  // Track blob URLs for cleanup to prevent memory leaks
+  private videoBlobUrl: string | null = null;
+  private referenceVideoBlobUrl: string | null = null;
+  private frameCounterTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  // Enforced total frames count (overrides calculated value from video duration)
+  private _enforcedTotalFrames: number | null = null;
+  // Track cursor hover state for showing progress bar during playback
+  isCursorOverCanvas = false;
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -66,6 +74,58 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.playbackFrame = newFrame;
     }
   }
+
+  /**
+   * Get sorted list of frames that have annotations
+   */
+  getAnnotatedFrames(): number[] {
+    const frames: number[] = [];
+    this.timeStack.forEach((shapes, frame) => {
+      if (shapes && shapes.length > 0) {
+        frames.push(frame);
+      }
+    });
+    return frames.sort((a, b) => a - b);
+  }
+
+  /**
+   * Jump to the previous annotated frame
+   */
+  prevAnnotatedFrame() {
+    const annotatedFrames = this.getAnnotatedFrames();
+    if (annotatedFrames.length === 0) return;
+
+    const currentFrame = this.playbackFrame;
+    // Find the last frame that is less than current
+    for (let i = annotatedFrames.length - 1; i >= 0; i--) {
+      if (annotatedFrames[i] < currentFrame) {
+        this.playbackFrame = annotatedFrames[i];
+        return;
+      }
+    }
+    // Wrap around to the last annotated frame
+    this.playbackFrame = annotatedFrames[annotatedFrames.length - 1];
+  }
+
+  /**
+   * Jump to the next annotated frame
+   */
+  nextAnnotatedFrame() {
+    const annotatedFrames = this.getAnnotatedFrames();
+    if (annotatedFrames.length === 0) return;
+
+    const currentFrame = this.playbackFrame;
+    // Find the first frame that is greater than current
+    for (const frame of annotatedFrames) {
+      if (frame > currentFrame) {
+        this.playbackFrame = frame;
+        return;
+      }
+    }
+    // Wrap around to the first annotated frame
+    this.playbackFrame = annotatedFrames[0];
+  }
+
   removeGlobalShape(shapeType: IShape['type']) {
     this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
   }
@@ -138,6 +198,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return this.enforcedCanvasSize?.height ?? 0;
   }
   get aspectRatio() {
+    if (this.canvasHeight === 0) {
+      return 0;
+    }
     return this.canvasWidth / this.canvasHeight;
   }
   get isMobile() {
@@ -184,7 +247,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
 
   async setVideoBlob(blob: Blob, fps = this.fps) {
+    // Revoke previous blob URL to prevent memory leak
+    if (this.videoBlobUrl) {
+      URL.revokeObjectURL(this.videoBlobUrl);
+    }
     const url = URL.createObjectURL(blob);
+    this.videoBlobUrl = url;
     await this.setVideoUrl(url, fps);
     this.plugins.forEach((p) => {
       p.on('videoBlobSet', blob);
@@ -299,7 +367,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
   initFrameCounter() {
     if (!this.frameCallbackSupported) {
-      setTimeout(() => {
+      this.frameCounterTimeoutId = setTimeout(() => {
+        if (this.isDestroyed) return;
         this.plannedFn?.();
         this.plannedFn = null;
         this.initFrameCounter();
@@ -354,6 +423,22 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (this.isDestroyed) return;
     super.destroy();
     this.stopAnnotationsAsVideo();
+
+    // Clear frame counter timeout to prevent memory leak
+    if (this.frameCounterTimeoutId) {
+      clearTimeout(this.frameCounterTimeoutId);
+      this.frameCounterTimeoutId = null;
+    }
+
+    // Revoke blob URLs to prevent memory leak
+    if (this.videoBlobUrl) {
+      URL.revokeObjectURL(this.videoBlobUrl);
+      this.videoBlobUrl = null;
+    }
+    if (this.referenceVideoBlobUrl) {
+      URL.revokeObjectURL(this.referenceVideoBlobUrl);
+      this.referenceVideoBlobUrl = null;
+    }
 
     this.currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
@@ -530,7 +615,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     const blobs = new Blob([blob], { type });
 
+    // Revoke previous reference video blob URL to prevent memory leak
+    if (this.referenceVideoBlobUrl) {
+      URL.revokeObjectURL(this.referenceVideoBlobUrl);
+    }
     const mediaUrl = window.URL.createObjectURL(blobs);
+    this.referenceVideoBlobUrl = mediaUrl;
 
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");
@@ -902,11 +992,30 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   get totalFrames() {
+    // Use enforced value if set
+    if (this._enforcedTotalFrames !== null) {
+      return this._enforcedTotalFrames;
+    }
     const node = this.videoElement as HTMLVideoElement;
     if (node.tagName !== "VIDEO") {
       return 1;
     }
     return Math.ceil(node.duration * this.fps);
+  }
+
+  /**
+   * Set a fixed total frames count, overriding the calculated value from video duration.
+   * Pass null to clear the enforcement and use the calculated value.
+   */
+  setTotalFrames(frames: number | null) {
+    this._enforcedTotalFrames = frames !== null ? Math.max(1, Math.round(frames)) : null;
+  }
+
+  /**
+   * Get the enforced total frames value, or null if using calculated value.
+   */
+  getEnforcedTotalFrames(): number | null {
+    return this._enforcedTotalFrames;
   }
 
   frameFromProgressBar(event: PointerEvent, countY: boolean = true) {
@@ -922,7 +1031,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (countY) {
       if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
         const frame = Math.ceil(
-          ((x1 - x) / width) * (node.duration * this.fps)
+          ((x1 - x) / width) * this.totalFrames
         );
         return frame;
       }
@@ -930,7 +1039,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     } else {
       if (x1 >= x && x1 <= x + width) {
         const frame = Math.ceil(
-          ((x1 - x) / width) * (node.duration * this.fps)
+          ((x1 - x) / width) * this.totalFrames
         );
         return frame;
       }
@@ -971,7 +1080,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.addVideoOverlay();
     }
     this.drawShapesOverlay();
-    this.addFrameSquareOverlay();
-    this.addProgressBarOverlay();
+    // Show frame overlay and progress bar only when cursor is over canvas (or on mobile)
+    if (this.isCursorOverCanvas || this.isMobile) {
+      this.addFrameSquareOverlay();
+      this.addProgressBarOverlay();
+    }
   }
 }

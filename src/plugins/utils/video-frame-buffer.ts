@@ -65,7 +65,7 @@ export class VideoFrameBuffer {
     this.setCanvasSize();
     const delta = metadata.expectedDisplayTime - performance.now();
     if (delta > 10) {
-      console.log("looks like frame is not yet rendered");
+      // Frame rendering delayed - expected display time not yet reached
     }
     if (this.isDestroyed) {
       return false;

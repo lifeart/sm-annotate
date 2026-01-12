@@ -3,7 +3,9 @@ export type PointerEventNames =
   | "pointermove"
   | "pointerup"
   | "pointercancel"
-  | "pointerover";
+  | "pointerover"
+  | "pointerenter"
+  | "pointerleave";
 export type KeyboardEventNames = "keydown";
 export type ButtonEventNames = "click";
 export type InputEventNames = "input" | "change";
@@ -20,6 +22,7 @@ export type VideoEventNames =
   | "error"
   | "requestVideoFrameCallback";
 export type WindowEventNames = "resize";
+export type TouchEventNames = "touchmove" | "touchstart" | "touchend" | "touchcancel";
 export type EventNames =
   | VideoEventNames
   | InputEventNames
@@ -29,3 +32,4 @@ export type EventNames =
   | ButtonEventNames
   | ClipboardEventNames
   | DropEventNames
+  | TouchEventNames

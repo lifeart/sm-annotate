@@ -20,9 +20,12 @@ export function onDocumentPaste(event: ClipboardEvent, tool: SmAnnotate) {
         event.stopPropagation();
         event.stopImmediatePropagation();
         const img = new Image();
+        const blobUrl = URL.createObjectURL(file);
         img.addEventListener(
           "load",
           () => {
+            // Revoke blob URL after image loads to prevent memory leak
+            URL.revokeObjectURL(blobUrl);
             const imageRatio = img.naturalWidth / img.naturalHeight;
             const pasteWidth = 0.25;
             const pasteHeight = (pasteWidth / imageRatio) * tool.aspectRatio;
@@ -49,8 +52,18 @@ export function onDocumentPaste(event: ClipboardEvent, tool: SmAnnotate) {
             once: true,
           }
         );
+        img.addEventListener(
+          "error",
+          () => {
+            // Revoke blob URL on error to prevent memory leak
+            URL.revokeObjectURL(blobUrl);
+          },
+          {
+            once: true,
+          }
+        );
 
-        img.src = URL.createObjectURL(file);
+        img.src = blobUrl;
         tool.redrawFullCanvas();
       }
     }

@@ -1,4 +1,4 @@
-export type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover";
+export type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover" | "pointerenter" | "pointerleave";
 export type KeyboardEventNames = "keydown";
 export type ButtonEventNames = "click";
 export type InputEventNames = "input" | "change";
@@ -6,4 +6,5 @@ export type ClipboardEventNames = "copy" | "paste" | "cut";
 export type DropEventNames = "drop" | "dragover" | "dragenter" | "dragleave";
 export type VideoEventNames = "timeupdate" | "volumechange" | "seeking" | "play" | "pause" | "seek" | "stalled" | "error" | "requestVideoFrameCallback";
 export type WindowEventNames = "resize";
-export type EventNames = VideoEventNames | InputEventNames | PointerEventNames | KeyboardEventNames | WindowEventNames | ButtonEventNames | ClipboardEventNames | DropEventNames;
+export type TouchEventNames = "touchmove" | "touchstart" | "touchend" | "touchcancel";
+export type EventNames = VideoEventNames | InputEventNames | PointerEventNames | KeyboardEventNames | WindowEventNames | ButtonEventNames | ClipboardEventNames | DropEventNames | TouchEventNames;

@@ -19,8 +19,15 @@ export function initCanvas(this: AnnotationTool) {
     this.addEvent(this.canvas, "pointermove", this.handleMouseMove);
     this.addEvent(this.canvas, "pointerup", this.handleMouseUp);
     this.addEvent(this.canvas, "pointercancel", this.handleMouseUp);
-    // better mobile workflow
-    this.canvas.addEventListener('touchmove', (e) => {
+    // Track cursor hover state for showing progress bar during video playback
+    this.addEvent(this.canvas, "pointerenter", () => {
+      this.isCursorOverCanvas = true;
+    });
+    this.addEvent(this.canvas, "pointerleave", () => {
+      this.isCursorOverCanvas = false;
+    });
+    // better mobile workflow - use addEvent for proper cleanup on destroy
+    this.addEvent(this.canvas, "touchmove", (e: TouchEvent) => {
       e.stopImmediatePropagation();
       e.stopPropagation();
       e.preventDefault();

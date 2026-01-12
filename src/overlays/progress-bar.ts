@@ -13,7 +13,7 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   const annotatedFrames = allFrames.filter((frame) => {
     return this.timeStack.get(frame)?.length;
   });
-  const totalFrames = node.duration * this.fps;
+  const totalFrames = this.totalFrames;
 
   const { x, width, height, y } = this.progressBarCoordinates;
 

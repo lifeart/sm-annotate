@@ -27,8 +27,25 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
         y: number;
         frame: number;
     }[];
+    private videoBlobUrl;
+    private referenceVideoBlobUrl;
+    private frameCounterTimeoutId;
+    private _enforcedTotalFrames;
+    isCursorOverCanvas: boolean;
     prevFrame(): void;
     nextFrame(): void;
+    /**
+     * Get sorted list of frames that have annotations
+     */
+    getAnnotatedFrames(): number[];
+    /**
+     * Jump to the previous annotated frame
+     */
+    prevAnnotatedFrame(): void;
+    /**
+     * Jump to the next annotated frame
+     */
+    nextAnnotatedFrame(): void;
     removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
@@ -129,6 +146,15 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     saveAllFrames(): FrameAnnotationV1[];
     getAnnotationFrame(event: PointerEvent): number | null;
     get totalFrames(): number;
+    /**
+     * Set a fixed total frames count, overriding the calculated value from video duration.
+     * Pass null to clear the enforcement and use the calculated value.
+     */
+    setTotalFrames(frames: number | null): void;
+    /**
+     * Get the enforced total frames value, or null if using calculated value.
+     */
+    getEnforcedTotalFrames(): number | null;
     frameFromProgressBar(event: PointerEvent, countY?: boolean): number | null;
     hasAnnotationsForFrame(frame: number): boolean | undefined;
     isAnnotationsAsVideoActive: boolean;
