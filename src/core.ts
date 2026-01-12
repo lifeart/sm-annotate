@@ -74,6 +74,58 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.playbackFrame = newFrame;
     }
   }
+
+  /**
+   * Get sorted list of frames that have annotations
+   */
+  getAnnotatedFrames(): number[] {
+    const frames: number[] = [];
+    this.timeStack.forEach((shapes, frame) => {
+      if (shapes && shapes.length > 0) {
+        frames.push(frame);
+      }
+    });
+    return frames.sort((a, b) => a - b);
+  }
+
+  /**
+   * Jump to the previous annotated frame
+   */
+  prevAnnotatedFrame() {
+    const annotatedFrames = this.getAnnotatedFrames();
+    if (annotatedFrames.length === 0) return;
+
+    const currentFrame = this.playbackFrame;
+    // Find the last frame that is less than current
+    for (let i = annotatedFrames.length - 1; i >= 0; i--) {
+      if (annotatedFrames[i] < currentFrame) {
+        this.playbackFrame = annotatedFrames[i];
+        return;
+      }
+    }
+    // Wrap around to the last annotated frame
+    this.playbackFrame = annotatedFrames[annotatedFrames.length - 1];
+  }
+
+  /**
+   * Jump to the next annotated frame
+   */
+  nextAnnotatedFrame() {
+    const annotatedFrames = this.getAnnotatedFrames();
+    if (annotatedFrames.length === 0) return;
+
+    const currentFrame = this.playbackFrame;
+    // Find the first frame that is greater than current
+    for (const frame of annotatedFrames) {
+      if (frame > currentFrame) {
+        this.playbackFrame = frame;
+        return;
+      }
+    }
+    // Wrap around to the first annotated frame
+    this.playbackFrame = annotatedFrames[0];
+  }
+
   removeGlobalShape(shapeType: IShape['type']) {
     this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
   }

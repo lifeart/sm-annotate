@@ -34,6 +34,18 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     isCursorOverCanvas: boolean;
     prevFrame(): void;
     nextFrame(): void;
+    /**
+     * Get sorted list of frames that have annotations
+     */
+    getAnnotatedFrames(): number[];
+    /**
+     * Jump to the previous annotated frame
+     */
+    prevAnnotatedFrame(): void;
+    /**
+     * Jump to the next annotated frame
+     */
+    nextAnnotatedFrame(): void;
     removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
