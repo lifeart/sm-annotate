@@ -1,43 +1,139 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>SmAnnotate - video annotation tool</title>
+    <meta charset="UTF-8" />
+    <title>SmAnnotate - Professional Video Annotation Tool</title>
     <link rel="stylesheet" href="./style.css" />
-    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
-      <video id="video1" playsinline muted loop>
-        <source src="./mov_bbb.mp4" type="video/mp4" />
-        Your browser does not support HTML5 video.
-      </video>
-    </div>
-    <div class="extra-buttons-container">
-      <div>
-        <ul>
-          <li>
-            <label for="video">Select Video</label>
-            <input type="file" accept="video/*" id="video" />
-          </li>
-          <li>
-            <label for="ref-video">Select Reference Video</label>
-            <input type="file" accept="video/*" id="ref-video" />
-          </li>
-        </ul>
-      </div>
-      <div>
-        <ul>
-          <li>
-            <label for="file">Annotations from file</label>
-            <input type="file" accept="application/json" id="file" />
-          </li>
-          <li>
-            <button type="button" id="download">Download annotations</a>
-          </li>
-          <li>
-            <button type="button" id="sample">Load sample annotation</a>
-          </li>
-        </ul>
-      </div>
+    <div class="app">
+      <header class="header">
+        <div class="header-content">
+          <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/>
+              <path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>
+            </svg>
+            <h1>SmAnnotate</h1>
+          </div>
+          <p class="tagline">Professional frame-by-frame video annotation</p>
+        </div>
+      </header>
+
+      <main class="main">
+        <div class="video-section">
+          <div class="video-container" id="video-wrapper">
+            <video id="video1" playsinline muted loop>
+              <source src="./mov_bbb.mp4" type="video/mp4" />
+              Your browser does not support HTML5 video.
+            </video>
+          </div>
+        </div>
+
+        <aside class="sidebar">
+          <div class="panel">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+              Video Source
+            </h2>
+            <div class="panel-content">
+              <label class="file-input">
+                <input type="file" accept="video/*" id="video" />
+                <span class="file-input-button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Select Video
+                </span>
+                <span class="file-input-hint">MP4, WebM, MOV</span>
+              </label>
+              <label class="file-input">
+                <input type="file" accept="video/*" id="ref-video" />
+                <span class="file-input-button secondary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h3"/>
+                    <path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/>
+                    <path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/>
+                  </svg>
+                  Reference Video
+                </span>
+                <span class="file-input-hint">For comparison mode</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              Annotations
+            </h2>
+            <div class="panel-content">
+              <label class="file-input">
+                <input type="file" accept="application/json" id="file" />
+                <span class="file-input-button secondary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  Import JSON
+                </span>
+              </label>
+              <div class="button-group">
+                <button type="button" id="download" class="btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Export
+                </button>
+                <button type="button" id="sample" class="btn btn-outline">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Load Demo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-info">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              Keyboard Shortcuts
+            </h2>
+            <div class="panel-content">
+              <ul class="shortcuts-list">
+                <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span>Undo</span></li>
+                <li><kbd>Backspace</kbd> <span>Delete shape</span></li>
+                <li><kbd>Hold</kbd> <span>Jump to annotation</span></li>
+              </ul>
+            </div>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <p>SmAnnotate v1.0 &mdash; Frame-accurate video annotation tool</p>
+      </footer>
     </div>
 
     <script src="./index.js"></script>

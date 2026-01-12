@@ -5,25 +5,7 @@ import { SmAnnotate } from "../src";
 const video = document.querySelector("video") as HTMLVideoElement;
 
 async function initAnnotator() {
-  // resize video to fit window
-
-  const computedVideoElementStyle = window.getComputedStyle(video);
-
-  const videoWidth = parseFloat(computedVideoElementStyle.width);
-  const videoHeight = parseFloat(computedVideoElementStyle.height);
-  const windowHeight = window.innerHeight - 80;
-
-  if (videoHeight > windowHeight) {
-    // change video style to fit window
-
-    const videoRatio = videoWidth / videoHeight;
-
-    const optimalVideoHeight = windowHeight;
-    const optimalVideoWidth = optimalVideoHeight * videoRatio;
-
-    video.style.width = `${optimalVideoWidth}px`;
-    video.style.height = `${optimalVideoHeight}px`;
-  }
+  // Video sizing is now handled by CSS flexbox layout
 
   // Video is ready to play
 
