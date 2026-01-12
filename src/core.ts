@@ -6,7 +6,6 @@ import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
-import { playerControlsDefaultStyle, playerControlsFullScreenStyle, uiContainerDefaultStyle, uiContainerFullScreenStyle } from "./ui";
 import { Theme, injectThemeStyles } from "./ui/theme";
 
 const pixelRatio = window.devicePixelRatio || 1;
@@ -578,25 +577,20 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         video.style.marginBottom = '';
     }
 
-    if (isFullscreen) { 
-      this.playerControlsContainer.style.cssText = playerControlsFullScreenStyle;
-      this.uiContainer.style.cssText = uiContainerFullScreenStyle;
-    } else {
-      this.playerControlsContainer.style.cssText = playerControlsDefaultStyle;
-      this.uiContainer.style.cssText = uiContainerDefaultStyle;
-    }
-
     // Update canvas dimensions
     this.isCanvasInitialized = video.videoWidth > 0 && video.videoHeight > 0;
     this.canvas.width = width * this.pixelRatio;
     this.canvas.height = height * this.pixelRatio;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    
-    // Match canvas position to video
+
+    // Match canvas position to video - account for container padding and video margins
     this.canvas.style.position = 'absolute';
-    this.canvas.style.top = video.style.marginTop || '0';
-    this.canvas.style.left = '0';
+    // Use video's offsetTop to correctly position canvas over video
+    const videoTop = video.offsetTop;
+    const videoLeft = video.offsetLeft;
+    this.canvas.style.top = `${videoTop}px`;
+    this.canvas.style.left = `${videoLeft}px`;
 
     // Store enforced size for other calculations
     this.enforcedCanvasSize = { width, height };

@@ -154,11 +154,8 @@ export function initUI(this: AnnotationTool) {
       }
     })
 
-    // Add fullscreen button to player controls
+    // Add fullscreen button to player controls (as last button in flow)
     const fullscreenButton = createFullscreenButton(this);
-    fullscreenButton.style.position = 'absolute';
-    fullscreenButton.style.right = '40px';
-    fullscreenButton.style.bottom = '10px';
     playerControls.appendChild(fullscreenButton);
   }
 }
