@@ -163,7 +163,7 @@ export class AudioPeaksPlugin
 
     const { x, width } = this.progressBarCoordinates;
     const currentFrame = this.annotationTool.playbackFrame;
-    const totalFrames = maybeVideoElement.duration * this.annotationTool.fps;
+    const totalFrames = this.annotationTool.totalFrames;
 
     const currentFrameCoordinate =
       Math.ceil((currentFrame / totalFrames) * width) + x;

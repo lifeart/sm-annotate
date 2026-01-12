@@ -47,6 +47,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private videoBlobUrl: string | null = null;
   private referenceVideoBlobUrl: string | null = null;
   private frameCounterTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  // Enforced total frames count (overrides calculated value from video duration)
+  private _enforcedTotalFrames: number | null = null;
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -936,11 +938,30 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   get totalFrames() {
+    // Use enforced value if set
+    if (this._enforcedTotalFrames !== null) {
+      return this._enforcedTotalFrames;
+    }
     const node = this.videoElement as HTMLVideoElement;
     if (node.tagName !== "VIDEO") {
       return 1;
     }
     return Math.ceil(node.duration * this.fps);
+  }
+
+  /**
+   * Set a fixed total frames count, overriding the calculated value from video duration.
+   * Pass null to clear the enforcement and use the calculated value.
+   */
+  setTotalFrames(frames: number | null) {
+    this._enforcedTotalFrames = frames !== null ? Math.max(1, Math.round(frames)) : null;
+  }
+
+  /**
+   * Get the enforced total frames value, or null if using calculated value.
+   */
+  getEnforcedTotalFrames(): number | null {
+    return this._enforcedTotalFrames;
   }
 
   frameFromProgressBar(event: PointerEvent, countY: boolean = true) {
@@ -956,7 +977,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (countY) {
       if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
         const frame = Math.ceil(
-          ((x1 - x) / width) * (node.duration * this.fps)
+          ((x1 - x) / width) * this.totalFrames
         );
         return frame;
       }
@@ -964,7 +985,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     } else {
       if (x1 >= x && x1 <= x + width) {
         const frame = Math.ceil(
-          ((x1 - x) / width) * (node.duration * this.fps)
+          ((x1 - x) / width) * this.totalFrames
         );
         return frame;
       }
