@@ -214,8 +214,37 @@ export class SelectionToolPlugin
       this.annotationTool.canvasHeight
     );
 
-    // Clear selection area
-    this.ctx.clearRect(startX, startY, rectWidth, rectHeight);
+    // Redraw video content in the selection area (instead of just clearing to transparent)
+    const video = this.annotationTool.videoElement;
+    if (video instanceof HTMLVideoElement && rectWidth > 0 && rectHeight > 0) {
+      // Get video frame from buffer if available
+      const frameNumber = this.annotationTool.videoFrameBuffer?.frameNumberFromTime(
+        video.currentTime
+      );
+      const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(frameNumber || 0) ?? video;
+      const vw = videoFrame ? videoFrame.width : video.videoWidth;
+      const vh = videoFrame ? videoFrame.height : video.videoHeight;
+
+      // Calculate scale factors
+      const scaleX = vw / this.annotationTool.canvasWidth;
+      const scaleY = vh / this.annotationTool.canvasHeight;
+
+      // Draw the video portion that corresponds to the selection area
+      this.ctx.drawImage(
+        videoFrame,
+        startX * scaleX,
+        startY * scaleY,
+        rectWidth * scaleX,
+        rectHeight * scaleY,
+        startX,
+        startY,
+        rectWidth,
+        rectHeight
+      );
+    } else {
+      // Fallback: just clear the rect (will show black/transparent)
+      this.ctx.clearRect(startX, startY, rectWidth, rectHeight);
+    }
 
     // Draw selection border
     this.ctx.beginPath();
