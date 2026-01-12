@@ -12,8 +12,14 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     shapeIndex: number;
     lastDrawnShape: IShape | null;
     isScale: boolean;
+    selectedShapeIndex: number;
+    private boundHandleKeyDown;
     move(shape: IMove): IMove;
     normalize(shape: IMove): IMove;
+    onActivate(): void;
+    onDeactivate(): void;
+    private handleKeyDown;
+    private deleteSelectedShape;
     onPointerDown(event: PointerEvent): void;
     isPointerAtShape(shape: IShape, x: number, y: number): boolean;
     isPointerAtCorner(rawShape: IImage | IAudioPeaks, x: number, y: number): boolean;

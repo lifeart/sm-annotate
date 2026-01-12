@@ -17,6 +17,9 @@ export class MoveToolPlugin
   shapeIndex: number = -1;
   lastDrawnShape: IShape | null = null;
   isScale = false;
+  // Track selected shape for deletion with Backspace
+  selectedShapeIndex: number = -1;
+  private boundHandleKeyDown: ((e: KeyboardEvent) => void) | null = null;
   move(shape: IMove) {
     return shape;
   }
@@ -25,18 +28,61 @@ export class MoveToolPlugin
       ...shape,
     };
   }
+
+  onActivate(): void {
+    this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+    document.addEventListener('keydown', this.boundHandleKeyDown);
+  }
+
+  onDeactivate(): void {
+    if (this.boundHandleKeyDown) {
+      document.removeEventListener('keydown', this.boundHandleKeyDown);
+      this.boundHandleKeyDown = null;
+    }
+    this.selectedShapeIndex = -1;
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    // Delete selected shape with Backspace or Delete key
+    if ((event.key === 'Backspace' || event.key === 'Delete') && this.selectedShapeIndex >= 0) {
+      event.preventDefault();
+      this.deleteSelectedShape();
+    }
+  }
+
+  private deleteSelectedShape(): void {
+    if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+      return;
+    }
+    // Save current state for undo
+    this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+    // Remove the selected shape
+    this.annotationTool.shapes.splice(this.selectedShapeIndex, 1);
+    // Reset selection
+    this.selectedShapeIndex = -1;
+    this.shapeIndex = -1;
+    // Redraw canvas
+    this.annotationTool.redrawFullCanvas();
+  }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
     const originalShapes = this.annotationTool.shapes;
     const shapes = originalShapes.slice().reverse();
+    let foundShape = false;
     for (const shape of shapes) {
       if (this.isPointerAtShape(shape, x, y)) {
         this.shape = {...shape};
         shape.fillStyle = 'rgba(0, 0, 0, 0)';
         shape.strokeStyle = 'rgba(0, 0, 0, 0)';
         this.shapeIndex = originalShapes.indexOf(shape);
+        this.selectedShapeIndex = this.shapeIndex;
+        foundShape = true;
         break;
       }
+    }
+    if (!foundShape) {
+      // Clicked on empty area - deselect
+      this.selectedShapeIndex = -1;
     }
     if (!this.shape) {
       return;
@@ -180,6 +226,7 @@ export class MoveToolPlugin
     this.isScale = false;
     this.lastDrawnShape = null;
     this.shapeIndex = -1;
+    this.selectedShapeIndex = -1;
     this.annotationTool.canvas.style.cursor = 'default';
   }
   save(shape: IShape) {
