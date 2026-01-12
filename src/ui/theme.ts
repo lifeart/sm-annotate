@@ -82,10 +82,10 @@ function generateStyles(): string {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      display: inline-flex;
+      display: flex;
+      flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      flex-direction: row;
       gap: 2px;
       padding: 4px;
       background: var(--${PREFIX}-bg-primary);
@@ -93,11 +93,12 @@ function generateStyles(): string {
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
-      white-space: nowrap;
       z-index: 10;
       margin-top: 8px;
-      width: max-content;
-      height: 40px;
+    }
+
+    .${PREFIX}-container > * {
+      flex-shrink: 0;
     }
 
     .${PREFIX}-player-controls {
@@ -105,10 +106,10 @@ function generateStyles(): string {
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      display: inline-flex;
+      display: flex;
+      flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      flex-direction: row;
       gap: 2px;
       padding: 4px;
       background: var(--${PREFIX}-bg-primary);
@@ -116,11 +117,12 @@ function generateStyles(): string {
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
-      white-space: nowrap;
       z-index: 10;
       margin-bottom: 8px;
-      width: max-content;
-      height: 40px;
+    }
+
+    .${PREFIX}-player-controls > * {
+      flex-shrink: 0;
     }
 
     /* Fullscreen mode - toolbars inside the fullscreen container */

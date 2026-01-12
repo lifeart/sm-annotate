@@ -141,6 +141,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     clearCanvas(): void;
     frameToDataUrl(): string | null;
     redrawFullCanvas(): void;
+    drawSelectionHandles(): void;
     replaceFrame(frame: number, shapes: IShape[]): void;
     addShapesToFrame(frame: number, shapes: IShape[]): void;
     setFrameRate(fps: number): void;

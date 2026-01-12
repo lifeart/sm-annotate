@@ -10,6 +10,9 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🛠️ Multiple drawing tools (curve, rectangle, circle, line, arrow, text, eraser)
 * 🔲 Selection tool for cropping video frames
 * ↔️ Move tool for repositioning and resizing shapes
+* 📐 Visual resize handles for precise shape scaling
+* 📋 Duplicate shapes (Ctrl/Cmd + D)
+* 📑 Copy annotations to adjacent frames (Ctrl/Cmd + Shift + Arrow)
 * 🎨 Customizable color and stroke size for annotations
 * ↩️ Undo functionality (Ctrl/Cmd + Z)
 * ⌫ Delete selected shapes with Backspace/Delete key (in move tool)
@@ -22,6 +25,8 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🎬 Video overlay comparison mode (split view with adjustable opacity)
 * 🔊 Audio waveform visualization
 * 🖼️ Paste images from clipboard
+* 🌓 Dark/Light theme toggle
+* 💡 Tooltips on all toolbar buttons
 
 ## Additional Benefits
 
@@ -113,6 +118,16 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | `Ctrl/Cmd + Z` | Undo last action |
 | `Backspace` / `Delete` | Delete selected shape (in move tool) |
 | `←` / `→` | Previous / Next frame |
+| `Space` | Play / Pause video |
+
+### Move Tool
+
+| Key | Action |
+| --- | --- |
+| `Ctrl/Cmd + D` | Duplicate selected shape |
+| `Ctrl/Cmd + Shift + →` | Copy all annotations to next frame |
+| `Ctrl/Cmd + Shift + ←` | Copy all annotations to previous frame |
+| `Backspace` / `Delete` | Delete selected shape |
 
 ### Curve Tool
 
@@ -145,10 +160,11 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Curve | Freehand drawing |
 | Text | Add text annotations |
 | Eraser | Remove annotations |
-| Move | Reposition, resize shapes, and adjust opacity |
+| Move | Reposition shapes with drag, resize with corner/edge handles, duplicate with Ctrl+D |
 | Selection | Crop and capture video frame area |
 | Compare | Split-view video comparison |
 | Opacity | Adjust overlay or selected shape opacity (off/25%/50%/70%/100%) |
+| Theme | Toggle between dark and light mode |
 
 ## Development
 

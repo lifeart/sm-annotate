@@ -910,8 +910,21 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.addVideoOverlay();
     }
     this.drawShapesOverlay();
+    this.drawSelectionHandles();
     this.addFrameSquareOverlay();
     this.addProgressBarOverlay();
+  }
+
+  drawSelectionHandles() {
+    // Only draw handles when move tool is active
+    if (this.currentTool !== 'move') return;
+
+    try {
+      const movePlugin = this.pluginForTool('move') as import('./plugins/move').MoveToolPlugin;
+      movePlugin.drawResizeHandles();
+    } catch {
+      // Move plugin not available
+    }
   }
 
   replaceFrame(frame: number, shapes: IShape[]) {
