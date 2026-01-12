@@ -18,7 +18,7 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   const { x, width, height, y } = this.progressBarCoordinates;
 
   const coordinatesOnProgressBar = annotatedFrames.map((frame) => {
-    return Math.ceil((frame / totalFrames) * width);
+    return Math.round((frame / totalFrames) * width);
   });
 
   // draw coordinate filled blue bubbles in the bottom of canvas
@@ -50,7 +50,7 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   // draw current frame indicator
   const currentFrame = this.playbackFrame;
   const currentFrameCoordinate =
-    Math.ceil((currentFrame / totalFrames) * width) + x;
+    Math.round((currentFrame / totalFrames) * width) + x;
 
   this.ctx.fillStyle = "white";
   this.ctx.beginPath();
