@@ -20,6 +20,7 @@ export type VideoEventNames =
   | "error"
   | "requestVideoFrameCallback";
 export type WindowEventNames = "resize";
+export type TouchEventNames = "touchmove" | "touchstart" | "touchend" | "touchcancel";
 export type EventNames =
   | VideoEventNames
   | InputEventNames
@@ -29,3 +30,4 @@ export type EventNames =
   | ButtonEventNames
   | ClipboardEventNames
   | DropEventNames
+  | TouchEventNames

@@ -19,8 +19,8 @@ export function initCanvas(this: AnnotationTool) {
     this.addEvent(this.canvas, "pointermove", this.handleMouseMove);
     this.addEvent(this.canvas, "pointerup", this.handleMouseUp);
     this.addEvent(this.canvas, "pointercancel", this.handleMouseUp);
-    // better mobile workflow
-    this.canvas.addEventListener('touchmove', (e) => {
+    // better mobile workflow - use addEvent for proper cleanup on destroy
+    this.addEvent(this.canvas, "touchmove", (e: TouchEvent) => {
       e.stopImmediatePropagation();
       e.stopPropagation();
       e.preventDefault();

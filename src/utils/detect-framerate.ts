@@ -21,8 +21,12 @@ export function detectFrameRate(
   let fps: number;
   const fpsRounder: number[] = [];
   let frameNotSeeked = true;
+  let isDestroyed = false;
 
   function ticker(_: number, metadata: VideoFrameCallbackMetadata): void {
+    // Stop callback loop if destroyed
+    if (isDestroyed) return;
+
     const mediaTimeDiff = Math.abs(metadata.mediaTime - lastMediaTime);
     const frameNumDiff = Math.abs(metadata.presentedFrames - lastFrameNum);
     const diff = mediaTimeDiff / frameNumDiff;
@@ -42,7 +46,10 @@ export function detectFrameRate(
     frameNotSeeked = true;
     lastMediaTime = metadata.mediaTime;
     lastFrameNum = metadata.presentedFrames;
-    videoElement.requestVideoFrameCallback(ticker);
+    // Only continue callback loop if not destroyed
+    if (!isDestroyed) {
+      videoElement.requestVideoFrameCallback(ticker);
+    }
   }
 
   videoElement.requestVideoFrameCallback(ticker);
@@ -59,6 +66,7 @@ export function detectFrameRate(
   }
 
   return () => {
+    isDestroyed = true;
     videoElement.removeEventListener("seeked", onSeeked);
   };
 }

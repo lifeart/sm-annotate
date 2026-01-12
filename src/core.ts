@@ -43,6 +43,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   plugins: PluginInstances[] = [];
   playTimeout!: number & ReturnType<typeof window.setTimeout>;
   annotatedFrameCoordinates: { x: number; y: number; frame: number }[] = [];
+  // Track blob URLs for cleanup to prevent memory leaks
+  private videoBlobUrl: string | null = null;
+  private referenceVideoBlobUrl: string | null = null;
+  private frameCounterTimeoutId: ReturnType<typeof setTimeout> | null = null;
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -138,6 +142,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return this.enforcedCanvasSize?.height ?? 0;
   }
   get aspectRatio() {
+    if (this.canvasHeight === 0) {
+      return 0;
+    }
     return this.canvasWidth / this.canvasHeight;
   }
   get isMobile() {
@@ -184,7 +191,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
 
   async setVideoBlob(blob: Blob, fps = this.fps) {
+    // Revoke previous blob URL to prevent memory leak
+    if (this.videoBlobUrl) {
+      URL.revokeObjectURL(this.videoBlobUrl);
+    }
     const url = URL.createObjectURL(blob);
+    this.videoBlobUrl = url;
     await this.setVideoUrl(url, fps);
     this.plugins.forEach((p) => {
       p.on('videoBlobSet', blob);
@@ -299,7 +311,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
   initFrameCounter() {
     if (!this.frameCallbackSupported) {
-      setTimeout(() => {
+      this.frameCounterTimeoutId = setTimeout(() => {
+        if (this.isDestroyed) return;
         this.plannedFn?.();
         this.plannedFn = null;
         this.initFrameCounter();
@@ -354,6 +367,22 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (this.isDestroyed) return;
     super.destroy();
     this.stopAnnotationsAsVideo();
+
+    // Clear frame counter timeout to prevent memory leak
+    if (this.frameCounterTimeoutId) {
+      clearTimeout(this.frameCounterTimeoutId);
+      this.frameCounterTimeoutId = null;
+    }
+
+    // Revoke blob URLs to prevent memory leak
+    if (this.videoBlobUrl) {
+      URL.revokeObjectURL(this.videoBlobUrl);
+      this.videoBlobUrl = null;
+    }
+    if (this.referenceVideoBlobUrl) {
+      URL.revokeObjectURL(this.referenceVideoBlobUrl);
+      this.referenceVideoBlobUrl = null;
+    }
 
     this.currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
@@ -530,7 +559,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     const blobs = new Blob([blob], { type });
 
+    // Revoke previous reference video blob URL to prevent memory leak
+    if (this.referenceVideoBlobUrl) {
+      URL.revokeObjectURL(this.referenceVideoBlobUrl);
+    }
     const mediaUrl = window.URL.createObjectURL(blobs);
+    this.referenceVideoBlobUrl = mediaUrl;
 
     if (!this.referenceVideoElement) {
       this.referenceVideoElement = document.createElement("video");

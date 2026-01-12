@@ -1,4 +1,4 @@
-import { ButtonEventNames, ClipboardEventNames, DropEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
+import { ButtonEventNames, ClipboardEventNames, DropEventNames, InputEventNames, KeyboardEventNames, PointerEventNames, TouchEventNames, VideoEventNames, WindowEventNames } from "./ui/events";
 export declare class AnnotationToolBase<T> {
     destructors: (() => void)[];
     isDestroyed: boolean;
@@ -19,6 +19,7 @@ export declare class AnnotationToolBase<T> {
     addEvent(node: HTMLVideoElement, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
     addEvent(node: HTMLButtonElement, event: ButtonEventNames, callback: (e: Event) => void): void;
     addEvent(node: HTMLCanvasElement, event: PointerEventNames, callback: (e: PointerEvent) => void): void;
+    addEvent(node: HTMLCanvasElement, event: TouchEventNames, callback: (e: TouchEvent) => void): void;
     addEvent(node: typeof document, event: KeyboardEventNames, callback: (e: KeyboardEvent) => void): void;
     addEvent(node: typeof window, event: WindowEventNames, callback: (e: Event) => void): void;
     addProgressBarOverlay(): void;

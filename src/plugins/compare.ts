@@ -288,8 +288,6 @@ export class CompareToolPlugin
         cropWidth1,
         h // Destination position and size
       );
-    } else {
-      console.log("no video data", frameNumber);
     }
 
     // this.ctx.filter = filter;

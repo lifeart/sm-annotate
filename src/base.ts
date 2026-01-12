@@ -6,6 +6,7 @@ import {
   InputEventNames,
   KeyboardEventNames,
   PointerEventNames,
+  TouchEventNames,
   VideoEventNames,
   WindowEventNames,
 } from "./ui/events";
@@ -79,6 +80,11 @@ export class AnnotationToolBase<T> {
     callback: (e: PointerEvent) => void
   ): void;
   addEvent(
+    node: HTMLCanvasElement,
+    event: TouchEventNames,
+    callback: (e: TouchEvent) => void
+  ): void;
+  addEvent(
     node: typeof document,
     event: KeyboardEventNames,
     callback: (e: KeyboardEvent) => void
@@ -104,11 +110,12 @@ export class AnnotationToolBase<T> {
       | ((e: Event) => void)
       | ((e: DragEvent) => void)
       | ((e: ClipboardEvent) => void)
+      | ((e: TouchEvent) => void)
   ) {
     type EventArgs = Parameters<typeof callback>;
     const safeCallback = (e: EventArgs[0]) => {
       if (this.isDestroyed) return;
-      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent & DragEvent);
+      callback(e as PointerEvent & KeyboardEvent & Event & ClipboardEvent & DragEvent & TouchEvent);
     };
 
     node.addEventListener(event, safeCallback);

@@ -14,6 +14,7 @@ export declare class ButtonConstructor {
         (node: HTMLVideoElement, event: "keydown", callback: (e: KeyboardEvent) => void): void;
         (node: HTMLButtonElement, event: "click", callback: (e: Event) => void): void;
         (node: HTMLCanvasElement, event: import("./ui/events").PointerEventNames, callback: (e: PointerEvent) => void): void;
+        (node: HTMLCanvasElement, event: import("./ui/events").TouchEventNames, callback: (e: TouchEvent) => void): void;
         (node: Document, event: "keydown", callback: (e: KeyboardEvent) => void): void;
         (node: Window & typeof globalThis, event: "resize", callback: (e: Event) => void): void;
     };

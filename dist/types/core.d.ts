@@ -27,6 +27,9 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
         y: number;
         frame: number;
     }[];
+    private videoBlobUrl;
+    private referenceVideoBlobUrl;
+    private frameCounterTimeoutId;
     prevFrame(): void;
     nextFrame(): void;
     removeGlobalShape(shapeType: IShape['type']): void;
