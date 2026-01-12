@@ -27,11 +27,13 @@ const addStyle = (node: HTMLElement, style: StylePojo) => {
 
 const defaultColor = colorMap.r;
 
-export const playerControlsDefaultStyle = `position: relative; top: 0px; left: 0px; z-index: 2;`;
-export const uiContainerDefaultStyle = `position: absolute; top: -40px; left: 0px; z-index: 2; display: block;`;
+// Styles are now handled by CSS classes in theme.ts
+// These are kept for backwards compatibility but mostly unused
+export const playerControlsDefaultStyle = '';
+export const uiContainerDefaultStyle = '';
 
-export const playerControlsFullScreenStyle = 'position: absolute;left: 0px;bottom: 5px;width: 100%;z-index: 2;';
-export const uiContainerFullScreenStyle = 'position: absolute; top: 0; left: 0px; z-index: 2; display: block;';
+export const playerControlsFullScreenStyle = '';
+export const uiContainerFullScreenStyle = '';
 
 export function initUI(this: AnnotationTool) {
   // Create the container for the UI elements

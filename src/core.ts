@@ -1011,14 +1011,16 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   getAnnotationFrame(event: PointerEvent) {
     const x = event.offsetX;
     const y = event.offsetY;
-    const offset = this.isMobile ? 10 : 5;
+    // Tolerance should be larger than the marker size (8px desktop, 16px mobile)
+    // to make clicking easier. Using 12px desktop, 20px mobile.
+    const tolerance = this.isMobile ? 20 : 12;
     const frame =
       this.annotatedFrameCoordinates.find((coordinate) => {
         return (
-          x >= coordinate.x - offset &&
-          x <= coordinate.x + offset &&
-          y >= coordinate.y - offset &&
-          y <= coordinate.y + offset
+          x >= coordinate.x - tolerance &&
+          x <= coordinate.x + tolerance &&
+          y >= coordinate.y - tolerance &&
+          y <= coordinate.y + tolerance
         );
       })?.frame ?? null;
     return frame;

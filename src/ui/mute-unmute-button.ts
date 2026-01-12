@@ -14,6 +14,8 @@ export function createMuteUnmuteButton(
 
   button.type = "button";
   applyButtonStyle(button);
+  button.dataset.tooltip = "Mute/Unmute";
+  button.dataset.tooltipPosition = "bottom";
 
   if (video.muted || video.volume === 0) {
     button.innerHTML = muteIcon;

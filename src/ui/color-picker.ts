@@ -5,6 +5,7 @@ export function createColorPicker(defaultColor: string, tool: AnnotationTool) {
   const colorPicker = document.createElement("input");
   colorPicker.type = "color";
   colorPicker.value = defaultColor;
+  colorPicker.dataset.tooltip = "Stroke color";
 
 
   const onColorChange = (event: Event) => {

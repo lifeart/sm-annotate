@@ -8,8 +8,9 @@ const fullscreenIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 export function createFullscreenButton(tool: AnnotationTool) {
     const button = document.createElement('button');
     button.innerHTML = fullscreenIcon;
-    button.title = 'Toggle Fullscreen';
     button.type = 'button';
+    button.dataset.tooltip = 'Fullscreen';
+    button.dataset.tooltipPosition = 'bottom';
     applyFullscreenButtonStyle(button);
 
     const toggleFullScreen = () => {

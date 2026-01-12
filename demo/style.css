@@ -116,7 +116,8 @@ body {
   box-shadow: 0 8px 32px var(--shadow);
   border: 1px solid var(--border);
   max-width: 100%;
-  margin-top: 50px; /* Space for top toolbar */
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
 
 video {
@@ -396,24 +397,3 @@ kbd {
   }
 }
 
-/* Annotation Tool Overrides */
-.video-container .sm-annotate-container {
-  position: absolute !important;
-  top: auto !important;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 8px;
-  flex-wrap: nowrap !important;
-  white-space: nowrap;
-}
-
-.video-container .sm-annotate-player-controls {
-  position: absolute !important;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 8px;
-  flex-wrap: nowrap !important;
-  white-space: nowrap;
-}

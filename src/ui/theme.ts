@@ -78,6 +78,10 @@ function generateThemeCSS(theme: ThemeColors): string {
 function generateStyles(): string {
   return `
     .${PREFIX}-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-flex;
       align-items: center;
       flex-wrap: nowrap;
@@ -89,9 +93,15 @@ function generateStyles(): string {
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
       white-space: nowrap;
+      z-index: 10;
+      margin-top: 8px;
     }
 
     .${PREFIX}-player-controls {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-flex;
       align-items: center;
       flex-wrap: nowrap;
@@ -103,6 +113,23 @@ function generateStyles(): string {
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
       white-space: nowrap;
+      z-index: 10;
+      margin-bottom: 8px;
+    }
+
+    /* Fullscreen mode - toolbars inside the fullscreen container */
+    :fullscreen .${PREFIX}-container,
+    :-webkit-full-screen .${PREFIX}-container {
+      position: fixed;
+      top: 0;
+      margin-top: 8px;
+    }
+
+    :fullscreen .${PREFIX}-player-controls,
+    :-webkit-full-screen .${PREFIX}-player-controls {
+      position: fixed;
+      bottom: 0;
+      margin-bottom: 8px;
     }
 
     .${PREFIX}-btn {
@@ -239,6 +266,88 @@ function generateStyles(): string {
       width: 18px;
       height: 18px;
     }
+
+    /* Tooltip styles using modern CSS */
+    [data-tooltip] {
+      position: relative;
+    }
+
+    [data-tooltip]::before,
+    [data-tooltip]::after {
+      position: absolute;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, visibility 0.2s ease, translate 0.2s ease;
+      z-index: 1000;
+    }
+
+    /* Tooltip text bubble */
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      inset-block-end: calc(100% + 8px);
+      inset-inline-start: 50%;
+      translate: -50% 4px;
+      padding: 6px 10px;
+      background: var(--${PREFIX}-bg-secondary);
+      color: var(--${PREFIX}-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      white-space: nowrap;
+      border-radius: 6px;
+      border: 1px solid var(--${PREFIX}-border);
+      box-shadow: 0 4px 12px var(--${PREFIX}-shadow);
+    }
+
+    /* Tooltip arrow */
+    [data-tooltip]::before {
+      content: '';
+      inset-block-end: calc(100% + 2px);
+      inset-inline-start: 50%;
+      translate: -50% 4px;
+      border: 6px solid transparent;
+      border-block-start-color: var(--${PREFIX}-bg-secondary);
+    }
+
+    /* Show tooltip on hover/focus */
+    [data-tooltip]:hover::before,
+    [data-tooltip]:hover::after,
+    [data-tooltip]:focus-visible::before,
+    [data-tooltip]:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      translate: -50% 0;
+    }
+
+    /* Bottom tooltip variant */
+    [data-tooltip-position="bottom"]::after {
+      inset-block-end: auto;
+      inset-block-start: calc(100% + 8px);
+      translate: -50% -4px;
+    }
+
+    [data-tooltip-position="bottom"]::before {
+      inset-block-end: auto;
+      inset-block-start: calc(100% + 2px);
+      translate: -50% -4px;
+      border-block-start-color: transparent;
+      border-block-end-color: var(--${PREFIX}-bg-secondary);
+    }
+
+    [data-tooltip-position="bottom"]:hover::before,
+    [data-tooltip-position="bottom"]:hover::after,
+    [data-tooltip-position="bottom"]:focus-visible::before,
+    [data-tooltip-position="bottom"]:focus-visible::after {
+      translate: -50% 0;
+    }
+
+    /* Hide tooltip on disabled buttons */
+    [data-tooltip]:disabled::before,
+    [data-tooltip]:disabled::after {
+      display: none;
+    }
   `;
 }
 
@@ -305,7 +414,7 @@ export function getCSSPrefix(): string {
 export function createThemeToggleButton(tool: AnnotationTool): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.title = 'Toggle theme';
+  button.dataset.tooltip = 'Toggle theme';
   applyButtonStyle(button);
 
   const updateIcon = () => {

@@ -20,7 +20,7 @@ export declare class ButtonConstructor {
     };
     get currentTool(): AnnotationTool["currentTool"];
     set currentTool(value: AnnotationTool["currentTool"]);
-    create: (icon: string, tool: Tool | ((e: Event) => void), container?: HTMLElement) => HTMLButtonElement;
+    create: (icon: string, tool: Tool | ((e: Event) => void), container?: HTMLElement, tooltip?: string, tooltipPosition?: "top" | "bottom") => HTMLButtonElement;
 }
 export declare function addButtons(tool: AnnotationTool, Button: ButtonConstructor): void;
 export {};

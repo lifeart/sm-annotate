@@ -15,6 +15,8 @@ export function createPlayPauseButton(
   button.type = "button";
   button.innerHTML = playIcon;
   applyButtonStyle(button);
+  button.dataset.tooltip = "Play/Pause";
+  button.dataset.tooltipPosition = "bottom";
 
   tool.addEvent(video, "play", () => {
     button.innerHTML = pauseIcon;

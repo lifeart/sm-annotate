@@ -40,7 +40,7 @@ function findStateIndex(opacity: number): number {
 export function createOverlayOpacityButton(tool: AnnotationTool) {
   const button = document.createElement("button");
   button.type = "button";
-  button.title = "Opacity (overlay / selected shape)";
+  button.dataset.tooltip = "Opacity";
 
   // Track overlay opacity index separately
   let overlayIndex = findStateIndex(tool.overlayOpacity);
@@ -56,11 +56,11 @@ export function createOverlayOpacityButton(tool: AnnotationTool) {
       const shapeOpacity = selectedShape.opacity ?? 1;
       const stateIndex = findStateIndex(shapeOpacity);
       button.innerHTML = iconForOpacity(OPACITY_STATES[stateIndex], true);
-      button.title = "Shape opacity";
+      button.dataset.tooltip = "Shape opacity";
     } else {
       // Overlay mode: show overlay opacity
       button.innerHTML = iconForOpacity(OPACITY_STATES[overlayIndex], false);
-      button.title = "Overlay opacity";
+      button.dataset.tooltip = "Overlay opacity";
     }
   };
 

@@ -36,6 +36,8 @@ export function createPlaybackSpeedControlButton(
 
   button.innerHTML = iconForSpeed(defaultState);
   applyButtonStyle(button);
+  button.dataset.tooltip = "Playback speed";
+  button.dataset.tooltipPosition = "bottom";
 
   tool.addEvent(button, "click", () => {
     const currentState = states.indexOf(video.playbackRate);

@@ -8,6 +8,7 @@ export function createStrokeWidthSlider(tool: AnnotationTool) {
   strokeWidthSlider.max = "10";
   strokeWidthSlider.value = "5";
   strokeWidthSlider.style.margin = "5px";
+  strokeWidthSlider.dataset.tooltip = "Stroke width";
 
   const onStrokeWidthChange = (event: Event) => {
     tool.ctx.lineWidth = (event.target as HTMLInputElement).valueAsNumber;
