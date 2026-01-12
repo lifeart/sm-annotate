@@ -19,7 +19,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📊 Progress bar with annotation markers (visible on hover during playback)
 * ⏭️ Jump to next/previous annotated frame (long press on frame navigation buttons)
 * 💾 Saving the current frame or all frames with annotations
-* 🎬 Video overlay comparison mode (split view)
+* 🎬 Video overlay comparison mode (split view with adjustable opacity)
 * 🔊 Audio waveform visualization
 * 🖼️ Paste images from clipboard
 
@@ -81,6 +81,9 @@ await annotationTool.setVideoUrl(videoUrl, fps);
 
 // Add reference video for comparison
 await annotationTool.addReferenceVideoByURL(referenceUrl, fps);
+
+// Adjust overlay opacity for compare mode (0 = off, 0.25, 0.5, 0.7, 1)
+annotationTool.overlayOpacity = 0.7;
 ```
 
 ### Frame Navigation
@@ -142,6 +145,7 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Move | Reposition and resize shapes |
 | Selection | Crop and capture video frame area |
 | Compare | Split-view video comparison |
+| Overlay Opacity | Adjust reference video opacity (off/25%/50%/70%/100%) |
 
 ## Development
 
