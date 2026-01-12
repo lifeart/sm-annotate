@@ -80,6 +80,7 @@ function generateStyles(): string {
     .${PREFIX}-container {
       display: inline-flex;
       align-items: center;
+      flex-wrap: nowrap;
       gap: 2px;
       padding: 4px;
       background: var(--${PREFIX}-bg-primary);
@@ -87,11 +88,13 @@ function generateStyles(): string {
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+      white-space: nowrap;
     }
 
     .${PREFIX}-player-controls {
       display: inline-flex;
       align-items: center;
+      flex-wrap: nowrap;
       gap: 2px;
       padding: 4px;
       background: var(--${PREFIX}-bg-primary);
@@ -99,6 +102,7 @@ function generateStyles(): string {
       border-radius: 8px;
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+      white-space: nowrap;
     }
 
     .${PREFIX}-btn {
