@@ -1,4 +1,5 @@
 import type { AnnotationTool } from "../core";
+import { applyButtonStyle } from "./theme";
 import type { MoveToolPlugin } from "../plugins/move";
 
 type OpacityState = {
@@ -64,7 +65,7 @@ export function createOverlayOpacityButton(tool: AnnotationTool) {
   };
 
   updateButton();
-  button.style.margin = "5px";
+  applyButtonStyle(button);
 
   tool.addEvent(button, "click", () => {
     const movePlugin = tool.currentTool === 'move'

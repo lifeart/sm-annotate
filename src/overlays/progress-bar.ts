@@ -48,7 +48,11 @@ export function addProgressBarOverlay(this: AnnotationTool) {
   });
 
   // draw current frame indicator
-  const currentFrame = this.playbackFrame;
+  // Use lastNavigatedFrame during progress bar drag for smoother visual feedback
+  // (video.currentTime updates async, so playbackFrame may lag behind user input)
+  const currentFrame = this.isProgressBarNavigation && this.lastNavigatedFrame > 0
+    ? this.lastNavigatedFrame
+    : this.playbackFrame;
   const currentFrameCoordinate =
     Math.round((currentFrame / totalFrames) * width) + x;
 

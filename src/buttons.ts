@@ -4,6 +4,7 @@ import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createOverlayOpacityButton } from "./ui/overlay-opacity-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
 import { createPlaybackSpeedControlButton } from "./ui/playback-speed-button";
+import { applyButtonStyle, setButtonActive } from "./ui/theme";
 
 type Tool = NonNullable<AnnotationTool["currentTool"]>;
 
@@ -97,7 +98,7 @@ export class ButtonConstructor {
 
     button.type = "button";
     button.innerHTML = icon;
-    button.style.margin = "5px";
+    applyButtonStyle(button);
     container.appendChild(button);
 
     this.buttons.push(button);

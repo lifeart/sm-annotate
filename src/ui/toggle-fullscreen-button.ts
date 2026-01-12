@@ -1,16 +1,13 @@
 import type { AnnotationTool } from "../core";
+import { applyButtonStyle } from "./theme";
 
 export function createFullscreenButton(tool: AnnotationTool) {
     const button = document.createElement('button');
     button.textContent = '⛶';
     button.title = 'Toggle Fullscreen';
     button.type = 'button';
+    applyButtonStyle(button);
     button.style.fontSize = '20px';
-    button.style.padding = '5px 10px';
-    button.style.backgroundColor = 'transparent';
-    button.style.border = 'none';
-    button.style.cursor = 'pointer';
-    button.style.color = '#fff';
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
