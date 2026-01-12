@@ -47,7 +47,7 @@ function setupLongPress(
     // Prevent click if it was a long press
     if (isLongPress) {
       e.preventDefault();
-      e.stopPropagation();
+      e.stopImmediatePropagation();
       isLongPress = false;
     }
   };
