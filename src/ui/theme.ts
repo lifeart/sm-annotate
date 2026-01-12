@@ -82,7 +82,7 @@ function generateStyles(): string {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
+      display: inline-flex;
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
@@ -97,16 +97,12 @@ function generateStyles(): string {
       margin-top: 8px;
     }
 
-    .${PREFIX}-container > * {
-      flex-shrink: 0;
-    }
-
     .${PREFIX}-player-controls {
       position: absolute;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
+      display: inline-flex;
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
@@ -119,10 +115,6 @@ function generateStyles(): string {
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
       z-index: 10;
       margin-bottom: 8px;
-    }
-
-    .${PREFIX}-player-controls > * {
-      flex-shrink: 0;
     }
 
     /* Fullscreen mode - toolbars inside the fullscreen container */
@@ -185,6 +177,7 @@ function generateStyles(): string {
     }
 
     .${PREFIX}-divider {
+      flex: 0 0 1px;
       width: 1px;
       height: 20px;
       margin: 0 4px;

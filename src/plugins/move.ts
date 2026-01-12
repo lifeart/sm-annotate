@@ -1,8 +1,14 @@
-import type { IShape } from ".";
+import type { IShape, ShapeMap } from ".";
 import { IAudioPeaks } from "./audio-peaks";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 import type { IImage } from "./image";
-import type { ShapeMap } from ".";
+import type { IRectangle } from "./rectangle";
+import type { ICircle } from "./circle";
+import type { ILine } from "./line";
+import type { IArrow } from "./arrow";
+import type { ICurve } from "./curve";
+import type { IText } from "./text";
+import type { ISelection } from "./selection";
 
 export interface IMove extends IShapeBase {
   type: "move";
@@ -34,6 +40,7 @@ export class MoveToolPlugin
   private activeHandle: HandlePosition | null = null;
   private handleSize = 8;
   private resizeStartBounds: BoundingBox | null = null;
+  private resizeOriginalShape: IShape | null = null;
 
   /**
    * Get the currently selected shape, if any
@@ -214,10 +221,26 @@ export class MoveToolPlugin
     const shape = this.annotationTool.deserialize([rawShape])[0];
 
     switch (shape.type) {
-      case 'rectangle':
-      case 'image':
+      case 'rectangle': {
+        const s = shape as IRectangle;
+        return {
+          x: Math.min(s.x, s.x + s.width),
+          y: Math.min(s.y, s.y + s.height),
+          width: Math.abs(s.width),
+          height: Math.abs(s.height)
+        };
+      }
+      case 'image': {
+        const s = shape as IImage;
+        return {
+          x: Math.min(s.x, s.x + s.width),
+          y: Math.min(s.y, s.y + s.height),
+          width: Math.abs(s.width),
+          height: Math.abs(s.height)
+        };
+      }
       case 'selection': {
-        const s = shape as { x: number; y: number; width: number; height: number };
+        const s = shape as ISelection;
         return {
           x: Math.min(s.x, s.x + s.width),
           y: Math.min(s.y, s.y + s.height),
@@ -226,17 +249,16 @@ export class MoveToolPlugin
         };
       }
       case 'circle': {
-        const c = shape as unknown as { cx: number; cy: number; radius: number };
+        const c = shape as ICircle;
         return {
-          x: c.cx - c.radius,
-          y: c.cy - c.radius,
+          x: c.x - c.radius,
+          y: c.y - c.radius,
           width: c.radius * 2,
           height: c.radius * 2
         };
       }
-      case 'line':
-      case 'arrow': {
-        const l = shape as unknown as { x1: number; y1: number; x2: number; y2: number };
+      case 'line': {
+        const l = shape as ILine;
         const minX = Math.min(l.x1, l.x2);
         const minY = Math.min(l.y1, l.y2);
         const maxX = Math.max(l.x1, l.x2);
@@ -248,8 +270,21 @@ export class MoveToolPlugin
           height: maxY - minY || 10
         };
       }
+      case 'arrow': {
+        const a = shape as IArrow;
+        const minX = Math.min(a.x1, a.x2);
+        const minY = Math.min(a.y1, a.y2);
+        const maxX = Math.max(a.x1, a.x2);
+        const maxY = Math.max(a.y1, a.y2);
+        return {
+          x: minX,
+          y: minY,
+          width: maxX - minX || 10,
+          height: maxY - minY || 10
+        };
+      }
       case 'curve': {
-        const c = shape as unknown as { points: { x: number; y: number }[] };
+        const c = shape as ICurve;
         if (!c.points || c.points.length === 0) return null;
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         for (const p of c.points) {
@@ -266,13 +301,14 @@ export class MoveToolPlugin
         };
       }
       case 'text': {
-        const t = shape as unknown as { x: number; y: number; text: string; fontSize?: number };
-        const fontSize = t.fontSize || 16;
+        const t = shape as IText;
+        const lineWidth = rawShape.lineWidth ?? 1;
+        const fontSize = 16 + lineWidth * 0.5;
         const estimatedWidth = t.text.length * fontSize * 0.6;
         return {
           x: t.x,
           y: t.y - fontSize,
-          width: estimatedWidth,
+          width: estimatedWidth || 50,
           height: fontSize * 1.2
         };
       }
@@ -382,9 +418,12 @@ export class MoveToolPlugin
 
   /**
    * Resize shape based on handle drag
+   * @param keepAspectRatio - When true (shift key), maintains original aspect ratio
    */
-  private resizeShape(shape: IShape, handle: HandlePosition, dx: number, dy: number, startBounds: BoundingBox): void {
-    const deserialized = this.annotationTool.deserialize([shape])[0];
+  private resizeShape(shape: IShape, handle: HandlePosition, dx: number, dy: number, startBounds: BoundingBox, keepAspectRatio = false): void {
+    if (!this.resizeOriginalShape) return;
+
+    const deserialized = this.annotationTool.deserialize([this.resizeOriginalShape])[0];
 
     // Calculate new bounds based on handle
     let newX = startBounds.x;
@@ -429,48 +468,158 @@ export class MoveToolPlugin
         break;
     }
 
+    // Keep aspect ratio if shift is pressed
+    if (keepAspectRatio && startBounds.width > 0 && startBounds.height > 0) {
+      const aspectRatio = startBounds.width / startBounds.height;
+
+      // Determine which dimension to constrain based on handle
+      if (handle === 'n' || handle === 's') {
+        // Vertical handles: adjust width to match height
+        const constrainedWidth = newHeight * aspectRatio;
+        const widthDiff = constrainedWidth - newWidth;
+        newWidth = constrainedWidth;
+        // Center horizontally
+        newX -= widthDiff / 2;
+      } else if (handle === 'e' || handle === 'w') {
+        // Horizontal handles: adjust height to match width
+        const constrainedHeight = newWidth / aspectRatio;
+        const heightDiff = constrainedHeight - newHeight;
+        newHeight = constrainedHeight;
+        // Center vertically
+        newY -= heightDiff / 2;
+      } else {
+        // Corner handles: use the larger scale factor
+        const scaleFromWidth = newWidth / startBounds.width;
+        const scaleFromHeight = newHeight / startBounds.height;
+        const uniformScale = Math.max(Math.abs(scaleFromWidth), Math.abs(scaleFromHeight));
+        const signX = scaleFromWidth >= 0 ? 1 : -1;
+        const signY = scaleFromHeight >= 0 ? 1 : -1;
+
+        const constrainedWidth = startBounds.width * uniformScale * signX;
+        const constrainedHeight = startBounds.height * uniformScale * signY;
+
+        // Adjust position based on handle corner
+        if (handle === 'nw') {
+          newX = startBounds.x + startBounds.width - constrainedWidth;
+          newY = startBounds.y + startBounds.height - constrainedHeight;
+        } else if (handle === 'ne') {
+          newY = startBounds.y + startBounds.height - constrainedHeight;
+        } else if (handle === 'sw') {
+          newX = startBounds.x + startBounds.width - constrainedWidth;
+        }
+        // 'se' keeps origin at top-left, no adjustment needed
+
+        newWidth = constrainedWidth;
+        newHeight = constrainedHeight;
+      }
+    }
+
     // Ensure minimum size
-    if (newWidth < 10) { newWidth = 10; newX = startBounds.x + startBounds.width - 10; }
-    if (newHeight < 10) { newHeight = 10; newY = startBounds.y + startBounds.height - 10; }
+    const minSize = 10;
+    if (newWidth < minSize) {
+      if (handle.includes('w')) {
+        newX = startBounds.x + startBounds.width - minSize;
+      }
+      newWidth = minSize;
+    }
+    if (newHeight < minSize) {
+      if (handle.includes('n')) {
+        newY = startBounds.y + startBounds.height - minSize;
+      }
+      newHeight = minSize;
+    }
+
+    // Calculate scale factors
+    const scaleX = startBounds.width > 0 ? newWidth / startBounds.width : 1;
+    const scaleY = startBounds.height > 0 ? newHeight / startBounds.height : 1;
 
     // Apply resize based on shape type
     switch (deserialized.type) {
-      case 'rectangle':
+      case 'rectangle': {
+        const rectShape = shape as IRectangle;
+        rectShape.x = newX / this.annotationTool.canvasWidth;
+        rectShape.y = newY / this.annotationTool.canvasHeight;
+        rectShape.width = newWidth / this.annotationTool.canvasWidth;
+        rectShape.height = newHeight / this.annotationTool.canvasHeight;
+        break;
+      }
       case 'selection': {
-        (shape as any).x = newX / this.annotationTool.canvasWidth;
-        (shape as any).y = newY / this.annotationTool.canvasHeight;
-        (shape as any).width = newWidth / this.annotationTool.canvasWidth;
-        (shape as any).height = newHeight / this.annotationTool.canvasHeight;
+        const selShape = shape as ISelection;
+        selShape.x = newX / this.annotationTool.canvasWidth;
+        selShape.y = newY / this.annotationTool.canvasHeight;
+        selShape.width = newWidth / this.annotationTool.canvasWidth;
+        selShape.height = newHeight / this.annotationTool.canvasHeight;
         break;
       }
       case 'circle': {
+        const circleShape = shape as ICircle;
         const radius = Math.min(newWidth, newHeight) / 2;
-        (shape as any).cx = (newX + newWidth / 2) / this.annotationTool.canvasWidth;
-        (shape as any).cy = (newY + newHeight / 2) / this.annotationTool.canvasHeight;
-        (shape as any).radius = radius / Math.min(this.annotationTool.canvasWidth, this.annotationTool.canvasHeight);
+        const centerX = newX + newWidth / 2;
+        const centerY = newY + newHeight / 2;
+        circleShape.x = centerX / this.annotationTool.canvasWidth;
+        circleShape.y = centerY / this.annotationTool.canvasHeight;
+        circleShape.radius = radius / this.annotationTool.canvasWidth;
         break;
       }
-      case 'line':
+      case 'line': {
+        const lineShape = shape as ILine;
+        const origLine = deserialized as ILine;
+        const relX1 = (origLine.x1 - startBounds.x) * scaleX + newX;
+        const relY1 = (origLine.y1 - startBounds.y) * scaleY + newY;
+        const relX2 = (origLine.x2 - startBounds.x) * scaleX + newX;
+        const relY2 = (origLine.y2 - startBounds.y) * scaleY + newY;
+        lineShape.x1 = relX1 / this.annotationTool.canvasWidth;
+        lineShape.y1 = relY1 / this.annotationTool.canvasHeight;
+        lineShape.x2 = relX2 / this.annotationTool.canvasWidth;
+        lineShape.y2 = relY2 / this.annotationTool.canvasHeight;
+        break;
+      }
       case 'arrow': {
-        // Scale line endpoints proportionally
-        const scaleX = newWidth / startBounds.width;
-        const scaleY = newHeight / startBounds.height;
-        const origShape = this.annotationTool.deserialize([this.annotationTool.shapes[this.selectedShapeIndex]])[0] as any;
-        const relX1 = (origShape.x1 - startBounds.x) * scaleX + newX;
-        const relY1 = (origShape.y1 - startBounds.y) * scaleY + newY;
-        const relX2 = (origShape.x2 - startBounds.x) * scaleX + newX;
-        const relY2 = (origShape.y2 - startBounds.y) * scaleY + newY;
-        (shape as any).x1 = relX1 / this.annotationTool.canvasWidth;
-        (shape as any).y1 = relY1 / this.annotationTool.canvasHeight;
-        (shape as any).x2 = relX2 / this.annotationTool.canvasWidth;
-        (shape as any).y2 = relY2 / this.annotationTool.canvasHeight;
+        const arrowShape = shape as IArrow;
+        const origArrow = deserialized as IArrow;
+        const relX1 = (origArrow.x1 - startBounds.x) * scaleX + newX;
+        const relY1 = (origArrow.y1 - startBounds.y) * scaleY + newY;
+        const relX2 = (origArrow.x2 - startBounds.x) * scaleX + newX;
+        const relY2 = (origArrow.y2 - startBounds.y) * scaleY + newY;
+        arrowShape.x1 = relX1 / this.annotationTool.canvasWidth;
+        arrowShape.y1 = relY1 / this.annotationTool.canvasHeight;
+        arrowShape.x2 = relX2 / this.annotationTool.canvasWidth;
+        arrowShape.y2 = relY2 / this.annotationTool.canvasHeight;
+        break;
+      }
+      case 'curve': {
+        const curveShape = shape as ICurve;
+        const origCurve = deserialized as ICurve;
+        curveShape.points = origCurve.points.map(p => ({
+          x: ((p.x - startBounds.x) * scaleX + newX) / this.annotationTool.canvasWidth,
+          y: ((p.y - startBounds.y) * scaleY + newY) / this.annotationTool.canvasHeight
+        }));
+        break;
+      }
+      case 'text': {
+        const textShape = shape as IText;
+        const origText = deserialized as IText;
+        const origLineWidth = this.resizeOriginalShape.lineWidth ?? 1;
+        const origFontSize = 16 + origLineWidth * 0.5;
+        // Position text at new bounds, scaling the offset
+        const relX = (origText.x - startBounds.x) * scaleX + newX;
+        const relY = (origText.y - startBounds.y) * scaleY + newY;
+        textShape.x = relX / this.annotationTool.canvasWidth;
+        textShape.y = relY / this.annotationTool.canvasHeight;
+        // Scale lineWidth to affect font size
+        const avgScale = (scaleX + scaleY) / 2;
+        const newFontSize = origFontSize * avgScale;
+        // lineWidth controls font size: fontSize = 16 + lineWidth * 0.5
+        // So: lineWidth = (fontSize - 16) / 0.5 = (fontSize - 16) * 2
+        textShape.lineWidth = Math.max(1, (newFontSize - 16) * 2);
         break;
       }
       case 'image': {
-        (shape as any).x = newX / this.annotationTool.canvasWidth;
-        (shape as any).y = newY / this.annotationTool.canvasHeight;
-        (shape as any).width = newWidth / this.annotationTool.canvasWidth;
-        (shape as any).height = newHeight / this.annotationTool.canvasHeight;
+        const imgShape = shape as IImage;
+        imgShape.x = newX / this.annotationTool.canvasWidth;
+        imgShape.y = newY / this.annotationTool.canvasHeight;
+        imgShape.width = newWidth / this.annotationTool.canvasWidth;
+        imgShape.height = newHeight / this.annotationTool.canvasHeight;
         break;
       }
     }
@@ -503,6 +652,8 @@ export class MoveToolPlugin
       const selectedShape = this.getSelectedShape();
       if (selectedShape) {
         this.resizeStartBounds = this.getShapeBounds(selectedShape);
+        // Store deep copy of original shape for resize calculations
+        this.resizeOriginalShape = JSON.parse(JSON.stringify(selectedShape));
         // Save for undo
         this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
       }
@@ -598,7 +749,7 @@ export class MoveToolPlugin
 
       const shape = this.annotationTool.shapes[this.selectedShapeIndex];
       if (shape) {
-        this.resizeShape(shape, this.activeHandle, dx, dy, this.resizeStartBounds);
+        this.resizeShape(shape, this.activeHandle, dx, dy, this.resizeStartBounds, event.shiftKey);
         this.annotationTool.redrawFullCanvas();
       }
       return;
@@ -676,6 +827,7 @@ export class MoveToolPlugin
     if (this.activeHandle) {
       this.activeHandle = null;
       this.resizeStartBounds = null;
+      this.resizeOriginalShape = null;
       this.isDrawing = false;
       this.annotationTool.canvas.style.cursor = 'default';
       this.annotationTool.redrawFullCanvas();
@@ -713,6 +865,7 @@ export class MoveToolPlugin
     this.selectedShapeIndex = -1;
     this.activeHandle = null;
     this.resizeStartBounds = null;
+    this.resizeOriginalShape = null;
     this.annotationTool.canvas.style.cursor = 'default';
   }
   save(shape: IShape) {

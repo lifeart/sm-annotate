@@ -27,4 +27,4 @@ export interface ShapeMap {
     selection: ISelection;
 }
 export type PluginInstances = RectangleToolPlugin | CircleToolPlugin | LineToolPlugin | ArrowToolPlugin | TextToolPlugin | EraserToolPlugin | CurveToolPlugin | MoveToolPlugin | ImageToolPlugin | CompareToolPlugin | AudioPeaksPlugin | SelectionToolPlugin;
-export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof AudioPeaksPlugin | typeof ImageToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin | typeof SelectionToolPlugin)[];
+export declare const plugins: (typeof RectangleToolPlugin | typeof CircleToolPlugin | typeof CurveToolPlugin | typeof LineToolPlugin | typeof ArrowToolPlugin | typeof TextToolPlugin | typeof EraserToolPlugin | typeof AudioPeaksPlugin | typeof ImageToolPlugin | typeof SelectionToolPlugin | typeof MoveToolPlugin | typeof CompareToolPlugin)[];

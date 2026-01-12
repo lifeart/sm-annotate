@@ -1,8 +1,7 @@
-import type { IShape } from ".";
+import type { IShape, ShapeMap } from ".";
 import { IAudioPeaks } from "./audio-peaks";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 import type { IImage } from "./image";
-import type { ShapeMap } from ".";
 export interface IMove extends IShapeBase {
     type: "move";
 }
@@ -24,6 +23,7 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     private activeHandle;
     private handleSize;
     private resizeStartBounds;
+    private resizeOriginalShape;
     /**
      * Get the currently selected shape, if any
      */
@@ -71,6 +71,7 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     private getCursorForHandle;
     /**
      * Resize shape based on handle drag
+     * @param keepAspectRatio - When true (shift key), maintains original aspect ratio
      */
     private resizeShape;
     private deleteSelectedShape;

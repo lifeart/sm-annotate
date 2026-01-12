@@ -128,6 +128,7 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | `Ctrl/Cmd + Shift + →` | Copy all annotations to next frame |
 | `Ctrl/Cmd + Shift + ←` | Copy all annotations to previous frame |
 | `Backspace` / `Delete` | Delete selected shape |
+| `Shift` + drag handle | Resize while keeping aspect ratio |
 
 ### Curve Tool
 
