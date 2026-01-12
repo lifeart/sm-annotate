@@ -1,13 +1,16 @@
 import type { AnnotationTool } from "../core";
-import { applyButtonStyle } from "./theme";
+import { applyFullscreenButtonStyle } from "./theme";
+
+const fullscreenIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+</svg>`;
 
 export function createFullscreenButton(tool: AnnotationTool) {
     const button = document.createElement('button');
-    button.textContent = '⛶';
+    button.innerHTML = fullscreenIcon;
     button.title = 'Toggle Fullscreen';
     button.type = 'button';
-    applyButtonStyle(button);
-    button.style.fontSize = '20px';
+    applyFullscreenButtonStyle(button);
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {

@@ -1,11 +1,10 @@
 import type { AnnotationTool } from "../core";
 
 export function createColorPicker(defaultColor: string, tool: AnnotationTool) {
-      // Create the color picker
+  // Create the color picker
   const colorPicker = document.createElement("input");
   colorPicker.type = "color";
   colorPicker.value = defaultColor;
-  colorPicker.style.margin = "5px";
 
 
   const onColorChange = (event: Event) => {

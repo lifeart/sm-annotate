@@ -4,7 +4,7 @@ import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createOverlayOpacityButton } from "./ui/overlay-opacity-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
 import { createPlaybackSpeedControlButton } from "./ui/playback-speed-button";
-import { applyButtonStyle, setButtonActive } from "./ui/theme";
+import { applyButtonStyle, setButtonActive, createDivider } from "./ui/theme";
 
 type Tool = NonNullable<AnnotationTool["currentTool"]>;
 
@@ -166,6 +166,9 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>',
     "eraser"
   );
+
+  // Divider after drawing tools
+  Button.uiContainer.appendChild(createDivider());
 
   Button.create(
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>',

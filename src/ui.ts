@@ -9,7 +9,7 @@ import { colorMap } from "./plugins/utils/color-map";
 import { createColorPicker } from "./ui/color-picker";
 import { createStrokeWidthSlider } from "./ui/stroke-width-slider";
 import { createFullscreenButton } from "./ui/toggle-fullscreen-button";
-import { applyContainerStyle, applyPlayerControlsStyle, createThemeToggleButton, applyInputStyle, applySliderStyle, applyColorPickerStyle } from "./ui/theme";
+import { applyContainerStyle, applyPlayerControlsStyle, createThemeToggleButton, applyColorPickerStyle, applySliderStyle, createDivider } from "./ui/theme";
 
 type StylePojo = Omit<Partial<CSSStyleDeclaration>, 'length' | 'parentRule' | typeof Symbol.iterator>;
 
@@ -60,7 +60,6 @@ export function initUI(this: AnnotationTool) {
     const wrapper = document.createElement("div");
     wrapper.style.display = "inline-flex";
     wrapper.style.alignItems = "center";
-    wrapper.style.margin = "5px";
     return wrapper;
   };
 
@@ -77,6 +76,9 @@ export function initUI(this: AnnotationTool) {
 
   this.hideButton("compare");
 
+  // Divider before color/stroke controls
+  uiContainer.appendChild(createDivider());
+
   this.colorPicker = createColorPicker(defaultColor, this);
   applyColorPickerStyle(this.colorPicker);
   uiContainer.appendChild(this.colorPicker);
@@ -87,6 +89,9 @@ export function initUI(this: AnnotationTool) {
   applySliderStyle(this.strokeSizePicker);
   strokeControlWrapper.appendChild(this.strokeSizePicker);
   uiContainer.appendChild(strokeControlWrapper);
+
+  // Divider before theme toggle
+  uiContainer.appendChild(createDivider());
 
   // Add theme toggle button
   const themeToggleBtn = createThemeToggleButton(this);

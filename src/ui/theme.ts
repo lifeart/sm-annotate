@@ -3,60 +3,51 @@ import type { AnnotationTool } from "../core";
 export type Theme = 'dark' | 'light';
 
 export interface ThemeColors {
-  // Background colors
   bgPrimary: string;
   bgSecondary: string;
+  bgTertiary: string;
   bgHover: string;
   bgActive: string;
-
-  // Text colors
   textPrimary: string;
   textSecondary: string;
-
-  // Border colors
+  textMuted: string;
   border: string;
   borderHover: string;
-
-  // Accent colors
   accent: string;
   accentHover: string;
-
-  // Button colors
-  buttonBg: string;
-  buttonHover: string;
-  buttonActive: string;
+  shadow: string;
 }
 
 const darkTheme: ThemeColors = {
-  bgPrimary: '#1a1a1a',
-  bgSecondary: '#2d2d2d',
-  bgHover: '#3d3d3d',
-  bgActive: '#4d4d4d',
-  textPrimary: '#e0e0e0',
-  textSecondary: '#a0a0a0',
-  border: '#404040',
-  borderHover: '#505050',
-  accent: '#4a9eff',
-  accentHover: '#6bb3ff',
-  buttonBg: '#333333',
-  buttonHover: '#444444',
-  buttonActive: '#4a9eff',
+  bgPrimary: 'rgba(28, 28, 32, 0.95)',
+  bgSecondary: 'rgba(42, 42, 48, 0.98)',
+  bgTertiary: '#35353d',
+  bgHover: 'rgba(255, 255, 255, 0.08)',
+  bgActive: 'rgba(255, 255, 255, 0.12)',
+  textPrimary: '#f0f0f2',
+  textSecondary: '#a8a8b0',
+  textMuted: '#68687a',
+  border: 'rgba(255, 255, 255, 0.1)',
+  borderHover: 'rgba(255, 255, 255, 0.2)',
+  accent: '#5b9fff',
+  accentHover: '#7db3ff',
+  shadow: 'rgba(0, 0, 0, 0.4)',
 };
 
 const lightTheme: ThemeColors = {
-  bgPrimary: '#f5f5f5',
-  bgSecondary: '#ffffff',
-  bgHover: '#e8e8e8',
-  bgActive: '#d0d0d0',
-  textPrimary: '#1a1a1a',
-  textSecondary: '#666666',
-  border: '#d0d0d0',
-  borderHover: '#b0b0b0',
-  accent: '#0066cc',
-  accentHover: '#0077ee',
-  buttonBg: '#e0e0e0',
-  buttonHover: '#d0d0d0',
-  buttonActive: '#0066cc',
+  bgPrimary: 'rgba(250, 250, 252, 0.95)',
+  bgSecondary: 'rgba(255, 255, 255, 0.98)',
+  bgTertiary: '#f0f0f5',
+  bgHover: 'rgba(0, 0, 0, 0.04)',
+  bgActive: 'rgba(0, 0, 0, 0.08)',
+  textPrimary: '#1a1a24',
+  textSecondary: '#5a5a6e',
+  textMuted: '#9090a0',
+  border: 'rgba(0, 0, 0, 0.1)',
+  borderHover: 'rgba(0, 0, 0, 0.2)',
+  accent: '#2563eb',
+  accentHover: '#3b82f6',
+  shadow: 'rgba(0, 0, 0, 0.15)',
 };
 
 export const themes: Record<Theme, ThemeColors> = {
@@ -64,51 +55,71 @@ export const themes: Record<Theme, ThemeColors> = {
   light: lightTheme,
 };
 
-// CSS class name prefix
 const PREFIX = 'sm-annotate';
 
-// Generate CSS for a theme
 function generateThemeCSS(theme: ThemeColors): string {
   return `
     --${PREFIX}-bg-primary: ${theme.bgPrimary};
     --${PREFIX}-bg-secondary: ${theme.bgSecondary};
+    --${PREFIX}-bg-tertiary: ${theme.bgTertiary};
     --${PREFIX}-bg-hover: ${theme.bgHover};
     --${PREFIX}-bg-active: ${theme.bgActive};
     --${PREFIX}-text-primary: ${theme.textPrimary};
     --${PREFIX}-text-secondary: ${theme.textSecondary};
+    --${PREFIX}-text-muted: ${theme.textMuted};
     --${PREFIX}-border: ${theme.border};
     --${PREFIX}-border-hover: ${theme.borderHover};
     --${PREFIX}-accent: ${theme.accent};
     --${PREFIX}-accent-hover: ${theme.accentHover};
-    --${PREFIX}-button-bg: ${theme.buttonBg};
-    --${PREFIX}-button-hover: ${theme.buttonHover};
-    --${PREFIX}-button-active: ${theme.buttonActive};
+    --${PREFIX}-shadow: ${theme.shadow};
   `;
 }
 
-// Generate button styles
-function generateButtonStyles(): string {
+function generateStyles(): string {
   return `
+    .${PREFIX}-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      background: var(--${PREFIX}-bg-primary);
+      border: 1px solid var(--${PREFIX}-border);
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+    }
+
+    .${PREFIX}-player-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      background: var(--${PREFIX}-bg-primary);
+      border: 1px solid var(--${PREFIX}-border);
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+    }
+
     .${PREFIX}-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 32px;
       height: 32px;
-      margin: 2px;
-      padding: 4px;
-      border: 1px solid var(--${PREFIX}-border);
-      border-radius: 4px;
-      background: var(--${PREFIX}-button-bg);
-      color: var(--${PREFIX}-text-primary);
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--${PREFIX}-text-secondary);
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: background 0.15s ease, color 0.15s ease;
       outline: none;
     }
 
     .${PREFIX}-btn:hover {
-      background: var(--${PREFIX}-button-hover);
-      border-color: var(--${PREFIX}-border-hover);
+      background: var(--${PREFIX}-bg-hover);
+      color: var(--${PREFIX}-text-primary);
     }
 
     .${PREFIX}-btn:active {
@@ -116,112 +127,117 @@ function generateButtonStyles(): string {
     }
 
     .${PREFIX}-btn.active {
-      background: var(--${PREFIX}-button-active);
-      border-color: var(--${PREFIX}-accent);
+      background: var(--${PREFIX}-accent);
       color: #ffffff;
     }
 
+    .${PREFIX}-btn.active:hover {
+      background: var(--${PREFIX}-accent-hover);
+    }
+
     .${PREFIX}-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
     }
 
     .${PREFIX}-btn svg {
       width: 18px;
       height: 18px;
-      stroke: currentColor;
-    }
-
-    .${PREFIX}-container {
-      display: inline-flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 2px;
-      padding: 4px 6px;
-      background: var(--${PREFIX}-bg-primary);
-      border: 1px solid var(--${PREFIX}-border);
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .${PREFIX}-player-controls {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      padding: 4px 6px;
-      background: var(--${PREFIX}-bg-primary);
-      border: 1px solid var(--${PREFIX}-border);
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .${PREFIX}-divider {
       width: 1px;
-      height: 24px;
+      height: 20px;
       margin: 0 4px;
       background: var(--${PREFIX}-border);
     }
 
-    .${PREFIX}-input {
-      height: 28px;
-      padding: 4px 8px;
-      border: 1px solid var(--${PREFIX}-border);
-      border-radius: 4px;
-      background: var(--${PREFIX}-bg-secondary);
-      color: var(--${PREFIX}-text-primary);
-      font-size: 12px;
-      outline: none;
-      transition: border-color 0.15s ease;
-    }
-
-    .${PREFIX}-input:hover {
-      border-color: var(--${PREFIX}-border-hover);
-    }
-
-    .${PREFIX}-input:focus {
-      border-color: var(--${PREFIX}-accent);
-    }
-
     .${PREFIX}-color-picker {
       width: 32px;
-      height: 28px;
-      padding: 2px;
-      border: 1px solid var(--${PREFIX}-border);
-      border-radius: 4px;
-      background: var(--${PREFIX}-bg-secondary);
+      height: 32px;
+      padding: 4px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
       cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .${PREFIX}-color-picker:hover {
+      background: var(--${PREFIX}-bg-hover);
     }
 
     .${PREFIX}-color-picker::-webkit-color-swatch-wrapper {
-      padding: 2px;
+      padding: 0;
     }
 
     .${PREFIX}-color-picker::-webkit-color-swatch {
-      border: none;
-      border-radius: 2px;
+      border: 2px solid var(--${PREFIX}-border);
+      border-radius: 4px;
+    }
+
+    .${PREFIX}-color-picker:hover::-webkit-color-swatch {
+      border-color: var(--${PREFIX}-border-hover);
     }
 
     .${PREFIX}-slider {
-      width: 50px;
+      width: 48px;
       height: 28px;
-      padding: 4px 8px;
+      padding: 0 8px;
       border: 1px solid var(--${PREFIX}-border);
-      border-radius: 4px;
+      border-radius: 6px;
       background: var(--${PREFIX}-bg-secondary);
       color: var(--${PREFIX}-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 12px;
+      font-weight: 500;
       text-align: center;
+      transition: border-color 0.15s ease;
     }
 
-    .${PREFIX}-label {
-      font-size: 11px;
+    .${PREFIX}-slider:hover {
+      border-color: var(--${PREFIX}-border-hover);
+    }
+
+    .${PREFIX}-slider:focus {
+      outline: none;
+      border-color: var(--${PREFIX}-accent);
+    }
+
+    .${PREFIX}-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .${PREFIX}-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
       color: var(--${PREFIX}-text-secondary);
-      margin-right: 4px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      outline: none;
+    }
+
+    .${PREFIX}-fullscreen-btn:hover {
+      background: var(--${PREFIX}-bg-hover);
+      color: var(--${PREFIX}-text-primary);
+    }
+
+    .${PREFIX}-fullscreen-btn svg {
+      width: 18px;
+      height: 18px;
     }
   `;
 }
 
-// Inject theme styles into document
 let styleElement: HTMLStyleElement | null = null;
 
 export function injectThemeStyles(theme: Theme = 'dark'): void {
@@ -236,67 +252,52 @@ export function injectThemeStyles(theme: Theme = 'dark'): void {
     :root {
       ${generateThemeCSS(themeColors)}
     }
-    ${generateButtonStyles()}
+    ${generateStyles()}
   `;
 }
 
-// Apply theme class to button
 export function applyButtonStyle(button: HTMLButtonElement): void {
   button.classList.add(`${PREFIX}-btn`);
-  // Remove inline styles that conflict with CSS
-  button.style.margin = '';
 }
 
-// Apply active state to button
 export function setButtonActive(button: HTMLButtonElement, active: boolean): void {
-  if (active) {
-    button.classList.add('active');
-  } else {
-    button.classList.remove('active');
-  }
+  button.classList.toggle('active', active);
 }
 
-// Apply container style
 export function applyContainerStyle(container: HTMLElement): void {
   container.classList.add(`${PREFIX}-container`);
 }
 
-// Apply player controls style
 export function applyPlayerControlsStyle(container: HTMLElement): void {
   container.classList.add(`${PREFIX}-player-controls`);
 }
 
-// Apply input style
-export function applyInputStyle(input: HTMLInputElement): void {
-  input.classList.add(`${PREFIX}-input`);
-  input.style.margin = '';
-}
-
-// Apply color picker style
 export function applyColorPickerStyle(input: HTMLInputElement): void {
   input.classList.add(`${PREFIX}-color-picker`);
-  input.style.margin = '';
 }
 
-// Apply slider style
 export function applySliderStyle(input: HTMLInputElement): void {
   input.classList.add(`${PREFIX}-slider`);
-  input.style.margin = '';
 }
 
-// Create divider element
+export function applyFullscreenButtonStyle(button: HTMLButtonElement): void {
+  button.classList.add(`${PREFIX}-fullscreen-btn`);
+}
+
+export function applyGroupStyle(element: HTMLElement): void {
+  element.classList.add(`${PREFIX}-group`);
+}
+
 export function createDivider(): HTMLDivElement {
   const divider = document.createElement('div');
   divider.classList.add(`${PREFIX}-divider`);
   return divider;
 }
 
-// Get CSS prefix for external use
 export function getCSSPrefix(): string {
   return PREFIX;
 }
 
-// Theme toggle button
 export function createThemeToggleButton(tool: AnnotationTool): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
@@ -306,7 +307,7 @@ export function createThemeToggleButton(tool: AnnotationTool): HTMLButtonElement
   const updateIcon = () => {
     const isDark = tool.theme === 'dark';
     button.innerHTML = isDark
-      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/>
           <line x1="12" y1="1" x2="12" y2="3"/>
           <line x1="12" y1="21" x2="12" y2="23"/>
@@ -317,7 +318,7 @@ export function createThemeToggleButton(tool: AnnotationTool): HTMLButtonElement
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>`
-      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>`;
   };
