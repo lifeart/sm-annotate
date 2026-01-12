@@ -57,9 +57,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
     const activeTimeFrame = this.playbackFrame;
-    const newFrame = Math.max(1, activeTimeFrame - 1);
-    if (newFrame === this.playbackFrame) {
-      this.playbackFrame = this.totalFrames - 1;
+    const newFrame = activeTimeFrame - 1;
+    if (newFrame < 1) {
+      this.playbackFrame = this.totalFrames;
     } else {
       this.playbackFrame = newFrame;
     }
@@ -69,8 +69,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
     const activeTimeFrame = this.playbackFrame;
-    const newFrame = Math.min(this.totalFrames, activeTimeFrame + 1);
-    if (newFrame === this.totalFrames) {
+    const newFrame = activeTimeFrame + 1;
+    if (newFrame > this.totalFrames) {
       this.playbackFrame = 1;
     } else {
       this.playbackFrame = newFrame;
@@ -599,7 +599,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   get msPerFrame() {
-    return this.fps / 1000;
+    return 1000 / this.fps;
   }
 
   syncVideoSizes() {
@@ -1002,7 +1002,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (node.tagName !== "VIDEO") {
       return 1;
     }
-    return Math.ceil(node.duration * this.fps);
+    return Math.round(node.duration * this.fps);
   }
 
   /**
@@ -1030,20 +1030,21 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const x1 = event.offsetX;
     const y1 = event.offsetY;
 
+    const calculateFrame = () => {
+      // Use Math.round for consistency with other frame calculations
+      // Ensure frame is within valid 1-indexed range
+      const rawFrame = Math.round(((x1 - x) / width) * this.totalFrames);
+      return Math.max(1, Math.min(rawFrame, this.totalFrames));
+    };
+
     if (countY) {
       if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
-        const frame = Math.ceil(
-          ((x1 - x) / width) * this.totalFrames
-        );
-        return frame;
+        return calculateFrame();
       }
       return null;
     } else {
       if (x1 >= x && x1 <= x + width) {
-        const frame = Math.ceil(
-          ((x1 - x) / width) * this.totalFrames
-        );
-        return frame;
+        return calculateFrame();
       }
       return null;
     }
