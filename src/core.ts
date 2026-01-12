@@ -49,6 +49,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private frameCounterTimeoutId: ReturnType<typeof setTimeout> | null = null;
   // Enforced total frames count (overrides calculated value from video duration)
   private _enforcedTotalFrames: number | null = null;
+  // Track cursor hover state for showing progress bar during playback
+  isCursorOverCanvas = false;
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -1026,7 +1028,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.addVideoOverlay();
     }
     this.drawShapesOverlay();
-    this.addFrameSquareOverlay();
-    this.addProgressBarOverlay();
+    // Show frame overlay and progress bar only when cursor is over canvas (or on mobile)
+    if (this.isCursorOverCanvas || this.isMobile) {
+      this.addFrameSquareOverlay();
+      this.addProgressBarOverlay();
+    }
   }
 }

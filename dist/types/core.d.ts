@@ -31,6 +31,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     private referenceVideoBlobUrl;
     private frameCounterTimeoutId;
     private _enforcedTotalFrames;
+    isCursorOverCanvas: boolean;
     prevFrame(): void;
     nextFrame(): void;
     removeGlobalShape(shapeType: IShape['type']): void;

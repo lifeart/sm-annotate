@@ -1,4 +1,4 @@
-export type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover";
+export type PointerEventNames = "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "pointerover" | "pointerenter" | "pointerleave";
 export type KeyboardEventNames = "keydown";
 export type ButtonEventNames = "click";
 export type InputEventNames = "input" | "change";
