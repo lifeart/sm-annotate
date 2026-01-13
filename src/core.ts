@@ -315,7 +315,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.hideCanvas();
   }
   showControls() {
-    this.uiContainer.style.display = "block";
+    this.uiContainer.style.display = "";
   }
   hideControls() {
     this.uiContainer.style.display = "none";
