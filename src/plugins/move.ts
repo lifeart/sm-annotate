@@ -884,10 +884,10 @@ export class MoveToolPlugin
 
     // If shape has rotation, transform pointer coordinates by inverse rotation
     if (deserializedShape.rotation) {
-      // Use deserialized shape for bounds (canvas coordinates)
-      const bounds = this.getShapeBounds(deserializedShape);
+      // Pass original shape to getShapeBounds (it deserializes internally)
+      const bounds = this.getShapeBounds(shape);
       if (bounds) {
-        const center = this.getShapeRotationCenter(deserializedShape, bounds);
+        const center = this.getShapeRotationCenter(shape, bounds);
         // Apply inverse rotation to the pointer coordinates
         const cos = Math.cos(-deserializedShape.rotation);
         const sin = Math.sin(-deserializedShape.rotation);
