@@ -32,12 +32,32 @@ export class TextToolPlugin
   }
 
   draw(shape: IText) {
+    // Handle empty text
+    if (!shape.text) {
+      return;
+    }
+
     // support multiline text
     const lines = shape.text.split("\n");
     const fontSize = 16 + (shape.lineWidth ?? this.ctx.lineWidth) * 0.5;
     const lineHeight = fontSize * 1.25;
+
+    // Calculate text bounds for rotation center
+    this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+    const lineWidths = lines.map(line => this.ctx.measureText(line).width);
+    const textWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
+    const textHeight = lines.length * lineHeight;
+    const centerX = shape.x + textWidth / 2;
+    const centerY = shape.y - fontSize / 2 + textHeight / 2;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     for (let i = 0; i < lines.length; i++) {
       this.drawTextLine(shape.x, shape.y + i * lineHeight, lines[i], fontSize);
+    }
+
+    if (rotated) {
+      this.restoreRotation();
     }
   }
   drawText(x: number, y: number, text: string) {
@@ -230,13 +250,17 @@ export class TextToolPlugin
   }
 
   isPointerAtShape(shape: IText, x: number, y: number): boolean {
+    if (!shape.text) return false;
     const lines = shape.text.split("\n");
+    if (lines.length === 0) return false;
     const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
     const lineHeight = fontSize * 1.25;
     const textHeight = lines.length * lineHeight;
     // Set font to measure text width correctly
     this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
-    const textWidth = Math.max(...lines.map(line => this.ctx.measureText(line).width));
+    const lineWidths = lines.map(line => this.ctx.measureText(line).width);
+    const textWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
+    if (textWidth === 0) return false;
     return (
       x >= shape.x &&
       x <= shape.x + textWidth &&

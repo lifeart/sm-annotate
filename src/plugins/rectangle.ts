@@ -82,7 +82,16 @@ export class RectangleToolPlugin
     this.ctx.stroke();
   }
   draw(shape: IRectangle) {
+    const centerX = shape.x + shape.width / 2;
+    const centerY = shape.y + shape.height / 2;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawRectangle(shape.x, shape.y, shape.width, shape.height);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   isPointerAtShape(shape: IRectangle, x: number, y: number): boolean {
     const tolerance = 5;

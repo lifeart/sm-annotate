@@ -116,6 +116,38 @@ describe('CircleToolPlugin', () => {
     });
   });
 
+  describe('isPointerAtShape - invalid radius', () => {
+    const plugin = Object.create(CircleToolPlugin.prototype);
+
+    it('should return false for undefined radius', () => {
+      const shape = {
+        type: 'circle',
+        x: 100,
+        y: 100,
+        radius: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      } as unknown as ICircle;
+
+      expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(false);
+    });
+
+    it('should return false for negative radius', () => {
+      const shape: ICircle = {
+        type: 'circle',
+        x: 100,
+        y: 100,
+        radius: -50,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      };
+
+      expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(false);
+    });
+  });
+
   describe('drawing methods', () => {
     let plugin: CircleToolPlugin;
     let mockCtx: MockCanvasContext;
@@ -144,6 +176,42 @@ describe('CircleToolPlugin', () => {
         expect(mockCtx.beginPath).toHaveBeenCalled();
         expect(mockCtx.arc).toHaveBeenCalledWith(100, 100, 50, 0, 2 * Math.PI);
         expect(mockCtx.stroke).toHaveBeenCalled();
+      });
+
+      it('should not draw with undefined radius', () => {
+        const shape = {
+          type: 'circle',
+          x: 100,
+          y: 100,
+          radius: undefined,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        } as unknown as ICircle;
+
+        plugin.draw(shape);
+
+        expect(mockCtx.beginPath).not.toHaveBeenCalled();
+        expect(mockCtx.arc).not.toHaveBeenCalled();
+        expect(mockCtx.stroke).not.toHaveBeenCalled();
+      });
+
+      it('should not draw with negative radius', () => {
+        const shape: ICircle = {
+          type: 'circle',
+          x: 100,
+          y: 100,
+          radius: -50,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        };
+
+        plugin.draw(shape);
+
+        expect(mockCtx.beginPath).not.toHaveBeenCalled();
+        expect(mockCtx.arc).not.toHaveBeenCalled();
+        expect(mockCtx.stroke).not.toHaveBeenCalled();
       });
     });
 

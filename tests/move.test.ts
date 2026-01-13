@@ -276,6 +276,52 @@ describe('MoveToolPlugin', () => {
       expect(bounds!.x).toBe(100);
     });
 
+    it('should return null for text with empty text', () => {
+      const shape: IText = {
+        type: 'text',
+        x: 100,
+        y: 100,
+        text: '',
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      };
+
+      const bounds = plugin.getShapeBounds(shape);
+
+      expect(bounds).toBeNull();
+    });
+
+    it('should return null for text with undefined text', () => {
+      const shape = {
+        type: 'text',
+        x: 100,
+        y: 100,
+        text: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      } as unknown as IText;
+
+      const bounds = plugin.getShapeBounds(shape);
+
+      expect(bounds).toBeNull();
+    });
+
+    it('should return null for curve with undefined points', () => {
+      const shape = {
+        type: 'curve',
+        points: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      } as unknown as ICurve;
+
+      const bounds = plugin.getShapeBounds(shape);
+
+      expect(bounds).toBeNull();
+    });
+
     it('should return bounds for image', () => {
       const shape: IImage = {
         type: 'image',
@@ -1096,6 +1142,58 @@ describe('MoveToolPlugin', () => {
       plugin['resizeShape'](shape, 'se', 20, 30, plugin['resizeStartBounds']!);
 
       expect(shape.width).not.toBe(0.25);
+    });
+
+    it('should handle curve with empty points array during resize', () => {
+      const shape: ICurve = {
+        type: 'curve',
+        points: [],
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      };
+      mockAnnotationTool.shapes = [shape];
+      mockAnnotationTool.deserialize = vi.fn((shapes: IShape[]) =>
+        shapes.map((s) => {
+          if (s.type === 'curve') {
+            const curve = s as ICurve;
+            return { ...curve, points: curve.points?.map((p) => ({ x: p.x * 800, y: p.y * 600 })) || [] };
+          }
+          return s;
+        })
+      );
+      plugin.selectedShapeIndex = 0;
+      plugin['resizeOriginalShape'] = JSON.parse(JSON.stringify(shape));
+      plugin['resizeStartBounds'] = { x: 50, y: 50, width: 100, height: 50 };
+
+      // Should not throw
+      expect(() => plugin['resizeShape'](shape, 'se', 20, 10, plugin['resizeStartBounds']!)).not.toThrow();
+    });
+
+    it('should handle curve with undefined points during resize', () => {
+      const shape = {
+        type: 'curve',
+        points: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      } as unknown as ICurve;
+      mockAnnotationTool.shapes = [shape as IShape];
+      mockAnnotationTool.deserialize = vi.fn((shapes: IShape[]) =>
+        shapes.map((s) => {
+          if (s.type === 'curve') {
+            const curve = s as ICurve;
+            return { ...curve };
+          }
+          return s;
+        })
+      );
+      plugin.selectedShapeIndex = 0;
+      plugin['resizeOriginalShape'] = JSON.parse(JSON.stringify(shape));
+      plugin['resizeStartBounds'] = { x: 50, y: 50, width: 100, height: 50 };
+
+      // Should not throw
+      expect(() => plugin['resizeShape'](shape, 'se', 20, 10, plugin['resizeStartBounds']!)).not.toThrow();
     });
 
     it('should keep aspect ratio when shift is pressed', () => {

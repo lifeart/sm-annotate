@@ -6,6 +6,9 @@ export interface IShapeBase {
     fillStyle: string | CanvasPattern | CanvasGradient;
     lineWidth: number;
     opacity?: number;
+    rotation?: number;
+    rotationCenterX?: number;
+    rotationCenterY?: number;
 }
 export interface ToolPlugin<T extends IShapeBase> {
     name: IShapeBase["type"];
@@ -35,4 +38,28 @@ export declare class BasePlugin<T extends IShapeBase> {
     onActivate(): void;
     reset(): void;
     save(shape: T): void;
+    /**
+     * Apply rotation transform before drawing a shape.
+     * Must be paired with restoreRotation() after drawing.
+     * @param shape The shape being drawn
+     * @param centerX The rotation center X in canvas coordinates
+     * @param centerY The rotation center Y in canvas coordinates
+     * @returns true if rotation was applied (and restore is needed)
+     */
+    protected applyRotation(shape: T, centerX: number, centerY: number): boolean;
+    /**
+     * Restore canvas state after rotation. Only call if applyRotation returned true.
+     */
+    protected restoreRotation(): void;
+    /**
+     * Get the rotation center for a shape in canvas coordinates.
+     * Uses custom center if set, otherwise uses provided default center.
+     * @param shape The shape
+     * @param defaultCenterX Default center X in canvas coordinates
+     * @param defaultCenterY Default center Y in canvas coordinates
+     */
+    protected getRotationCenter(shape: T, defaultCenterX: number, defaultCenterY: number): {
+        x: number;
+        y: number;
+    };
 }

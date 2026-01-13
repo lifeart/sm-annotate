@@ -24,6 +24,11 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     private handleSize;
     private resizeStartBounds;
     private resizeOriginalShape;
+    private rotationActive;
+    private rotationStartAngle;
+    private rotationShapeStartAngle;
+    private centerDragActive;
+    private rotationHandleDistance;
     /**
      * Deep clone a shape, preserving HTMLImageElement references that JSON.stringify can't handle
      */
@@ -65,6 +70,26 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
      * Draw resize handles for the selected shape
      */
     drawResizeHandles(): void;
+    /**
+     * Get the rotation center for the selected shape in canvas coordinates
+     */
+    private getShapeRotationCenter;
+    /**
+     * Draw rotation handle and center point for the selected shape
+     */
+    private drawRotationHandles;
+    /**
+     * Check if pointer is at the rotation handle
+     */
+    private isPointerAtRotationHandle;
+    /**
+     * Check if pointer is at the rotation center
+     */
+    private isPointerAtRotationCenter;
+    /**
+     * Calculate angle from center to point
+     */
+    private calculateAngle;
     /**
      * Check if pointer is on a resize handle
      */

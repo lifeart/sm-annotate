@@ -74,9 +74,23 @@ export class CircleToolPlugin
     this.ctx.stroke();
   }
   draw(shape: ICircle) {
+    // Handle missing or invalid radius
+    if (shape.radius === undefined || shape.radius < 0) {
+      return;
+    }
+
+    // Circle center is already at x, y
+    const rotationCenter = this.getRotationCenter(shape, shape.x, shape.y);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawCircle(shape.x, shape.y, shape.radius);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   isPointerAtShape(shape: ICircle, x: number, y: number): boolean {
+    if (shape.radius === undefined || shape.radius < 0) return false;
     const dx = x - shape.x;
     const dy = y - shape.y;
     const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);

@@ -67,7 +67,27 @@ export class CurveToolPlugin
     };
   }
   draw(shape: ICurve) {
+    // Handle missing or empty points
+    if (!shape.points || shape.points.length === 0) {
+      return;
+    }
+
+    // Calculate centroid of all points for rotation center
+    let sumX = 0, sumY = 0;
+    for (const p of shape.points) {
+      sumX += p.x;
+      sumY += p.y;
+    }
+    const centerX = sumX / shape.points.length;
+    const centerY = sumY / shape.points.length;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawCurve(shape);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   reset(): void {
     super.reset();
@@ -185,8 +205,9 @@ export class CurveToolPlugin
     // zoomCtx.scale(this.zoomScale, this.zoomScale);
   }
   isPointerAtShape(shape: ICurve, x: number, y: number) {
+    if (!shape.points || shape.points.length === 0) return false;
     const threshold = Math.max((shape.lineWidth ?? this.ctx.lineWidth) / 2, 5);
-    
+
     for (let i = 0; i < shape.points.length - 1; i++) {
       const point = shape.points[i];
       const nextPoint = shape.points[i + 1];
