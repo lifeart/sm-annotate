@@ -349,6 +349,150 @@ function generateStyles(): string {
     [data-tooltip]:disabled::after {
       display: none;
     }
+
+    /* Mobile styles - larger touch targets */
+    @media (max-width: 960px) {
+      .${PREFIX}-container {
+        gap: 4px;
+        padding: 6px;
+        margin-top: 4px;
+        border-radius: 10px;
+      }
+
+      .${PREFIX}-player-controls {
+        gap: 4px;
+        padding: 6px;
+        margin-bottom: 4px;
+        border-radius: 10px;
+      }
+
+      .${PREFIX}-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+      }
+
+      .${PREFIX}-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .${PREFIX}-divider {
+        height: 28px;
+        margin: 0 6px;
+      }
+
+      .${PREFIX}-color-picker {
+        width: 44px;
+        height: 44px;
+        padding: 6px;
+        border-radius: 8px;
+      }
+
+      .${PREFIX}-slider {
+        width: 56px;
+        height: 36px;
+        font-size: 14px;
+        border-radius: 8px;
+      }
+
+      .${PREFIX}-fullscreen-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+      }
+
+      .${PREFIX}-fullscreen-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* Touch devices - hide tooltips */
+    @media (pointer: coarse) {
+      [data-tooltip]::before,
+      [data-tooltip]::after {
+        display: none;
+      }
+    }
+
+    /* Fullscreen mode with safe area support */
+    :fullscreen .${PREFIX}-container,
+    :-webkit-full-screen .${PREFIX}-container {
+      margin-top: max(8px, env(safe-area-inset-top, 8px));
+    }
+
+    :fullscreen .${PREFIX}-player-controls,
+    :-webkit-full-screen .${PREFIX}-player-controls {
+      margin-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    }
+
+    /* Mobile fullscreen - extra adjustments */
+    @media (max-width: 960px) {
+      :fullscreen .${PREFIX}-container,
+      :-webkit-full-screen .${PREFIX}-container {
+        margin-top: max(4px, env(safe-area-inset-top, 4px));
+        padding-left: max(6px, env(safe-area-inset-left, 6px));
+        padding-right: max(6px, env(safe-area-inset-right, 6px));
+      }
+
+      :fullscreen .${PREFIX}-player-controls,
+      :-webkit-full-screen .${PREFIX}-player-controls {
+        margin-bottom: max(4px, env(safe-area-inset-bottom, 4px));
+        padding-left: max(6px, env(safe-area-inset-left, 6px));
+        padding-right: max(6px, env(safe-area-inset-right, 6px));
+      }
+    }
+
+    /* Landscape orientation on mobile - compact mode */
+    @media (max-width: 960px) and (orientation: landscape) and (max-height: 500px) {
+      .${PREFIX}-container {
+        padding: 4px;
+        gap: 2px;
+      }
+
+      .${PREFIX}-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .${PREFIX}-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .${PREFIX}-divider {
+        height: 24px;
+        margin: 0 4px;
+      }
+
+      .${PREFIX}-color-picker {
+        width: 36px;
+        height: 36px;
+        padding: 4px;
+      }
+
+      .${PREFIX}-slider {
+        width: 48px;
+        height: 32px;
+        font-size: 12px;
+      }
+
+      .${PREFIX}-fullscreen-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .${PREFIX}-fullscreen-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .${PREFIX}-player-controls {
+        padding: 4px;
+        gap: 2px;
+      }
+    }
   `;
 }
 
