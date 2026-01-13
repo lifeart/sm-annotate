@@ -1,46 +1,29 @@
-import { describe, it, expect } from 'vitest';
-import { ILine, LineToolPlugin } from '../src/plugins/line';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { LineToolPlugin } from '../src/plugins/line';
+import { createPurePlugin, setupPluginTest, pointerAt, DrawingContext } from './helpers/minimal-mocks';
+import { createLine, createHorizontalLine, createDiagonalLine, createPointLine } from './helpers/shape-factories';
 
 describe('LineToolPlugin', () => {
+  // Pure functions - no mocks needed
   describe('normalize', () => {
+    const plugin = createPurePlugin(LineToolPlugin);
+
     it('should normalize line coordinates relative to canvas size', () => {
-      const plugin = Object.create(LineToolPlugin.prototype);
-
-      const shape: ILine = {
-        type: 'line',
-        x1: 100,
-        y1: 50,
-        x2: 300,
-        y2: 150,
-        strokeStyle: '#000',
-        fillStyle: '#fff',
-        lineWidth: 2,
-      };
-
+      const shape = createLine({ x1: 100, y1: 50, x2: 300, y2: 150 });
       const normalized = plugin.normalize(shape, 400, 200);
 
-      expect(normalized.x1).toBe(0.25); // 100 / 400
-      expect(normalized.y1).toBe(0.25); // 50 / 200
-      expect(normalized.x2).toBe(0.75); // 300 / 400
-      expect(normalized.y2).toBe(0.75); // 150 / 200
+      expect(normalized.x1).toBe(0.25);
+      expect(normalized.y1).toBe(0.25);
+      expect(normalized.x2).toBe(0.75);
+      expect(normalized.y2).toBe(0.75);
     });
   });
 
   describe('move', () => {
-    it('should move both line endpoints by delta values', () => {
-      const plugin = Object.create(LineToolPlugin.prototype);
+    const plugin = createPurePlugin(LineToolPlugin);
 
-      const shape: ILine = {
-        type: 'line',
-        x1: 100,
-        y1: 100,
-        x2: 200,
-        y2: 150,
-        strokeStyle: '#000',
-        fillStyle: '#fff',
-        lineWidth: 1,
-      };
-
+    it('should move both endpoints by delta values', () => {
+      const shape = createLine({ x1: 100, y1: 100, x2: 200, y2: 150 });
       const moved = plugin.move(shape, 50, -25);
 
       expect(moved.x1).toBe(150);
@@ -51,129 +34,176 @@ describe('LineToolPlugin', () => {
   });
 
   describe('isPointerAtShape', () => {
-    const plugin = Object.create(LineToolPlugin.prototype);
+    const plugin = createPurePlugin(LineToolPlugin);
 
-    const shape: ILine = {
-      type: 'line',
-      x1: 100,
-      y1: 100,
-      x2: 200,
-      y2: 100, // Horizontal line
-      strokeStyle: '#000',
-      fillStyle: '#fff',
-      lineWidth: 1,
-    };
+    describe('horizontal line', () => {
+      const shape = createHorizontalLine({ x1: 100, x2: 200, y1: 100 });
 
-    it('should return true when pointer is on the line', () => {
-      expect(plugin.isPointerAtShape(shape, 150, 100)).toBe(true);
+      it('returns true on the line', () => {
+        expect(plugin.isPointerAtShape(shape, 150, 100)).toBe(true);
+      });
+
+      it('returns true near the line (within tolerance)', () => {
+        expect(plugin.isPointerAtShape(shape, 150, 103)).toBe(true);
+      });
+
+      it('returns true at endpoints', () => {
+        expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(true);
+        expect(plugin.isPointerAtShape(shape, 200, 100)).toBe(true);
+      });
+
+      it('returns false far from line', () => {
+        expect(plugin.isPointerAtShape(shape, 150, 150)).toBe(false);
+      });
+
+      it('returns false beyond endpoints', () => {
+        expect(plugin.isPointerAtShape(shape, 50, 100)).toBe(false);
+        expect(plugin.isPointerAtShape(shape, 250, 100)).toBe(false);
+      });
     });
 
-    it('should return true when pointer is near the line (within tolerance)', () => {
-      expect(plugin.isPointerAtShape(shape, 150, 103)).toBe(true);
+    describe('diagonal line', () => {
+      const shape = createDiagonalLine();
+
+      it('returns true on diagonal', () => {
+        expect(plugin.isPointerAtShape(shape, 50, 50)).toBe(true);
+      });
+
+      it('returns true near diagonal', () => {
+        expect(plugin.isPointerAtShape(shape, 52, 50)).toBe(true);
+      });
+
+      it('returns false far from diagonal', () => {
+        expect(plugin.isPointerAtShape(shape, 20, 80)).toBe(false);
+      });
     });
 
-    it('should return true at start point', () => {
-      expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(true);
+    describe('zero-length line (point)', () => {
+      const shape = createPointLine(100, 100);
+
+      it('returns true at the point', () => {
+        expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(true);
+      });
+
+      it('returns true near the point', () => {
+        expect(plugin.isPointerAtShape(shape, 103, 100)).toBe(true);
+      });
+
+      it('returns false far from point', () => {
+        expect(plugin.isPointerAtShape(shape, 120, 100)).toBe(false);
+      });
     });
 
-    it('should return true at end point', () => {
-      expect(plugin.isPointerAtShape(shape, 200, 100)).toBe(true);
-    });
+    describe('lineWidth tolerance', () => {
+      it('thick lines have larger hit area', () => {
+        const thin = createHorizontalLine({ x1: 100, x2: 200, y1: 100, lineWidth: 2 });
+        const thick = createHorizontalLine({ x1: 100, x2: 200, y1: 100, lineWidth: 20 });
 
-    it('should return false when pointer is far from the line', () => {
-      expect(plugin.isPointerAtShape(shape, 150, 150)).toBe(false);
-    });
-
-    it('should return false when pointer is beyond line endpoints', () => {
-      expect(plugin.isPointerAtShape(shape, 50, 100)).toBe(false);
-      expect(plugin.isPointerAtShape(shape, 250, 100)).toBe(false);
-    });
-  });
-
-  describe('isPointerAtShape - diagonal line', () => {
-    const plugin = Object.create(LineToolPlugin.prototype);
-
-    const diagonalShape: ILine = {
-      type: 'line',
-      x1: 0,
-      y1: 0,
-      x2: 100,
-      y2: 100,
-      strokeStyle: '#000',
-      fillStyle: '#fff',
-      lineWidth: 1,
-    };
-
-    it('should return true when pointer is on diagonal line', () => {
-      expect(plugin.isPointerAtShape(diagonalShape, 50, 50)).toBe(true);
-    });
-
-    it('should return true when pointer is near diagonal line', () => {
-      expect(plugin.isPointerAtShape(diagonalShape, 52, 50)).toBe(true);
-    });
-
-    it('should return false when pointer is far from diagonal line', () => {
-      expect(plugin.isPointerAtShape(diagonalShape, 20, 80)).toBe(false);
-    });
-  });
-
-  describe('isPointerAtShape - lineWidth tolerance', () => {
-    const plugin = Object.create(LineToolPlugin.prototype);
-
-    it('should use shape lineWidth for tolerance calculation', () => {
-      const thinLine: ILine = {
-        type: 'line',
-        x1: 100,
-        y1: 100,
-        x2: 200,
-        y2: 100,
-        strokeStyle: '#000',
-        fillStyle: '#fff',
-        lineWidth: 2,
-      };
-
-      const thickLine: ILine = {
-        type: 'line',
-        x1: 100,
-        y1: 100,
-        x2: 200,
-        y2: 100,
-        strokeStyle: '#000',
-        fillStyle: '#fff',
-        lineWidth: 20,
-      };
-
-      // At y=108, thin line should not be detected (tolerance ~5)
-      expect(plugin.isPointerAtShape(thinLine, 150, 108)).toBe(false);
-      // At y=108, thick line should be detected (tolerance ~10)
-      expect(plugin.isPointerAtShape(thickLine, 150, 108)).toBe(true);
+        expect(plugin.isPointerAtShape(thin, 150, 108)).toBe(false);
+        expect(plugin.isPointerAtShape(thick, 150, 108)).toBe(true);
+      });
     });
   });
 
-  describe('isPointerAtShape - zero-length line', () => {
-    const plugin = Object.create(LineToolPlugin.prototype);
+  // Drawing tests - need minimal ctx mock
+  describe('drawing', () => {
+    let plugin: LineToolPlugin;
+    let ctx: DrawingContext;
 
-    const pointShape: ILine = {
-      type: 'line',
-      x1: 100,
-      y1: 100,
-      x2: 100,
-      y2: 100, // Zero-length (point)
-      strokeStyle: '#000',
-      fillStyle: '#fff',
-      lineWidth: 1,
-    };
-
-    it('should return true when pointer is at the point', () => {
-      expect(plugin.isPointerAtShape(pointShape, 100, 100)).toBe(true);
+    beforeEach(() => {
+      ({ plugin, ctx } = setupPluginTest(LineToolPlugin));
     });
 
-    it('should return true when pointer is near the point (within tolerance)', () => {
-      expect(plugin.isPointerAtShape(pointShape, 103, 100)).toBe(true);
+    it('draw() renders line shape', () => {
+      const shape = createLine({ x1: 10, y1: 20, x2: 100, y2: 80 });
+      plugin.draw(shape);
+
+      expect(ctx.beginPath).toHaveBeenCalled();
+      expect(ctx.moveTo).toHaveBeenCalledWith(10, 20);
+      expect(ctx.lineTo).toHaveBeenCalledWith(100, 80);
+      expect(ctx.stroke).toHaveBeenCalled();
     });
 
-    it('should return false when pointer is far from the point', () => {
-      expect(plugin.isPointerAtShape(pointShape, 120, 100)).toBe(false);
+    it('drawLine() renders with given parameters', () => {
+      plugin.drawLine(10, 20, 100, 80);
+
+      expect(ctx.beginPath).toHaveBeenCalled();
+      expect(ctx.moveTo).toHaveBeenCalledWith(10, 20);
+      expect(ctx.lineTo).toHaveBeenCalledWith(100, 80);
+      expect(ctx.stroke).toHaveBeenCalled();
+    });
+  });
+
+  // Pointer event tests
+  describe('pointer events', () => {
+    let plugin: LineToolPlugin;
+    let ctx: DrawingContext;
+    let tool: ReturnType<typeof setupPluginTest>['tool'];
+
+    beforeEach(() => {
+      ({ plugin, ctx, tool } = setupPluginTest(LineToolPlugin));
+    });
+
+    describe('onPointerDown', () => {
+      it('starts drawing at pointer position', () => {
+        plugin.onPointerDown(pointerAt(50, 75));
+
+        expect(plugin.startX).toBe(50);
+        expect(plugin.startY).toBe(75);
+        expect(plugin.isDrawing).toBe(true);
+      });
+    });
+
+    describe('onPointerMove', () => {
+      it('does nothing when not drawing', () => {
+        plugin.isDrawing = false;
+        plugin.onPointerMove(pointerAt(100, 100));
+
+        expect(ctx.beginPath).not.toHaveBeenCalled();
+      });
+
+      it('draws line when drawing', () => {
+        plugin.isDrawing = true;
+        plugin.startX = 10;
+        plugin.startY = 20;
+        plugin.onPointerMove(pointerAt(100, 80));
+
+        expect(ctx.moveTo).toHaveBeenCalledWith(10, 20);
+        expect(ctx.lineTo).toHaveBeenCalledWith(100, 80);
+        expect(ctx.stroke).toHaveBeenCalled();
+      });
+    });
+
+    describe('onPointerUp', () => {
+      it('does nothing when not drawing', () => {
+        plugin.isDrawing = false;
+        plugin.onPointerUp(pointerAt(100, 100));
+
+        expect(tool.addShape).not.toHaveBeenCalled();
+      });
+
+      it('saves line shape', () => {
+        plugin.isDrawing = true;
+        plugin.startX = 10;
+        plugin.startY = 20;
+        ctx.strokeStyle = '#ff0000';
+        ctx.fillStyle = '#00ff00';
+        ctx.lineWidth = 3;
+
+        plugin.onPointerUp(pointerAt(100, 80));
+
+        expect(tool.addShape).toHaveBeenCalledWith({
+          type: 'line',
+          x1: 10,
+          y1: 20,
+          x2: 100,
+          y2: 80,
+          strokeStyle: '#ff0000',
+          fillStyle: '#00ff00',
+          lineWidth: 3,
+        });
+        expect(plugin.isDrawing).toBe(false);
+      });
     });
   });
 });
