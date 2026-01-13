@@ -67,7 +67,26 @@ export class CurveToolPlugin
     };
   }
   draw(shape: ICurve) {
-    this.drawCurve(shape);
+    // Calculate centroid of all points for rotation center
+    if (shape.points.length > 0) {
+      let sumX = 0, sumY = 0;
+      for (const p of shape.points) {
+        sumX += p.x;
+        sumY += p.y;
+      }
+      const centerX = sumX / shape.points.length;
+      const centerY = sumY / shape.points.length;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
+      this.drawCurve(shape);
+
+      if (rotated) {
+        this.restoreRotation();
+      }
+    } else {
+      this.drawCurve(shape);
+    }
   }
   reset(): void {
     super.reset();

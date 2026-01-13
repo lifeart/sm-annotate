@@ -43,6 +43,12 @@ export class ImageToolPlugin
       console.error("Image is not an instance of HTMLImageElement");
       return;
     }
+
+    const centerX = shape.x + shape.width / 2;
+    const centerY = shape.y + shape.height / 2;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.ctx.drawImage(
       shape.image,
       shape.x,
@@ -50,6 +56,10 @@ export class ImageToolPlugin
       shape.width,
       shape.height
     );
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   isPointerAtShape(shape: IImage, x: number, y: number): boolean {
     // Normalize coordinates to handle negative width/height

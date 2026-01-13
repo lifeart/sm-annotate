@@ -31,7 +31,16 @@ export class ArrowToolPlugin
     return shape;
   }
   draw(shape: IArrow) {
+    const centerX = (shape.x1 + shape.x2) / 2;
+    const centerY = (shape.y1 + shape.y2) / 2;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawArrow(shape.x1, shape.y1, shape.x2, shape.y2, shape.lineWidth);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);

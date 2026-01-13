@@ -71,7 +71,16 @@ export class LineToolPlugin
     this.ctx.stroke();
   }
   draw(shape: ILine) {
+    const centerX = (shape.x1 + shape.x2) / 2;
+    const centerY = (shape.y1 + shape.y2) / 2;
+    const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawLine(shape.x1, shape.y1, shape.x2, shape.y2);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   isPointerAtShape(shape: ILine, x: number, y: number): boolean {
     const { x1, y1, x2, y2 } = shape;

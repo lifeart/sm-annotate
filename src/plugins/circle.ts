@@ -74,7 +74,15 @@ export class CircleToolPlugin
     this.ctx.stroke();
   }
   draw(shape: ICircle) {
+    // Circle center is already at x, y
+    const rotationCenter = this.getRotationCenter(shape, shape.x, shape.y);
+    const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+
     this.drawCircle(shape.x, shape.y, shape.radius);
+
+    if (rotated) {
+      this.restoreRotation();
+    }
   }
   isPointerAtShape(shape: ICircle, x: number, y: number): boolean {
     const dx = x - shape.x;

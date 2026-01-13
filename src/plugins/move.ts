@@ -42,6 +42,13 @@ export class MoveToolPlugin
   private resizeStartBounds: BoundingBox | null = null;
   private resizeOriginalShape: IShape | null = null;
 
+  // Rotation handle tracking
+  private rotationActive = false;
+  private rotationStartAngle = 0;
+  private rotationShapeStartAngle = 0;
+  private centerDragActive = false;
+  private rotationHandleDistance = 40; // Distance from center to rotation handle
+
   /**
    * Deep clone a shape, preserving HTMLImageElement references that JSON.stringify can't handle
    */
@@ -374,6 +381,136 @@ export class MoveToolPlugin
     }
 
     ctx.restore();
+
+    // Also draw rotation handles
+    this.drawRotationHandles(bounds);
+  }
+
+  /**
+   * Get the rotation center for the selected shape in canvas coordinates
+   */
+  private getShapeRotationCenter(shape: IShape, bounds: BoundingBox): { x: number; y: number } {
+    if (shape.rotationCenterX !== undefined && shape.rotationCenterY !== undefined) {
+      return {
+        x: shape.rotationCenterX * this.annotationTool.canvasWidth,
+        y: shape.rotationCenterY * this.annotationTool.canvasHeight,
+      };
+    }
+    // Default to shape center
+    return {
+      x: bounds.x + bounds.width / 2,
+      y: bounds.y + bounds.height / 2,
+    };
+  }
+
+  /**
+   * Draw rotation handle and center point for the selected shape
+   */
+  private drawRotationHandles(bounds: BoundingBox): void {
+    const shape = this.getSelectedShape();
+    if (!shape) return;
+
+    const ctx = this.annotationTool.ctx;
+    const center = this.getShapeRotationCenter(shape, bounds);
+
+    // Calculate rotation handle position (above center, accounting for current rotation)
+    const rotation = shape.rotation ?? 0;
+    const handleX = center.x + Math.sin(rotation) * this.rotationHandleDistance;
+    const handleY = center.y - Math.cos(rotation) * this.rotationHandleDistance;
+
+    ctx.save();
+
+    // Draw line from center to rotation handle
+    ctx.beginPath();
+    ctx.strokeStyle = '#5b9fff';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    ctx.moveTo(center.x, center.y);
+    ctx.lineTo(handleX, handleY);
+    ctx.stroke();
+
+    // Draw rotation center crosshair
+    const crossSize = 6;
+    ctx.beginPath();
+    ctx.strokeStyle = '#5b9fff';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(center.x - crossSize, center.y);
+    ctx.lineTo(center.x + crossSize, center.y);
+    ctx.moveTo(center.x, center.y - crossSize);
+    ctx.lineTo(center.x, center.y + crossSize);
+    ctx.stroke();
+
+    // Draw center circle
+    ctx.beginPath();
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#5b9fff';
+    ctx.lineWidth = 1.5;
+    ctx.arc(center.x, center.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw rotation handle (circle)
+    ctx.beginPath();
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#5b9fff';
+    ctx.lineWidth = 1.5;
+    ctx.arc(handleX, handleY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw rotation icon inside handle
+    ctx.beginPath();
+    ctx.strokeStyle = '#5b9fff';
+    ctx.lineWidth = 1;
+    ctx.arc(handleX, handleY, 3, -Math.PI * 0.7, Math.PI * 0.5);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  /**
+   * Check if pointer is at the rotation handle
+   */
+  private isPointerAtRotationHandle(x: number, y: number): boolean {
+    const shape = this.getSelectedShape();
+    if (!shape) return false;
+
+    const bounds = this.getShapeBounds(shape);
+    if (!bounds) return false;
+
+    const center = this.getShapeRotationCenter(shape, bounds);
+    const rotation = shape.rotation ?? 0;
+    const handleX = center.x + Math.sin(rotation) * this.rotationHandleDistance;
+    const handleY = center.y - Math.cos(rotation) * this.rotationHandleDistance;
+
+    const dx = x - handleX;
+    const dy = y - handleY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance <= 12; // Larger hit area than visual size
+  }
+
+  /**
+   * Check if pointer is at the rotation center
+   */
+  private isPointerAtRotationCenter(x: number, y: number): boolean {
+    const shape = this.getSelectedShape();
+    if (!shape) return false;
+
+    const bounds = this.getShapeBounds(shape);
+    if (!bounds) return false;
+
+    const center = this.getShapeRotationCenter(shape, bounds);
+    const dx = x - center.x;
+    const dy = y - center.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance <= 10; // Hit area for center
+  }
+
+  /**
+   * Calculate angle from center to point
+   */
+  private calculateAngle(centerX: number, centerY: number, x: number, y: number): number {
+    return Math.atan2(x - centerX, -(y - centerY));
   }
 
   /**
@@ -653,7 +790,38 @@ export class MoveToolPlugin
   onPointerDown(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
 
-    // Check if clicking on a resize handle first
+    // Check rotation handle first (highest priority)
+    if (this.selectedShapeIndex >= 0 && this.isPointerAtRotationHandle(x, y)) {
+      const shape = this.getSelectedShape();
+      if (shape) {
+        const bounds = this.getShapeBounds(shape);
+        if (bounds) {
+          const center = this.getShapeRotationCenter(shape, bounds);
+          this.rotationActive = true;
+          this.rotationStartAngle = this.calculateAngle(center.x, center.y, x, y);
+          this.rotationShapeStartAngle = shape.rotation ?? 0;
+          this.isDrawing = true;
+          // Save for undo
+          this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+          this.annotationTool.canvas.style.cursor = 'grabbing';
+          return;
+        }
+      }
+    }
+
+    // Check rotation center drag
+    if (this.selectedShapeIndex >= 0 && this.isPointerAtRotationCenter(x, y)) {
+      this.centerDragActive = true;
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+      // Save for undo
+      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.annotationTool.canvas.style.cursor = 'move';
+      return;
+    }
+
+    // Check if clicking on a resize handle
     const handle = this.getHandleAtPosition(x, y);
     if (handle && this.selectedShapeIndex >= 0) {
       this.activeHandle = handle;
@@ -711,6 +879,22 @@ export class MoveToolPlugin
 
   isPointerAtShape(shape: IShape, x: number, y: number): boolean {
     const deserializedShape = this.annotationTool.deserialize([shape])[0];
+
+    // If shape has rotation, transform pointer coordinates by inverse rotation
+    if (deserializedShape.rotation) {
+      const bounds = this.getShapeBounds(shape);
+      if (bounds) {
+        const center = this.getShapeRotationCenter(deserializedShape, bounds);
+        // Apply inverse rotation to the pointer coordinates
+        const cos = Math.cos(-deserializedShape.rotation);
+        const sin = Math.sin(-deserializedShape.rotation);
+        const dx = x - center.x;
+        const dy = y - center.y;
+        x = center.x + dx * cos - dy * sin;
+        y = center.y + dx * sin + dy * cos;
+      }
+    }
+
     const plugin = this.annotationTool.pluginForTool(deserializedShape.type);
     return plugin.isPointerAtShape(deserializedShape, x, y);
   }
@@ -752,6 +936,41 @@ export class MoveToolPlugin
   onPointerMove(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);
 
+    // Handle rotation dragging
+    if (this.isDrawing && this.rotationActive) {
+      const shape = this.annotationTool.shapes[this.selectedShapeIndex];
+      if (shape) {
+        const bounds = this.getShapeBounds(shape);
+        if (bounds) {
+          const center = this.getShapeRotationCenter(shape, bounds);
+          const currentAngle = this.calculateAngle(center.x, center.y, x, y);
+          let newRotation = this.rotationShapeStartAngle + (currentAngle - this.rotationStartAngle);
+
+          // Snap to 15 degree increments if shift is held
+          if (event.shiftKey) {
+            const snapAngle = Math.PI / 12; // 15 degrees
+            newRotation = Math.round(newRotation / snapAngle) * snapAngle;
+          }
+
+          shape.rotation = newRotation;
+          this.annotationTool.redrawFullCanvas();
+        }
+      }
+      return;
+    }
+
+    // Handle center dragging
+    if (this.isDrawing && this.centerDragActive) {
+      const shape = this.annotationTool.shapes[this.selectedShapeIndex];
+      if (shape) {
+        // Set custom rotation center (normalized)
+        shape.rotationCenterX = x / this.annotationTool.canvasWidth;
+        shape.rotationCenterY = y / this.annotationTool.canvasHeight;
+        this.annotationTool.redrawFullCanvas();
+      }
+      return;
+    }
+
     // Handle resize dragging
     if (this.isDrawing && this.activeHandle && this.resizeStartBounds) {
       const dx = x - this.startX;
@@ -767,6 +986,17 @@ export class MoveToolPlugin
 
     // Update cursor when hovering over handles
     if (!this.isDrawing && this.selectedShapeIndex >= 0) {
+      // Check rotation handle first
+      if (this.isPointerAtRotationHandle(x, y)) {
+        this.annotationTool.canvas.style.cursor = 'grab';
+        return;
+      }
+      // Check rotation center
+      if (this.isPointerAtRotationCenter(x, y)) {
+        this.annotationTool.canvas.style.cursor = 'move';
+        return;
+      }
+      // Check resize handles
       const handle = this.getHandleAtPosition(x, y);
       if (handle) {
         this.annotationTool.canvas.style.cursor = this.getCursorForHandle(handle);
@@ -833,6 +1063,24 @@ export class MoveToolPlugin
     }
   }
   onPointerUp(event: PointerEvent) {
+    // Handle rotation completion
+    if (this.rotationActive) {
+      this.rotationActive = false;
+      this.isDrawing = false;
+      this.annotationTool.canvas.style.cursor = 'default';
+      this.annotationTool.redrawFullCanvas();
+      return;
+    }
+
+    // Handle center drag completion
+    if (this.centerDragActive) {
+      this.centerDragActive = false;
+      this.isDrawing = false;
+      this.annotationTool.canvas.style.cursor = 'default';
+      this.annotationTool.redrawFullCanvas();
+      return;
+    }
+
     // Handle resize completion
     if (this.activeHandle) {
       this.activeHandle = null;
@@ -879,6 +1127,8 @@ export class MoveToolPlugin
     this.activeHandle = null;
     this.resizeStartBounds = null;
     this.resizeOriginalShape = null;
+    this.rotationActive = false;
+    this.centerDragActive = false;
     this.annotationTool.canvas.style.cursor = 'default';
   }
   save(shape: IShape) {
