@@ -10,6 +10,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🛠️ Multiple drawing tools (curve, rectangle, circle, line, arrow, text, eraser)
 * 🔲 Selection tool for cropping video frames
 * ↔️ Move tool for repositioning and resizing shapes
+* 🔄 Rotation support for all shapes with adjustable center point
 * 📐 Visual resize handles for precise shape scaling
 * 📋 Duplicate shapes (Ctrl/Cmd + D)
 * 📑 Copy annotations to adjacent frames (Ctrl/Cmd + Shift + Arrow)
@@ -129,6 +130,7 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | `Ctrl/Cmd + Shift + ←` | Copy all annotations to previous frame |
 | `Backspace` / `Delete` | Delete selected shape |
 | `Shift` + drag handle | Resize while keeping aspect ratio |
+| `Shift` + drag rotation handle | Snap rotation to 15° increments |
 
 ### Curve Tool
 
@@ -161,7 +163,7 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Curve | Freehand drawing |
 | Text | Add text annotations |
 | Eraser | Remove annotations |
-| Move | Reposition shapes with drag, resize with corner/edge handles, duplicate with Ctrl+D |
+| Move | Reposition, resize, and rotate shapes; drag rotation handle to rotate, drag center point to change rotation pivot |
 | Selection | Crop and capture video frame area |
 | Compare | Split-view video comparison |
 | Opacity | Adjust overlay or selected shape opacity (off/25%/50%/70%/100%) |
