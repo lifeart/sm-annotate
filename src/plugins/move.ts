@@ -43,6 +43,17 @@ export class MoveToolPlugin
   private resizeOriginalShape: IShape | null = null;
 
   /**
+   * Deep clone a shape, preserving HTMLImageElement references that JSON.stringify can't handle
+   */
+  private cloneShape(shape: IShape): IShape {
+    if (shape.type === 'image') {
+      const imgShape = shape as IImage;
+      return { ...JSON.parse(JSON.stringify(shape)), image: imgShape.image };
+    }
+    return JSON.parse(JSON.stringify(shape));
+  }
+
+  /**
    * Get the currently selected shape, if any
    */
   getSelectedShape(): IShape | null {
@@ -127,7 +138,7 @@ export class MoveToolPlugin
     if (!shape) return;
 
     // Deep clone the shape
-    const clonedShape = JSON.parse(JSON.stringify(shape)) as IShape;
+    const clonedShape = this.cloneShape(shape);
 
     // Offset the clone
     const offset = 20;
@@ -163,7 +174,7 @@ export class MoveToolPlugin
     const existingShapes = this.annotationTool.timeStack.get(nextFrame) || [];
 
     // Clone current shapes
-    const clonedShapes = this.annotationTool.shapes.map(s => JSON.parse(JSON.stringify(s)) as IShape);
+    const clonedShapes = this.annotationTool.shapes.map(s => this.cloneShape(s));
 
     // Merge with existing (append)
     const mergedShapes = [...existingShapes, ...clonedShapes];
@@ -190,7 +201,7 @@ export class MoveToolPlugin
     const existingShapes = this.annotationTool.timeStack.get(prevFrame) || [];
 
     // Clone current shapes
-    const clonedShapes = this.annotationTool.shapes.map(s => JSON.parse(JSON.stringify(s)) as IShape);
+    const clonedShapes = this.annotationTool.shapes.map(s => this.cloneShape(s));
 
     // Merge with existing (append)
     const mergedShapes = [...existingShapes, ...clonedShapes];
@@ -653,7 +664,7 @@ export class MoveToolPlugin
       if (selectedShape) {
         this.resizeStartBounds = this.getShapeBounds(selectedShape);
         // Store deep copy of original shape for resize calculations
-        this.resizeOriginalShape = JSON.parse(JSON.stringify(selectedShape));
+        this.resizeOriginalShape = this.cloneShape(selectedShape);
         // Save for undo
         this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
       }
@@ -667,13 +678,7 @@ export class MoveToolPlugin
     for (const shape of shapes) {
       if (this.isPointerAtShape(shape, x, y)) {
         // Deep clone to preserve original styles
-        // For image shapes, preserve the image reference since JSON.stringify can't serialize HTMLImageElement
-        if (shape.type === 'image') {
-          const imgShape = shape as IImage;
-          this.shape = { ...JSON.parse(JSON.stringify(shape)), image: imgShape.image };
-        } else {
-          this.shape = JSON.parse(JSON.stringify(shape));
-        }
+        this.shape = this.cloneShape(shape);
         this.shapeIndex = originalShapes.indexOf(shape);
         this.selectedShapeIndex = this.shapeIndex;
         foundShape = true;

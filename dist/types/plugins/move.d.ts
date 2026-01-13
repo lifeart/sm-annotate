@@ -25,6 +25,10 @@ export declare class MoveToolPlugin extends BasePlugin<IMove> implements ToolPlu
     private resizeStartBounds;
     private resizeOriginalShape;
     /**
+     * Deep clone a shape, preserving HTMLImageElement references that JSON.stringify can't handle
+     */
+    private cloneShape;
+    /**
      * Get the currently selected shape, if any
      */
     getSelectedShape(): IShape | null;
