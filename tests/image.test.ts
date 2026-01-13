@@ -183,6 +183,46 @@ describe('ImageToolPlugin', () => {
 
         consoleSpy.mockRestore();
       });
+
+      it('should not draw with zero width', () => {
+        const mockImage = document.createElement('img');
+
+        const shape: IImage = {
+          type: 'image',
+          x: 100,
+          y: 100,
+          width: 0,
+          height: 150,
+          image: mockImage,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        };
+
+        plugin.draw(shape);
+
+        expect(mockCtx.drawImage).not.toHaveBeenCalled();
+      });
+
+      it('should not draw with zero height', () => {
+        const mockImage = document.createElement('img');
+
+        const shape: IImage = {
+          type: 'image',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 0,
+          image: mockImage,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        };
+
+        plugin.draw(shape);
+
+        expect(mockCtx.drawImage).not.toHaveBeenCalled();
+      });
     });
 
     describe('onPointerDown', () => {

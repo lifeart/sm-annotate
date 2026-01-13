@@ -138,6 +138,34 @@ describe('TextToolPlugin', () => {
       expect(plugin.isPointerAtShape(thinText, 150, 80)).toBe(false);
       expect(plugin.isPointerAtShape(thickText, 150, 80)).toBe(true);
     });
+
+    it('should return false for empty text', () => {
+      const shape: IText = {
+        type: 'text',
+        x: 100,
+        y: 100,
+        text: '',
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      };
+
+      expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(false);
+    });
+
+    it('should return false for undefined text', () => {
+      const shape = {
+        type: 'text',
+        x: 100,
+        y: 100,
+        text: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 1,
+      } as unknown as IText;
+
+      expect(plugin.isPointerAtShape(shape, 100, 100)).toBe(false);
+    });
   });
 
   describe('drawing methods', () => {
@@ -187,6 +215,38 @@ describe('TextToolPlugin', () => {
         expect(mockCtx.fillText).toHaveBeenNthCalledWith(1, 'Line 1', 100, 100);
         expect(mockCtx.fillText).toHaveBeenNthCalledWith(2, 'Line 2', 100, 121.25);
         expect(mockCtx.fillText).toHaveBeenNthCalledWith(3, 'Line 3', 100, 142.5);
+      });
+
+      it('should not draw empty text', () => {
+        const shape: IText = {
+          type: 'text',
+          x: 100,
+          y: 100,
+          text: '',
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        };
+
+        plugin.draw(shape);
+
+        expect(mockCtx.fillText).not.toHaveBeenCalled();
+      });
+
+      it('should not draw undefined text', () => {
+        const shape = {
+          type: 'text',
+          x: 100,
+          y: 100,
+          text: undefined,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        } as unknown as IText;
+
+        plugin.draw(shape);
+
+        expect(mockCtx.fillText).not.toHaveBeenCalled();
       });
     });
 

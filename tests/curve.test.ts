@@ -142,6 +142,30 @@ describe('CurveToolPlugin', () => {
       // At y=8, thick curve should be detected (tolerance ~10)
       expect(plugin.isPointerAtShape(thickCurve, 50, 8)).toBe(true);
     });
+
+    it('should return false for empty points array', () => {
+      const shape: ICurve = {
+        type: 'curve',
+        points: [],
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      };
+
+      expect(plugin.isPointerAtShape(shape, 50, 50)).toBe(false);
+    });
+
+    it('should return false for undefined points', () => {
+      const shape = {
+        type: 'curve',
+        points: undefined,
+        strokeStyle: '#000',
+        fillStyle: '#fff',
+        lineWidth: 2,
+      } as unknown as ICurve;
+
+      expect(plugin.isPointerAtShape(shape, 50, 50)).toBe(false);
+    });
   });
 
   describe('drawing methods', () => {
@@ -176,6 +200,36 @@ describe('CurveToolPlugin', () => {
         expect(mockCtx.moveTo).toHaveBeenCalledWith(0, 0);
         expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
         expect(mockCtx.stroke).toHaveBeenCalled();
+      });
+
+      it('should not draw with empty points array', () => {
+        const shape: ICurve = {
+          type: 'curve',
+          points: [],
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        };
+
+        plugin.draw(shape);
+
+        expect(mockCtx.beginPath).not.toHaveBeenCalled();
+        expect(mockCtx.stroke).not.toHaveBeenCalled();
+      });
+
+      it('should not draw with undefined points', () => {
+        const shape = {
+          type: 'curve',
+          points: undefined,
+          strokeStyle: '#000',
+          fillStyle: '#fff',
+          lineWidth: 2,
+        } as unknown as ICurve;
+
+        plugin.draw(shape);
+
+        expect(mockCtx.beginPath).not.toHaveBeenCalled();
+        expect(mockCtx.stroke).not.toHaveBeenCalled();
       });
     });
 

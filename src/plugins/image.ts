@@ -44,6 +44,11 @@ export class ImageToolPlugin
       return;
     }
 
+    // Handle invalid dimensions
+    if (shape.width === 0 || shape.height === 0) {
+      return;
+    }
+
     const centerX = shape.x + shape.width / 2;
     const centerY = shape.y + shape.height / 2;
     const rotationCenter = this.getRotationCenter(shape, centerX, centerY);

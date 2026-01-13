@@ -320,6 +320,7 @@ export class MoveToolPlugin
       }
       case 'text': {
         const t = shape as IText;
+        if (!t.text) return null;
         const lineWidth = rawShape.lineWidth ?? 1;
         const fontSize = 16 + lineWidth * 0.5;
         const estimatedWidth = t.text.length * fontSize * 0.6;
@@ -738,6 +739,7 @@ export class MoveToolPlugin
       case 'curve': {
         const curveShape = shape as ICurve;
         const origCurve = deserialized as ICurve;
+        if (!origCurve.points || origCurve.points.length === 0) break;
         curveShape.points = origCurve.points.map(p => ({
           x: ((p.x - startBounds.x) * scaleX + newX) / this.annotationTool.canvasWidth,
           y: ((p.y - startBounds.y) * scaleY + newY) / this.annotationTool.canvasHeight
@@ -882,7 +884,8 @@ export class MoveToolPlugin
 
     // If shape has rotation, transform pointer coordinates by inverse rotation
     if (deserializedShape.rotation) {
-      const bounds = this.getShapeBounds(shape);
+      // Use deserialized shape for bounds (canvas coordinates)
+      const bounds = this.getShapeBounds(deserializedShape);
       if (bounds) {
         const center = this.getShapeRotationCenter(deserializedShape, bounds);
         // Apply inverse rotation to the pointer coordinates
