@@ -667,7 +667,13 @@ export class MoveToolPlugin
     for (const shape of shapes) {
       if (this.isPointerAtShape(shape, x, y)) {
         // Deep clone to preserve original styles
-        this.shape = JSON.parse(JSON.stringify(shape));
+        // For image shapes, preserve the image reference since JSON.stringify can't serialize HTMLImageElement
+        if (shape.type === 'image') {
+          const imgShape = shape as IImage;
+          this.shape = { ...JSON.parse(JSON.stringify(shape)), image: imgShape.image };
+        } else {
+          this.shape = JSON.parse(JSON.stringify(shape));
+        }
         this.shapeIndex = originalShapes.indexOf(shape);
         this.selectedShapeIndex = this.shapeIndex;
         foundShape = true;
