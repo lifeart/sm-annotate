@@ -205,9 +205,12 @@ async function initAnnotator() {
     }
     const file = rvFileInput.files[0];
     try {
+      // Use actual video dimensions for correct aspect ratio conversion
+      const videoWidth = video.videoWidth || tool.canvasWidth || 1920;
+      const videoHeight = video.videoHeight || tool.canvasHeight || 1080;
       const result = await parseOpenRVFile(file, {
-        width: tool.canvasWidth || 1920,
-        height: tool.canvasHeight || 1080,
+        width: videoWidth,
+        height: videoHeight,
         fps: tool.fps,
       });
 
@@ -217,13 +220,17 @@ async function initAnnotator() {
       } else {
         tool.appendFrames(result.frames);
       }
+
+      // Sync activeTimeFrame with current video position before redrawing
+      tool.updateActiveTimeFrame();
       tool.redrawFullCanvas();
+
+      // Log loaded annotations info
+      const annotatedFrames = result.frames.map(f => f.frame);
+      console.log(`Loaded ${result.frames.length} annotated frames:`, annotatedFrames);
 
       if (result.mediaPath) {
         console.log("OpenRV media path:", result.mediaPath);
-      }
-      if (result.sessionName) {
-        console.log("OpenRV session:", result.sessionName);
       }
     } catch (err) {
       console.error("Failed to parse OpenRV file:", err);

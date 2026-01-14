@@ -1173,7 +1173,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   loadAllFrames(frames: FrameAnnotationV1[]) {
     this.cleanFrameStacks();
     frames.forEach((frame) => {
-      this.timeStack.set(frame.frame, frame.shapes);
+      // Use parseShapes/stringifyShapes to create deep copy and handle special types (like images)
+      this.timeStack.set(frame.frame, this.parseShapes(this.stringifyShapes(frame.shapes)));
     });
   }
 
