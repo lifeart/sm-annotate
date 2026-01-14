@@ -568,6 +568,15 @@ function generateStyles(): string {
         padding: 6px;
         margin-top: 4px;
         border-radius: 10px;
+        max-width: calc(100vw - 16px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .${PREFIX}-container::-webkit-scrollbar {
+        display: none;
       }
 
       .${PREFIX}-player-controls {
@@ -575,6 +584,15 @@ function generateStyles(): string {
         padding: 6px;
         margin-bottom: 4px;
         border-radius: 10px;
+        max-width: calc(100vw - 16px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .${PREFIX}-player-controls::-webkit-scrollbar {
+        display: none;
       }
 
       .${PREFIX}-btn {

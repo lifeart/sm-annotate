@@ -694,7 +694,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     // Get the container dimensions
     const container = video.parentElement;
-    const isFullscreen = !!document.fullscreenElement;
+    const isFullscreen = !!(document.fullscreenElement ?? (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement);
     let width = Math.min(rawWidth, video.videoWidth);
     let height = Math.floor(width / trueAspectRatio);
 
