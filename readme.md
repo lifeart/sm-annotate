@@ -28,6 +28,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🖼️ Paste images from clipboard
 * 🌓 Dark/Light theme toggle
 * 💡 Tooltips on all toolbar buttons
+* 📦 OpenRV format import/export (.rv files for professional video review)
 
 ## Additional Benefits
 
@@ -35,7 +36,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Test coverage with Vitest
+* 🧪 Comprehensive test coverage (440+ tests with Vitest)
 
 ## Getting Started
 
@@ -94,6 +95,69 @@ annotationTool.overlayOpacity = 0.7;
 // Shapes can have individual opacity (0 to 1)
 // Use the opacity button when a shape is selected in move tool
 ```
+
+### OpenRV Format Support
+
+Export and import annotations in [OpenRV](https://github.com/AcademySoftwareFoundation/OpenRV) .rv format (GTO text format):
+
+```javascript
+import {
+  exportToOpenRV,
+  downloadAsOpenRV,
+  parseOpenRV,
+  parseOpenRVFile
+} from '@lifeart/sm-annotate';
+
+// Export annotations to OpenRV format
+const rvContent = exportToOpenRV(annotationTool.saveAllFrames(), {
+  mediaPath: '/path/to/video.mp4',
+  width: 1920,
+  height: 1080,
+  sessionName: 'my-session', // optional
+});
+
+// Download as .rv file
+downloadAsOpenRV(annotationTool.saveAllFrames(), {
+  mediaPath: '/path/to/video.mp4',
+  width: 1920,
+  height: 1080,
+}, 'annotations.rv');
+
+// Parse OpenRV file content
+const result = parseOpenRV(rvFileContent, {
+  width: 1920,  // optional, defaults to file dimensions or 1920
+  height: 1080, // optional, defaults to file dimensions or 1080
+  fps: 25,      // optional, defaults to 25
+});
+
+// Load parsed annotations
+annotationTool.loadAllFrames(result.frames);
+
+// Access parsed metadata
+console.log(result.mediaPath);    // original media path
+console.log(result.dimensions);   // { width, height }
+console.log(result.sessionName);  // session name
+
+// Parse from File object (e.g., from file input)
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const result = await parseOpenRVFile(file, { fps: 30 });
+  annotationTool.loadAllFrames(result.frames);
+});
+```
+
+**Supported shapes for OpenRV export:**
+- Curves (freehand drawings) → pen strokes
+- Lines → pen strokes (2-point)
+- Arrows → pen strokes (3 components: line + arrowhead)
+- Rectangles → pen strokes (closed 5-point path)
+- Circles → pen strokes (approximated as 33-point polygon)
+- Text → text annotations
+
+**Rotation support:** Shapes with rotation are fully supported. The rotation is "baked in" to the exported coordinates, including support for custom rotation centers. Text rotation only affects the anchor position since OpenRV text doesn't natively support rotation.
+
+**Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported.
 
 ### Frame Navigation
 
