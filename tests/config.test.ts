@@ -21,6 +21,7 @@ describe('config', () => {
     it('should have toolbar settings by default', () => {
       expect(defaultConfig.toolbar.draggable).toBe(false);
       expect(defaultConfig.toolbar.sidebarPosition).toBe('left');
+      expect(defaultConfig.toolbar.defaultTool).toBe('curve');
     });
 
     it('should have all features enabled by default', () => {
@@ -70,6 +71,24 @@ describe('config', () => {
 
       expect(result.toolbar.draggable).toBe(true);
       expect(result.toolbar.sidebarPosition).toBe('left'); // default preserved
+      expect(result.toolbar.defaultTool).toBe('curve'); // default preserved
+    });
+
+    it('should allow overriding defaultTool to null', () => {
+      const result = mergeConfig({
+        toolbar: { defaultTool: null },
+      } as Partial<SmAnnotateConfig>);
+
+      expect(result.toolbar.defaultTool).toBe(null);
+      expect(result.toolbar.draggable).toBe(false); // default preserved
+    });
+
+    it('should allow overriding defaultTool to different tool', () => {
+      const result = mergeConfig({
+        toolbar: { defaultTool: 'rectangle' },
+      } as Partial<SmAnnotateConfig>);
+
+      expect(result.toolbar.defaultTool).toBe('rectangle');
     });
 
     it('should merge features settings partially', () => {
@@ -96,6 +115,7 @@ describe('config', () => {
           draggable: true,
           sidebarPosition: 'right',
           position: { x: 100, y: 50 },
+          defaultTool: 'curve',
         },
         features: {
           showThemeToggle: false,

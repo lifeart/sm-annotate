@@ -40,7 +40,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Comprehensive test coverage (619 tests with Vitest)
+* 🧪 Comprehensive test coverage (629 tests with Vitest)
 
 ## Getting Started
 
@@ -129,6 +129,7 @@ const annotationTool = new SmAnnotate(video, {
     sidebarPosition: 'left',    // For vertical layout: 'left' | 'right'
     draggable: false,           // For minimal layout: allow dragging
     position: { x: 10, y: 10 }, // For minimal layout: initial position
+    defaultTool: 'curve',       // Default selected tool (null = none)
   },
 
   // Feature visibility

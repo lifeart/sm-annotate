@@ -19,6 +19,7 @@
  * ```
  */
 import type { Theme } from "./ui/theme";
+import type { Tool } from "./plugins";
 /**
  * Layout modes for the annotation toolbar.
  *
@@ -58,6 +59,8 @@ export interface ToolbarConfig {
     draggable?: boolean;
     /** Sidebar position for vertical layout */
     sidebarPosition?: 'left' | 'right';
+    /** Default selected tool on init (null = no tool selected) */
+    defaultTool?: Tool | null;
 }
 /**
  * Feature visibility flags

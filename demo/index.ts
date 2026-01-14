@@ -57,7 +57,9 @@ async function initAnnotator() {
 
   const bl = new Blob([blob], { type: "video/mp4" });
 
-  const tool = new SmAnnotate(video);
+  const tool = new SmAnnotate(video, {
+    toolbar: { defaultTool: null },
+  });
 
   await tool.setVideoBlob(bl, 30);
 
@@ -155,6 +157,7 @@ async function initAnnotator() {
       .then((response) => response.json())
       .then((data) => {
         tool.loadAllFrames(data);
+        tool.updateActiveTimeFrame();
         tool.redrawFullCanvas();
       });
   });
@@ -177,6 +180,7 @@ async function initAnnotator() {
         tool.appendFrames(dataObj);
       }
 
+      tool.updateActiveTimeFrame();
       tool.redrawFullCanvas();
     };
     reader.readAsText(file);

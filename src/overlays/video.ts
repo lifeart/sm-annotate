@@ -15,9 +15,9 @@ export function addVideoOverlay(this: AnnotationTool) {
   const offsetX = videoRect.left - canvasRect.left;
   const offsetY = videoRect.top - canvasRect.top;
 
-  const frameNumber = this.videoFrameBuffer?.frameNumberFromTime(
-    node.currentTime
-  );
+  // Always use activeTimeFrame to ensure video frame and shapes stay in sync
+  // activeTimeFrame is set via updateActiveTimeFrame() which is called before drawing
+  const frameNumber = this.activeTimeFrame;
 
   const videoFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0) ?? node;
   const vw = videoFrame ? videoFrame.width : node.videoWidth;

@@ -497,7 +497,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.isProgressBarNavigation = false;
     this.shapes = [];
     this.globalShapes = [];
-    this.currentTool = this.isMobile ? null : "curve";
+    this.currentTool = this.isMobile ? null : (this.config.toolbar.defaultTool ?? null);
     // Initialize theme
     injectThemeStyles(this._theme);
 
@@ -961,9 +961,18 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
           return;
         }
         this.lastNavigatedFrame = maybeFrame;
+        // Update activeTimeFrame immediately to ensure correct shapes are drawn
+        this.activeTimeFrame = maybeFrame;
         if (this.isVideoPaused) {
           this.playbackFrame = maybeFrame;
         }
+        // Redraw canvas immediately during progress bar navigation
+        this.clearCanvas();
+        if (!this.hasGlobalOverlays) {
+          this.addVideoOverlay();
+        }
+        this.drawShapesOverlay();
+        this.addProgressBarOverlay();
         return;
       } else {
         this.hideControls();
@@ -1174,7 +1183,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.cleanFrameStacks();
     frames.forEach((frame) => {
       // Use parseShapes/stringifyShapes to create deep copy and handle special types (like images)
-      this.timeStack.set(frame.frame, this.parseShapes(this.stringifyShapes(frame.shapes)));
+      const shapes = frame.shapes || [];
+      this.timeStack.set(frame.frame, this.parseShapes(this.stringifyShapes(shapes)));
     });
   }
 
