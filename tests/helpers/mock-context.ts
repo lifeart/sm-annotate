@@ -82,12 +82,12 @@ export interface MockAnnotationTool {
   referenceVideoElement: HTMLVideoElement | null;
   videoFrameBuffer: {
     getFrame: Mock;
-    getHistogram: Mock;
+    getAudioFingerprint: Mock;
     frameNumberFromTime: Mock;
   } | null;
   referenceVideoFrameBuffer: {
     getFrame: Mock;
-    getHistogram: Mock;
+    getAudioFingerprint: Mock;
     frameNumberFromTime: Mock;
     getFrameNumberBySignature: Mock;
   } | null;

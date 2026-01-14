@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { vFromRGB, grayscale } from '../src/plugins/utils/image-grayscale';
-import { HistogramFrame, sobelOperator, calculateSimilarity } from '../src/plugins/utils/sobel-operator';
+import { AudioFingerprint, calculateAudioSimilarity } from '../src/plugins/utils/audio-fingerprint';
 
 describe('Image Grayscale Utils', () => {
   describe('vFromRGB', () => {
@@ -61,111 +61,106 @@ describe('Image Grayscale Utils', () => {
   });
 });
 
-describe('Sobel Operator', () => {
-  describe('HistogramFrame', () => {
-    it('should create a HistogramFrame with unique id', () => {
-      const frame1 = new HistogramFrame();
-      const frame2 = new HistogramFrame();
+describe('Audio Fingerprint', () => {
+  describe('AudioFingerprint', () => {
+    it('should create an AudioFingerprint with unique id', () => {
+      const fp1 = new AudioFingerprint();
+      const fp2 = new AudioFingerprint();
 
-      expect(frame1.id).toBeDefined();
-      expect(frame2.id).toBeDefined();
-      expect(frame1.id).not.toBe(frame2.id);
+      expect(fp1.id).toBeDefined();
+      expect(fp2.id).toBeDefined();
+      expect(fp1.id).not.toBe(fp2.id);
     });
 
     it('should behave like an array', () => {
-      const frame = new HistogramFrame();
-      frame.push(1, 2, 3);
+      const fp = new AudioFingerprint();
+      fp.push(0.1, 0.2, 0.3);
 
-      expect(frame.length).toBe(3);
-      expect(frame[0]).toBe(1);
-      expect(frame[1]).toBe(2);
-      expect(frame[2]).toBe(3);
+      expect(fp.length).toBe(3);
+      expect(fp[0]).toBe(0.1);
+      expect(fp[1]).toBe(0.2);
+      expect(fp[2]).toBe(0.3);
+    });
+
+    it('should accept initial values in constructor', () => {
+      const fp = new AudioFingerprint(0.5, 0.6, 0.7);
+
+      expect(fp.length).toBe(3);
+      expect(fp[0]).toBe(0.5);
+      expect(fp[1]).toBe(0.6);
+      expect(fp[2]).toBe(0.7);
     });
   });
 
-  describe('sobelOperator', () => {
-    it('should detect edges in a simple gradient image', () => {
-      // Create a 3x3 image with a vertical gradient
-      // This should produce some edge detection values
-      const data = new Uint8ClampedArray([
-        0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255, // Row 1: black, gray, white
-        0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255, // Row 2: black, gray, white
-        0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255, // Row 3: black, gray, white
-      ]);
-      const imageData = { data, width: 3, height: 3 } as ImageData;
+  describe('calculateAudioSimilarity', () => {
+    it('should return 1 for identical fingerprints', () => {
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fp2 = new AudioFingerprint(0.1, 0.2, 0.3);
 
-      const edges = sobelOperator(imageData);
-
-      // With a 3x3 image, sobel operator processes only the center pixel (border is skipped)
-      expect(edges.length).toBe(1);
-      expect(edges instanceof HistogramFrame).toBe(true);
-    });
-
-    it('should return HistogramFrame instance', () => {
-      const data = new Uint8ClampedArray([
-        100, 100, 100, 255, 100, 100, 100, 255, 100, 100, 100, 255,
-        100, 100, 100, 255, 100, 100, 100, 255, 100, 100, 100, 255,
-        100, 100, 100, 255, 100, 100, 100, 255, 100, 100, 100, 255,
-      ]);
-      const imageData = { data, width: 3, height: 3 } as ImageData;
-
-      const result = sobelOperator(imageData);
-
-      expect(result instanceof HistogramFrame).toBe(true);
-    });
-  });
-
-  describe('calculateSimilarity', () => {
-    it('should return 1 for identical histograms', () => {
-      const frame1 = new HistogramFrame();
-      frame1.push(10, 20, 30);
-
-      const frame2 = new HistogramFrame();
-      frame2.push(10, 20, 30);
-
-      const similarity = calculateSimilarity(frame1, frame2);
+      const similarity = calculateAudioSimilarity(fp1, fp2);
 
       expect(similarity).toBe(1);
     });
 
-    it('should return value less than 1 for different histograms', () => {
-      const frame1 = new HistogramFrame();
-      frame1.push(10, 20, 30);
+    it('should return value between 0 and 1 for different fingerprints', () => {
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fp2 = new AudioFingerprint(0.5, 0.6, 0.7);
 
-      const frame2 = new HistogramFrame();
-      frame2.push(50, 60, 70);
+      const similarity = calculateAudioSimilarity(fp1, fp2);
 
-      const similarity = calculateSimilarity(frame1, frame2);
+      expect(similarity).toBeGreaterThanOrEqual(0);
+      expect(similarity).toBeLessThanOrEqual(1);
+    });
 
-      expect(similarity).toBeLessThan(1);
-      expect(similarity).toBeGreaterThan(0);
+    it('should return higher similarity for more similar fingerprints', () => {
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fpSimilar = new AudioFingerprint(0.11, 0.21, 0.31);
+      const fpDifferent = new AudioFingerprint(0.9, 0.8, 0.7);
+
+      const similarityClose = calculateAudioSimilarity(fp1, fpSimilar);
+      const similarityFar = calculateAudioSimilarity(fp1, fpDifferent);
+
+      expect(similarityClose).toBeGreaterThan(similarityFar);
     });
 
     it('should cache similarity results', () => {
-      const frame1 = new HistogramFrame();
-      frame1.push(1, 2, 3);
-
-      const frame2 = new HistogramFrame();
-      frame2.push(4, 5, 6);
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fp2 = new AudioFingerprint(0.4, 0.5, 0.6);
 
       // Calculate twice - should use cache second time
-      const result1 = calculateSimilarity(frame1, frame2);
-      const result2 = calculateSimilarity(frame1, frame2);
+      const result1 = calculateAudioSimilarity(fp1, fp2);
+      const result2 = calculateAudioSimilarity(fp1, fp2);
 
       expect(result1).toBe(result2);
     });
 
     it('should return same result regardless of argument order', () => {
-      const frame1 = new HistogramFrame();
-      frame1.push(1, 2, 3);
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fp2 = new AudioFingerprint(0.4, 0.5, 0.6);
 
-      const frame2 = new HistogramFrame();
-      frame2.push(4, 5, 6);
-
-      const result1 = calculateSimilarity(frame1, frame2);
-      const result2 = calculateSimilarity(frame2, frame1);
+      const result1 = calculateAudioSimilarity(fp1, fp2);
+      const result2 = calculateAudioSimilarity(fp2, fp1);
 
       expect(result1).toBe(result2);
+    });
+
+    it('should return 0 for empty fingerprints', () => {
+      const fp1 = new AudioFingerprint();
+      const fp2 = new AudioFingerprint(0.1, 0.2, 0.3);
+
+      expect(calculateAudioSimilarity(fp1, fp2)).toBe(0);
+      expect(calculateAudioSimilarity(fp2, fp1)).toBe(0);
+      expect(calculateAudioSimilarity(fp1, fp1)).toBe(0);
+    });
+
+    it('should handle fingerprints with different lengths', () => {
+      const fp1 = new AudioFingerprint(0.1, 0.2, 0.3);
+      const fp2 = new AudioFingerprint(0.1, 0.2, 0.3, 0.4, 0.5);
+
+      // Should use shorter length and still return valid similarity
+      const similarity = calculateAudioSimilarity(fp1, fp2);
+      expect(similarity).toBeGreaterThanOrEqual(0);
+      expect(similarity).toBeLessThanOrEqual(1);
     });
   });
 });

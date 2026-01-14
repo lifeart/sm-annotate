@@ -105,7 +105,7 @@ export function createMockVideo(options: MockVideoOptions = {}): HTMLVideoElemen
 export interface MockFrameBufferOptions {
   frameNumber?: number;
   frame?: { width: number; height: number } | null;
-  histogram?: number[];
+  audioFingerprint?: number[];
   signatureFrame?: number;
 }
 
@@ -113,7 +113,7 @@ export function createMockVideoFrameBuffer(options: MockFrameBufferOptions = {})
   return {
     frameNumberFromTime: vi.fn(() => options.frameNumber ?? 30),
     getFrame: vi.fn(() => options.frame ?? { width: 800, height: 600 }),
-    getHistogram: vi.fn(() => options.histogram ?? [1, 2, 3]),
+    getAudioFingerprint: vi.fn(() => options.audioFingerprint ?? [0.1, 0.2, 0.3]),
   };
 }
 
@@ -121,7 +121,7 @@ export function createMockReferenceVideoFrameBuffer(options: MockFrameBufferOpti
   return {
     frameNumberFromTime: vi.fn(() => options.frameNumber ?? 30),
     getFrame: vi.fn(() => options.frame ?? { width: 800, height: 600 }),
-    getHistogram: vi.fn(() => options.histogram ?? [1, 2, 3]),
+    getAudioFingerprint: vi.fn(() => options.audioFingerprint ?? [0.1, 0.2, 0.3]),
     getFrameNumberBySignature: vi.fn(() => options.signatureFrame ?? 32),
   };
 }

@@ -156,13 +156,14 @@ export class CompareToolPlugin
 
     let referenceVideoFrameNumber = frameNumber;
 
-    const CUSTOM_FSYNC =
+    // Use audio-based sync when reference video is significantly larger
+    const AUDIO_SYNC_ENABLED =
       widthDiff > video1.videoWidth && heightDiff > video1.videoHeight && !this.annotationTool.isMobile;
 
-    if (CUSTOM_FSYNC) {
+    if (AUDIO_SYNC_ENABLED) {
       const bestFrame =
         this.annotationTool.referenceVideoFrameBuffer?.getFrameNumberBySignature(
-          this.annotationTool.videoFrameBuffer?.getHistogram(frameNumber) ??
+          this.annotationTool.videoFrameBuffer?.getAudioFingerprint(frameNumber) ??
             null,
           frameNumber
         ) ?? frameNumber;
