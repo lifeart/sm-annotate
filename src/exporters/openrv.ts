@@ -141,21 +141,20 @@ function applyRotationToPoints(
  *
  * OpenRV uses NDC where:
  * - (0, 0) is the center of the image
- * - X: -aspectRatio (left) to +aspectRatio (right)
- * - Y: -1 (bottom) to 1 (top)
+ * - X: -1 (left) to +1 (right)
+ * - Y: -1 (bottom) to +1 (top)
  */
 function convertSmAnnotateToOpenRV(
   smX: number,
   smY: number,
-  aspectRatio: number
+  _aspectRatio: number
 ): { x: number; y: number } {
-  // Convert from 0..1 to -1..1 for base coordinates
-  const normalizedX = smX * 2 - 1;
-  const normalizedY = 1 - smY * 2;
-  // Scale X by aspect ratio for OpenRV
+  // Convert from 0..1 to OpenRV NDC
+  // X: -1 to +1
+  // Y: -1 to +1 (inverted because sm-annotate Y+ is down, OpenRV Y+ is up)
   return {
-    x: normalizedX * aspectRatio,
-    y: normalizedY,
+    x: smX * 2 - 1,
+    y: 1 - smY * 2,
   };
 }
 
@@ -501,7 +500,7 @@ function shapeToGTOComponents(
   height: number
 ): GTOComponent[] {
   // Note: Shapes use 0-1 normalized coordinates. The component functions
-  // convert to OpenRV's NDC format (centered at 0, X scaled by aspect ratio).
+  // convert to OpenRV's NDC format (centered at 0, -1 to 1 range).
   switch (shape.type) {
     case 'curve':
       return [curveToGTOComponent(shape as ICurve, id, frame, width, height)];
