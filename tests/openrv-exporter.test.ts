@@ -386,7 +386,7 @@ describe('OpenRV Exporter', () => {
       expect(result).not.toContain('sourceGroup000000_paint');
     });
 
-    it('should denormalize coordinates correctly', () => {
+    it('should convert to OpenRV NDC coordinates correctly', () => {
       const shape: ILine = {
         type: 'line',
         x1: 0.5,
@@ -410,11 +410,10 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, options);
 
-      // x1=0.5 * 1000 = 500, y1=0.5 * 500 = 250
-      // x2=1.0 * 1000 = 1000, y2=1.0 * 500 = 500
-      expect(result).toContain('500');
-      expect(result).toContain('250');
-      expect(result).toContain('1000');
+      // aspectRatio = 1000/500 = 2
+      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0): x = (0.5*2-1)*2 = 0, y = 1-0.5*2 = 0
+      // sm-annotate (1.0, 1.0) -> OpenRV (2, -1): x = (1.0*2-1)*2 = 2, y = 1-1.0*2 = -1
+      expect(result).toContain('points = [ [ 0 0 ] [ 2 -1 ] ]');
     });
 
     it('should handle rgb() color format', () => {
@@ -650,14 +649,13 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, { ...defaultOptions, width: 1000, height: 1000 });
 
-      // After 90 degree rotation around center (500, 500):
-      // (400, 500) -> (500, 400)
-      // (600, 500) -> (500, 600)
+      // After 90 degree rotation around center (0.5, 0.5):
+      // (0.4, 0.5) -> (0.5, 0.4), then to OpenRV: (0, 0.2)
+      // (0.6, 0.5) -> (0.5, 0.6), then to OpenRV: (0, -0.2)
+      // For aspectRatio=1: openrv_x = sm_x*2-1, openrv_y = 1-sm_y*2
       expect(result).toContain('"pen:0:1:User"');
-      // Points are now in nested format [ [ x y ] [ x y ] ]
-      expect(result).toContain('500');
-      expect(result).toContain('400');
-      expect(result).toContain('600');
+      // Check that output has proper OpenRV NDC coordinates
+      expect(result).toContain('[ [ 0 0.2 ] [ 0 -0.2 ] ]');
     });
 
     it('should apply rotation to rectangle points', () => {
@@ -709,13 +707,13 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, { ...defaultOptions, width: 1000, height: 1000 });
 
-      // After rotation around (300, 500):
-      // (300, 500) stays at (300, 500)
-      // (500, 500) rotates to (300, 700)
+      // After rotation around (0.3, 0.5):
+      // (0.3, 0.5) stays at (0.3, 0.5), then to OpenRV: (-0.4, 0)
+      // (0.5, 0.5) rotates to (0.3, 0.7), then to OpenRV: (-0.4, -0.4)
+      // For aspectRatio=1: openrv_x = sm_x*2-1, openrv_y = 1-sm_y*2
       expect(result).toContain('"pen:0:1:User"');
-      expect(result).toContain('300');
-      expect(result).toContain('500');
-      expect(result).toContain('700');
+      // Check that output has proper OpenRV NDC coordinates
+      expect(result).toContain('-0.4');
     });
 
     it('should apply rotation to arrow components', () => {
@@ -742,10 +740,12 @@ describe('OpenRV Exporter', () => {
       expect(result).toContain('"pen:0:1:User"');
       expect(result).toContain('"pen:1:1:User"');
       expect(result).toContain('"pen:2:1:User"');
-      // After 180 degree rotation around center (500, 500):
-      // (300, 500) -> (700, 500), (700, 500) -> (300, 500)
-      expect(result).toContain('700');
-      expect(result).toContain('300');
+      // After 180 degree rotation around center (0.5, 0.5):
+      // (0.3, 0.5) -> (0.7, 0.5), (0.7, 0.5) -> (0.3, 0.5)
+      // Convert to OpenRV NDC (aspectRatio=1): x = sm_x*2-1, y = 1-sm_y*2
+      // (0.7, 0.5) -> (0.4, 0), (0.3, 0.5) -> (-0.4, 0)
+      expect(result).toContain('0.4');
+      expect(result).toContain('-0.4');
     });
 
     it('should apply rotation to circle points', () => {
@@ -768,11 +768,12 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, { ...defaultOptions, width: 1000, height: 1000 });
 
-      // Circle should be exported with 33 points
+      // Circle should be exported with 33 points as a pen component
       expect(result).toContain('"pen:0:1:User"');
-      // The first point without rotation would be at (600, 500) - x + radius at angle 0
-      // After 90 degree rotation around center (500, 500), it becomes (500, 600)
-      expect(result).toContain('600');
+      // The first point without rotation would be at sm-annotate (0.6, 0.5) - x + radius at angle 0
+      // After 90 degree rotation around center (0.5, 0.5), it becomes (0.5, 0.4)
+      // Convert to OpenRV NDC: (0.5, 0.4) -> (0, 0.2)
+      expect(result).toContain('0.2');
     });
 
     it('should not affect shapes without rotation', () => {
@@ -791,12 +792,11 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, { ...defaultOptions, width: 1000, height: 1000 });
 
-      // Points should be unchanged (just denormalized)
+      // Points should be converted to OpenRV NDC
+      // sm-annotate (0.1, 0.2) -> OpenRV (-0.8, 0.6)
+      // sm-annotate (0.3, 0.4) -> OpenRV (-0.4, 0.2)
       expect(result).toContain('"pen:0:1:User"');
-      expect(result).toContain('100');
-      expect(result).toContain('200');
-      expect(result).toContain('300');
-      expect(result).toContain('400');
+      expect(result).toContain('[ [ -0.8 0.6 ] [ -0.4 0.2 ] ]');
     });
 
     it('should export multiple shapes on same frame', () => {
@@ -894,6 +894,166 @@ describe('OpenRV Exporter', () => {
 
       expect(result).toContain('"pen:0:100000:User"');
       expect(result).toContain('"frame:100000"');
+    });
+  });
+
+  describe('coordinate conversion for various aspect ratios', () => {
+    it('should convert to correct OpenRV NDC for ultrawide (21:9) aspect ratio', () => {
+      // Ultrawide 21:9 -> aspectRatio = 2560/1080 ≈ 2.37
+      const width = 2560;
+      const height = 1080;
+      const aspectRatio = width / height;
+
+      const shape: ILine = {
+        type: 'line',
+        // sm-annotate corners: top-left (0,0) and bottom-right (1,1)
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 1,
+        strokeStyle: '#ff0000',
+        fillStyle: '#ff0000',
+        lineWidth: 2,
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 1, fps: 24, version: 1, shapes: [shape] },
+      ];
+
+      const result = exportToOpenRV(frames, {
+        mediaPath: '/test.mp4',
+        width,
+        height,
+      });
+
+      // sm-annotate (0, 0) -> OpenRV (-aspectRatio, 1)
+      // sm-annotate (1, 1) -> OpenRV (aspectRatio, -1)
+      // For aspectRatio ≈ 2.37: -2.37..2.37 range
+      expect(result).toContain(`-${aspectRatio.toFixed(6)}`);
+      expect(result).toContain(`${aspectRatio.toFixed(6)}`);
+    });
+
+    it('should convert to correct OpenRV NDC for portrait (9:16) aspect ratio', () => {
+      // Portrait 9:16 -> aspectRatio = 1080/1920 = 0.5625
+      const width = 1080;
+      const height = 1920;
+
+      const shape: ILine = {
+        type: 'line',
+        // sm-annotate center (0.5, 0.5) should map to OpenRV (0, 0)
+        x1: 0.5,
+        y1: 0.5,
+        x2: 1.0,
+        y2: 1.0,
+        strokeStyle: '#00ff00',
+        fillStyle: '#00ff00',
+        lineWidth: 2,
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 1, fps: 30, version: 1, shapes: [shape] },
+      ];
+
+      const result = exportToOpenRV(frames, {
+        mediaPath: '/test.mp4',
+        width,
+        height,
+      });
+
+      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0)
+      expect(result).toContain('[ [ 0 0 ]');
+      // sm-annotate (1.0, 1.0) -> OpenRV (aspectRatio, -1) = (0.5625, -1)
+      expect(result).toContain('0.5625');
+      expect(result).toContain('-1 ]');
+    });
+
+    it('should convert to correct OpenRV NDC for square (1:1) aspect ratio', () => {
+      const width = 1000;
+      const height = 1000;
+
+      const shape: ILine = {
+        type: 'line',
+        // sm-annotate top-left (0, 0) and bottom-right (1, 1)
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 1,
+        strokeStyle: '#0000ff',
+        fillStyle: '#0000ff',
+        lineWidth: 2,
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 1, fps: 25, version: 1, shapes: [shape] },
+      ];
+
+      const result = exportToOpenRV(frames, {
+        mediaPath: '/test.mp4',
+        width,
+        height,
+      });
+
+      // sm-annotate (0, 0) -> OpenRV (-1, 1)
+      // sm-annotate (1, 1) -> OpenRV (1, -1)
+      expect(result).toContain('[ [ -1 1 ] [ 1 -1 ] ]');
+    });
+
+    it('should convert text position correctly for various aspect ratios', () => {
+      const width = 1920;
+      const height = 1080;
+
+      const shape: IText = {
+        type: 'text',
+        // sm-annotate top-left (0, 0) should map to OpenRV (-aspectRatio, 1)
+        x: 0,
+        y: 0,
+        text: 'Top Left',
+        strokeStyle: '#ffffff',
+        fillStyle: '#ffffff',
+        lineWidth: 1,
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 1, fps: 24, version: 1, shapes: [shape] },
+      ];
+
+      const result = exportToOpenRV(frames, {
+        mediaPath: '/test.mp4',
+        width,
+        height,
+      });
+
+      // sm-annotate (0, 0) -> OpenRV (-aspectRatio, 1) where aspectRatio = 1920/1080 ≈ 1.777...
+      // The position should contain negative aspect ratio and 1
+      expect(result).toContain('position = [ [ -1.77777');
+      expect(result).toContain('1 ] ]');
+    });
+
+    it('should normalize lineWidth correctly for different heights', () => {
+      // LineWidth should be normalized by dividing by height
+      const width = 1920;
+      const height = 1080;
+
+      const shape: ICurve = {
+        type: 'curve',
+        points: [{ x: 0.5, y: 0.5 }, { x: 0.6, y: 0.6 }],
+        strokeStyle: '#ff0000',
+        fillStyle: '#ff0000',
+        lineWidth: 5.4, // 5.4 / 1080 = 0.005
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 1, fps: 24, version: 1, shapes: [shape] },
+      ];
+
+      const result = exportToOpenRV(frames, {
+        mediaPath: '/test.mp4',
+        width,
+        height,
+      });
+
+      // Normalized width = 5.4 / 1080 = 0.005
+      expect(result).toContain('0.005');
     });
   });
 });

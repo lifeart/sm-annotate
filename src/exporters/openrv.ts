@@ -132,6 +132,34 @@ function applyRotationToPoints(
 }
 
 /**
+ * Convert sm-annotate coordinates to OpenRV normalized device coordinates.
+ *
+ * sm-annotate uses:
+ * - (0, 0) is the top-left corner
+ * - X: 0 (left) to 1 (right)
+ * - Y: 0 (top) to 1 (bottom)
+ *
+ * OpenRV uses NDC where:
+ * - (0, 0) is the center of the image
+ * - X: -aspectRatio (left) to +aspectRatio (right)
+ * - Y: -1 (bottom) to 1 (top)
+ */
+function convertSmAnnotateToOpenRV(
+  smX: number,
+  smY: number,
+  aspectRatio: number
+): { x: number; y: number } {
+  // Convert from 0..1 to -1..1 for base coordinates
+  const normalizedX = smX * 2 - 1;
+  const normalizedY = 1 - smY * 2;
+  // Scale X by aspect ratio for OpenRV
+  return {
+    x: normalizedX * aspectRatio,
+    y: normalizedY,
+  };
+}
+
+/**
  * Format a float array for GTO output (nested format)
  * Outputs: [ [ v1 v2 v3 ... ] ] for single vectors
  */
@@ -160,17 +188,22 @@ function formatNumber(n: number): string {
 /**
  * Format points array for GTO (nested array of x y pairs)
  * Outputs: [ [ x1 y1 ] [ x2 y2 ] ... ]
+ * Converts from sm-annotate coordinates to OpenRV NDC
  */
-function formatPoints(points: IPoint[]): string {
-  const pairs = points.map(p => `[ ${formatNumber(p.x)} ${formatNumber(p.y)} ]`);
+function formatPoints(points: IPoint[], aspectRatio: number): string {
+  const pairs = points.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return `[ ${formatNumber(converted.x)} ${formatNumber(converted.y)} ]`;
+  });
   return `[ ${pairs.join(' ')} ]`;
 }
 
 /**
  * Convert curve shape to OpenRV pen component
  */
-function curveToGTOComponent(shape: ICurve, id: number, frame: number): GTOComponent {
+function curveToGTOComponent(shape: ICurve, id: number, frame: number, width: number, height: number): GTOComponent {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+  const aspectRatio = width / height;
 
   // Calculate center for rotation (average of all points)
   let centerX = 0, centerY = 0;
@@ -183,8 +216,9 @@ function curveToGTOComponent(shape: ICurve, id: number, frame: number): GTOCompo
 
   const points = applyRotationToPoints(shape.points, shape, centerX, centerY);
 
-  // Create width array (one value per point) - OpenRV format uses this
-  const widthArray = new Array(points.length).fill(shape.lineWidth);
+  // Create width array (one value per point) - OpenRV format uses normalized width (relative to height)
+  const normalizedWidth = shape.lineWidth / height;
+  const widthArray = new Array(points.length).fill(normalizedWidth);
 
   return {
     name: `"pen:${id}:${frame}:User"`,
@@ -192,7 +226,7 @@ function curveToGTOComponent(shape: ICurve, id: number, frame: number): GTOCompo
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
       { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
       { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
+      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
       { type: 'int', name: 'debug', value: 0 },
       { type: 'int', name: 'join', value: 3 },
       { type: 'int', name: 'cap', value: 1 },
@@ -204,8 +238,9 @@ function curveToGTOComponent(shape: ICurve, id: number, frame: number): GTOCompo
 /**
  * Convert line shape to OpenRV pen component (2-point curve)
  */
-function lineToGTOComponent(shape: ILine, id: number, frame: number): GTOComponent {
+function lineToGTOComponent(shape: ILine, id: number, frame: number, width: number, height: number): GTOComponent {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+  const aspectRatio = width / height;
 
   // Center is midpoint of line
   const centerX = (shape.x1 + shape.x2) / 2;
@@ -217,7 +252,8 @@ function lineToGTOComponent(shape: ILine, id: number, frame: number): GTOCompone
   ];
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
-  const widthArray = new Array(points.length).fill(shape.lineWidth);
+  const normalizedWidth = shape.lineWidth / height;
+  const widthArray = new Array(points.length).fill(normalizedWidth);
 
   return {
     name: `"pen:${id}:${frame}:User"`,
@@ -225,7 +261,7 @@ function lineToGTOComponent(shape: ILine, id: number, frame: number): GTOCompone
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
       { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
       { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
+      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
       { type: 'int', name: 'debug', value: 0 },
       { type: 'int', name: 'join', value: 3 },
       { type: 'int', name: 'cap', value: 1 },
@@ -237,9 +273,10 @@ function lineToGTOComponent(shape: ILine, id: number, frame: number): GTOCompone
 /**
  * Convert arrow shape to OpenRV pen component (line + arrowhead strokes)
  */
-function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComponent[] {
+function arrowToGTOComponents(shape: IArrow, id: number, frame: number, width: number, height: number): GTOComponent[] {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
   const colorStr = formatFloatArray(color);
+  const aspectRatio = width / height;
 
   // Center is midpoint of arrow line
   const centerX = (shape.x1 + shape.x2) / 2;
@@ -277,7 +314,8 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
   arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY);
   arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY);
 
-  const widthArray2 = new Array(2).fill(shape.lineWidth);
+  const normalizedWidth = shape.lineWidth / height;
+  const widthArray2 = new Array(2).fill(normalizedWidth);
 
   return [
     {
@@ -286,7 +324,7 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
         { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
         { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(linePoints) },
+        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(linePoints, aspectRatio) },
         { type: 'int', name: 'debug', value: 0 },
         { type: 'int', name: 'join', value: 3 },
         { type: 'int', name: 'cap', value: 1 },
@@ -299,7 +337,7 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
         { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
         { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead1) },
+        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead1, aspectRatio) },
         { type: 'int', name: 'debug', value: 0 },
         { type: 'int', name: 'join', value: 3 },
         { type: 'int', name: 'cap', value: 1 },
@@ -312,7 +350,7 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
         { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
         { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead2) },
+        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead2, aspectRatio) },
         { type: 'int', name: 'debug', value: 0 },
         { type: 'int', name: 'join', value: 3 },
         { type: 'int', name: 'cap', value: 1 },
@@ -325,8 +363,9 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
 /**
  * Convert rectangle shape to OpenRV pen component (4-point closed path)
  */
-function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number): GTOComponent {
+function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number, width: number, height: number): GTOComponent {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+  const aspectRatio = width / height;
 
   // Center is center of rectangle
   const centerX = shape.x + shape.width / 2;
@@ -343,7 +382,8 @@ function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number): 
 
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
-  const widthArray = new Array(points.length).fill(shape.lineWidth);
+  const normalizedWidth = shape.lineWidth / height;
+  const widthArray = new Array(points.length).fill(normalizedWidth);
 
   return {
     name: `"pen:${id}:${frame}:User"`,
@@ -351,7 +391,7 @@ function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number): 
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
       { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
       { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
+      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
       { type: 'int', name: 'debug', value: 0 },
       { type: 'int', name: 'join', value: 3 },
       { type: 'int', name: 'cap', value: 1 },
@@ -363,8 +403,9 @@ function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number): 
 /**
  * Convert circle shape to OpenRV pen component (approximated as polygon)
  */
-function circleToGTOComponent(shape: ICircle, id: number, frame: number, segments: number = 32): GTOComponent {
+function circleToGTOComponent(shape: ICircle, id: number, frame: number, width: number, height: number, segments: number = 32): GTOComponent {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+  const aspectRatio = width / height;
 
   // Center is center of circle
   const centerX = shape.x;
@@ -382,7 +423,8 @@ function circleToGTOComponent(shape: ICircle, id: number, frame: number, segment
 
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
-  const widthArray = new Array(points.length).fill(shape.lineWidth);
+  const normalizedWidth = shape.lineWidth / height;
+  const widthArray = new Array(points.length).fill(normalizedWidth);
 
   return {
     name: `"pen:${id}:${frame}:User"`,
@@ -390,7 +432,7 @@ function circleToGTOComponent(shape: ICircle, id: number, frame: number, segment
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
       { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
       { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
+      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
       { type: 'int', name: 'debug', value: 0 },
       { type: 'int', name: 'join', value: 3 },
       { type: 'int', name: 'cap', value: 1 },
@@ -403,9 +445,9 @@ function circleToGTOComponent(shape: ICircle, id: number, frame: number, segment
  * Convert text shape to OpenRV text component
  * Note: OpenRV text doesn't support rotation natively, so rotation is applied to the position only
  */
-function textToGTOComponent(shape: IText, id: number, frame: number): GTOComponent {
+function textToGTOComponent(shape: IText, id: number, frame: number, width: number, height: number): GTOComponent {
   const color = extractColor(shape.fillStyle, shape.opacity ?? 1);
-  const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
+  const aspectRatio = width / height;
 
   // Apply rotation to position if set
   let posX = shape.x;
@@ -421,13 +463,21 @@ function textToGTOComponent(shape: IText, id: number, frame: number): GTOCompone
     textRotation = (shape.rotation * 180) / Math.PI;
   }
 
+  // Convert position from sm-annotate to OpenRV coordinates
+  const openrvPos = convertSmAnnotateToOpenRV(posX, posY, aspectRatio);
+
+  // Font size: OpenRV uses normalized size (relative to height)
+  // sm-annotate lineWidth is in pixels, convert to normalized
+  const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
+  const normalizedSize = fontSize / height;
+
   return {
     name: `"text:${id}:${frame}:User"`,
     properties: [
-      { type: 'float', dimensions: 2, name: 'position', value: formatFloatArray([posX, posY]) },
+      { type: 'float', dimensions: 2, name: 'position', value: formatFloatArray([openrvPos.x, openrvPos.y]) },
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
       { type: 'float', name: 'spacing', value: 0.8 },
-      { type: 'float', name: 'size', value: fontSize / 100 }, // Size as percentage
+      { type: 'float', name: 'size', value: normalizedSize },
       { type: 'float', name: 'scale', value: 1 },
       { type: 'float', name: 'rotation', value: textRotation },
       { type: 'string', name: 'font', value: '""' },
@@ -440,6 +490,8 @@ function textToGTOComponent(shape: IText, id: number, frame: number): GTOCompone
 
 /**
  * Convert a shape to GTO components
+ * Shapes are stored with 0-1 normalized coordinates in sm-annotate.
+ * The component functions handle conversion to OpenRV's NDC coordinate system.
  */
 function shapeToGTOComponents(
   shape: IShape,
@@ -448,70 +500,21 @@ function shapeToGTOComponents(
   width: number,
   height: number
 ): GTOComponent[] {
-  // Denormalize coordinates (shapes are stored as 0-1 normalized)
-  const denormalize = <T extends IShape>(s: T): T => {
-    const result = { ...s };
-
-    // Handle different shape types
-    if ('x' in result && typeof result.x === 'number') {
-      (result as { x: number }).x *= width;
-    }
-    if ('y' in result && typeof result.y === 'number') {
-      (result as { y: number }).y *= height;
-    }
-    if ('x1' in result && typeof result.x1 === 'number') {
-      (result as { x1: number }).x1 *= width;
-    }
-    if ('y1' in result && typeof result.y1 === 'number') {
-      (result as { y1: number }).y1 *= height;
-    }
-    if ('x2' in result && typeof result.x2 === 'number') {
-      (result as { x2: number }).x2 *= width;
-    }
-    if ('y2' in result && typeof result.y2 === 'number') {
-      (result as { y2: number }).y2 *= height;
-    }
-    if ('width' in result && typeof result.width === 'number' && result.type === 'rectangle') {
-      (result as { width: number }).width *= width;
-    }
-    if ('height' in result && typeof result.height === 'number') {
-      (result as { height: number }).height *= height;
-    }
-    if ('radius' in result && typeof result.radius === 'number') {
-      (result as { radius: number }).radius *= width;
-    }
-    if ('points' in result && Array.isArray(result.points)) {
-      (result as { points: IPoint[] }).points = result.points.map((p: IPoint) => ({
-        x: p.x * width,
-        y: p.y * height
-      }));
-    }
-    // Denormalize rotation center if present
-    if ('rotationCenterX' in result && typeof result.rotationCenterX === 'number') {
-      (result as { rotationCenterX: number }).rotationCenterX *= width;
-    }
-    if ('rotationCenterY' in result && typeof result.rotationCenterY === 'number') {
-      (result as { rotationCenterY: number }).rotationCenterY *= height;
-    }
-
-    return result;
-  };
-
-  const denormalizedShape = denormalize(shape);
-
+  // Note: Shapes use 0-1 normalized coordinates. The component functions
+  // convert to OpenRV's NDC format (centered at 0, X scaled by aspect ratio).
   switch (shape.type) {
     case 'curve':
-      return [curveToGTOComponent(denormalizedShape as ICurve, id, frame)];
+      return [curveToGTOComponent(shape as ICurve, id, frame, width, height)];
     case 'line':
-      return [lineToGTOComponent(denormalizedShape as ILine, id, frame)];
+      return [lineToGTOComponent(shape as ILine, id, frame, width, height)];
     case 'arrow':
-      return arrowToGTOComponents(denormalizedShape as IArrow, id, frame);
+      return arrowToGTOComponents(shape as IArrow, id, frame, width, height);
     case 'rectangle':
-      return [rectangleToGTOComponent(denormalizedShape as IRectangle, id, frame)];
+      return [rectangleToGTOComponent(shape as IRectangle, id, frame, width, height)];
     case 'circle':
-      return [circleToGTOComponent(denormalizedShape as ICircle, id, frame)];
+      return [circleToGTOComponent(shape as ICircle, id, frame, width, height)];
     case 'text':
-      return [textToGTOComponent(denormalizedShape as IText, id, frame)];
+      return [textToGTOComponent(shape as IText, id, frame, width, height)];
     // Skip non-visual shapes
     case 'eraser':
     case 'move':

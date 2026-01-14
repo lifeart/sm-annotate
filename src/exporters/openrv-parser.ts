@@ -192,6 +192,36 @@ function parseGTOText(content: string): GTOObject[] {
 }
 
 /**
+ * Convert OpenRV normalized coordinates to sm-annotate coordinates.
+ *
+ * OpenRV uses NDC where:
+ * - (0, 0) is the center of the image
+ * - X: -1 (left) to 1 (right)
+ * - Y: -1 (bottom) to 1 (top)
+ *
+ * sm-annotate uses:
+ * - (0, 0) is the top-left corner
+ * - X: 0 (left) to 1 (right)
+ * - Y: 0 (top) to 1 (bottom)
+ *
+ * When aspect ratio differs from 1:1, OpenRV may use different X range.
+ * We account for this by scaling X based on aspect ratio.
+ */
+function convertOpenRVToSmAnnotate(
+  openrvX: number,
+  openrvY: number,
+  aspectRatio: number
+): { x: number; y: number } {
+  // OpenRV X is scaled by aspect ratio: ranges from -aspectRatio to +aspectRatio
+  // Normalize to -1..1 first, then convert to 0..1
+  const normalizedX = openrvX / aspectRatio;
+  return {
+    x: (normalizedX + 1) / 2,
+    y: (1 - openrvY) / 2,
+  };
+}
+
+/**
  * Convert pen component to curve shape
  */
 function penComponentToCurve(
@@ -207,26 +237,38 @@ function penComponentToCurve(
     return null;
   }
 
-  // Convert flat points array to IPoint array and normalize
+  const aspectRatio = width / height;
+
+  // Convert flat points array to IPoint array
+  // OpenRV uses NDC (-1 to 1 centered), convert to sm-annotate (0 to 1 top-left)
   const points: IPoint[] = [];
   for (let i = 0; i < pointsData.length; i += 2) {
-    points.push({
-      x: pointsData[i] / width,
-      y: pointsData[i + 1] / height,
-    });
+    const converted = convertOpenRVToSmAnnotate(
+      pointsData[i],
+      pointsData[i + 1],
+      aspectRatio
+    );
+    points.push(converted);
   }
 
   const color = colorData ? rgbaToHex(colorData) : '#000000';
   const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
 
   // Handle width - can be a single number or an array (one per point)
+  // OpenRV width is normalized (relative to image height), convert to reasonable pixel value
   let lineWidth = 2;
   if (typeof widthData === 'number') {
-    lineWidth = widthData;
+    lineWidth = widthData * height;
   } else if (Array.isArray(widthData) && widthData.length > 0) {
-    // Use average of all widths, or first value
-    lineWidth = widthData[0];
+    // Use first value, multiply by height to denormalize
+    const firstWidth = widthData[0];
+    if (typeof firstWidth === 'number') {
+      lineWidth = firstWidth * height;
+    }
   }
+
+  // Clamp to reasonable range
+  lineWidth = Math.max(1, Math.min(lineWidth, 50));
 
   return {
     type: 'curve',
@@ -255,19 +297,31 @@ function textComponentToText(
     return null;
   }
 
+  const aspectRatio = width / height;
+
+  // Convert OpenRV NDC to sm-annotate coordinates
+  const converted = convertOpenRVToSmAnnotate(
+    positionData[0],
+    positionData[1],
+    aspectRatio
+  );
+
   const color = colorData ? rgbaToHex(colorData) : '#000000';
   const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
 
-  // Convert size percentage back to lineWidth
-  // Original: fontSize = 16 + lineWidth * 0.5, size = fontSize / 100
-  // Reverse: fontSize = size * 100, lineWidth = (fontSize - 16) / 0.5
-  const fontSize = (size ?? 0.16) * 100;
+  // Convert size (normalized to height) back to lineWidth
+  // OpenRV size is relative to image height
+  // Original export: size = fontSize / 100, fontSize = 16 + lineWidth * 0.5
+  // We'll convert normalized size to a reasonable font size
+  const normalizedSize = size ?? 0.01;
+  // Denormalize: multiply by height to get pixel size, then convert to lineWidth
+  const fontSize = normalizedSize * height;
   const lineWidth = Math.max(1, (fontSize - 16) / 0.5);
 
   return {
     type: 'text',
-    x: positionData[0] / width,
-    y: positionData[1] / height,
+    x: converted.x,
+    y: converted.y,
     text: textContent,
     strokeStyle: color,
     fillStyle: color,
@@ -329,40 +383,44 @@ export function parseOpenRV(
 
   result.fps = fps;
 
-  // Extract paint annotations
-  const paintObj = objects.find(o => o.protocol === 'RVPaint');
-  if (!paintObj) {
+  // Extract paint annotations from ALL RVPaint blocks
+  // Multiple RVPaint blocks can exist (e.g., defaultLayout_paint, defaultSequence_p_sourceGroup000000)
+  const paintObjects = objects.filter(o => o.protocol === 'RVPaint');
+  if (paintObjects.length === 0) {
     return result;
   }
 
   // Group shapes by frame
   const frameShapes = new Map<number, IShape[]>();
 
-  for (const [compName, props] of paintObj.components) {
-    // Parse pen components: pen:ID:FRAME:user or pen:ID:FRAME:User (case-insensitive)
-    const penMatch = compName.match(/^pen:\d+:(\d+):/i);
-    if (penMatch) {
-      const frame = parseInt(penMatch[1]);
-      const shape = penComponentToCurve(props, width, height);
-      if (shape) {
-        if (!frameShapes.has(frame)) {
-          frameShapes.set(frame, []);
+  // Iterate through all RVPaint blocks
+  for (const paintObj of paintObjects) {
+    for (const [compName, props] of paintObj.components) {
+      // Parse pen components: pen:ID:FRAME:user or pen:ID:FRAME:User (case-insensitive)
+      const penMatch = compName.match(/^pen:\d+:(\d+):/i);
+      if (penMatch) {
+        const frame = parseInt(penMatch[1]);
+        const shape = penComponentToCurve(props, width, height);
+        if (shape) {
+          if (!frameShapes.has(frame)) {
+            frameShapes.set(frame, []);
+          }
+          frameShapes.get(frame)!.push(shape);
         }
-        frameShapes.get(frame)!.push(shape);
+        continue;
       }
-      continue;
-    }
 
-    // Parse text components: text:ID:FRAME:user or text:ID:FRAME:User (case-insensitive)
-    const textMatch = compName.match(/^text:\d+:(\d+):/i);
-    if (textMatch) {
-      const frame = parseInt(textMatch[1]);
-      const shape = textComponentToText(props, width, height);
-      if (shape) {
-        if (!frameShapes.has(frame)) {
-          frameShapes.set(frame, []);
+      // Parse text components: text:ID:FRAME:user or text:ID:FRAME:User (case-insensitive)
+      const textMatch = compName.match(/^text:\d+:(\d+):/i);
+      if (textMatch) {
+        const frame = parseInt(textMatch[1]);
+        const shape = textComponentToText(props, width, height);
+        if (shape) {
+          if (!frameShapes.has(frame)) {
+            frameShapes.set(frame, []);
+          }
+          frameShapes.get(frame)!.push(shape);
         }
-        frameShapes.get(frame)!.push(shape);
       }
     }
   }
