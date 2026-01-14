@@ -1,0 +1,89 @@
+[
+    {
+        "frame": 1,
+        "fps": 25,
+        "version": 1,
+        "shapes": [
+            {
+                "type": "text",
+                "x": 0.1,
+                "y": 0.1,
+                "text": "Sample Text",
+                "fillStyle": "#ffffff",
+                "strokeStyle": "#ffffff",
+                "lineWidth": 2,
+                "opacity": 1
+            }
+        ]
+    },
+    {
+        "frame": 5,
+        "fps": 25,
+        "version": 1,
+        "shapes": [
+            {
+                "type": "curve",
+                "points": [
+                    {"x": 0.1, "y": 0.1},
+                    {"x": 0.2, "y": 0.15},
+                    {"x": 0.3, "y": 0.1},
+                    {"x": 0.4, "y": 0.2}
+                ],
+                "strokeStyle": "#ff0000",
+                "fillStyle": "#ff0000",
+                "lineWidth": 3,
+                "opacity": 1
+            },
+            {
+                "type": "rectangle",
+                "x": 0.5,
+                "y": 0.5,
+                "width": 0.2,
+                "height": 0.15,
+                "strokeStyle": "#00ff00",
+                "fillStyle": "#00ff00",
+                "lineWidth": 2,
+                "opacity": 1
+            }
+        ]
+    },
+    {
+        "frame": 10,
+        "fps": 25,
+        "version": 1,
+        "shapes": [
+            {
+                "type": "circle",
+                "x": 0.5,
+                "y": 0.5,
+                "radius": 0.1,
+                "strokeStyle": "#0000ff",
+                "fillStyle": "#0000ff",
+                "lineWidth": 2,
+                "opacity": 1
+            },
+            {
+                "type": "arrow",
+                "x1": 0.2,
+                "y1": 0.3,
+                "x2": 0.4,
+                "y2": 0.5,
+                "strokeStyle": "#ffff00",
+                "fillStyle": "#ffff00",
+                "lineWidth": 2,
+                "opacity": 1
+            },
+            {
+                "type": "line",
+                "x1": 0.6,
+                "y1": 0.2,
+                "x2": 0.8,
+                "y2": 0.4,
+                "strokeStyle": "#ff00ff",
+                "fillStyle": "#ff00ff",
+                "lineWidth": 2,
+                "opacity": 1
+            }
+        ]
+    }
+]
