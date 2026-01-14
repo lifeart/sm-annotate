@@ -3,6 +3,7 @@ import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { Theme } from "./ui/theme";
+import { SmAnnotateConfig, LayoutMode } from "./config";
 export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
@@ -36,6 +37,11 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     overlayOpacity: number;
     private _theme;
     private themeChangeListeners;
+    config: SmAnnotateConfig;
+    private layoutManager;
+    private collapseController;
+    private gestureHandler;
+    private gestureState;
     prevFrame(): void;
     nextFrame(): void;
     /**
@@ -53,6 +59,50 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     get theme(): Theme;
     setTheme(theme: Theme): void;
     onThemeChange(listener: (theme: Theme) => void): () => void;
+    /**
+     * Set the layout mode for the annotation tool
+     */
+    setLayout(mode: LayoutMode): void;
+    /**
+     * Get the current layout mode
+     */
+    getLayout(): LayoutMode;
+    /**
+     * Collapse the toolbar
+     */
+    collapseToolbar(): void;
+    /**
+     * Expand the toolbar
+     */
+    expandToolbar(): void;
+    /**
+     * Toggle toolbar collapse state
+     */
+    toggleToolbar(): void;
+    /**
+     * Check if toolbar is collapsed
+     */
+    isToolbarCollapsed(): boolean;
+    /**
+     * Enable or disable gesture support
+     */
+    setGesturesEnabled(enabled: boolean): void;
+    /**
+     * Check if gestures are enabled
+     */
+    isGesturesEnabled(): boolean;
+    /**
+     * Reset zoom and pan to default
+     */
+    resetZoom(): void;
+    /**
+     * Get current zoom scale
+     */
+    getZoomScale(): number;
+    /**
+     * Apply gesture transform to canvas
+     */
+    private applyGestureTransform;
     removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
@@ -81,7 +131,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     get undoStack(): IShape[][];
     set undoStack(shapes: IShape[][]);
     get pixelRatio(): number;
-    constructor(videoElement: HTMLVideoElement | HTMLImageElement);
+    constructor(videoElement: HTMLVideoElement | HTMLImageElement, config?: Partial<SmAnnotateConfig>);
     setVideoBlob(blob: Blob, fps?: number): Promise<void>;
     setVideoUrl(url: string, fps?: number): Promise<void>;
     enableVideoFrameBuffer(): void;

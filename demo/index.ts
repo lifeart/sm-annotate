@@ -1,6 +1,6 @@
 new EventSource("/esbuild").addEventListener("change", () => location.reload());
 
-import { SmAnnotate, downloadAsOpenRV, parseOpenRVFile } from "../src";
+import { SmAnnotate, downloadAsOpenRV, parseOpenRVFile, LayoutMode } from "../src";
 
 const video = document.querySelector("video") as HTMLVideoElement;
 
@@ -252,6 +252,53 @@ async function initAnnotator() {
       },
       `annotations-${prettyDate}.rv`
     );
+  });
+
+  // Layout switching
+  const layoutButtons = document.querySelectorAll(".layout-btn");
+  const layoutLabel = document.getElementById("layout-label");
+
+  const layoutLabels: Record<LayoutMode, string> = {
+    horizontal: "Horizontal (default)",
+    vertical: "Vertical Sidebar",
+    minimal: "Minimal / Floating",
+    "bottom-dock": "Bottom Dock",
+  };
+
+  layoutButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const button = e.currentTarget as HTMLButtonElement;
+      const layout = button.dataset.layout as LayoutMode;
+
+      // Update active state
+      layoutButtons.forEach((b) => b.classList.remove("active"));
+      button.classList.add("active");
+
+      // Update label
+      if (layoutLabel) {
+        layoutLabel.textContent = layoutLabels[layout];
+      }
+
+      // Apply layout
+      tool.setLayout(layout);
+
+      // Resize canvas after layout change
+      requestAnimationFrame(() => {
+        tool.setCanvasSize();
+      });
+    });
+  });
+
+  // Window resize handling
+  let resizeTimeout: number | undefined;
+  window.addEventListener("resize", () => {
+    // Debounce resize events
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
+    }
+    resizeTimeout = window.setTimeout(() => {
+      tool.setCanvasSize();
+    }, 100);
   });
 }
 

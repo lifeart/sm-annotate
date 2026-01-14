@@ -13,6 +13,20 @@ AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
 
 export { AnnotationTool as SmAnnotate, FrameAnnotationV1 };
 
+// Configuration types
+export type {
+  SmAnnotateConfig,
+  LayoutMode,
+  MobileConfig,
+  ToolbarConfig,
+  FeatureFlags,
+  ToolbarPosition,
+} from './config';
+export { defaultConfig } from './config';
+
+// Gesture types
+export type { GestureState } from './gestures/gesture-handler';
+
 // Exporters & Parsers
 export {
   // OpenRV export

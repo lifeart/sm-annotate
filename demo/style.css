@@ -371,6 +371,42 @@ kbd {
   color: var(--text-muted);
 }
 
+/* Layout Selector */
+.layout-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.layout-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.layout-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.layout-btn.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.layout-btn svg {
+  pointer-events: none;
+}
+
 /* Responsive */
 @media screen and (max-width: 900px) {
   .main {

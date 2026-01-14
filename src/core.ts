@@ -7,6 +7,10 @@ import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { Theme, injectThemeStyles } from "./ui/theme";
+import { SmAnnotateConfig, LayoutMode, mergeConfig } from "./config";
+import { LayoutManager } from "./ui/layout";
+import { CollapseController } from "./ui/collapse-controller";
+import { GestureHandler, GestureState } from "./gestures/gesture-handler";
 
 const pixelRatio = window.devicePixelRatio || 1;
 
@@ -57,6 +61,16 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private _theme: Theme = 'dark';
   // Listeners for theme changes
   private themeChangeListeners: ((theme: Theme) => void)[] = [];
+  // Configuration for the annotation tool
+  config: SmAnnotateConfig;
+  // Layout manager for switching between layouts
+  private layoutManager: LayoutManager | null = null;
+  // Collapse controller for toolbar visibility
+  private collapseController: CollapseController | null = null;
+  // Gesture handler for pinch-to-zoom and pan
+  private gestureHandler: GestureHandler | null = null;
+  // Current gesture transform state
+  private gestureState: GestureState = { scale: 1, panX: 0, panY: 0 };
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -152,6 +166,106 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     };
   }
 
+  // ==================== LAYOUT API ====================
+
+  /**
+   * Set the layout mode for the annotation tool
+   */
+  setLayout(mode: LayoutMode): void {
+    if (!this.layoutManager) {
+      this.layoutManager = new LayoutManager(this);
+    }
+    this.layoutManager.setLayout(mode, {
+      sidebarPosition: this.config.toolbar.sidebarPosition,
+    });
+  }
+
+  /**
+   * Get the current layout mode
+   */
+  getLayout(): LayoutMode {
+    return this.layoutManager?.getCurrentLayout() ?? this.config.layout;
+  }
+
+  // ==================== COLLAPSE API ====================
+
+  /**
+   * Collapse the toolbar
+   */
+  collapseToolbar(): void {
+    this.collapseController?.collapse();
+  }
+
+  /**
+   * Expand the toolbar
+   */
+  expandToolbar(): void {
+    this.collapseController?.expand();
+  }
+
+  /**
+   * Toggle toolbar collapse state
+   */
+  toggleToolbar(): void {
+    this.collapseController?.toggle();
+  }
+
+  /**
+   * Check if toolbar is collapsed
+   */
+  isToolbarCollapsed(): boolean {
+    return this.collapseController?.collapsed ?? false;
+  }
+
+  // ==================== GESTURE API ====================
+
+  /**
+   * Enable or disable gesture support
+   */
+  setGesturesEnabled(enabled: boolean): void {
+    if (enabled && !this.gestureHandler) {
+      this.gestureHandler = new GestureHandler(this.canvas, (state) => {
+        this.applyGestureTransform(state);
+      });
+      this.gestureHandler.init();
+    } else if (!enabled && this.gestureHandler) {
+      this.gestureHandler.destroy();
+      this.gestureHandler = null;
+      this.resetZoom();
+    }
+  }
+
+  /**
+   * Check if gestures are enabled
+   */
+  isGesturesEnabled(): boolean {
+    return this.gestureHandler !== null;
+  }
+
+  /**
+   * Reset zoom and pan to default
+   */
+  resetZoom(): void {
+    this.gestureState = { scale: 1, panX: 0, panY: 0 };
+    this.gestureHandler?.reset();
+    this.redrawFullCanvas();
+  }
+
+  /**
+   * Get current zoom scale
+   */
+  getZoomScale(): number {
+    return this.gestureState.scale;
+  }
+
+  /**
+   * Apply gesture transform to canvas
+   */
+  private applyGestureTransform(state: GestureState): void {
+    this.gestureState = state;
+    this.redrawFullCanvas();
+  }
+
   removeGlobalShape(shapeType: IShape['type']) {
     this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
   }
@@ -230,7 +344,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return this.canvasWidth / this.canvasHeight;
   }
   get isMobile() {
-    return window.innerWidth < 960;
+    const breakpoint = this.config?.mobile?.breakpoint ?? 960;
+    return window.innerWidth < breakpoint;
   }
   get progressBarCoordinates() {
     const height = this.isMobile ? 30 : 10;
@@ -265,8 +380,13 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return pixelRatio;
   }
 
-  constructor(videoElement: HTMLVideoElement | HTMLImageElement) {
+  constructor(
+    videoElement: HTMLVideoElement | HTMLImageElement,
+    config?: Partial<SmAnnotateConfig>
+  ) {
     super();
+    this.config = mergeConfig(config);
+    this._theme = this.config.theme;
     this.plugins = plugins.map((Plugin) => new Plugin(this));
     this.init(videoElement);
   }
@@ -380,6 +500,29 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.currentTool = this.isMobile ? null : "curve";
     // Initialize theme
     injectThemeStyles(this._theme);
+
+    // Initialize layout manager and set configured layout
+    this.layoutManager = new LayoutManager(this);
+    this.layoutManager.setLayout(this.config.layout, {
+      sidebarPosition: this.config.toolbar.sidebarPosition,
+    });
+
+    // Initialize collapse controller on mobile if enabled
+    if (this.isMobile && this.config.mobile.collapsibleToolbars) {
+      this.collapseController = new CollapseController(
+        this.uiContainer,
+        this.config.mobile.autoCollapse
+      );
+      this.collapseController.init();
+    }
+
+    // Initialize gesture handler if enabled on mobile
+    if (this.isMobile && this.config.mobile.gesturesEnabled) {
+      this.gestureHandler = new GestureHandler(this.canvas, (state) => {
+        this.applyGestureTransform(state);
+      });
+      this.gestureHandler.init();
+    }
   }
 
   setVideoStyles() {
@@ -523,6 +666,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.referenceVideoFrameBuffer = null;
     this.videoFrameBuffer?.destroy();
     this.videoFrameBuffer = null;
+
+    // Cleanup layout, collapse, and gesture handlers
+    this.layoutManager?.destroy();
+    this.layoutManager = null;
+    this.collapseController?.destroy();
+    this.collapseController = null;
+    this.gestureHandler?.destroy();
+    this.gestureHandler = null;
+    this.gestureState = { scale: 1, panX: 0, panY: 0 };
   }
 
   isCanvasInitialized = false;
@@ -745,6 +897,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.isMouseDown = true;
     if (isMultiTouch(event)) return;
 
+    // Skip single-touch events when two-finger gesture is active
+    if (this.gestureHandler?.hasTwoFingers()) return;
+
     const genericFrame = this.frameFromProgressBar(event, true);
     if (genericFrame) {
       this.isProgressBarNavigation = true;
@@ -758,6 +913,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       }
       return;
     }
+
+    // Auto-collapse toolbar when drawing starts on mobile
+    if (this.currentTool && this.collapseController?.autoCollapseEnabled) {
+      this.collapseController.collapse();
+    }
+
     if (this.currentTool) {
       this.pluginForTool(this.currentTool).onPointerDown(event);
     }
@@ -839,6 +1000,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.pluginForTool(this.currentTool).onPointerUp(event);
     }
 
+    // Auto-expand toolbar when drawing ends on mobile
+    if (this.collapseController?.autoCollapseEnabled) {
+      this.collapseController.expand();
+    }
+
     this.redrawFullCanvas();
   }
 
@@ -853,6 +1019,21 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       lineWidth: this.ctx.lineWidth,
       globalAlpha: this.ctx.globalAlpha,
     };
+
+    // Apply gesture transform (zoom/pan) if active
+    const hasTransform = this.gestureState.scale !== 1 ||
+                         this.gestureState.panX !== 0 ||
+                         this.gestureState.panY !== 0;
+    if (hasTransform) {
+      this.ctx.save();
+      this.ctx.translate(this.gestureState.panX, this.gestureState.panY);
+      // Scale from center of canvas
+      const cx = this.canvasWidth / 2;
+      const cy = this.canvasHeight / 2;
+      this.ctx.translate(cx, cy);
+      this.ctx.scale(this.gestureState.scale, this.gestureState.scale);
+      this.ctx.translate(-cx, -cy);
+    }
 
     for (let shape of this.deserialize(this.globalShapes)) {
       this.ctx.strokeStyle = shape.strokeStyle;
@@ -877,6 +1058,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       } catch (e) {
         console.error(e);
       }
+    }
+
+    // Restore transform if applied
+    if (hasTransform) {
+      this.ctx.restore();
     }
 
     this.ctx.strokeStyle = prevSettings.strokeStyle;

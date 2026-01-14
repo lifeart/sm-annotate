@@ -29,6 +29,10 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🌓 Dark/Light theme toggle
 * 💡 Tooltips on all toolbar buttons
 * 📦 OpenRV format import/export (.rv files for professional video review)
+* 🎛️ Multiple layout modes (horizontal, vertical, minimal, bottom-dock)
+* 📐 Collapsible toolbars for mobile
+* 🔍 Pinch-to-zoom and pan gestures
+* 🎨 CSS custom properties for easy theming
 
 ## Additional Benefits
 
@@ -95,6 +99,133 @@ annotationTool.overlayOpacity = 0.7;
 // Shapes can have individual opacity (0 to 1)
 // Use the opacity button when a shape is selected in move tool
 ```
+
+### Embedding & Configuration
+
+SmAnnotate can be customized for different embedding scenarios with layout modes, mobile optimizations, and CSS theming.
+
+#### Configuration Options
+
+```javascript
+import { SmAnnotate } from '@lifeart/sm-annotate';
+
+const annotationTool = new SmAnnotate(video, {
+  // Layout mode: 'horizontal' | 'vertical' | 'minimal' | 'bottom-dock'
+  layout: 'horizontal',
+
+  // Theme: 'dark' | 'light'
+  theme: 'dark',
+
+  // Mobile settings
+  mobile: {
+    collapsibleToolbars: true,  // Enable collapsible toolbar on mobile
+    gesturesEnabled: true,      // Enable pinch-to-zoom and pan
+    autoCollapse: true,         // Auto-collapse toolbar when drawing
+    breakpoint: 960,            // Mobile breakpoint in pixels
+  },
+
+  // Toolbar options
+  toolbar: {
+    sidebarPosition: 'left',    // For vertical layout: 'left' | 'right'
+    draggable: false,           // For minimal layout: allow dragging
+    position: { x: 10, y: 10 }, // For minimal layout: initial position
+  },
+
+  // Feature visibility
+  features: {
+    showThemeToggle: true,
+    showFullscreen: true,
+    showProgressBar: true,
+    showFrameCounter: true,
+  },
+});
+```
+
+#### Layout Modes
+
+| Mode | Description |
+| --- | --- |
+| `horizontal` | Default layout with toolbar at top, player controls at bottom |
+| `vertical` | Tools in a vertical sidebar (left or right side) |
+| `minimal` | Compact floating toolbar that can be dragged around |
+| `bottom-dock` | All controls merged into a single bar at the bottom |
+
+```javascript
+// Switch layout at runtime
+annotationTool.setLayout('vertical');
+annotationTool.setLayout('minimal');
+annotationTool.setLayout('bottom-dock');
+
+// Get current layout
+const currentLayout = annotationTool.getLayout();
+```
+
+#### Collapsible Toolbars (Mobile)
+
+On mobile devices, toolbars can be collapsed to maximize drawing space:
+
+```javascript
+// Programmatic control
+annotationTool.collapseToolbar();
+annotationTool.expandToolbar();
+annotationTool.toggleToolbar();
+
+// Check state
+if (annotationTool.isToolbarCollapsed()) {
+  console.log('Toolbar is hidden');
+}
+```
+
+When `autoCollapse` is enabled, the toolbar automatically hides when drawing starts and reappears when drawing ends.
+
+#### Gesture Support (Mobile)
+
+Enable pinch-to-zoom and two-finger pan for detailed annotation work:
+
+```javascript
+// Enable/disable at runtime
+annotationTool.setGesturesEnabled(true);
+
+// Reset zoom to default
+annotationTool.resetZoom();
+
+// Get current zoom level (0.5x to 3x range)
+const scale = annotationTool.getZoomScale();
+```
+
+#### CSS Customization
+
+SmAnnotate uses CSS custom properties for styling. Override these in your CSS:
+
+```css
+:root {
+  /* Colors */
+  --sm-annotate-bg-primary: rgba(28, 28, 32, 0.95);
+  --sm-annotate-bg-hover: rgba(255, 255, 255, 0.08);
+  --sm-annotate-text-primary: #f0f0f2;
+  --sm-annotate-accent: #5b9fff;
+  --sm-annotate-border: rgba(255, 255, 255, 0.1);
+
+  /* Sizing */
+  --sm-annotate-toolbar-radius: 8px;
+  --sm-annotate-toolbar-padding: 4px;
+  --sm-annotate-toolbar-gap: 2px;
+  --sm-annotate-btn-size: 32px;
+  --sm-annotate-btn-size-mobile: 44px;
+  --sm-annotate-btn-radius: 6px;
+
+  /* Typography */
+  --sm-annotate-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Animation */
+  --sm-annotate-transition-duration: 0.15s;
+
+  /* Z-index */
+  --sm-annotate-z-index-toolbar: 10;
+}
+```
+
+All CSS classes use the `sm-annotate-` prefix to prevent conflicts with host page styles.
 
 ### OpenRV Format Support
 
@@ -215,6 +346,9 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Drag on progress bar | Scrub through frames |
 | Click on annotation marker | Jump to annotated frame |
 | Long press frame buttons | Jump to next/previous annotation |
+| Pinch (two fingers) | Zoom in/out (0.5x to 3x) |
+| Two-finger drag | Pan the canvas |
+| Tap collapse button | Toggle toolbar visibility |
 
 ## Tools
 
