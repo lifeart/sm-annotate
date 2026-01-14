@@ -253,14 +253,18 @@ describe('BottomDockLayout', () => {
   let mockTool: Partial<AnnotationTool>;
   let mockContainer: HTMLDivElement;
   let mockPlayerControls: HTMLDivElement;
+  let child1: HTMLButtonElement;
+  let child2: HTMLButtonElement;
 
   beforeEach(() => {
     mockContainer = document.createElement('div');
     mockPlayerControls = document.createElement('div');
 
     // Add child elements to player controls
-    const child1 = document.createElement('button');
-    const child2 = document.createElement('button');
+    child1 = document.createElement('button');
+    child1.id = 'play-btn';
+    child2 = document.createElement('button');
+    child2.id = 'pause-btn';
     mockPlayerControls.appendChild(child1);
     mockPlayerControls.appendChild(child2);
 
@@ -287,7 +291,69 @@ describe('BottomDockLayout', () => {
     layout.apply(mockTool as AnnotationTool);
 
     expect(mockPlayerControls.childNodes.length).toBe(0);
-    expect(mockContainer.childNodes.length).toBe(2);
+    // 3 children: divider + 2 moved elements
+    expect(mockContainer.childNodes.length).toBe(3);
+  });
+
+  it('should add divider with correct class before player controls', () => {
+    layout.apply(mockTool as AnnotationTool);
+
+    const firstChild = mockContainer.firstChild as HTMLElement;
+    expect(firstChild.classList.contains('sm-annotate-divider')).toBe(true);
+  });
+
+  it('should preserve element references when moving', () => {
+    layout.apply(mockTool as AnnotationTool);
+
+    // The original elements should be in the container (not clones)
+    expect(mockContainer.querySelector('#play-btn')).toBe(child1);
+    expect(mockContainer.querySelector('#pause-btn')).toBe(child2);
+  });
+
+  it('should restore player control children on cleanup', () => {
+    layout.apply(mockTool as AnnotationTool);
+    expect(mockPlayerControls.childNodes.length).toBe(0);
+
+    layout.cleanup();
+
+    // Elements should be moved back to player controls
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+    // Divider should be removed from container
+    expect(mockContainer.childNodes.length).toBe(0);
+  });
+
+  it('should restore same element references on cleanup', () => {
+    layout.apply(mockTool as AnnotationTool);
+    layout.cleanup();
+
+    // The original elements should be back in player controls
+    expect(mockPlayerControls.querySelector('#play-btn')).toBe(child1);
+    expect(mockPlayerControls.querySelector('#pause-btn')).toBe(child2);
+  });
+
+  it('should handle multiple apply/cleanup cycles', () => {
+    // First cycle
+    layout.apply(mockTool as AnnotationTool);
+    expect(mockPlayerControls.childNodes.length).toBe(0);
+    expect(mockContainer.childNodes.length).toBe(3);
+
+    layout.cleanup();
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+    expect(mockContainer.childNodes.length).toBe(0);
+
+    // Second cycle
+    layout.apply(mockTool as AnnotationTool);
+    expect(mockPlayerControls.childNodes.length).toBe(0);
+    expect(mockContainer.childNodes.length).toBe(3);
+
+    layout.cleanup();
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+    expect(mockContainer.childNodes.length).toBe(0);
+  });
+
+  it('should handle cleanup without prior apply', () => {
+    // Cleanup without apply should not throw
+    expect(() => layout.cleanup()).not.toThrow();
   });
 
   it('should handle missing containers gracefully', () => {
@@ -302,5 +368,113 @@ describe('BottomDockLayout', () => {
   it('should not throw on cleanup', () => {
     layout.apply(mockTool as AnnotationTool);
     expect(() => layout.cleanup()).not.toThrow();
+  });
+});
+
+describe('Layout switching integration', () => {
+  let layoutManager: LayoutManager;
+  let mockTool: Partial<AnnotationTool>;
+  let mockCanvas: HTMLCanvasElement;
+  let mockParent: HTMLDivElement;
+  let mockUiContainer: HTMLDivElement;
+  let mockPlayerControls: HTMLDivElement;
+  let playBtn: HTMLButtonElement;
+  let pauseBtn: HTMLButtonElement;
+
+  beforeEach(() => {
+    mockParent = document.createElement('div');
+    mockCanvas = document.createElement('canvas');
+    mockUiContainer = document.createElement('div');
+    mockPlayerControls = document.createElement('div');
+
+    // Add buttons to player controls
+    playBtn = document.createElement('button');
+    playBtn.id = 'play-btn';
+    pauseBtn = document.createElement('button');
+    pauseBtn.id = 'pause-btn';
+    mockPlayerControls.appendChild(playBtn);
+    mockPlayerControls.appendChild(pauseBtn);
+
+    mockParent.appendChild(mockCanvas);
+
+    mockTool = {
+      canvas: mockCanvas,
+      uiContainer: mockUiContainer,
+      playerControlsContainer: mockPlayerControls,
+      config: {
+        layout: 'horizontal',
+        theme: 'dark',
+        mobile: {
+          collapsibleToolbars: true,
+          gesturesEnabled: true,
+          autoCollapse: true,
+          breakpoint: 960,
+        },
+        toolbar: {
+          draggable: false,
+          sidebarPosition: 'left',
+        },
+        features: {
+          showThemeToggle: true,
+          showFullscreen: true,
+          showProgressBar: true,
+          showFrameCounter: true,
+        },
+      },
+    };
+
+    layoutManager = new LayoutManager(mockTool as AnnotationTool);
+  });
+
+  afterEach(() => {
+    layoutManager.destroy();
+  });
+
+  it('should preserve player controls when switching from bottom-dock to horizontal', () => {
+    layoutManager.setLayout('bottom-dock');
+    expect(mockPlayerControls.childNodes.length).toBe(0);
+
+    layoutManager.setLayout('horizontal');
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+    expect(mockPlayerControls.querySelector('#play-btn')).toBe(playBtn);
+    expect(mockPlayerControls.querySelector('#pause-btn')).toBe(pauseBtn);
+  });
+
+  it('should preserve player controls when switching from bottom-dock to vertical', () => {
+    layoutManager.setLayout('bottom-dock');
+    layoutManager.setLayout('vertical');
+
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+  });
+
+  it('should preserve player controls when switching from bottom-dock to minimal', () => {
+    layoutManager.setLayout('bottom-dock');
+    layoutManager.setLayout('minimal');
+
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+  });
+
+  it('should handle rapid layout switching', () => {
+    const layouts: LayoutMode[] = ['horizontal', 'vertical', 'minimal', 'bottom-dock'];
+
+    for (let i = 0; i < 10; i++) {
+      const layout = layouts[i % layouts.length];
+      layoutManager.setLayout(layout);
+      expect(layoutManager.getCurrentLayout()).toBe(layout);
+    }
+
+    // After all switching, elements should still be intact
+    layoutManager.setLayout('horizontal');
+    expect(mockPlayerControls.childNodes.length).toBe(2);
+  });
+
+  it('should handle switching to same layout multiple times', () => {
+    layoutManager.setLayout('bottom-dock');
+    layoutManager.setLayout('bottom-dock');
+    layoutManager.setLayout('bottom-dock');
+
+    // Should still work correctly
+    layoutManager.setLayout('horizontal');
+    expect(mockPlayerControls.childNodes.length).toBe(2);
   });
 });

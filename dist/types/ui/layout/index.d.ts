@@ -125,6 +125,9 @@ declare class MinimalLayout implements LayoutRenderer {
 declare class BottomDockLayout implements LayoutRenderer {
     readonly name: LayoutMode;
     private movedElements;
+    private playerControls;
+    private divider;
+    private prefix;
     apply(tool: AnnotationTool): void;
     cleanup(): void;
 }

@@ -297,6 +297,9 @@ class MinimalLayout implements LayoutRenderer {
 class BottomDockLayout implements LayoutRenderer {
   readonly name: LayoutMode = 'bottom-dock';
   private movedElements: HTMLElement[] = [];
+  private playerControls: HTMLElement | null = null;
+  private divider: HTMLElement | null = null;
+  private prefix = getCSSPrefix();
 
   apply(tool: AnnotationTool): void {
     // Move player controls children into main container
@@ -304,6 +307,13 @@ class BottomDockLayout implements LayoutRenderer {
     const playerControls = tool.playerControlsContainer;
 
     if (container && playerControls) {
+      this.playerControls = playerControls;
+
+      // Add a divider before player controls elements
+      this.divider = document.createElement('div');
+      this.divider.classList.add(`${this.prefix}-divider`);
+      container.appendChild(this.divider);
+
       // Move each child from player controls to main container
       while (playerControls.firstChild) {
         const child = playerControls.firstChild as HTMLElement;
@@ -314,8 +324,21 @@ class BottomDockLayout implements LayoutRenderer {
   }
 
   cleanup(): void {
-    // Elements will be re-rendered on layout change
+    // Move elements back to player controls
+    if (this.playerControls) {
+      for (const element of this.movedElements) {
+        this.playerControls.appendChild(element);
+      }
+    }
+
+    // Remove the divider we added
+    if (this.divider && this.divider.parentNode) {
+      this.divider.parentNode.removeChild(this.divider);
+    }
+
     this.movedElements = [];
+    this.playerControls = null;
+    this.divider = null;
   }
 }
 
