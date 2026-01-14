@@ -197,27 +197,26 @@ function parseGTOText(content: string): GTOObject[] {
  * OpenRV uses NDC where:
  * - (0, 0) is the center of the image
  * - X: -1 (left) to 1 (right)
- * - Y: -1 (bottom) to 1 (top)
+ * - Y: scaled by inverse of aspect ratio: -(h/w) to +(h/w)
  *
  * sm-annotate uses:
  * - (0, 0) is the top-left corner
  * - X: 0 (left) to 1 (right)
  * - Y: 0 (top) to 1 (bottom)
  *
- * When aspect ratio differs from 1:1, OpenRV may use different X range.
- * We account for this by scaling X based on aspect ratio.
+ * OpenRV stores X coordinates in -1 to +1 range, but Y is scaled
+ * by the inverse of aspect ratio (height/width).
  */
 function convertOpenRVToSmAnnotate(
   openrvX: number,
   openrvY: number,
   aspectRatio: number
 ): { x: number; y: number } {
-  // OpenRV X is scaled by aspect ratio: ranges from -aspectRatio to +aspectRatio
-  // Normalize to -1..1 first, then convert to 0..1
-  const normalizedX = openrvX / aspectRatio;
+  // OpenRV X: -1 to +1 centered
+  // OpenRV Y: -(h/w) to +(h/w) centered, need to scale by aspect ratio to normalize
   return {
-    x: (normalizedX + 1) / 2,
-    y: (1 - openrvY) / 2,
+    x: (openrvX + 1) / 2,
+    y: (1 - openrvY * aspectRatio) / 2,
   };
 }
 
@@ -366,19 +365,58 @@ export function parseOpenRV(
       }
     }
 
-    const requestComp = fileSourceObj.components.get('request');
-    if (requestComp) {
-      const w = requestComp.get('width');
-      const h = requestComp.get('height');
-      if (typeof w === 'number' && typeof h === 'number') {
-        result.dimensions = { width: w, height: h };
+    // Try to get dimensions from proxy component (contains source media size)
+    const proxyComp = fileSourceObj.components.get('proxy');
+    if (proxyComp) {
+      const size = proxyComp.get('size') as number[] | undefined;
+      if (size && size.length >= 2) {
+        result.dimensions = { width: size[0], height: size[1] };
+      }
+    }
+
+    // Fallback: try request component (used in some .rv files and tests)
+    if (!result.dimensions) {
+      const requestComp = fileSourceObj.components.get('request');
+      if (requestComp) {
+        const w = requestComp.get('width');
+        const h = requestComp.get('height');
+        if (typeof w === 'number' && typeof h === 'number') {
+          result.dimensions = { width: w, height: h };
+        }
       }
     }
   }
 
-  // Use dimensions from options or from file
-  const width = options.width ?? result.dimensions?.width ?? 1920;
-  const height = options.height ?? result.dimensions?.height ?? 1080;
+  // Fallback: try to get dimensions from RVStack or RVSequence output
+  if (!result.dimensions) {
+    const stackObj = objects.find(o => o.protocol === 'RVStack');
+    if (stackObj) {
+      const outputComp = stackObj.components.get('output');
+      if (outputComp) {
+        const size = outputComp.get('size') as number[] | undefined;
+        if (size && size.length >= 2) {
+          result.dimensions = { width: size[0], height: size[1] };
+        }
+      }
+    }
+  }
+
+  if (!result.dimensions) {
+    const seqObj = objects.find(o => o.protocol === 'RVSequence');
+    if (seqObj) {
+      const outputComp = seqObj.components.get('output');
+      if (outputComp) {
+        const size = outputComp.get('size') as number[] | undefined;
+        if (size && size.length >= 2) {
+          result.dimensions = { width: size[0], height: size[1] };
+        }
+      }
+    }
+  }
+
+  // Use dimensions from file first (needed for line width denormalization and aspect ratio), then fallback to options
+  const width = result.dimensions?.width ?? options.width ?? 1920;
+  const height = result.dimensions?.height ?? options.height ?? 1080;
   const fps = options.fps ?? 25;
 
   result.fps = fps;

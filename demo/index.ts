@@ -209,14 +209,15 @@ async function initAnnotator() {
     }
     const file = rvFileInput.files[0];
     try {
-      // Use actual video dimensions for correct aspect ratio conversion
-      const videoWidth = video.videoWidth || tool.canvasWidth || 1920;
-      const videoHeight = video.videoHeight || tool.canvasHeight || 1080;
+      // Parse without passing dimensions - let the parser extract from file
       const result = await parseOpenRVFile(file, {
-        width: videoWidth,
-        height: videoHeight,
         fps: tool.fps,
       });
+
+      // Debug: log dimensions used
+      console.log("RV file dimensions:", result.dimensions);
+      console.log("Demo video dimensions:", video.videoWidth, "x", video.videoHeight);
+      console.log("Canvas dimensions:", tool.canvasWidth, "x", tool.canvasHeight);
 
       const append = confirm("Append to existing annotations?");
       if (!append) {
@@ -232,6 +233,9 @@ async function initAnnotator() {
       // Log loaded annotations info
       const annotatedFrames = result.frames.map(f => f.frame);
       console.log(`Loaded ${result.frames.length} annotated frames:`, annotatedFrames);
+      if (result.frames.length > 0) {
+        console.log("First frame shapes:", result.frames[0].shapes);
+      }
 
       if (result.mediaPath) {
         console.log("OpenRV media path:", result.mediaPath);

@@ -246,18 +246,45 @@ function parseOpenRV(content, options = {}) {
       }
     }
 
-    const requestComp = fileSourceObj.components.get('request');
-    if (requestComp) {
-      const w = requestComp.get('width');
-      const h = requestComp.get('height');
-      if (typeof w === 'number' && typeof h === 'number') {
-        result.dimensions = { width: w, height: h };
+    // Try to get dimensions from proxy component (contains source media size)
+    const proxyComp = fileSourceObj.components.get('proxy');
+    if (proxyComp) {
+      const size = proxyComp.get('size');
+      if (Array.isArray(size) && size.length >= 2) {
+        result.dimensions = { width: size[0], height: size[1] };
+      }
+    }
+
+    // Fallback: try request component (used in some .rv files)
+    if (!result.dimensions) {
+      const requestComp = fileSourceObj.components.get('request');
+      if (requestComp) {
+        const w = requestComp.get('width');
+        const h = requestComp.get('height');
+        if (typeof w === 'number' && typeof h === 'number') {
+          result.dimensions = { width: w, height: h };
+        }
       }
     }
   }
 
-  const width = options.width ?? result.dimensions?.width ?? 1920;
-  const height = options.height ?? result.dimensions?.height ?? 1080;
+  // Fallback: try to get dimensions from RVStack output
+  if (!result.dimensions) {
+    const stackObj = objects.find(o => o.protocol === 'RVStack');
+    if (stackObj) {
+      const outputComp = stackObj.components.get('output');
+      if (outputComp) {
+        const size = outputComp.get('size');
+        if (Array.isArray(size) && size.length >= 2) {
+          result.dimensions = { width: size[0], height: size[1] };
+        }
+      }
+    }
+  }
+
+  // Use dimensions from file first, then fallback to options
+  const width = result.dimensions?.width ?? options.width ?? 1920;
+  const height = result.dimensions?.height ?? options.height ?? 1080;
   const fps = options.fps ?? 25;
 
   result.fps = fps;
@@ -317,8 +344,8 @@ function parseOpenRV(content, options = {}) {
 const filePath = join(__dirname, '../demo/test_session.rv');
 const content = readFileSync(filePath, 'utf-8');
 
-// Parse with dimensions from the file (1280x536 based on proxy.size in the file)
-const result = parseOpenRV(content, { width: 1280, height: 536, fps: 24 });
+// Parse - dimensions will be extracted from the file automatically
+const result = parseOpenRV(content, { fps: 24 });
 
 console.log('=== Parsed OpenRV Result ===\n');
 
