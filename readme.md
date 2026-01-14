@@ -40,7 +40,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Comprehensive test coverage (580+ tests with Vitest)
+* 🧪 Comprehensive test coverage (619 tests with Vitest)
 
 ## Getting Started
 
@@ -288,7 +288,9 @@ fileInput.addEventListener('change', async (e) => {
 
 **Rotation support:** Shapes with rotation are fully supported. The rotation is "baked in" to the exported coordinates, including support for custom rotation centers. Text rotation only affects the anchor position since OpenRV text doesn't natively support rotation.
 
-**Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported.
+**Coordinate system:** OpenRV uses Normalized Device Coordinates (NDC) centered at the image center, while sm-annotate uses 0-1 normalized coordinates with origin at top-left. The converter handles this automatically, including proper aspect ratio scaling for non-square images (ultrawide, portrait, etc.).
+
+**Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported. Files with multiple RVPaint blocks (common in real OpenRV sessions) are fully supported.
 
 ### Frame Navigation
 
