@@ -197,26 +197,23 @@ function parseGTOText(content: string): GTOObject[] {
  * OpenRV uses NDC where:
  * - (0, 0) is the center of the image
  * - X: -1 (left) to 1 (right)
- * - Y: scaled by inverse of aspect ratio: -(h/w) to +(h/w)
+ * - Y: -1 (bottom) to 1 (top)
  *
  * sm-annotate uses:
  * - (0, 0) is the top-left corner
  * - X: 0 (left) to 1 (right)
  * - Y: 0 (top) to 1 (bottom)
- *
- * OpenRV stores X coordinates in -1 to +1 range, but Y is scaled
- * by the inverse of aspect ratio (height/width).
  */
 function convertOpenRVToSmAnnotate(
   openrvX: number,
   openrvY: number,
-  aspectRatio: number
+  _aspectRatio: number
 ): { x: number; y: number } {
   // OpenRV X: -1 to +1 centered
-  // OpenRV Y: -(h/w) to +(h/w) centered, need to scale by aspect ratio to normalize
+  // OpenRV Y: -1 to +1 centered (Y+ is up, so we invert)
   return {
     x: (openrvX + 1) / 2,
-    y: (1 - openrvY * aspectRatio) / 2,
+    y: (1 - openrvY) / 2,
   };
 }
 

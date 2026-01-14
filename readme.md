@@ -289,7 +289,7 @@ fileInput.addEventListener('change', async (e) => {
 
 **Rotation support:** Shapes with rotation are fully supported. The rotation is "baked in" to the exported coordinates, including support for custom rotation centers. Text rotation only affects the anchor position since OpenRV text doesn't natively support rotation.
 
-**Coordinate system:** OpenRV uses Normalized Device Coordinates (NDC) centered at the image center, while sm-annotate uses 0-1 normalized coordinates with origin at top-left. The converter handles this automatically, including proper aspect ratio scaling for non-square images (ultrawide, portrait, etc.).
+**Coordinate system:** OpenRV uses Normalized Device Coordinates (NDC) centered at the image center (-1 to +1 range, Y+ is up), while sm-annotate uses 0-1 normalized coordinates with origin at top-left (Y+ is down). The converter handles this transformation automatically.
 
 **Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported. Files with multiple RVPaint blocks (common in real OpenRV sessions) are fully supported.
 

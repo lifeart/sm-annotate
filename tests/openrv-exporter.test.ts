@@ -410,11 +410,10 @@ describe('OpenRV Exporter', () => {
 
       const result = exportToOpenRV(frames, options);
 
-      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -(h/w) to +(h/w)
-      // For 1000x500, aspectRatio = 2, Y range is -0.5 to +0.5
-      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0): x = 0.5*2-1 = 0, y = (1-0.5*2)/2 = 0
-      // sm-annotate (1.0, 1.0) -> OpenRV (1, -0.5): x = 1.0*2-1 = 1, y = (1-1.0*2)/2 = -0.5
-      expect(result).toContain('points = [ [ 0 0 ] [ 1 -0.5 ] ]');
+      // OpenRV uses NDC: -1 to +1 for both X and Y (center origin)
+      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0): x = 0.5*2-1 = 0, y = 1-0.5*2 = 0
+      // sm-annotate (1.0, 1.0) -> OpenRV (1, -1): x = 1.0*2-1 = 1, y = 1-1.0*2 = -1
+      expect(result).toContain('points = [ [ 0 0 ] [ 1 -1 ] ]');
     });
 
     it('should handle rgb() color format', () => {
@@ -900,11 +899,9 @@ describe('OpenRV Exporter', () => {
 
   describe('coordinate conversion for various aspect ratios', () => {
     it('should convert to correct OpenRV NDC for ultrawide (21:9) aspect ratio', () => {
-      // Ultrawide 21:9 -> aspectRatio = 2560/1080 ≈ 2.37
-      // OpenRV Y is scaled by inverse of aspect ratio: -(h/w) to +(h/w) = -0.422 to +0.422
+      // OpenRV uses -1 to +1 for both X and Y (no aspect ratio scaling)
       const width = 2560;
       const height = 1080;
-      const aspectRatio = width / height;
 
       const shape: ILine = {
         type: 'line',
@@ -928,19 +925,16 @@ describe('OpenRV Exporter', () => {
         height,
       });
 
-      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -(h/w) to +(h/w)
-      // sm-annotate (0, 0) -> OpenRV (-1, 0.422): x = -1, y = (1-0)/aspectRatio = 0.422
-      // sm-annotate (1, 1) -> OpenRV (1, -0.422): x = 1, y = (1-2)/aspectRatio = -0.422
-      // Note: These values may be slightly different due to floating point precision
-      expect(result).toMatch(/\[ \[ -1 0\.42\d* \] \[ 1 -0\.42\d* \] \]/);
+      // OpenRV uses NDC: -1 to +1 for both X and Y
+      // sm-annotate (0, 0) -> OpenRV (-1, 1): x = -1, y = 1-0*2 = 1
+      // sm-annotate (1, 1) -> OpenRV (1, -1): x = 1, y = 1-1*2 = -1
+      expect(result).toContain('[ [ -1 1 ] [ 1 -1 ] ]');
     });
 
     it('should convert to correct OpenRV NDC for portrait (9:16) aspect ratio', () => {
-      // Portrait 9:16 -> aspectRatio = 1080/1920 = 0.5625
-      // OpenRV Y is scaled by inverse of aspect ratio: -(h/w) to +(h/w) = -1.778 to +1.778
+      // OpenRV uses -1 to +1 for both X and Y (no aspect ratio scaling)
       const width = 1080;
       const height = 1920;
-      const aspectRatio = width / height;
 
       const shape: ILine = {
         type: 'line',
@@ -964,10 +958,10 @@ describe('OpenRV Exporter', () => {
         height,
       });
 
-      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -(h/w) to +(h/w)
-      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0): x = 0, y = (1-1)/aspectRatio = 0
-      // sm-annotate (1.0, 1.0) -> OpenRV (1, -1.778): x = 1, y = (1-2)/aspectRatio = -1.778
-      expect(result).toMatch(/\[ \[ 0 0 \] \[ 1 -1\.77\d* \] \]/);
+      // OpenRV uses NDC: -1 to +1 for both X and Y
+      // sm-annotate (0.5, 0.5) -> OpenRV (0, 0): x = 0, y = 1-0.5*2 = 0
+      // sm-annotate (1.0, 1.0) -> OpenRV (1, -1): x = 1, y = 1-1*2 = -1
+      expect(result).toContain('[ [ 0 0 ] [ 1 -1 ] ]');
     });
 
     it('should convert to correct OpenRV NDC for square (1:1) aspect ratio', () => {
@@ -1002,14 +996,13 @@ describe('OpenRV Exporter', () => {
     });
 
     it('should convert text position correctly for various aspect ratios', () => {
-      // OpenRV Y is scaled by inverse of aspect ratio
+      // OpenRV uses -1 to +1 for both X and Y (no aspect ratio scaling)
       const width = 1920;
       const height = 1080;
-      const aspectRatio = width / height;
 
       const shape: IText = {
         type: 'text',
-        // sm-annotate top-left (0, 0) should map to OpenRV (-1, 0.5625)
+        // sm-annotate top-left (0, 0) should map to OpenRV (-1, 1)
         x: 0,
         y: 0,
         text: 'Top Left',
@@ -1028,9 +1021,9 @@ describe('OpenRV Exporter', () => {
         height,
       });
 
-      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -(h/w) to +(h/w)
-      // sm-annotate (0, 0) -> OpenRV (-1, 0.5625): x = -1, y = (1-0)/aspectRatio = 0.5625
-      expect(result).toMatch(/position = \[ \[ -1 0\.56\d* \] \]/);
+      // OpenRV uses NDC: -1 to +1 for both X and Y
+      // sm-annotate (0, 0) -> OpenRV (-1, 1): x = -1, y = 1-0*2 = 1
+      expect(result).toContain('position = [ [ -1 1 ] ]');
     });
 
     it('should normalize lineWidth correctly for different heights', () => {
