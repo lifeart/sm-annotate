@@ -1,6 +1,6 @@
 new EventSource("/esbuild").addEventListener("change", () => location.reload());
 
-import { SmAnnotate } from "../src";
+import { SmAnnotate, downloadAsOpenRV, parseOpenRVFile } from "../src";
 
 const video = document.querySelector("video") as HTMLVideoElement;
 
@@ -193,6 +193,65 @@ async function initAnnotator() {
     const prettyDate = new Date().toISOString().replace(/:/g, "-");
     a.download = `annotations-${prettyDate}.json`;
     a.click();
+  });
+
+  // OpenRV format support
+  const rvFileInput = document.getElementById("rv-file") as HTMLInputElement;
+  const downloadRvButton = document.getElementById("download-rv") as HTMLButtonElement;
+
+  rvFileInput.addEventListener("change", async (e) => {
+    if (!rvFileInput.files || rvFileInput.files.length === 0) {
+      return;
+    }
+    const file = rvFileInput.files[0];
+    try {
+      const result = await parseOpenRVFile(file, {
+        width: tool.canvasWidth || 1920,
+        height: tool.canvasHeight || 1080,
+        fps: tool.fps,
+      });
+
+      const append = confirm("Append to existing annotations?");
+      if (!append) {
+        tool.loadAllFrames(result.frames);
+      } else {
+        tool.appendFrames(result.frames);
+      }
+      tool.redrawFullCanvas();
+
+      if (result.mediaPath) {
+        console.log("OpenRV media path:", result.mediaPath);
+      }
+      if (result.sessionName) {
+        console.log("OpenRV session:", result.sessionName);
+      }
+    } catch (err) {
+      console.error("Failed to parse OpenRV file:", err);
+      alert("Failed to parse OpenRV file. Check console for details.");
+    }
+  });
+
+  downloadRvButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const frames = tool.saveAllFrames();
+    if (frames.length === 0) {
+      alert("No annotations to export.");
+      return;
+    }
+
+    const prettyDate = new Date().toISOString().replace(/:/g, "-");
+    downloadAsOpenRV(
+      frames,
+      {
+        mediaPath: video.currentSrc || "video.mp4",
+        width: tool.canvasWidth || 1920,
+        height: tool.canvasHeight || 1080,
+        sessionName: `sm-annotate-${prettyDate}`,
+      },
+      `annotations-${prettyDate}.rv`
+    );
   });
 }
 

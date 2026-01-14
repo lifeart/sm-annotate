@@ -12,3 +12,17 @@ AnnotationTool.prototype.addVideoOverlay = addVideoOverlay;
 AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
 
 export { AnnotationTool as SmAnnotate, FrameAnnotationV1 };
+
+// Exporters & Parsers
+export {
+  // OpenRV export
+  exportToOpenRV,
+  downloadAsOpenRV,
+  hexToRGBA,
+  type OpenRVExportOptions,
+  // OpenRV import
+  parseOpenRV,
+  parseOpenRVFile,
+  rgbaToHex,
+  type ParsedOpenRVResult,
+} from './exporters';
