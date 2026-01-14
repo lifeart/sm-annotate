@@ -51,6 +51,7 @@ export function rgbaToHex(rgba: number[]): string {
 
 /**
  * Parse a GTO property value from string
+ * Handles both flat arrays and nested arrays like [ [ x y ] [ x y ] ]
  */
 function parsePropertyValue(valueStr: string, type: string): GTOPropertyValue {
   valueStr = valueStr.trim();
@@ -59,14 +60,38 @@ function parsePropertyValue(valueStr: string, type: string): GTOPropertyValue {
   if (valueStr.startsWith('[') && valueStr.endsWith(']')) {
     const inner = valueStr.slice(1, -1).trim();
 
-    // Handle string arrays
-    if (type === 'string') {
-      const matches = inner.match(/"([^"\\]|\\.)*"/g);
-      return matches ? matches.map(s => s.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n')) : [];
+    // Empty array
+    if (inner === '') {
+      return type === 'string' ? [] : [];
     }
 
-    // Handle numeric arrays
-    const numbers = inner.split(/\s+/).filter(s => s.length > 0).map(Number);
+    // Handle string arrays - can be single string or array of strings
+    if (type === 'string') {
+      const matches = inner.match(/"([^"\\]|\\.)*"/g);
+      if (matches) {
+        return matches.map(s => s.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n'));
+      }
+      // Single unquoted string in array
+      return [];
+    }
+
+    // Check for nested arrays format: [ [ x y ] [ x y ] ]
+    // OpenRV uses this for points, colors, etc.
+    if (inner.includes('[')) {
+      // Extract all numbers from nested structure
+      const numbers: number[] = [];
+      // Match all numbers (including negative and scientific notation)
+      const numMatches = inner.match(/-?\d+\.?\d*(?:e[+-]?\d+)?/gi);
+      if (numMatches) {
+        for (const num of numMatches) {
+          numbers.push(Number(num));
+        }
+      }
+      return numbers;
+    }
+
+    // Handle flat numeric arrays
+    const numbers = inner.split(/\s+/).filter(s => s.length > 0 && !isNaN(Number(s))).map(Number);
     return numbers;
   }
 
@@ -130,13 +155,27 @@ function parseGTOText(content: string): GTOObject[] {
 
     // Inside an object
     if (currentObject && braceDepth >= 1) {
-      // Component name (no assignment)
-      if (!line.includes('=') && !line.includes('[') && braceDepth === 1) {
-        currentComponent = line;
-        if (!currentObject.components.has(currentComponent)) {
-          currentObject.components.set(currentComponent, new Map());
+      // Component name - can be quoted (OpenRV format) or unquoted
+      // Quoted: "pen:1:15:User" or "frame:15"
+      // Unquoted: pen:0:1:user or paint
+      if (braceDepth === 1) {
+        // Check for quoted component name: "something"
+        const quotedMatch = line.match(/^"([^"]+)"$/);
+        if (quotedMatch) {
+          currentComponent = quotedMatch[1];
+          if (!currentObject.components.has(currentComponent)) {
+            currentObject.components.set(currentComponent, new Map());
+          }
+          continue;
         }
-        continue;
+        // Unquoted component name (no assignment, no brackets)
+        if (!line.includes('=') && !line.includes('[')) {
+          currentComponent = line;
+          if (!currentObject.components.has(currentComponent)) {
+            currentObject.components.set(currentComponent, new Map());
+          }
+          continue;
+        }
       }
 
       // Property assignment: type[dims] name = value
@@ -162,7 +201,7 @@ function penComponentToCurve(
 ): ICurve | null {
   const pointsData = props.get('points') as number[] | undefined;
   const colorData = props.get('color') as number[] | undefined;
-  const lineWidth = props.get('width') as number | undefined;
+  const widthData = props.get('width');
 
   if (!pointsData || pointsData.length < 4) {
     return null;
@@ -180,12 +219,21 @@ function penComponentToCurve(
   const color = colorData ? rgbaToHex(colorData) : '#000000';
   const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
 
+  // Handle width - can be a single number or an array (one per point)
+  let lineWidth = 2;
+  if (typeof widthData === 'number') {
+    lineWidth = widthData;
+  } else if (Array.isArray(widthData) && widthData.length > 0) {
+    // Use average of all widths, or first value
+    lineWidth = widthData[0];
+  }
+
   return {
     type: 'curve',
     points,
     strokeStyle: color,
     fillStyle: color,
-    lineWidth: lineWidth ?? 2,
+    lineWidth,
     opacity,
   };
 }
@@ -291,8 +339,8 @@ export function parseOpenRV(
   const frameShapes = new Map<number, IShape[]>();
 
   for (const [compName, props] of paintObj.components) {
-    // Parse pen components: pen:ID:FRAME:user
-    const penMatch = compName.match(/^pen:\d+:(\d+):/);
+    // Parse pen components: pen:ID:FRAME:user or pen:ID:FRAME:User (case-insensitive)
+    const penMatch = compName.match(/^pen:\d+:(\d+):/i);
     if (penMatch) {
       const frame = parseInt(penMatch[1]);
       const shape = penComponentToCurve(props, width, height);
@@ -305,8 +353,8 @@ export function parseOpenRV(
       continue;
     }
 
-    // Parse text components: text:ID:FRAME:user
-    const textMatch = compName.match(/^text:\d+:(\d+):/);
+    // Parse text components: text:ID:FRAME:user or text:ID:FRAME:User (case-insensitive)
+    const textMatch = compName.match(/^text:\d+:(\d+):/i);
     if (textMatch) {
       const frame = parseInt(textMatch[1]);
       const shape = textComponentToText(props, width, height);
