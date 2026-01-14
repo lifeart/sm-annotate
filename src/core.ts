@@ -1100,10 +1100,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   redrawFullCanvas() {
-    if (!this.hasGlobalOverlays) {
-      this.clearCanvas();
-      this.addVideoOverlay();
-    }
+    this.clearCanvas();
+    this.addVideoOverlay();
     this.drawShapesOverlay();
     this.drawSelectionHandles();
     this.addFrameSquareOverlay();
@@ -1309,16 +1307,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     if (!this.isAnnotationsAsVideoActive) {
       return;
     }
-    if (!this.hasGlobalOverlays) {
-      this.clearCanvas();
-    }
-    if (this.isMobile) {
-      if (!this.hasGlobalOverlays) {
-        this.addVideoOverlay();
-      }
-    } else {
-      this.addVideoOverlay();
-    }
+    this.clearCanvas();
+    this.addVideoOverlay();
     this.drawShapesOverlay();
     // Show frame overlay and progress bar only when cursor is over canvas (or on mobile)
     if (this.isCursorOverCanvas || this.isMobile) {
