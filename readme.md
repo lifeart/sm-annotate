@@ -40,7 +40,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Comprehensive test coverage (440+ tests with Vitest)
+* 🧪 Comprehensive test coverage (580+ tests with Vitest)
 
 ## Getting Started
 

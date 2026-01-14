@@ -377,7 +377,7 @@ describe('CompareToolPlugin', () => {
       };
       mockAnnotationTool.videoFrameBuffer = {
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
-        getHistogram: vi.fn(),
+        getAudioFingerprint: vi.fn(),
       };
       mockCtx.drawImage = vi.fn();
       mockCtx.globalAlpha = 1;
@@ -506,7 +506,7 @@ describe('CompareToolPlugin', () => {
       expect(mockCtx.drawImage).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle CUSTOM_FSYNC when reference video is much larger', () => {
+    it('should handle audio sync when reference video is much larger', () => {
       const video1 = document.createElement('video');
       Object.defineProperty(video1, 'videoWidth', { value: 640 });
       Object.defineProperty(video1, 'videoHeight', { value: 480 });
@@ -528,7 +528,7 @@ describe('CompareToolPlugin', () => {
       };
       mockAnnotationTool.videoFrameBuffer = {
         getFrame: vi.fn(() => ({ width: 640, height: 480 })),
-        getHistogram: vi.fn(() => [1, 2, 3]),
+        getAudioFingerprint: vi.fn(() => [0.1, 0.2, 0.3]),
       };
       mockCtx.drawImage = vi.fn();
 
