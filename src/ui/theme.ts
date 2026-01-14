@@ -72,11 +72,37 @@ function generateThemeCSS(theme: ThemeColors): string {
     --${PREFIX}-accent: ${theme.accent};
     --${PREFIX}-accent-hover: ${theme.accentHover};
     --${PREFIX}-shadow: ${theme.shadow};
+
+    /* Customizable sizing and layout variables */
+    --${PREFIX}-toolbar-radius: 8px;
+    --${PREFIX}-toolbar-padding: 4px;
+    --${PREFIX}-toolbar-gap: 2px;
+    --${PREFIX}-btn-size: 32px;
+    --${PREFIX}-btn-size-mobile: 44px;
+    --${PREFIX}-btn-radius: 6px;
+    --${PREFIX}-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --${PREFIX}-transition-duration: 0.15s;
+    --${PREFIX}-z-index-toolbar: 10;
+    --${PREFIX}-z-index-tooltip: 1000;
   `;
 }
 
 function generateStyles(): string {
   return `
+    /* Root container for CSS isolation */
+    .${PREFIX}-root {
+      font-family: var(--${PREFIX}-font-family);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .${PREFIX}-root *,
+    .${PREFIX}-root *::before,
+    .${PREFIX}-root *::after {
+      box-sizing: border-box;
+    }
+
     .${PREFIX}-container {
       position: absolute;
       top: 0;
@@ -86,15 +112,16 @@ function generateStyles(): string {
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      gap: 2px;
-      padding: 4px;
+      gap: var(--${PREFIX}-toolbar-gap);
+      padding: var(--${PREFIX}-toolbar-padding);
       background: var(--${PREFIX}-bg-primary);
       border: 1px solid var(--${PREFIX}-border);
-      border-radius: 8px;
+      border-radius: var(--${PREFIX}-toolbar-radius);
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
-      z-index: 10;
+      z-index: var(--${PREFIX}-z-index-toolbar);
       margin-top: 8px;
+      font-family: var(--${PREFIX}-font-family);
     }
 
     .${PREFIX}-player-controls {
@@ -106,15 +133,199 @@ function generateStyles(): string {
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      gap: 2px;
-      padding: 4px;
+      gap: var(--${PREFIX}-toolbar-gap);
+      padding: var(--${PREFIX}-toolbar-padding);
       background: var(--${PREFIX}-bg-primary);
       border: 1px solid var(--${PREFIX}-border);
-      border-radius: 8px;
+      border-radius: var(--${PREFIX}-toolbar-radius);
       backdrop-filter: blur(12px);
       box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
-      z-index: 10;
+      z-index: var(--${PREFIX}-z-index-toolbar);
       margin-bottom: 8px;
+      font-family: var(--${PREFIX}-font-family);
+    }
+
+    /* ==================== LAYOUT MODES ==================== */
+
+    /* Horizontal layout (default) - already styled above */
+    .${PREFIX}-layout-horizontal .${PREFIX}-container {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      flex-direction: row;
+    }
+
+    /* Vertical sidebar layout */
+    .${PREFIX}-layout-vertical .${PREFIX}-container {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      flex-direction: column;
+      margin-top: 0;
+      margin-left: 8px;
+    }
+
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-container {
+      left: auto;
+      right: 0;
+      margin-left: 0;
+      margin-right: 8px;
+    }
+
+    .${PREFIX}-layout-vertical .${PREFIX}-divider {
+      width: 20px;
+      height: 1px;
+      margin: 4px 0;
+    }
+
+    .${PREFIX}-layout-vertical .${PREFIX}-player-controls {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      flex-direction: row;
+    }
+
+    /* Minimal/Floating layout */
+    .${PREFIX}-layout-minimal .${PREFIX}-container {
+      top: 8px;
+      left: 8px;
+      transform: none;
+      flex-wrap: wrap;
+      max-width: 200px;
+      cursor: move;
+      user-select: none;
+    }
+
+    .${PREFIX}-layout-minimal .${PREFIX}-container.${PREFIX}-dragging {
+      opacity: 0.8;
+    }
+
+    .${PREFIX}-layout-minimal .${PREFIX}-player-controls {
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Bottom dock layout */
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-container {
+      top: auto;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0;
+      margin-bottom: 8px;
+      flex-direction: row;
+    }
+
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-player-controls {
+      display: none;
+    }
+
+    /* ==================== COLLAPSIBLE TOOLBARS ==================== */
+
+    .${PREFIX}-collapsible {
+      transition: transform var(--${PREFIX}-transition-duration) ease,
+                  opacity var(--${PREFIX}-transition-duration) ease;
+    }
+
+    .${PREFIX}-collapsed {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .${PREFIX}-collapsed:hover,
+    .${PREFIX}-collapsed:focus-within {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Collapse direction based on layout */
+    .${PREFIX}-layout-horizontal .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: translateX(-50%) translateY(-100%);
+    }
+
+    .${PREFIX}-layout-vertical .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: translateY(-50%) translateX(-100%);
+    }
+
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: translateY(-50%) translateX(100%);
+    }
+
+    .${PREFIX}-layout-minimal .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: scale(0.8);
+      opacity: 0.3;
+    }
+
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: translateX(-50%) translateY(100%);
+    }
+
+    .${PREFIX}-collapse-btn {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--${PREFIX}-bg-secondary);
+      border: 1px solid var(--${PREFIX}-border);
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: calc(var(--${PREFIX}-z-index-toolbar) + 1);
+      transition: background var(--${PREFIX}-transition-duration) ease;
+    }
+
+    .${PREFIX}-collapse-btn:hover {
+      background: var(--${PREFIX}-bg-hover);
+    }
+
+    .${PREFIX}-collapse-btn svg {
+      width: 14px;
+      height: 14px;
+      color: var(--${PREFIX}-text-secondary);
+      transition: transform var(--${PREFIX}-transition-duration) ease;
+    }
+
+    .${PREFIX}-collapsed + .${PREFIX}-collapse-btn svg {
+      transform: rotate(180deg);
+    }
+
+    /* Collapse button position based on layout */
+    .${PREFIX}-layout-horizontal .${PREFIX}-collapse-btn {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 4px;
+    }
+
+    .${PREFIX}-layout-vertical .${PREFIX}-collapse-btn {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      margin-left: 4px;
+    }
+
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-collapse-btn {
+      left: auto;
+      right: 100%;
+      margin-left: 0;
+      margin-right: 4px;
+    }
+
+    .${PREFIX}-layout-minimal .${PREFIX}-collapse-btn {
+      top: -8px;
+      right: -8px;
+      left: auto;
+      transform: none;
+    }
+
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-collapse-btn {
+      bottom: 100%;
+      left: 50%;
+      top: auto;
+      transform: translateX(-50%);
+      margin-bottom: 4px;
     }
 
     /* Fullscreen mode - toolbars inside the fullscreen container */
