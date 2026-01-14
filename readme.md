@@ -293,6 +293,30 @@ fileInput.addEventListener('change', async (e) => {
 
 **Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported. Files with multiple RVPaint blocks (common in real OpenRV sessions) are fully supported.
 
+#### Python CLI Tools
+
+Standalone Python scripts are available in the `openrv/` folder for command-line conversion:
+
+```bash
+# Convert sm-annotate JSON to OpenRV .rv format
+python3 openrv/convert_to_rv.py annotations.json output.rv \
+  --media /path/to/video.mp4 --width 1920 --height 1080
+
+# Parse OpenRV .rv file to sm-annotate JSON
+python3 openrv/parse_rv.py input.rv output.json [--fps 25]
+
+# Use --frames-only to output just the frames array (for direct use with loadAllFrames)
+python3 openrv/parse_rv.py input.rv output.json --frames-only
+
+# Run round-trip tests
+python3 openrv/test_roundtrip.py
+```
+
+The Python scripts mirror the TypeScript implementation and are useful for:
+- Batch conversion of annotation files
+- Integration with Python-based pipelines
+- Command-line workflows without Node.js
+
 ### Frame Navigation
 
 ```javascript
