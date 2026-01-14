@@ -38,8 +38,7 @@ export class CurveToolPlugin
     const maybeNumeric = Number(key);
     if (isNaN(maybeNumeric) || !maybeNumeric) {
       if (key in colorMap) {
-        // @ts-expect-error
-        this.annotationTool.colorPicker.value = colorMap[key];
+        this.annotationTool.colorPicker.value = colorMap[key as keyof typeof colorMap];
         this.annotationTool.setCanvasSettings();
       }
       return;

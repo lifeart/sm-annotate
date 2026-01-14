@@ -1,4 +1,4 @@
-import type { ShapeMap } from ".";
+import type { IShape, ShapeMap } from ".";
 import type { AnnotationTool  } from "./../core";
 
 export interface IShapeBase {
@@ -55,8 +55,9 @@ export class BasePlugin<T extends IShapeBase> {
     this.isDrawing = false;
   }
   save(shape: T) {
-    // @todo - fix types here
-    this.annotationTool.addShape(shape as any);
+    // T extends IShapeBase, and IShape is a union of all shapes that extend IShapeBase
+    // This cast is safe because T is always a valid IShape type
+    this.annotationTool.addShape(shape as IShape);
   }
 
   /**

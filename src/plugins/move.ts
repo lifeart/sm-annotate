@@ -227,7 +227,10 @@ export class MoveToolPlugin
   private offsetShape(shape: IShape, dx: number, dy: number): void {
     const deserialized = this.annotationTool.deserialize([shape])[0];
     const plugin = this.annotationTool.pluginForTool(deserialized.type);
-    const moved = plugin.move(deserialized as any, dx, dy);
+    // Type assertion needed because pluginForTool returns ToolPlugin<ShapeMap[T]>
+    // but TypeScript can't narrow deserialized to match the plugin's expected type.
+    // This is safe because we're using the same shape's type to get the plugin.
+    const moved = plugin.move(deserialized as ShapeMap[typeof deserialized.type], dx, dy);
     // Copy moved properties back to original shape
     Object.assign(shape, this.annotationTool.serialize([moved])[0]);
   }
@@ -1047,8 +1050,7 @@ export class MoveToolPlugin
       } else {
         const item = this.annotationTool
           .pluginForTool(shapeCopy.type)
-          // @ts-expect-error copy
-          .move(shapeCopy, dx, dy);
+          .move(shapeCopy as ShapeMap[typeof shapeCopy.type], dx, dy);
 
         this.lastDrawnShape = item;
 
@@ -1057,8 +1059,7 @@ export class MoveToolPlugin
     } else {
       const item = this.annotationTool
         .pluginForTool(shapeCopy.type)
-        // @ts-expect-error copy
-        .move(shapeCopy, dx, dy);
+        .move(shapeCopy as ShapeMap[typeof shapeCopy.type], dx, dy);
 
       this.lastDrawnShape = item;
 
