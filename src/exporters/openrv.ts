@@ -132,21 +132,38 @@ function applyRotationToPoints(
 }
 
 /**
- * Format a float array for GTO output
+ * Format a float array for GTO output (nested format)
+ * Outputs: [ [ v1 v2 v3 ... ] ] for single vectors
  */
 function formatFloatArray(arr: number[]): string {
-  return `[ ${arr.map(n => n.toFixed(6)).join(' ')} ]`;
+  return `[ [ ${arr.map(n => formatNumber(n)).join(' ')} ] ]`;
 }
 
 /**
- * Format points array for GTO (flat array of x y pairs)
+ * Format a simple flat array for GTO output
+ */
+function formatFlatArray(arr: number[]): string {
+  return `[ ${arr.map(n => formatNumber(n)).join(' ')} ]`;
+}
+
+/**
+ * Format a number for GTO output
+ */
+function formatNumber(n: number): string {
+  // Use fixed point for most numbers, but keep reasonable precision
+  if (Number.isInteger(n)) {
+    return String(n);
+  }
+  return n.toFixed(9).replace(/\.?0+$/, '') || '0';
+}
+
+/**
+ * Format points array for GTO (nested array of x y pairs)
+ * Outputs: [ [ x1 y1 ] [ x2 y2 ] ... ]
  */
 function formatPoints(points: IPoint[]): string {
-  const flat: number[] = [];
-  for (const p of points) {
-    flat.push(p.x, p.y);
-  }
-  return `[ ${flat.map((n: number) => n.toFixed(6)).join(' ')} ]`;
+  const pairs = points.map(p => `[ ${formatNumber(p.x)} ${formatNumber(p.y)} ]`);
+  return `[ ${pairs.join(' ')} ]`;
 }
 
 /**
@@ -166,14 +183,19 @@ function curveToGTOComponent(shape: ICurve, id: number, frame: number): GTOCompo
 
   const points = applyRotationToPoints(shape.points, shape, centerX, centerY);
 
+  // Create width array (one value per point) - OpenRV format uses this
+  const widthArray = new Array(points.length).fill(shape.lineWidth);
+
   return {
-    name: `pen:${id}:${frame}:user`,
+    name: `"pen:${id}:${frame}:User"`,
     properties: [
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: shape.lineWidth },
+      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
+      { type: 'string', name: 'brush', value: '"circle"' },
       { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
-      { type: 'int', name: 'frame', value: frame },
-      { type: 'byte', name: 'brush', value: 0 }, // 0 = solid brush
+      { type: 'int', name: 'debug', value: 0 },
+      { type: 'int', name: 'join', value: 3 },
+      { type: 'int', name: 'cap', value: 1 },
       { type: 'int', name: 'splat', value: 0 },
     ]
   };
@@ -195,14 +217,18 @@ function lineToGTOComponent(shape: ILine, id: number, frame: number): GTOCompone
   ];
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
+  const widthArray = new Array(points.length).fill(shape.lineWidth);
+
   return {
-    name: `pen:${id}:${frame}:user`,
+    name: `"pen:${id}:${frame}:User"`,
     properties: [
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: shape.lineWidth },
+      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
+      { type: 'string', name: 'brush', value: '"circle"' },
       { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
-      { type: 'int', name: 'frame', value: frame },
-      { type: 'byte', name: 'brush', value: 0 },
+      { type: 'int', name: 'debug', value: 0 },
+      { type: 'int', name: 'join', value: 3 },
+      { type: 'int', name: 'cap', value: 1 },
       { type: 'int', name: 'splat', value: 0 },
     ]
   };
@@ -251,37 +277,45 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number): GTOComp
   arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY);
   arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY);
 
+  const widthArray2 = new Array(2).fill(shape.lineWidth);
+
   return [
     {
-      name: `pen:${id}:${frame}:user`,
+      name: `"pen:${id}:${frame}:User"`,
       properties: [
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: shape.lineWidth },
+        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
+        { type: 'string', name: 'brush', value: '"circle"' },
         { type: 'float', dimensions: 2, name: 'points', value: formatPoints(linePoints) },
-        { type: 'int', name: 'frame', value: frame },
-        { type: 'byte', name: 'brush', value: 0 },
+        { type: 'int', name: 'debug', value: 0 },
+        { type: 'int', name: 'join', value: 3 },
+        { type: 'int', name: 'cap', value: 1 },
         { type: 'int', name: 'splat', value: 0 },
       ]
     },
     {
-      name: `pen:${id + 1}:${frame}:user`,
+      name: `"pen:${id + 1}:${frame}:User"`,
       properties: [
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: shape.lineWidth },
+        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
+        { type: 'string', name: 'brush', value: '"circle"' },
         { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead1) },
-        { type: 'int', name: 'frame', value: frame },
-        { type: 'byte', name: 'brush', value: 0 },
+        { type: 'int', name: 'debug', value: 0 },
+        { type: 'int', name: 'join', value: 3 },
+        { type: 'int', name: 'cap', value: 1 },
         { type: 'int', name: 'splat', value: 0 },
       ]
     },
     {
-      name: `pen:${id + 2}:${frame}:user`,
+      name: `"pen:${id + 2}:${frame}:User"`,
       properties: [
         { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: shape.lineWidth },
+        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
+        { type: 'string', name: 'brush', value: '"circle"' },
         { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead2) },
-        { type: 'int', name: 'frame', value: frame },
-        { type: 'byte', name: 'brush', value: 0 },
+        { type: 'int', name: 'debug', value: 0 },
+        { type: 'int', name: 'join', value: 3 },
+        { type: 'int', name: 'cap', value: 1 },
         { type: 'int', name: 'splat', value: 0 },
       ]
     }
@@ -309,14 +343,18 @@ function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number): 
 
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
+  const widthArray = new Array(points.length).fill(shape.lineWidth);
+
   return {
-    name: `pen:${id}:${frame}:user`,
+    name: `"pen:${id}:${frame}:User"`,
     properties: [
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: shape.lineWidth },
+      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
+      { type: 'string', name: 'brush', value: '"circle"' },
       { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
-      { type: 'int', name: 'frame', value: frame },
-      { type: 'byte', name: 'brush', value: 0 },
+      { type: 'int', name: 'debug', value: 0 },
+      { type: 'int', name: 'join', value: 3 },
+      { type: 'int', name: 'cap', value: 1 },
       { type: 'int', name: 'splat', value: 0 },
     ]
   };
@@ -344,14 +382,18 @@ function circleToGTOComponent(shape: ICircle, id: number, frame: number, segment
 
   points = applyRotationToPoints(points, shape, centerX, centerY);
 
+  const widthArray = new Array(points.length).fill(shape.lineWidth);
+
   return {
-    name: `pen:${id}:${frame}:user`,
+    name: `"pen:${id}:${frame}:User"`,
     properties: [
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: shape.lineWidth },
+      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
+      { type: 'string', name: 'brush', value: '"circle"' },
       { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points) },
-      { type: 'int', name: 'frame', value: frame },
-      { type: 'byte', name: 'brush', value: 0 },
+      { type: 'int', name: 'debug', value: 0 },
+      { type: 'int', name: 'join', value: 3 },
+      { type: 'int', name: 'cap', value: 1 },
       { type: 'int', name: 'splat', value: 0 },
     ]
   };
@@ -368,22 +410,30 @@ function textToGTOComponent(shape: IText, id: number, frame: number): GTOCompone
   // Apply rotation to position if set
   let posX = shape.x;
   let posY = shape.y;
+  let textRotation = 0;
   if (shape.rotation) {
     const centerX = shape.rotationCenterX ?? shape.x;
     const centerY = shape.rotationCenterY ?? shape.y;
     const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation);
     posX = rotated.x;
     posY = rotated.y;
+    // OpenRV text rotation is in degrees
+    textRotation = (shape.rotation * 180) / Math.PI;
   }
 
   return {
-    name: `text:${id}:${frame}:user`,
+    name: `"text:${id}:${frame}:User"`,
     properties: [
       { type: 'float', dimensions: 2, name: 'position', value: formatFloatArray([posX, posY]) },
       { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
+      { type: 'float', name: 'spacing', value: 0.8 },
       { type: 'float', name: 'size', value: fontSize / 100 }, // Size as percentage
+      { type: 'float', name: 'scale', value: 1 },
+      { type: 'float', name: 'rotation', value: textRotation },
+      { type: 'string', name: 'font', value: '""' },
       { type: 'string', name: 'text', value: `"${shape.text.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"` },
-      { type: 'int', name: 'frame', value: frame },
+      { type: 'string', name: 'origin', value: '""' },
+      { type: 'int', name: 'debug', value: 0 },
     ]
   };
 }
@@ -560,14 +610,19 @@ export function exportToOpenRV(
     // Build frame order map
     const frameOrders = new Map<number, string[]>();
     for (const comp of components) {
-      // Component name format: type:ID:FRAME:user - extract the second number (FRAME)
+      // Component name format: "type:ID:FRAME:User" - extract the frame number
+      // Name is quoted now, e.g., "pen:0:5:User"
       const frameMatch = comp.name.match(/:\d+:(\d+):/);
       if (frameMatch) {
         const frame = parseInt(frameMatch[1]);
         if (!frameOrders.has(frame)) {
           frameOrders.set(frame, []);
         }
-        frameOrders.get(frame)!.push(comp.name);
+        // Store the inner name without outer quotes for the order list
+        const innerName = comp.name.startsWith('"') && comp.name.endsWith('"')
+          ? comp.name.slice(1, -1)
+          : comp.name;
+        frameOrders.get(frame)!.push(innerName);
       }
     }
 
@@ -577,19 +632,23 @@ export function exportToOpenRV(
     lines.push(`    paint`);
     lines.push(`    {`);
     lines.push(`        int nextId = ${nextId}`);
+    lines.push(`        int nextAnnotationId = 0`);
+    lines.push(`        int show = 1`);
+    lines.push(`        string exclude = [ ]`);
+    lines.push(`        string include = [ ]`);
     lines.push(`    }`);
+
+    // Add all shape components first
+    for (const component of components) {
+      lines.push(formatGTOComponent(component));
+    }
 
     // Add frame order components
     for (const [frame, order] of frameOrders) {
-      lines.push(`    frame:${frame}`);
+      lines.push(`    "frame:${frame}"`);
       lines.push(`    {`);
       lines.push(`        string order = [ ${order.map(o => `"${o}"`).join(' ')} ]`);
       lines.push(`    }`);
-    }
-
-    // Add all shape components
-    for (const component of components) {
-      lines.push(formatGTOComponent(component));
     }
 
     lines.push(`}`);
