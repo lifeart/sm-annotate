@@ -157,7 +157,8 @@ async function initAnnotator() {
     tool.setFFmpegFrameExtractor(null);
 
     // If FFmpeg is loaded, probe the video to get FPS
-    let detectedFps = 30;
+    let detectedFps = 0;
+    let fpsDetected = false;
     if (ffmpegExtractor?.isLoaded()) {
       try {
         ffmpegStatusEl.className = "ffmpeg-status loading";
@@ -165,6 +166,7 @@ async function initAnnotator() {
 
         const info = await ffmpegExtractor.probe(blobs);
         detectedFps = info.fps;
+        fpsDetected = info.fps > 0;
 
         ffmpegInfoEl.style.display = "flex";
         ffmpegFpsEl.textContent = `FPS: ${info.fps.toFixed(2)}`;
@@ -181,12 +183,26 @@ async function initAnnotator() {
       }
     }
 
-    const fps = prompt("Enter FPS (detected: " + detectedFps + ")", String(detectedFps));
-    if (!fps) {
-      return;
+    let fps: number;
+    if (fpsDetected) {
+      // Use detected FPS without prompting
+      fps = detectedFps;
+      console.log("Using detected FPS:", fps);
+    } else {
+      // FFmpeg not loaded or FPS not detected, prompt user
+      const fpsInput = prompt("Enter FPS", "30");
+      if (!fpsInput) {
+        return;
+      }
+      fps = parseInt(fpsInput, 10);
     }
 
-    await tool.setVideoBlob(blobs, parseInt(fps, 10));
+    await tool.setVideoBlob(blobs, fps);
+
+    // Auto-start frame extraction if FFmpeg is loaded
+    if (ffmpegExtractor?.isLoaded()) {
+      extractFrames();
+    }
   });
 
   refVideoInput.addEventListener("change", async (e) => {
@@ -459,7 +475,7 @@ async function initAnnotator() {
   // Store the current video blob for FFmpeg extraction
   currentVideoBlob = bl;
 
-  ffmpegLoadBtn.addEventListener("click", async () => {
+  async function loadFFmpeg() {
     if (ffmpegExtractor?.isLoaded()) {
       return;
     }
@@ -502,11 +518,16 @@ async function initAnnotator() {
       hideProgress();
       ffmpegLoadBtn.disabled = false;
     }
-  });
+  }
 
-  ffmpegExtractBtn.addEventListener("click", async () => {
+  // Load FFmpeg automatically on page load
+  loadFFmpeg();
+
+  ffmpegLoadBtn.addEventListener("click", loadFFmpeg);
+
+  async function extractFrames() {
     if (!ffmpegExtractor?.isLoaded() || !currentVideoBlob) {
-      alert("Please load FFmpeg first and ensure a video is loaded.");
+      console.warn("Cannot extract frames: FFmpeg not loaded or no video.");
       return;
     }
 
@@ -563,7 +584,9 @@ async function initAnnotator() {
       hideProgress();
       ffmpegExtractBtn.disabled = false;
     }
-  });
+  }
+
+  ffmpegExtractBtn.addEventListener("click", extractFrames);
 
   // Window resize handling
   let resizeTimeout: number | undefined;
