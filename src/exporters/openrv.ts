@@ -288,8 +288,10 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number, width: n
     { x: shape.x2, y: shape.y2 }
   ];
 
-  // Arrowhead calculation
-  const headLength = 10 + 2.5 * shape.lineWidth;
+  // Arrowhead calculation - normalize to coordinate system (0-1)
+  // head_length in pixels, normalize by average of width/height
+  const headLengthPx = 10 + 2.5 * shape.lineWidth;
+  const headLength = headLengthPx / ((width + height) / 2);
   const headAngle = Math.PI / 6;
   const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
 
