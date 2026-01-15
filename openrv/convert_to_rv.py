@@ -28,7 +28,8 @@ Supported shape types:
 
 Coordinate conversion:
 - sm-annotate: (0,0) top-left, X: 0-1, Y: 0-1 (Y+ down)
-- OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1 to +1 (Y+ up)
+- OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1/aspect to +1/aspect (Y+ up)
+  where aspect = width/height
 """
 
 import argparse
@@ -80,16 +81,18 @@ def extract_color(style: str, opacity: float = 1.0) -> Tuple[float, float, float
     return hex_to_rgba(style, opacity)
 
 
-def convert_sm_to_openrv(sm_x: float, sm_y: float) -> Tuple[float, float]:
+def convert_sm_to_openrv(sm_x: float, sm_y: float, aspect_ratio: float) -> Tuple[float, float]:
     """
     Convert sm-annotate coordinates to OpenRV NDC.
 
     sm-annotate: (0,0) top-left, X: 0-1, Y: 0-1 (Y+ down)
-    OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1 to +1 (Y+ up)
+    OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1/aspect to +1/aspect (Y+ up)
+
+    The Y range is scaled by aspect ratio to maintain proper proportions.
     """
     return (
         sm_x * 2 - 1,
-        1 - sm_y * 2
+        (1 - sm_y * 2) / aspect_ratio
     )
 
 
@@ -140,11 +143,11 @@ def format_flat_array(arr: List[float]) -> str:
     return f"[ {' '.join(format_number(n) for n in arr)} ]"
 
 
-def format_points(points: List[Dict[str, float]]) -> str:
+def format_points(points: List[Dict[str, float]], aspect_ratio: float) -> str:
     """Format points array for GTO (nested array of x y pairs)."""
     pairs = []
     for p in points:
-        ox, oy = convert_sm_to_openrv(p['x'], p['y'])
+        ox, oy = convert_sm_to_openrv(p['x'], p['y'], aspect_ratio)
         pairs.append(f"[ {format_number(ox)} {format_number(oy)} ]")
     return f"[ {' '.join(pairs)} ]"
 
@@ -186,13 +189,15 @@ def curve_to_component(shape: Dict, id: int, frame: int, width: int, height: int
     normalized_width = line_width / height
     width_array = [normalized_width] * len(points)
 
+    aspect_ratio = width / height
+
     return GTOComponent(
         f'"pen:{id}:{frame}:User"',
         [
             {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': format_float_array(list(color))},
             {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array)},
             {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points)},
+            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points, aspect_ratio)},
             {'type': 'int', 'name': 'debug', 'value': 0},
             {'type': 'int', 'name': 'join', 'value': 3},
             {'type': 'int', 'name': 'cap', 'value': 1},
@@ -219,13 +224,15 @@ def line_to_component(shape: Dict, id: int, frame: int, width: int, height: int)
     normalized_width = line_width / height
     width_array = [normalized_width] * len(points)
 
+    aspect_ratio = width / height
+
     return GTOComponent(
         f'"pen:{id}:{frame}:User"',
         [
             {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': format_float_array(list(color))},
             {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array)},
             {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points)},
+            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points, aspect_ratio)},
             {'type': 'int', 'name': 'debug', 'value': 0},
             {'type': 'int', 'name': 'join', 'value': 3},
             {'type': 'int', 'name': 'cap', 'value': 1},
@@ -282,6 +289,8 @@ def arrow_to_components(shape: Dict, id: int, frame: int, width: int, height: in
     normalized_width = line_width / height
     width_array2 = [normalized_width, normalized_width]
 
+    aspect_ratio = width / height
+
     return [
         GTOComponent(
             f'"pen:{id}:{frame}:User"',
@@ -289,7 +298,7 @@ def arrow_to_components(shape: Dict, id: int, frame: int, width: int, height: in
                 {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': color_str},
                 {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array2)},
                 {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(line_points)},
+                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(line_points, aspect_ratio)},
                 {'type': 'int', 'name': 'debug', 'value': 0},
                 {'type': 'int', 'name': 'join', 'value': 3},
                 {'type': 'int', 'name': 'cap', 'value': 1},
@@ -302,7 +311,7 @@ def arrow_to_components(shape: Dict, id: int, frame: int, width: int, height: in
                 {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': color_str},
                 {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array2)},
                 {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(arrow_head1)},
+                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(arrow_head1, aspect_ratio)},
                 {'type': 'int', 'name': 'debug', 'value': 0},
                 {'type': 'int', 'name': 'join', 'value': 3},
                 {'type': 'int', 'name': 'cap', 'value': 1},
@@ -315,7 +324,7 @@ def arrow_to_components(shape: Dict, id: int, frame: int, width: int, height: in
                 {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': color_str},
                 {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array2)},
                 {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(arrow_head2)},
+                {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(arrow_head2, aspect_ratio)},
                 {'type': 'int', 'name': 'debug', 'value': 0},
                 {'type': 'int', 'name': 'join', 'value': 3},
                 {'type': 'int', 'name': 'cap', 'value': 1},
@@ -347,13 +356,15 @@ def rectangle_to_component(shape: Dict, id: int, frame: int, width: int, height:
     normalized_width = line_width / height
     width_array = [normalized_width] * len(points)
 
+    aspect_ratio = width / height
+
     return GTOComponent(
         f'"pen:{id}:{frame}:User"',
         [
             {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': format_float_array(list(color))},
             {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array)},
             {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points)},
+            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points, aspect_ratio)},
             {'type': 'int', 'name': 'debug', 'value': 0},
             {'type': 'int', 'name': 'join', 'value': 3},
             {'type': 'int', 'name': 'cap', 'value': 1},
@@ -386,13 +397,15 @@ def circle_to_component(shape: Dict, id: int, frame: int, width: int, height: in
     normalized_width = line_width / height
     width_array = [normalized_width] * len(points)
 
+    aspect_ratio = width / height
+
     return GTOComponent(
         f'"pen:{id}:{frame}:User"',
         [
             {'type': 'float', 'dimensions': 4, 'name': 'color', 'value': format_float_array(list(color))},
             {'type': 'float', 'name': 'width', 'value': format_flat_array(width_array)},
             {'type': 'string', 'name': 'brush', 'value': '"circle"'},
-            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points)},
+            {'type': 'float', 'dimensions': 2, 'name': 'points', 'value': format_points(points, aspect_ratio)},
             {'type': 'int', 'name': 'debug', 'value': 0},
             {'type': 'int', 'name': 'join', 'value': 3},
             {'type': 'int', 'name': 'cap', 'value': 1},
@@ -419,7 +432,8 @@ def text_to_component(shape: Dict, id: int, frame: int, width: int, height: int)
         text_rotation = rotation * 180 / math.pi
 
     # Convert position to OpenRV coordinates
-    openrv_x, openrv_y = convert_sm_to_openrv(pos_x, pos_y)
+    aspect_ratio = width / height
+    openrv_x, openrv_y = convert_sm_to_openrv(pos_x, pos_y, aspect_ratio)
 
     # Font size: OpenRV uses normalized size (relative to height)
     line_width = shape.get('lineWidth', 1)

@@ -142,19 +142,20 @@ function applyRotationToPoints(
  * OpenRV uses NDC where:
  * - (0, 0) is the center of the image
  * - X: -1 (left) to +1 (right)
- * - Y: -1 (bottom) to +1 (top)
+ * - Y: -1/aspect (bottom) to +1/aspect (top), where aspect = width/height
  */
 function convertSmAnnotateToOpenRV(
   smX: number,
   smY: number,
-  _aspectRatio: number
+  aspectRatio: number
 ): { x: number; y: number } {
   // Convert from 0..1 to OpenRV NDC
   // X: -1 to +1
-  // Y: -1 to +1 (inverted because sm-annotate Y+ is down, OpenRV Y+ is up)
+  // Y: -1/aspect to +1/aspect (inverted because sm-annotate Y+ is down, OpenRV Y+ is up)
+  // The Y range is scaled by aspect ratio to maintain proper proportions
   return {
     x: smX * 2 - 1,
-    y: 1 - smY * 2,
+    y: (1 - smY * 2) / aspectRatio,
   };
 }
 

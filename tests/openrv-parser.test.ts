@@ -75,10 +75,11 @@ sourceGroup000000_source : RVFileSource (1)
     });
 
     it('should parse pen component as curve', () => {
-      // OpenRV uses NDC: X and Y both range -1 to +1 (center origin)
-      // OpenRV point (-0.8, 0.8) should convert to sm-annotate (0.1, 0.1):
+      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -1/aspect to +1/aspect
+      // For 1000x500 (aspect=2), Y ranges from -0.5 to +0.5
+      // OpenRV point (-0.8, 0.4) should convert to sm-annotate (0.1, 0.1):
       //   sm_x = (-0.8 + 1) / 2 = 0.1
-      //   sm_y = (1 - 0.8) / 2 = 0.1
+      //   sm_y = (1 - 0.4 * 2) / 2 = 0.1
       const content = `GTOa (4)
 
 sourceGroup000000_paint : RVPaint (3)
@@ -91,7 +92,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         float[4] color = [ 1.000000 0.000000 0.000000 0.800000 ]
         float width = 0.006
-        float[2] points = [ -0.8 0.8 0 0 ]
+        float[2] points = [ -0.8 0.4 0 0 ]
         int frame = 5
         byte brush = 0
         int splat = 0
@@ -107,7 +108,7 @@ sourceGroup000000_paint : RVPaint (3)
       const shape = result.frames[0].shapes[0] as ICurve;
       expect(shape.type).toBe('curve');
       expect(shape.points).toHaveLength(2);
-      // OpenRV (-0.8, 0.8) -> sm-annotate (0.1, 0.1)
+      // OpenRV (-0.8, 0.4) -> sm-annotate (0.1, 0.1)
       expect(shape.points[0].x).toBeCloseTo(0.1, 5);
       expect(shape.points[0].y).toBeCloseTo(0.1, 5);
       // OpenRV (0, 0) -> sm-annotate (0.5, 0.5)
@@ -120,10 +121,11 @@ sourceGroup000000_paint : RVPaint (3)
     });
 
     it('should parse text component', () => {
-      // OpenRV uses NDC: X and Y both range -1 to +1 (center origin)
+      // OpenRV uses NDC: X ranges -1 to +1, Y ranges -1/aspect to +1/aspect
+      // For 1000x500 (aspect=2), Y ranges from -0.5 to +0.5
       // To get sm-annotate (0.1, 0.4):
       //   0.1 = (openrv_x + 1) / 2 => openrv_x = -0.8
-      //   0.4 = (1 - openrv_y) / 2 => openrv_y = 0.2
+      //   0.4 = (1 - openrv_y * 2) / 2 => openrv_y = 0.1
       const content = `GTOa (4)
 
 sourceGroup000000_paint : RVPaint (3)
@@ -134,7 +136,7 @@ sourceGroup000000_paint : RVPaint (3)
     }
     text:0:10:user
     {
-        float[2] position = [ -0.8 0.2 ]
+        float[2] position = [ -0.8 0.1 ]
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
         float size = 0.033
         string text = "Hello World"
@@ -149,7 +151,7 @@ sourceGroup000000_paint : RVPaint (3)
 
       const shape = result.frames[0].shapes[0] as IText;
       expect(shape.type).toBe('text');
-      // OpenRV (-0.8, 0.2) -> sm-annotate (0.1, 0.4)
+      // OpenRV (-0.8, 0.1) -> sm-annotate (0.1, 0.4)
       expect(shape.x).toBeCloseTo(0.1, 5);
       expect(shape.y).toBeCloseTo(0.4, 5);
       expect(shape.text).toBe('Hello World');
@@ -245,10 +247,10 @@ sourceGroup000000_paint : RVPaint (3)
     });
 
     it('should use default dimensions when not provided', () => {
-      // Default dimensions are 1920x1080
-      // OpenRV uses -1 to +1 for both X and Y (center origin)
+      // Default dimensions are 1920x1080 (aspect=1.778)
+      // OpenRV uses X: -1 to +1, Y: -1/aspect to +1/aspect (about -0.5625 to +0.5625)
       // OpenRV (0, 0) -> sm-annotate (0.5, 0.5)
-      // OpenRV (1, 1) -> sm-annotate (1, 0) (top-right)
+      // OpenRV (1, 0.5625) -> sm-annotate (1, 0) (top-right)
       const content = `GTOa (4)
 
 sourceGroup000000_paint : RVPaint (3)
@@ -261,7 +263,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 0.00185
-        float[2] points = [ 0 0 1 1 ]
+        float[2] points = [ 0 0 1 0.5625 ]
         int frame = 1
     }
 }
@@ -269,12 +271,12 @@ sourceGroup000000_paint : RVPaint (3)
       const result = parseOpenRV(content);
 
       const shape = result.frames[0].shapes[0] as ICurve;
-      // Default dimensions 1920x1080
+      // Default dimensions 1920x1080 (aspect=1.778)
       // OpenRV (0, 0) -> sm-annotate (0.5, 0.5)
       expect(shape.points[0].x).toBeCloseTo(0.5, 5);
       expect(shape.points[0].y).toBeCloseTo(0.5, 5);
-      // OpenRV (1, 1) -> sm-annotate (1, 0) top-right
-      // sm_y = (1 - 1) / 2 = 0
+      // OpenRV (1, 0.5625) -> sm-annotate (1, 0) top-right
+      // sm_y = (1 - 0.5625 * 1.778) / 2 ≈ 0
       expect(shape.points[1].x).toBeCloseTo(1, 4);
       expect(shape.points[1].y).toBeCloseTo(0, 4);
     });
@@ -1659,13 +1661,17 @@ actualAnnotations_paint : RVPaint (3)
 
   describe('coordinate conversion with various aspect ratios', () => {
     it('should correctly convert coordinates for ultrawide aspect ratio (21:9)', () => {
-      // OpenRV uses -1 to +1 for both X and Y (no aspect ratio scaling in stored coordinates)
+      // OpenRV uses X: -1 to +1, Y: -1/aspect to +1/aspect
+      // For 2560x1080 (aspect=2.37), Y ranges from -0.422 to +0.422
       const width = 2560;
       const height = 1080;
+      const aspect = width / height; // ~2.37
 
       // OpenRV center (0, 0) should map to sm-annotate (0.5, 0.5)
-      // OpenRV (1, 1) -> (1, 0) top-right
-      // OpenRV (-1, -1) -> (0, 1) bottom-left
+      // OpenRV (1, 1/aspect) -> (1, 0) top-right
+      // OpenRV (-1, -1/aspect) -> (0, 1) bottom-left
+      const topY = 1 / aspect;
+      const bottomY = -1 / aspect;
       const content = `GTOa (4)
 
 sourceGroup000000_paint : RVPaint (3)
@@ -1678,7 +1684,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         float[4] color = [ 1 0 0 1 ]
         float width = 0.002
-        float[2] points = [ 0 0 1 1 -1 -1 ]
+        float[2] points = [ 0 0 1 ${topY} -1 ${bottomY} ]
         int frame = 1
     }
 }
@@ -1694,22 +1700,26 @@ sourceGroup000000_paint : RVPaint (3)
       expect(shape.points[0].x).toBeCloseTo(0.5, 4);
       expect(shape.points[0].y).toBeCloseTo(0.5, 4);
 
-      // OpenRV (1, 1) -> sm-annotate (1, 0) top-right
+      // OpenRV (1, 1/aspect) -> sm-annotate (1, 0) top-right
       expect(shape.points[1].x).toBeCloseTo(1, 4);
       expect(shape.points[1].y).toBeCloseTo(0, 4);
 
-      // OpenRV (-1, -1) -> sm-annotate (0, 1) bottom-left
+      // OpenRV (-1, -1/aspect) -> sm-annotate (0, 1) bottom-left
       expect(shape.points[2].x).toBeCloseTo(0, 4);
       expect(shape.points[2].y).toBeCloseTo(1, 4);
     });
 
     it('should correctly convert coordinates for portrait aspect ratio (9:16)', () => {
-      // OpenRV uses -1 to +1 for both X and Y (no aspect ratio scaling in stored coordinates)
+      // OpenRV uses X: -1 to +1, Y: -1/aspect to +1/aspect
+      // For 1080x1920 (aspect=0.5625), Y ranges from -1.778 to +1.778
       const width = 1080;
       const height = 1920;
+      const aspect = width / height; // ~0.5625
 
-      // OpenRV point (-1, 1) maps to sm-annotate (0, 0) (top-left)
-      // OpenRV point (1, -1) maps to sm-annotate (1, 1) (bottom-right)
+      // OpenRV point (-1, 1/aspect) maps to sm-annotate (0, 0) (top-left)
+      // OpenRV point (1, -1/aspect) maps to sm-annotate (1, 1) (bottom-right)
+      const topY = 1 / aspect;
+      const bottomY = -1 / aspect;
       const content = `GTOa (4)
 
 sourceGroup000000_paint : RVPaint (3)
@@ -1722,7 +1732,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         float[4] color = [ 0 1 0 1 ]
         float width = 0.001
-        float[2] points = [ -1 1 1 -1 ]
+        float[2] points = [ -1 ${topY} 1 ${bottomY} ]
         int frame = 1
     }
 }
@@ -1734,11 +1744,11 @@ sourceGroup000000_paint : RVPaint (3)
       const shape = parsed.frames[0].shapes[0] as ICurve;
       expect(shape.points.length).toBe(2);
 
-      // OpenRV (-1, 1) -> sm-annotate (0, 0) (top-left)
+      // OpenRV (-1, 1/aspect) -> sm-annotate (0, 0) (top-left)
       expect(shape.points[0].x).toBeCloseTo(0, 4);
       expect(shape.points[0].y).toBeCloseTo(0, 4);
 
-      // OpenRV (1, -1) -> sm-annotate (1, 1) (bottom-right)
+      // OpenRV (1, -1/aspect) -> sm-annotate (1, 1) (bottom-right)
       expect(shape.points[1].x).toBeCloseTo(1, 4);
       expect(shape.points[1].y).toBeCloseTo(1, 4);
     });

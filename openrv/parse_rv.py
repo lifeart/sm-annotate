@@ -13,7 +13,8 @@ Supported component types:
 - text:N:F:user - Text annotations
 
 Coordinate conversion:
-- OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1 to +1 (Y+ up)
+- OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1/aspect to +1/aspect (Y+ up)
+  where aspect = width/height
 - sm-annotate: (0,0) top-left, X: 0-1, Y: 0-1 (Y+ down)
 """
 
@@ -173,16 +174,18 @@ def parse_gto_text(content: str) -> List[GTOObject]:
     return objects
 
 
-def convert_openrv_to_sm(openrv_x: float, openrv_y: float) -> Tuple[float, float]:
+def convert_openrv_to_sm(openrv_x: float, openrv_y: float, aspect_ratio: float) -> Tuple[float, float]:
     """
     Convert OpenRV NDC coordinates to sm-annotate coordinates.
 
-    OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1 to +1 (Y+ up)
+    OpenRV NDC: (0,0) center, X: -1 to +1, Y: -1/aspect to +1/aspect (Y+ up)
     sm-annotate: (0,0) top-left, X: 0-1, Y: 0-1 (Y+ down)
+
+    The Y range is scaled by aspect ratio to maintain proper proportions.
     """
     return (
         (openrv_x + 1) / 2,
-        (1 - openrv_y) / 2
+        (1 - openrv_y * aspect_ratio) / 2
     )
 
 
@@ -195,11 +198,13 @@ def pen_component_to_curve(props: Dict[str, Any], width: int, height: int) -> Op
     if not points_data or len(points_data) < 4:
         return None
 
+    aspect_ratio = width / height
+
     # Convert flat points array to point objects
     points = []
     for i in range(0, len(points_data), 2):
         if i + 1 < len(points_data):
-            sm_x, sm_y = convert_openrv_to_sm(points_data[i], points_data[i + 1])
+            sm_x, sm_y = convert_openrv_to_sm(points_data[i], points_data[i + 1], aspect_ratio)
             points.append({'x': sm_x, 'y': sm_y})
 
     color = rgba_to_hex(color_data) if color_data else '#000000'
@@ -238,7 +243,8 @@ def text_component_to_text(props: Dict[str, Any], width: int, height: int) -> Op
         return None
 
     # Convert OpenRV NDC to sm-annotate coordinates
-    sm_x, sm_y = convert_openrv_to_sm(position_data[0], position_data[1])
+    aspect_ratio = width / height
+    sm_x, sm_y = convert_openrv_to_sm(position_data[0], position_data[1], aspect_ratio)
 
     color = rgba_to_hex(color_data) if color_data else '#000000'
     opacity = color_data[3] if len(color_data) >= 4 else 1
