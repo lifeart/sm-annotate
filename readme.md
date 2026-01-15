@@ -33,6 +33,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📐 Collapsible toolbars for mobile
 * 🔍 Pinch-to-zoom and pan gestures
 * 🎨 CSS custom properties for easy theming
+* 🎬 FFmpeg-based frame extraction for frame-accurate playback
 
 ## Additional Benefits
 
@@ -40,7 +41,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Comprehensive test coverage (629 tests with Vitest)
+* 🧪 Comprehensive test coverage (658 tests with Vitest)
 
 ## Getting Started
 
@@ -316,6 +317,57 @@ The Python scripts mirror the TypeScript implementation and are useful for:
 - Batch conversion of annotation files
 - Integration with Python-based pipelines
 - Command-line workflows without Node.js
+
+### FFmpeg Frame Extraction
+
+For frame-accurate video playback, SmAnnotate supports FFmpeg WASM-based frame extraction. This eliminates the ±1 frame drift common with HTML5 video's `requestVideoFrameCallback`.
+
+```javascript
+import { FFmpegFrameExtractor } from '@lifeart/sm-annotate';
+
+// Create extractor instance
+const extractor = new FFmpegFrameExtractor();
+
+// Load FFmpeg WASM (downloads ~30MB)
+await extractor.load((progress) => {
+  console.log(`Loading: ${Math.round(progress.loaded * 100)}%`);
+});
+
+// Probe video for metadata (FPS, duration, dimensions)
+const info = await extractor.probe(videoBlob);
+console.log(`FPS: ${info.fps}, Duration: ${info.duration}s`);
+console.log(`Dimensions: ${info.width}x${info.height}`);
+console.log(`Total frames: ${info.totalFrames}`);
+
+// Extract all frames as ImageBitmap objects
+const frames = await extractor.extractFrames(videoBlob, {
+  format: 'png', // or 'jpeg'
+  onProgress: (progress) => {
+    console.log(`Extracting frame ${progress.loaded}/${progress.total}`);
+  }
+});
+
+// Connect to annotation tool for frame-accurate rendering
+annotationTool.setFFmpegFrameExtractor(extractor);
+
+// Access individual frames
+const frame1 = frames.get(1); // 1-indexed
+```
+
+**Demo page behavior:**
+- FFmpeg loads automatically on page load
+- When selecting a video, FPS is auto-detected (no manual prompt needed)
+- Frame extraction starts automatically after video selection
+- If FFmpeg is still loading when you select a video, it queues and processes after load completes
+- Network errors allow retry via the load button
+
+**Requirements:**
+- Server must set CORS headers for SharedArrayBuffer support:
+  ```
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+  ```
+- Video files should be under ~100MB (WASM memory limit)
 
 ### Frame Navigation
 

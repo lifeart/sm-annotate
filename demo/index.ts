@@ -5,6 +5,8 @@ import { SmAnnotate, downloadAsOpenRV, parseOpenRV, parseOpenRVFile, LayoutMode,
 // Global FFmpeg extractor instance
 let ffmpegExtractor: FFmpegFrameExtractor | null = null;
 let currentVideoBlob: Blob | null = null;
+let ffmpegLoading = false;
+let pendingVideoProcess: (() => Promise<void>) | null = null;
 
 const video = document.querySelector("video") as HTMLVideoElement;
 
@@ -133,76 +135,91 @@ async function initAnnotator() {
     // Update the current video blob for FFmpeg
     currentVideoBlob = blobs;
 
-    // Reset FFmpeg UI elements
-    const ffmpegExtractBtnEl = document.getElementById("ffmpeg-extract") as HTMLButtonElement;
-    const ffmpegInfoEl = document.getElementById("ffmpeg-info") as HTMLDivElement;
-    const ffmpegFpsEl = document.getElementById("ffmpeg-fps") as HTMLSpanElement;
-    const ffmpegFramesEl = document.getElementById("ffmpeg-frames") as HTMLSpanElement;
-    const ffmpegStatusEl = document.getElementById("ffmpeg-status") as HTMLDivElement;
+    // Process video function - can be called immediately or queued
+    async function processVideo() {
+      // Reset FFmpeg UI elements
+      const ffmpegExtractBtnEl = document.getElementById("ffmpeg-extract") as HTMLButtonElement;
+      const ffmpegInfoEl = document.getElementById("ffmpeg-info") as HTMLDivElement;
+      const ffmpegFpsEl = document.getElementById("ffmpeg-fps") as HTMLSpanElement;
+      const ffmpegFramesEl = document.getElementById("ffmpeg-frames") as HTMLSpanElement;
+      const ffmpegStatusEl = document.getElementById("ffmpeg-status") as HTMLDivElement;
 
-    // Reset extract button (preserve icon)
-    ffmpegExtractBtnEl.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="2" y="2" width="20" height="20" rx="2"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      Extract Frames
-    `;
+      // Reset extract button (preserve icon)
+      ffmpegExtractBtnEl.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="2"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Extract Frames
+      `;
 
-    // Clear previously extracted frames and disconnect from tool
-    if (ffmpegExtractor?.isLoaded()) {
-      ffmpegExtractor.clearFrames();
-    }
-    // Disconnect FFmpeg extractor from tool (will use video element frames)
-    tool.setFFmpegFrameExtractor(null);
+      // Clear previously extracted frames and disconnect from tool
+      if (ffmpegExtractor?.isLoaded()) {
+        ffmpegExtractor.clearFrames();
+      }
+      // Disconnect FFmpeg extractor from tool (will use video element frames)
+      tool.setFFmpegFrameExtractor(null);
 
-    // If FFmpeg is loaded, probe the video to get FPS
-    let detectedFps = 0;
-    let fpsDetected = false;
-    if (ffmpegExtractor?.isLoaded()) {
-      try {
-        ffmpegStatusEl.className = "ffmpeg-status loading";
-        ffmpegStatusEl.querySelector(".status-text")!.textContent = "Probing video...";
+      // If FFmpeg is loaded, probe the video to get FPS
+      let detectedFps = 0;
+      let fpsDetected = false;
+      if (ffmpegExtractor?.isLoaded()) {
+        try {
+          ffmpegStatusEl.className = "ffmpeg-status loading";
+          ffmpegStatusEl.querySelector(".status-text")!.textContent = "Probing video...";
 
-        const info = await ffmpegExtractor.probe(blobs);
-        detectedFps = info.fps;
-        fpsDetected = info.fps > 0;
+          const info = await ffmpegExtractor.probe(blobs);
+          detectedFps = info.fps;
+          fpsDetected = info.fps > 0;
 
-        ffmpegInfoEl.style.display = "flex";
-        ffmpegFpsEl.textContent = `FPS: ${info.fps.toFixed(2)}`;
-        ffmpegFramesEl.textContent = `Frames: ${info.totalFrames}`;
+          ffmpegInfoEl.style.display = "flex";
+          ffmpegFpsEl.textContent = `FPS: ${info.fps.toFixed(2)}`;
+          ffmpegFramesEl.textContent = `Frames: ${info.totalFrames}`;
 
-        ffmpegStatusEl.className = "ffmpeg-status ready";
-        ffmpegStatusEl.querySelector(".status-text")!.textContent = "FFmpeg ready";
+          ffmpegStatusEl.className = "ffmpeg-status ready";
+          ffmpegStatusEl.querySelector(".status-text")!.textContent = "FFmpeg ready";
 
-        console.log("Detected video info:", info);
-      } catch (err) {
-        console.error("Failed to probe video:", err);
-        ffmpegStatusEl.className = "ffmpeg-status error";
-        ffmpegStatusEl.querySelector(".status-text")!.textContent = "Probe failed";
+          console.log("Detected video info:", info);
+        } catch (err) {
+          console.error("Failed to probe video:", err);
+          ffmpegStatusEl.className = "ffmpeg-status error";
+          ffmpegStatusEl.querySelector(".status-text")!.textContent = "Probe failed";
+        }
+      }
+
+      let fps: number;
+      if (fpsDetected) {
+        // Use detected FPS without prompting
+        fps = detectedFps;
+        console.log("Using detected FPS:", fps);
+      } else {
+        // FFmpeg not loaded or FPS not detected, prompt user
+        const fpsInput = prompt("Enter FPS", "30");
+        if (!fpsInput) {
+          return;
+        }
+        fps = parseInt(fpsInput, 10);
+      }
+
+      await tool.setVideoBlob(blobs, fps);
+
+      // Auto-start frame extraction if FFmpeg is loaded
+      if (ffmpegExtractor?.isLoaded()) {
+        extractFrames();
       }
     }
 
-    let fps: number;
-    if (fpsDetected) {
-      // Use detected FPS without prompting
-      fps = detectedFps;
-      console.log("Using detected FPS:", fps);
-    } else {
-      // FFmpeg not loaded or FPS not detected, prompt user
-      const fpsInput = prompt("Enter FPS", "30");
-      if (!fpsInput) {
-        return;
-      }
-      fps = parseInt(fpsInput, 10);
+    // If FFmpeg is still loading, queue video processing
+    if (ffmpegLoading) {
+      console.log("FFmpeg is loading, video will be processed when ready...");
+      const ffmpegStatusEl = document.getElementById("ffmpeg-status") as HTMLDivElement;
+      ffmpegStatusEl.querySelector(".status-text")!.textContent = "Loading FFmpeg... (video queued)";
+      pendingVideoProcess = processVideo;
+      return;
     }
 
-    await tool.setVideoBlob(blobs, fps);
-
-    // Auto-start frame extraction if FFmpeg is loaded
-    if (ffmpegExtractor?.isLoaded()) {
-      extractFrames();
-    }
+    // Process immediately
+    await processVideo();
   });
 
   refVideoInput.addEventListener("change", async (e) => {
@@ -476,10 +493,11 @@ async function initAnnotator() {
   currentVideoBlob = bl;
 
   async function loadFFmpeg() {
-    if (ffmpegExtractor?.isLoaded()) {
+    if (ffmpegExtractor?.isLoaded() || ffmpegLoading) {
       return;
     }
 
+    ffmpegLoading = true;
     ffmpegLoadBtn.disabled = true;
     updateFFmpegStatus("loading", "Loading FFmpeg...");
     updateProgress(0);
@@ -492,6 +510,7 @@ async function initAnnotator() {
         }
       });
 
+      ffmpegLoading = false;
       updateFFmpegStatus("ready", "FFmpeg ready");
       hideProgress();
       ffmpegExtractBtn.disabled = false;
@@ -512,11 +531,39 @@ async function initAnnotator() {
         ffmpegFrames.textContent = `Frames: ${info.totalFrames}`;
         console.log("Video info from FFmpeg:", info);
       }
+
+      // Process pending video if user selected one while loading
+      if (pendingVideoProcess) {
+        const process = pendingVideoProcess;
+        pendingVideoProcess = null;
+        await process();
+      }
     } catch (error) {
       console.error("Failed to load FFmpeg:", error);
-      updateFFmpegStatus("error", "Failed to load");
+      ffmpegLoading = false;
+
+      // Check if it's a network error - re-enable button for retry
+      const isNetworkError = error instanceof TypeError ||
+        (error instanceof Error && (
+          error.message.includes("fetch") ||
+          error.message.includes("network") ||
+          error.message.includes("Failed to load")
+        ));
+
+      if (isNetworkError) {
+        updateFFmpegStatus("error", "Network error - click to retry");
+        ffmpegLoadBtn.disabled = false;
+      } else {
+        updateFFmpegStatus("error", "Failed to load");
+      }
       hideProgress();
-      ffmpegLoadBtn.disabled = false;
+
+      // Process pending video without FFmpeg (will prompt for FPS)
+      if (pendingVideoProcess) {
+        const process = pendingVideoProcess;
+        pendingVideoProcess = null;
+        await process();
+      }
     }
   }
 
