@@ -28,19 +28,37 @@ export interface ParsedOpenRVResult {
  * Convert RGBA float array [r, g, b, a] to hex color string
  */
 export declare function rgbaToHex(rgba: number[]): string;
+export interface OpenRVParseOptions {
+    /** Override width (uses file dimensions if available) */
+    width?: number;
+    /** Override height (uses file dimensions if available) */
+    height?: number;
+    /** Target height for scaling calculations */
+    targetHeight?: number;
+    /** Frames per second */
+    fps?: number;
+    /**
+     * Scale factor for coordinates (0.85 = 15% smaller toward center).
+     * Applied after coordinate conversion.
+     */
+    coordinateScale?: number;
+    /**
+     * Offset to apply to coordinates after scaling.
+     * Positive values move shapes left (x) and up (y).
+     * Example: { x: 0.07, y: 0.07 } shifts 7% left and up.
+     */
+    coordinateOffset?: {
+        x: number;
+        y: number;
+    };
+    /** Enable debug logging */
+    debug?: boolean;
+}
 /**
  * Parse OpenRV GTO file content and convert to sm-annotate format
  */
-export declare function parseOpenRV(content: string, options?: {
-    width?: number;
-    height?: number;
-    fps?: number;
-}): ParsedOpenRVResult;
+export declare function parseOpenRV(content: string, options?: OpenRVParseOptions): ParsedOpenRVResult;
 /**
  * Parse OpenRV file from File object
  */
-export declare function parseOpenRVFile(file: File, options?: {
-    width?: number;
-    height?: number;
-    fps?: number;
-}): Promise<ParsedOpenRVResult>;
+export declare function parseOpenRVFile(file: File, options?: OpenRVParseOptions): Promise<ParsedOpenRVResult>;

@@ -2,6 +2,7 @@ import { AnnotationToolBase } from "./base";
 import { IShape, ShapeMap, Tool, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
+import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
 import { Theme } from "./ui/theme";
 import { SmAnnotateConfig, LayoutMode } from "./config";
 export type FrameAnnotationV1 = {
@@ -15,6 +16,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     playerControlsContainer: HTMLDivElement;
     referenceVideoFrameBuffer: VideoFrameBuffer | null;
     videoFrameBuffer: VideoFrameBuffer | null;
+    ffmpegFrameExtractor: FFmpegFrameExtractor | null;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isMouseDown: boolean;
@@ -135,6 +137,15 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     setVideoBlob(blob: Blob, fps?: number): Promise<void>;
     setVideoUrl(url: string, fps?: number): Promise<void>;
     enableVideoFrameBuffer(): void;
+    /**
+     * Set FFmpeg frame extractor for precise frame-accurate playback.
+     * When set, extracted frames will be used instead of video element frames.
+     */
+    setFFmpegFrameExtractor(extractor: FFmpegFrameExtractor | null): void;
+    /**
+     * Check if FFmpeg frames are available for the current frame.
+     */
+    hasFFmpegFrame(frameNumber: number): boolean;
     hide(): void;
     showControls(): void;
     hideControls(): void;

@@ -19,9 +19,31 @@ export function addVideoOverlay(this: AnnotationTool) {
   // activeTimeFrame is set via updateActiveTimeFrame() which is called before drawing
   const frameNumber = this.activeTimeFrame;
 
-  const videoFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0) ?? node;
-  const vw = videoFrame ? videoFrame.width : node.videoWidth;
-  const vh = videoFrame ? videoFrame.height : node.videoHeight;
+  // Priority: FFmpeg frames > VideoFrameBuffer > video element
+  // FFmpeg frames provide precise frame-accurate rendering
+  let videoFrame: ImageBitmap | HTMLVideoElement | null = null;
+  let vw: number;
+  let vh: number;
+
+  // Try FFmpeg extracted frames first (most accurate)
+  const ffmpegFrame = this.ffmpegFrameExtractor?.getFrame(frameNumber || 1);
+  if (ffmpegFrame) {
+    videoFrame = ffmpegFrame;
+    vw = ffmpegFrame.width;
+    vh = ffmpegFrame.height;
+  } else {
+    // Fall back to VideoFrameBuffer or video element
+    const bufferFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0);
+    if (bufferFrame) {
+      videoFrame = bufferFrame;
+      vw = bufferFrame.width;
+      vh = bufferFrame.height;
+    } else {
+      videoFrame = node;
+      vw = node.videoWidth;
+      vh = node.videoHeight;
+    }
+  }
 
   this.ctx.drawImage(
     videoFrame,

@@ -135,7 +135,7 @@ function parseGTOText(content: string): GTOObject[] {
       continue;
     }
 
-    // Opening brace
+    // Opening brace (standalone)
     if (line === '{') {
       braceDepth++;
       continue;
@@ -156,23 +156,32 @@ function parseGTOText(content: string): GTOObject[] {
     // Inside an object
     if (currentObject && braceDepth >= 1) {
       // Component name - can be quoted (OpenRV format) or unquoted
-      // Quoted: "pen:1:15:User" or "frame:15"
+      // Quoted: "pen:1:15:User" or "frame:15" or "pen:1:15:User" {
       // Unquoted: pen:0:1:user or paint
       if (braceDepth === 1) {
-        // Check for quoted component name: "something"
-        const quotedMatch = line.match(/^"([^"]+)"$/);
+        // Check for quoted component name with optional inline opening brace: "something" or "something" {
+        const quotedMatch = line.match(/^"([^"]+)"(\s*\{)?$/);
         if (quotedMatch) {
           currentComponent = quotedMatch[1];
           if (!currentObject.components.has(currentComponent)) {
             currentObject.components.set(currentComponent, new Map());
           }
+          // If there's an inline brace, increment depth
+          if (quotedMatch[2]) {
+            braceDepth++;
+          }
           continue;
         }
-        // Unquoted component name (no assignment, no brackets)
-        if (!line.includes('=') && !line.includes('[')) {
-          currentComponent = line;
+        // Unquoted component name with optional inline brace (no assignment)
+        const unquotedMatch = line.match(/^([^\s=\[]+)(\s*\{)?$/);
+        if (unquotedMatch && !line.includes('=')) {
+          currentComponent = unquotedMatch[1];
           if (!currentObject.components.has(currentComponent)) {
             currentObject.components.set(currentComponent, new Map());
+          }
+          // If there's an inline brace, increment depth
+          if (unquotedMatch[2]) {
+            braceDepth++;
           }
           continue;
         }
@@ -224,7 +233,10 @@ function convertOpenRVToSmAnnotate(
 function penComponentToCurve(
   props: Map<string, GTOPropertyValue>,
   width: number,
-  height: number
+  height: number,
+  targetHeight: number,
+  scale?: number,
+  offset?: { x: number; y: number }
 ): ICurve | null {
   const pointsData = props.get('points') as number[] | undefined;
   const colorData = props.get('color') as number[] | undefined;
@@ -240,11 +252,13 @@ function penComponentToCurve(
   // OpenRV uses NDC (-1 to 1 centered), convert to sm-annotate (0 to 1 top-left)
   const points: IPoint[] = [];
   for (let i = 0; i < pointsData.length; i += 2) {
-    const converted = convertOpenRVToSmAnnotate(
+    let converted = convertOpenRVToSmAnnotate(
       pointsData[i],
       pointsData[i + 1],
       aspectRatio
     );
+    // Apply scale and offset transformation
+    converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
     points.push(converted);
   }
 
@@ -255,13 +269,18 @@ function penComponentToCurve(
   // OpenRV width is normalized (relative to image height), convert to reasonable pixel value
   let lineWidth = 2;
   if (typeof widthData === 'number') {
-    lineWidth = widthData * height;
+    lineWidth = widthData * targetHeight;
   } else if (Array.isArray(widthData) && widthData.length > 0) {
     // Use first value, multiply by height to denormalize
     const firstWidth = widthData[0];
     if (typeof firstWidth === 'number') {
-      lineWidth = firstWidth * height;
+      lineWidth = firstWidth * targetHeight;
     }
+  }
+
+  // Apply scale to line width as well
+  if (scale !== undefined && scale !== 1) {
+    lineWidth *= scale;
   }
 
   // Clamp to reasonable range
@@ -283,7 +302,10 @@ function penComponentToCurve(
 function textComponentToText(
   props: Map<string, GTOPropertyValue>,
   width: number,
-  height: number
+  height: number,
+  targetHeight: number,
+  scale?: number,
+  offset?: { x: number; y: number }
 ): IText | null {
   const positionData = props.get('position') as number[] | undefined;
   const colorData = props.get('color') as number[] | undefined;
@@ -297,11 +319,14 @@ function textComponentToText(
   const aspectRatio = width / height;
 
   // Convert OpenRV NDC to sm-annotate coordinates
-  const converted = convertOpenRVToSmAnnotate(
+  let converted = convertOpenRVToSmAnnotate(
     positionData[0],
     positionData[1],
     aspectRatio
   );
+
+  // Apply scale and offset transformation
+  converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
 
   const color = colorData ? rgbaToHex(colorData) : '#000000';
   const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
@@ -311,8 +336,14 @@ function textComponentToText(
   // Original export: size = fontSize / 100, fontSize = 16 + lineWidth * 0.5
   // We'll convert normalized size to a reasonable font size
   const normalizedSize = size ?? 0.01;
-  // Denormalize: multiply by height to get pixel size, then convert to lineWidth
-  const fontSize = normalizedSize * height;
+  // Denormalize: multiply by targetHeight to get pixel size, then convert to lineWidth
+  let fontSize = normalizedSize * targetHeight;
+
+  // Apply scale to font size
+  if (scale !== undefined && scale !== 1) {
+    fontSize *= scale;
+  }
+
   const lineWidth = Math.max(1, (fontSize - 16) / 0.5);
 
   return {
@@ -327,12 +358,64 @@ function textComponentToText(
   };
 }
 
+export interface OpenRVParseOptions {
+  /** Override width (uses file dimensions if available) */
+  width?: number;
+  /** Override height (uses file dimensions if available) */
+  height?: number;
+  /** Target height for scaling calculations */
+  targetHeight?: number;
+  /** Frames per second */
+  fps?: number;
+  /**
+   * Scale factor for coordinates (0.85 = 15% smaller toward center).
+   * Applied after coordinate conversion.
+   */
+  coordinateScale?: number;
+  /**
+   * Offset to apply to coordinates after scaling.
+   * Positive values move shapes left (x) and up (y).
+   * Example: { x: 0.07, y: 0.07 } shifts 7% left and up.
+   */
+  coordinateOffset?: { x: number; y: number };
+  /** Enable debug logging */
+  debug?: boolean;
+}
+
+/**
+ * Apply scale and offset transformations to a coordinate.
+ * Scale is applied toward center (0.5, 0.5), then offset is added.
+ */
+function applyCoordinateTransform(
+  x: number,
+  y: number,
+  scale?: number,
+  offset?: { x: number; y: number }
+): { x: number; y: number } {
+  let newX = x;
+  let newY = y;
+
+  // Scale toward center (0.5, 0.5)
+  if (scale !== undefined && scale !== 1) {
+    newX = 0.5 + (x - 0.5) * scale;
+    newY = 0.5 + (y - 0.5) * scale;
+  }
+
+  // Apply offset (inverted: positive values move shapes left/up)
+  if (offset) {
+    newX -= offset.x;
+    newY -= offset.y;
+  }
+
+  return { x: newX, y: newY };
+}
+
 /**
  * Parse OpenRV GTO file content and convert to sm-annotate format
  */
 export function parseOpenRV(
   content: string,
-  options: { width?: number; height?: number; fps?: number } = {}
+  options: OpenRVParseOptions = {}
 ): ParsedOpenRVResult {
   const result: ParsedOpenRVResult = {
     frames: [],
@@ -415,16 +498,30 @@ export function parseOpenRV(
   // Use dimensions from file first (needed for line width denormalization and aspect ratio), then fallback to options
   const width = result.dimensions?.width ?? options.width ?? 1920;
   const height = result.dimensions?.height ?? options.height ?? 1080;
+  const targetHeight = options.targetHeight ?? height;
   const fps = options.fps ?? 25;
+  const scale = options.coordinateScale;
+  const offset = options.coordinateOffset;
+  const debug = options.debug ?? false;
 
   result.fps = fps;
+
+  if (debug) {
+    console.log('[OpenRV Parser] Source dimensions:', width, 'x', height);
+    console.log('[OpenRV Parser] Target height:', targetHeight);
+    console.log('[OpenRV Parser] Coordinate scale:', scale);
+    console.log('[OpenRV Parser] Coordinate offset:', offset);
+  }
 
   // Extract paint annotations from ALL RVPaint blocks
   // Multiple RVPaint blocks can exist (e.g., defaultLayout_paint, defaultSequence_p_sourceGroup000000)
   const paintObjects = objects.filter(o => o.protocol === 'RVPaint');
   if (paintObjects.length === 0) {
+    if (debug) console.log('[OpenRV Parser] No RVPaint objects found');
     return result;
   }
+
+  if (debug) console.log('[OpenRV Parser] Found', paintObjects.length, 'RVPaint objects');
 
   // Group shapes by frame
   const frameShapes = new Map<number, IShape[]>();
@@ -436,7 +533,7 @@ export function parseOpenRV(
       const penMatch = compName.match(/^pen:\d+:(\d+):/i);
       if (penMatch) {
         const frame = parseInt(penMatch[1]);
-        const shape = penComponentToCurve(props, width, height);
+        const shape = penComponentToCurve(props, width, height, targetHeight, scale, offset);
         if (shape) {
           if (!frameShapes.has(frame)) {
             frameShapes.set(frame, []);
@@ -450,7 +547,7 @@ export function parseOpenRV(
       const textMatch = compName.match(/^text:\d+:(\d+):/i);
       if (textMatch) {
         const frame = parseInt(textMatch[1]);
-        const shape = textComponentToText(props, width, height);
+        const shape = textComponentToText(props, width, height, targetHeight, scale, offset);
         if (shape) {
           if (!frameShapes.has(frame)) {
             frameShapes.set(frame, []);
@@ -482,7 +579,7 @@ export function parseOpenRV(
  */
 export async function parseOpenRVFile(
   file: File,
-  options: { width?: number; height?: number; fps?: number } = {}
+  options: OpenRVParseOptions = {}
 ): Promise<ParsedOpenRVResult> {
   const content = await file.text();
   return parseOpenRV(content, options);

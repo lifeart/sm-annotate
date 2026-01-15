@@ -19,4 +19,5 @@ export {
   parseOpenRVFile,
   rgbaToHex,
   type ParsedOpenRVResult,
+  type OpenRVParseOptions,
 } from './openrv-parser';

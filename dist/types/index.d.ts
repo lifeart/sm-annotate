@@ -4,3 +4,4 @@ export type { SmAnnotateConfig, LayoutMode, MobileConfig, ToolbarConfig, Feature
 export { defaultConfig } from './config';
 export type { GestureState } from './gestures/gesture-handler';
 export { exportToOpenRV, downloadAsOpenRV, hexToRGBA, type OpenRVExportOptions, parseOpenRV, parseOpenRVFile, rgbaToHex, type ParsedOpenRVResult, } from './exporters';
+export { FFmpegFrameExtractor, getSharedFFmpegExtractor, destroySharedFFmpegExtractor, type FFmpegProgress, type VideoInfo, type ProgressCallback, } from './plugins/utils/ffmpeg-frame-extractor';

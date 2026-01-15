@@ -40,3 +40,13 @@ export {
   rgbaToHex,
   type ParsedOpenRVResult,
 } from './exporters';
+
+// FFmpeg frame extraction (for precise frame-accurate playback)
+export {
+  FFmpegFrameExtractor,
+  getSharedFFmpegExtractor,
+  destroySharedFFmpegExtractor,
+  type FFmpegProgress,
+  type VideoInfo,
+  type ProgressCallback,
+} from './plugins/utils/ffmpeg-frame-extractor';

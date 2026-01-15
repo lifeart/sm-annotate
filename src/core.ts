@@ -6,6 +6,7 @@ import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
+import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
 import { Theme, injectThemeStyles } from "./ui/theme";
 import { SmAnnotateConfig, LayoutMode, mergeConfig } from "./config";
 import { LayoutManager } from "./ui/layout";
@@ -37,6 +38,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   playerControlsContainer!: HTMLDivElement;
   referenceVideoFrameBuffer: VideoFrameBuffer | null = null;
   videoFrameBuffer: VideoFrameBuffer | null = null;
+  ffmpegFrameExtractor: FFmpegFrameExtractor | null = null;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
   isMouseDown = false;
@@ -427,6 +429,23 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       false
     );
     this.videoFrameBuffer.isMobile = this.isMobile;
+  }
+
+  /**
+   * Set FFmpeg frame extractor for precise frame-accurate playback.
+   * When set, extracted frames will be used instead of video element frames.
+   */
+  setFFmpegFrameExtractor(extractor: FFmpegFrameExtractor | null) {
+    this.ffmpegFrameExtractor = extractor;
+    // Redraw to show FFmpeg frames
+    this.redrawFullCanvas();
+  }
+
+  /**
+   * Check if FFmpeg frames are available for the current frame.
+   */
+  hasFFmpegFrame(frameNumber: number): boolean {
+    return this.ffmpegFrameExtractor?.hasFrame(frameNumber) ?? false;
   }
 
   hide() {

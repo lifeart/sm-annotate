@@ -22,7 +22,9 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "build-types": "tsc --emitDeclarationOnly",
     "build-ts": "esbuild src/index.ts --bundle --minify --target=es2015 --outfile=dist/index.js --format=esm",
-    "watch": "esbuild demo/index.ts --bundle --outfile=demo/index.js --watch --servedir=demo --serve=4300",
+    "watch": "esbuild demo/index.ts --bundle --outfile=demo/index.js --watch",
+    "serve": "node demo/server.mjs",
+    "dev:ffmpeg": "yarn build-demo && yarn serve",
     "build-demo": "esbuild demo/index.ts --bundle --minify --target=es2015 --outfile=demo/index.js",
     "dev": "yarn run watch",
     "build": "yarn clean && yarn build-demo && yarn build-ts && yarn run build-types",
@@ -30,5 +32,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2"
   }
 }

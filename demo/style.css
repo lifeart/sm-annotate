@@ -449,3 +449,191 @@ kbd {
   }
 }
 
+/* FFmpeg Status */
+.ffmpeg-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 0.3s ease;
+}
+
+.ffmpeg-status.loading .status-dot {
+  background: #f59e0b;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.ffmpeg-status.ready .status-dot {
+  background: #10b981;
+}
+
+.ffmpeg-status.extracting .status-dot {
+  background: var(--accent);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.ffmpeg-status.error .status-dot {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* FFmpeg Progress */
+.ffmpeg-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* FFmpeg Info */
+.ffmpeg-info {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.ffmpeg-info .file-input-hint {
+  margin: 0;
+  text-align: left;
+}
+
+/* Disabled button state */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:disabled:hover {
+  transform: none;
+  background: var(--accent);
+}
+
+/* Small button variant */
+.btn-small {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* OpenRV Transform Controls */
+.rv-transform-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.range-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.range-control label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.range-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.range-label span {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+
+/* Range slider styling */
+.range-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.range-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.range-control input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--accent-subtle);
+}
+
+.range-control input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.range-control input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--accent-subtle);
+}
+
+.rv-transform-controls .btn-small {
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
