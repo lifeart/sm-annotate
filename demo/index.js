@@ -1,45 +1,237 @@
-"use strict";(()=>{var Dn=Object.create;var ue=Object.defineProperty,$n=Object.defineProperties,Bn=Object.getOwnPropertyDescriptor,Hn=Object.getOwnPropertyDescriptors,On=Object.getOwnPropertyNames,Bt=Object.getOwnPropertySymbols,zn=Object.getPrototypeOf,me=Object.prototype.hasOwnProperty,Ie=Object.prototype.propertyIsEnumerable;var ke=i=>{throw TypeError(i)},nt=Math.pow,de=(i,o,t)=>o in i?ue(i,o,{enumerable:!0,configurable:!0,writable:!0,value:t}):i[o]=t,M=(i,o)=>{for(var t in o||(o={}))me.call(o,t)&&de(i,t,o[t]);if(Bt)for(var t of Bt(o))Ie.call(o,t)&&de(i,t,o[t]);return i},H=(i,o)=>$n(i,Hn(o));var Me=(i,o)=>{var t={};for(var e in i)me.call(i,e)&&o.indexOf(e)<0&&(t[e]=i[e]);if(i!=null&&Bt)for(var e of Bt(i))o.indexOf(e)<0&&Ie.call(i,e)&&(t[e]=i[e]);return t};var Vn=(i,o)=>()=>(o||i((o={exports:{}}).exports,o),o.exports);var Wn=(i,o,t,e)=>{if(o&&typeof o=="object"||typeof o=="function")for(let n of On(o))!me.call(i,n)&&n!==t&&ue(i,n,{get:()=>o[n],enumerable:!(e=Bn(o,n))||e.enumerable});return i};var Nn=(i,o,t)=>(t=i!=null?Dn(zn(i)):{},Wn(o||!i||!i.__esModule?ue(t,"default",{value:i,enumerable:!0}):t,i));var Y=(i,o,t)=>de(i,typeof o!="symbol"?o+"":o,t),Pe=(i,o,t)=>o.has(i)||ke("Cannot "+t);var I=(i,o,t)=>(Pe(i,o,"read from private field"),t?t.call(i):o.get(i)),ot=(i,o,t)=>o.has(i)?ke("Cannot add the same private member more than once"):o instanceof WeakSet?o.add(i):o.set(i,t),Ft=(i,o,t,e)=>(Pe(i,o,"write to private field"),e?e.call(i,t):o.set(i,t),t);var k=(i,o,t)=>new Promise((e,n)=>{var a=l=>{try{c(t.next(l))}catch(s){n(s)}},r=l=>{try{c(t.throw(l))}catch(s){n(s)}},c=l=>l.done?e(l.value):Promise.resolve(l.value).then(a,r);c((t=t.apply(i,o)).next())});var hn=Vn((Sa,cn)=>{"use strict";function io(i){for(var o=1/0,t=-1/0,e=0,n=i.length,a;e<n;e++)a=i[e],o>a&&(o=a),t<a&&(t=a);return{min:o,max:t}}function rn(i,o){var t=Math.pow(2,o-1),e=i<0?i*t:i*(t-1);return Math.max(-t,Math.min(t-1,e))}function sn(i,o,t){var e,n=i.length,a=Math.ceil(n/o),r,c,l,s,h,m,u=ln(t,a*2);for(e=0;e<a;e++)r=e*o,c=(e+1)*o>n?n:(e+1)*o,l=i.subarray(r,c),m=io(l),h=rn(m.min,t),s=rn(m.max,t),u[e*2]=h,u[e*2+1]=s;return u}function ln(i,o){return new(new Function(`return Int${i}Array`)())(o)}function ao(i,o){var t=i.length,e=1/t,n=i[0].length/2,a=0,r=0,c,l,s=ln(o,n*2);for(r=0;r<n;r++){for(c=0,l=0,a=0;a<t;a++)c+=e*i[a][r*2],l+=e*i[a][r*2+1];s[r*2]=c,s[r*2+1]=l}return[s]}function Zt(i,o){return typeof i=="number"?i:o}cn.exports=function(i,o,t,e,n,a){if(o=Zt(o,1e3),a=Zt(a,16),t==null&&(t=!0),[8,16,32].indexOf(a)<0)throw new Error("Invalid number of bits specified for peaks.");var r=i.numberOfChannels,c=[],l,s,h,m;if(e=Zt(e,0),n=Zt(n,i.length),typeof i.subarray=="undefined")for(l=0;l<r;l++)h=i.getChannelData(l),m=h.subarray(e,n),c.push(sn(m,o,a));else c.push(sn(i.subarray(e,n),o,a));return t&&c.length>1&&(c=ao(c,a)),s=c[0].length/2,{length:s,data:c,bits:a}}});var Xn={bgPrimary:"rgba(28, 28, 32, 0.95)",bgSecondary:"rgba(42, 42, 48, 0.98)",bgTertiary:"#35353d",bgHover:"rgba(255, 255, 255, 0.08)",bgActive:"rgba(255, 255, 255, 0.12)",textPrimary:"#f0f0f2",textSecondary:"#a8a8b0",textMuted:"#68687a",border:"rgba(255, 255, 255, 0.1)",borderHover:"rgba(255, 255, 255, 0.2)",accent:"#5b9fff",accentHover:"#7db3ff",shadow:"rgba(0, 0, 0, 0.4)"},Yn={bgPrimary:"rgba(250, 250, 252, 0.95)",bgSecondary:"rgba(255, 255, 255, 0.98)",bgTertiary:"#f0f0f5",bgHover:"rgba(0, 0, 0, 0.04)",bgActive:"rgba(0, 0, 0, 0.08)",textPrimary:"#1a1a24",textSecondary:"#5a5a6e",textMuted:"#9090a0",border:"rgba(0, 0, 0, 0.1)",borderHover:"rgba(0, 0, 0, 0.2)",accent:"#2563eb",accentHover:"#3b82f6",shadow:"rgba(0, 0, 0, 0.15)"},Un={dark:Xn,light:Yn},d="sm-annotate";function jn(i){return`
-    --${d}-bg-primary: ${i.bgPrimary};
-    --${d}-bg-secondary: ${i.bgSecondary};
-    --${d}-bg-tertiary: ${i.bgTertiary};
-    --${d}-bg-hover: ${i.bgHover};
-    --${d}-bg-active: ${i.bgActive};
-    --${d}-text-primary: ${i.textPrimary};
-    --${d}-text-secondary: ${i.textSecondary};
-    --${d}-text-muted: ${i.textMuted};
-    --${d}-border: ${i.border};
-    --${d}-border-hover: ${i.borderHover};
-    --${d}-accent: ${i.accent};
-    --${d}-accent-hover: ${i.accentHover};
-    --${d}-shadow: ${i.shadow};
+"use strict";
+(() => {
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
+
+  // node_modules/webaudio-peaks/index.js
+  var require_webaudio_peaks = __commonJS({
+    "node_modules/webaudio-peaks/index.js"(exports, module) {
+      "use strict";
+      function findMinMax(array) {
+        var min = Infinity;
+        var max = -Infinity;
+        var i = 0;
+        var len = array.length;
+        var curr;
+        for (; i < len; i++) {
+          curr = array[i];
+          if (min > curr) {
+            min = curr;
+          }
+          if (max < curr) {
+            max = curr;
+          }
+        }
+        return {
+          min,
+          max
+        };
+      }
+      function convert(n, bits) {
+        var max = Math.pow(2, bits - 1);
+        var v2 = n < 0 ? n * max : n * (max - 1);
+        return Math.max(-max, Math.min(max - 1, v2));
+      }
+      function extractPeaks(channel, samplesPerPixel, bits) {
+        var i;
+        var chanLength = channel.length;
+        var numPeaks = Math.ceil(chanLength / samplesPerPixel);
+        var start;
+        var end;
+        var segment;
+        var max;
+        var min;
+        var extrema;
+        var peaks = makeTypedArray(bits, numPeaks * 2);
+        for (i = 0; i < numPeaks; i++) {
+          start = i * samplesPerPixel;
+          end = (i + 1) * samplesPerPixel > chanLength ? chanLength : (i + 1) * samplesPerPixel;
+          segment = channel.subarray(start, end);
+          extrema = findMinMax(segment);
+          min = convert(extrema.min, bits);
+          max = convert(extrema.max, bits);
+          peaks[i * 2] = min;
+          peaks[i * 2 + 1] = max;
+        }
+        return peaks;
+      }
+      function makeTypedArray(bits, length) {
+        return new (new Function(`return Int${bits}Array`)())(length);
+      }
+      function makeMono(channelPeaks, bits) {
+        var numChan = channelPeaks.length;
+        var weight = 1 / numChan;
+        var numPeaks = channelPeaks[0].length / 2;
+        var c = 0;
+        var i = 0;
+        var min;
+        var max;
+        var peaks = makeTypedArray(bits, numPeaks * 2);
+        for (i = 0; i < numPeaks; i++) {
+          min = 0;
+          max = 0;
+          for (c = 0; c < numChan; c++) {
+            min += weight * channelPeaks[c][i * 2];
+            max += weight * channelPeaks[c][i * 2 + 1];
+          }
+          peaks[i * 2] = min;
+          peaks[i * 2 + 1] = max;
+        }
+        return [peaks];
+      }
+      function defaultNumber(value, defaultNumber2) {
+        if (typeof value === "number") {
+          return value;
+        } else {
+          return defaultNumber2;
+        }
+      }
+      module.exports = function(source, samplesPerPixel, isMono, cueIn, cueOut, bits) {
+        samplesPerPixel = defaultNumber(samplesPerPixel, 1e3);
+        bits = defaultNumber(bits, 16);
+        if (isMono === null || isMono === void 0) {
+          isMono = true;
+        }
+        if ([8, 16, 32].indexOf(bits) < 0) {
+          throw new Error("Invalid number of bits specified for peaks.");
+        }
+        var numChan = source.numberOfChannels;
+        var peaks = [];
+        var c;
+        var numPeaks;
+        var channel;
+        var slice;
+        cueIn = defaultNumber(cueIn, 0);
+        cueOut = defaultNumber(cueOut, source.length);
+        if (typeof source.subarray === "undefined") {
+          for (c = 0; c < numChan; c++) {
+            channel = source.getChannelData(c);
+            slice = channel.subarray(cueIn, cueOut);
+            peaks.push(extractPeaks(slice, samplesPerPixel, bits));
+          }
+        } else {
+          peaks.push(
+            extractPeaks(source.subarray(cueIn, cueOut), samplesPerPixel, bits)
+          );
+        }
+        if (isMono && peaks.length > 1) {
+          peaks = makeMono(peaks, bits);
+        }
+        numPeaks = peaks[0].length / 2;
+        return {
+          length: numPeaks,
+          data: peaks,
+          bits
+        };
+      };
+    }
+  });
+
+  // src/ui/theme.ts
+  var darkTheme = {
+    bgPrimary: "rgba(28, 28, 32, 0.95)",
+    bgSecondary: "rgba(42, 42, 48, 0.98)",
+    bgTertiary: "#35353d",
+    bgHover: "rgba(255, 255, 255, 0.08)",
+    bgActive: "rgba(255, 255, 255, 0.12)",
+    textPrimary: "#f0f0f2",
+    textSecondary: "#a8a8b0",
+    textMuted: "#68687a",
+    border: "rgba(255, 255, 255, 0.1)",
+    borderHover: "rgba(255, 255, 255, 0.2)",
+    accent: "#5b9fff",
+    accentHover: "#7db3ff",
+    shadow: "rgba(0, 0, 0, 0.4)"
+  };
+  var lightTheme = {
+    bgPrimary: "rgba(250, 250, 252, 0.95)",
+    bgSecondary: "rgba(255, 255, 255, 0.98)",
+    bgTertiary: "#f0f0f5",
+    bgHover: "rgba(0, 0, 0, 0.04)",
+    bgActive: "rgba(0, 0, 0, 0.08)",
+    textPrimary: "#1a1a24",
+    textSecondary: "#5a5a6e",
+    textMuted: "#9090a0",
+    border: "rgba(0, 0, 0, 0.1)",
+    borderHover: "rgba(0, 0, 0, 0.2)",
+    accent: "#2563eb",
+    accentHover: "#3b82f6",
+    shadow: "rgba(0, 0, 0, 0.15)"
+  };
+  var themes = {
+    dark: darkTheme,
+    light: lightTheme
+  };
+  var PREFIX = "sm-annotate";
+  function generateThemeCSS(theme) {
+    return `
+    --${PREFIX}-bg-primary: ${theme.bgPrimary};
+    --${PREFIX}-bg-secondary: ${theme.bgSecondary};
+    --${PREFIX}-bg-tertiary: ${theme.bgTertiary};
+    --${PREFIX}-bg-hover: ${theme.bgHover};
+    --${PREFIX}-bg-active: ${theme.bgActive};
+    --${PREFIX}-text-primary: ${theme.textPrimary};
+    --${PREFIX}-text-secondary: ${theme.textSecondary};
+    --${PREFIX}-text-muted: ${theme.textMuted};
+    --${PREFIX}-border: ${theme.border};
+    --${PREFIX}-border-hover: ${theme.borderHover};
+    --${PREFIX}-accent: ${theme.accent};
+    --${PREFIX}-accent-hover: ${theme.accentHover};
+    --${PREFIX}-shadow: ${theme.shadow};
 
     /* Customizable sizing and layout variables */
-    --${d}-toolbar-radius: 8px;
-    --${d}-toolbar-padding: 4px;
-    --${d}-toolbar-gap: 2px;
-    --${d}-btn-size: 32px;
-    --${d}-btn-size-mobile: 44px;
-    --${d}-btn-radius: 6px;
-    --${d}-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    --${d}-transition-duration: 0.15s;
-    --${d}-z-index-toolbar: 10;
-    --${d}-z-index-tooltip: 1000;
-  `}function _n(){return`
+    --${PREFIX}-toolbar-radius: 8px;
+    --${PREFIX}-toolbar-padding: 4px;
+    --${PREFIX}-toolbar-gap: 2px;
+    --${PREFIX}-btn-size: 32px;
+    --${PREFIX}-btn-size-mobile: 44px;
+    --${PREFIX}-btn-radius: 6px;
+    --${PREFIX}-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --${PREFIX}-transition-duration: 0.15s;
+    --${PREFIX}-z-index-toolbar: 10;
+    --${PREFIX}-z-index-tooltip: 1000;
+  `;
+  }
+  function generateStyles() {
+    return `
     /* Root container for CSS isolation */
-    .${d}-root {
-      font-family: var(--${d}-font-family);
+    .${PREFIX}-root {
+      font-family: var(--${PREFIX}-font-family);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    .${d}-root *,
-    .${d}-root *::before,
-    .${d}-root *::after {
+    .${PREFIX}-root *,
+    .${PREFIX}-root *::before,
+    .${PREFIX}-root *::after {
       box-sizing: border-box;
     }
 
-    .${d}-container {
+    .${PREFIX}-container {
       position: absolute;
       top: 0;
       left: 50%;
@@ -48,19 +240,19 @@
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      gap: var(--${d}-toolbar-gap);
-      padding: var(--${d}-toolbar-padding);
-      background: var(--${d}-bg-primary);
-      border: 1px solid var(--${d}-border);
-      border-radius: var(--${d}-toolbar-radius);
+      gap: var(--${PREFIX}-toolbar-gap);
+      padding: var(--${PREFIX}-toolbar-padding);
+      background: var(--${PREFIX}-bg-primary);
+      border: 1px solid var(--${PREFIX}-border);
+      border-radius: var(--${PREFIX}-toolbar-radius);
       backdrop-filter: blur(12px);
-      box-shadow: 0 4px 16px var(--${d}-shadow);
-      z-index: var(--${d}-z-index-toolbar);
+      box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+      z-index: var(--${PREFIX}-z-index-toolbar);
       margin-top: 8px;
-      font-family: var(--${d}-font-family);
+      font-family: var(--${PREFIX}-font-family);
     }
 
-    .${d}-player-controls {
+    .${PREFIX}-player-controls {
       position: absolute;
       bottom: 0;
       left: 50%;
@@ -69,22 +261,22 @@
       flex-direction: row;
       align-items: center;
       flex-wrap: nowrap;
-      gap: var(--${d}-toolbar-gap);
-      padding: var(--${d}-toolbar-padding);
-      background: var(--${d}-bg-primary);
-      border: 1px solid var(--${d}-border);
-      border-radius: var(--${d}-toolbar-radius);
+      gap: var(--${PREFIX}-toolbar-gap);
+      padding: var(--${PREFIX}-toolbar-padding);
+      background: var(--${PREFIX}-bg-primary);
+      border: 1px solid var(--${PREFIX}-border);
+      border-radius: var(--${PREFIX}-toolbar-radius);
       backdrop-filter: blur(12px);
-      box-shadow: 0 4px 16px var(--${d}-shadow);
-      z-index: var(--${d}-z-index-toolbar);
+      box-shadow: 0 4px 16px var(--${PREFIX}-shadow);
+      z-index: var(--${PREFIX}-z-index-toolbar);
       margin-bottom: 8px;
-      font-family: var(--${d}-font-family);
+      font-family: var(--${PREFIX}-font-family);
     }
 
     /* ==================== LAYOUT MODES ==================== */
 
     /* Horizontal layout (default) - already styled above */
-    .${d}-layout-horizontal .${d}-container {
+    .${PREFIX}-layout-horizontal .${PREFIX}-container {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
@@ -92,7 +284,7 @@
     }
 
     /* Vertical sidebar layout */
-    .${d}-layout-vertical .${d}-container {
+    .${PREFIX}-layout-vertical .${PREFIX}-container {
       top: 50%;
       left: 0;
       transform: translateY(-50%);
@@ -101,20 +293,20 @@
       margin-left: 8px;
     }
 
-    .${d}-layout-vertical.${d}-sidebar-right .${d}-container {
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-container {
       left: auto;
       right: 0;
       margin-left: 0;
       margin-right: 8px;
     }
 
-    .${d}-layout-vertical .${d}-divider {
+    .${PREFIX}-layout-vertical .${PREFIX}-divider {
       width: 20px;
       height: 1px;
       margin: 4px 0;
     }
 
-    .${d}-layout-vertical .${d}-player-controls {
+    .${PREFIX}-layout-vertical .${PREFIX}-player-controls {
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
@@ -122,7 +314,7 @@
     }
 
     /* Minimal/Floating layout */
-    .${d}-layout-minimal .${d}-container {
+    .${PREFIX}-layout-minimal .${PREFIX}-container {
       top: 8px;
       left: 8px;
       transform: none;
@@ -132,18 +324,18 @@
       user-select: none;
     }
 
-    .${d}-layout-minimal .${d}-container.${d}-dragging {
+    .${PREFIX}-layout-minimal .${PREFIX}-container.${PREFIX}-dragging {
       opacity: 0.8;
     }
 
-    .${d}-layout-minimal .${d}-player-controls {
+    .${PREFIX}-layout-minimal .${PREFIX}-player-controls {
       bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     /* Bottom dock layout */
-    .${d}-layout-bottom-dock .${d}-container {
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-container {
       top: auto;
       bottom: 0;
       left: 50%;
@@ -153,110 +345,110 @@
       flex-direction: row;
     }
 
-    .${d}-layout-bottom-dock .${d}-player-controls {
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-player-controls {
       display: none;
     }
 
     /* ==================== COLLAPSIBLE TOOLBARS ==================== */
 
-    .${d}-collapsible {
-      transition: transform var(--${d}-transition-duration) ease,
-                  opacity var(--${d}-transition-duration) ease;
+    .${PREFIX}-collapsible {
+      transition: transform var(--${PREFIX}-transition-duration) ease,
+                  opacity var(--${PREFIX}-transition-duration) ease;
     }
 
-    .${d}-collapsed {
+    .${PREFIX}-collapsed {
       opacity: 0.3;
       pointer-events: none;
     }
 
-    .${d}-collapsed:hover,
-    .${d}-collapsed:focus-within {
+    .${PREFIX}-collapsed:hover,
+    .${PREFIX}-collapsed:focus-within {
       opacity: 1;
       pointer-events: auto;
     }
 
     /* Collapse direction based on layout */
-    .${d}-layout-horizontal .${d}-container.${d}-collapsed {
+    .${PREFIX}-layout-horizontal .${PREFIX}-container.${PREFIX}-collapsed {
       transform: translateX(-50%) translateY(-100%);
     }
 
-    .${d}-layout-vertical .${d}-container.${d}-collapsed {
+    .${PREFIX}-layout-vertical .${PREFIX}-container.${PREFIX}-collapsed {
       transform: translateY(-50%) translateX(-100%);
     }
 
-    .${d}-layout-vertical.${d}-sidebar-right .${d}-container.${d}-collapsed {
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-container.${PREFIX}-collapsed {
       transform: translateY(-50%) translateX(100%);
     }
 
-    .${d}-layout-minimal .${d}-container.${d}-collapsed {
+    .${PREFIX}-layout-minimal .${PREFIX}-container.${PREFIX}-collapsed {
       transform: scale(0.8);
       opacity: 0.3;
     }
 
-    .${d}-layout-bottom-dock .${d}-container.${d}-collapsed {
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-container.${PREFIX}-collapsed {
       transform: translateX(-50%) translateY(100%);
     }
 
-    .${d}-collapse-btn {
+    .${PREFIX}-collapse-btn {
       position: absolute;
       width: 24px;
       height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--${d}-bg-secondary);
-      border: 1px solid var(--${d}-border);
+      background: var(--${PREFIX}-bg-secondary);
+      border: 1px solid var(--${PREFIX}-border);
       border-radius: 50%;
       cursor: pointer;
-      z-index: calc(var(--${d}-z-index-toolbar) + 1);
-      transition: background var(--${d}-transition-duration) ease;
+      z-index: calc(var(--${PREFIX}-z-index-toolbar) + 1);
+      transition: background var(--${PREFIX}-transition-duration) ease;
     }
 
-    .${d}-collapse-btn:hover {
-      background: var(--${d}-bg-hover);
+    .${PREFIX}-collapse-btn:hover {
+      background: var(--${PREFIX}-bg-hover);
     }
 
-    .${d}-collapse-btn svg {
+    .${PREFIX}-collapse-btn svg {
       width: 14px;
       height: 14px;
-      color: var(--${d}-text-secondary);
-      transition: transform var(--${d}-transition-duration) ease;
+      color: var(--${PREFIX}-text-secondary);
+      transition: transform var(--${PREFIX}-transition-duration) ease;
     }
 
-    .${d}-collapsed + .${d}-collapse-btn svg {
+    .${PREFIX}-collapsed + .${PREFIX}-collapse-btn svg {
       transform: rotate(180deg);
     }
 
     /* Collapse button position based on layout */
-    .${d}-layout-horizontal .${d}-collapse-btn {
+    .${PREFIX}-layout-horizontal .${PREFIX}-collapse-btn {
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
       margin-top: 4px;
     }
 
-    .${d}-layout-vertical .${d}-collapse-btn {
+    .${PREFIX}-layout-vertical .${PREFIX}-collapse-btn {
       top: 50%;
       left: 100%;
       transform: translateY(-50%);
       margin-left: 4px;
     }
 
-    .${d}-layout-vertical.${d}-sidebar-right .${d}-collapse-btn {
+    .${PREFIX}-layout-vertical.${PREFIX}-sidebar-right .${PREFIX}-collapse-btn {
       left: auto;
       right: 100%;
       margin-left: 0;
       margin-right: 4px;
     }
 
-    .${d}-layout-minimal .${d}-collapse-btn {
+    .${PREFIX}-layout-minimal .${PREFIX}-collapse-btn {
       top: -8px;
       right: -8px;
       left: auto;
       transform: none;
     }
 
-    .${d}-layout-bottom-dock .${d}-collapse-btn {
+    .${PREFIX}-layout-bottom-dock .${PREFIX}-collapse-btn {
       bottom: 100%;
       left: 50%;
       top: auto;
@@ -265,21 +457,21 @@
     }
 
     /* Fullscreen mode - toolbars inside the fullscreen container */
-    :fullscreen .${d}-container,
-    :-webkit-full-screen .${d}-container {
+    :fullscreen .${PREFIX}-container,
+    :-webkit-full-screen .${PREFIX}-container {
       position: fixed;
       top: 0;
       margin-top: 8px;
     }
 
-    :fullscreen .${d}-player-controls,
-    :-webkit-full-screen .${d}-player-controls {
+    :fullscreen .${PREFIX}-player-controls,
+    :-webkit-full-screen .${PREFIX}-player-controls {
       position: fixed;
       bottom: 0;
       margin-bottom: 8px;
     }
 
-    .${d}-btn {
+    .${PREFIX}-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -289,49 +481,49 @@
       border: none;
       border-radius: 6px;
       background: transparent;
-      color: var(--${d}-text-secondary);
+      color: var(--${PREFIX}-text-secondary);
       cursor: pointer;
       transition: background 0.15s ease, color 0.15s ease;
       outline: none;
     }
 
-    .${d}-btn:hover {
-      background: var(--${d}-bg-hover);
-      color: var(--${d}-text-primary);
+    .${PREFIX}-btn:hover {
+      background: var(--${PREFIX}-bg-hover);
+      color: var(--${PREFIX}-text-primary);
     }
 
-    .${d}-btn:active {
-      background: var(--${d}-bg-active);
+    .${PREFIX}-btn:active {
+      background: var(--${PREFIX}-bg-active);
     }
 
-    .${d}-btn.active {
-      background: var(--${d}-accent);
+    .${PREFIX}-btn.active {
+      background: var(--${PREFIX}-accent);
       color: #ffffff;
     }
 
-    .${d}-btn.active:hover {
-      background: var(--${d}-accent-hover);
+    .${PREFIX}-btn.active:hover {
+      background: var(--${PREFIX}-accent-hover);
     }
 
-    .${d}-btn:disabled {
+    .${PREFIX}-btn:disabled {
       opacity: 0.35;
       cursor: not-allowed;
     }
 
-    .${d}-btn svg {
+    .${PREFIX}-btn svg {
       width: 18px;
       height: 18px;
     }
 
-    .${d}-divider {
+    .${PREFIX}-divider {
       flex: 0 0 1px;
       width: 1px;
       height: 20px;
       margin: 0 4px;
-      background: var(--${d}-border);
+      background: var(--${PREFIX}-border);
     }
 
-    .${d}-color-picker {
+    .${PREFIX}-color-picker {
       width: 32px;
       height: 32px;
       padding: 4px;
@@ -342,31 +534,31 @@
       transition: background 0.15s ease;
     }
 
-    .${d}-color-picker:hover {
-      background: var(--${d}-bg-hover);
+    .${PREFIX}-color-picker:hover {
+      background: var(--${PREFIX}-bg-hover);
     }
 
-    .${d}-color-picker::-webkit-color-swatch-wrapper {
+    .${PREFIX}-color-picker::-webkit-color-swatch-wrapper {
       padding: 0;
     }
 
-    .${d}-color-picker::-webkit-color-swatch {
-      border: 2px solid var(--${d}-border);
+    .${PREFIX}-color-picker::-webkit-color-swatch {
+      border: 2px solid var(--${PREFIX}-border);
       border-radius: 4px;
     }
 
-    .${d}-color-picker:hover::-webkit-color-swatch {
-      border-color: var(--${d}-border-hover);
+    .${PREFIX}-color-picker:hover::-webkit-color-swatch {
+      border-color: var(--${PREFIX}-border-hover);
     }
 
-    .${d}-slider {
+    .${PREFIX}-slider {
       width: 48px;
       height: 28px;
       padding: 0 8px;
-      border: 1px solid var(--${d}-border);
+      border: 1px solid var(--${PREFIX}-border);
       border-radius: 6px;
-      background: var(--${d}-bg-secondary);
-      color: var(--${d}-text-primary);
+      background: var(--${PREFIX}-bg-secondary);
+      color: var(--${PREFIX}-text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 12px;
       font-weight: 500;
@@ -374,22 +566,22 @@
       transition: border-color 0.15s ease;
     }
 
-    .${d}-slider:hover {
-      border-color: var(--${d}-border-hover);
+    .${PREFIX}-slider:hover {
+      border-color: var(--${PREFIX}-border-hover);
     }
 
-    .${d}-slider:focus {
+    .${PREFIX}-slider:focus {
       outline: none;
-      border-color: var(--${d}-accent);
+      border-color: var(--${PREFIX}-accent);
     }
 
-    .${d}-group {
+    .${PREFIX}-group {
       display: inline-flex;
       align-items: center;
       gap: 2px;
     }
 
-    .${d}-fullscreen-btn {
+    .${PREFIX}-fullscreen-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -399,18 +591,18 @@
       border: none;
       border-radius: 6px;
       background: transparent;
-      color: var(--${d}-text-secondary);
+      color: var(--${PREFIX}-text-secondary);
       cursor: pointer;
       transition: background 0.15s ease, color 0.15s ease;
       outline: none;
     }
 
-    .${d}-fullscreen-btn:hover {
-      background: var(--${d}-bg-hover);
-      color: var(--${d}-text-primary);
+    .${PREFIX}-fullscreen-btn:hover {
+      background: var(--${PREFIX}-bg-hover);
+      color: var(--${PREFIX}-text-primary);
     }
 
-    .${d}-fullscreen-btn svg {
+    .${PREFIX}-fullscreen-btn svg {
       width: 18px;
       height: 18px;
     }
@@ -437,16 +629,16 @@
       inset-inline-start: 50%;
       translate: -50% 4px;
       padding: 6px 10px;
-      background: var(--${d}-bg-secondary);
-      color: var(--${d}-text-primary);
+      background: var(--${PREFIX}-bg-secondary);
+      color: var(--${PREFIX}-text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 12px;
       font-weight: 500;
       line-height: 1.3;
       white-space: nowrap;
       border-radius: 6px;
-      border: 1px solid var(--${d}-border);
-      box-shadow: 0 4px 12px var(--${d}-shadow);
+      border: 1px solid var(--${PREFIX}-border);
+      box-shadow: 0 4px 12px var(--${PREFIX}-shadow);
     }
 
     /* Tooltip arrow */
@@ -456,7 +648,7 @@
       inset-inline-start: 50%;
       translate: -50% 4px;
       border: 6px solid transparent;
-      border-block-start-color: var(--${d}-bg-secondary);
+      border-block-start-color: var(--${PREFIX}-bg-secondary);
     }
 
     /* Show tooltip on hover/focus */
@@ -481,7 +673,7 @@
       inset-block-start: calc(100% + 2px);
       translate: -50% -4px;
       border-block-start-color: transparent;
-      border-block-end-color: var(--${d}-bg-secondary);
+      border-block-end-color: var(--${PREFIX}-bg-secondary);
     }
 
     [data-tooltip-position="bottom"]:hover::before,
@@ -499,7 +691,7 @@
 
     /* Mobile styles - larger touch targets */
     @media (max-width: 960px) {
-      .${d}-container {
+      .${PREFIX}-container {
         gap: 4px;
         padding: 6px;
         margin-top: 4px;
@@ -511,11 +703,11 @@
         -ms-overflow-style: none;
       }
 
-      .${d}-container::-webkit-scrollbar {
+      .${PREFIX}-container::-webkit-scrollbar {
         display: none;
       }
 
-      .${d}-player-controls {
+      .${PREFIX}-player-controls {
         gap: 4px;
         padding: 6px;
         margin-bottom: 4px;
@@ -527,47 +719,47 @@
         -ms-overflow-style: none;
       }
 
-      .${d}-player-controls::-webkit-scrollbar {
+      .${PREFIX}-player-controls::-webkit-scrollbar {
         display: none;
       }
 
-      .${d}-btn {
+      .${PREFIX}-btn {
         width: 44px;
         height: 44px;
         border-radius: 8px;
       }
 
-      .${d}-btn svg {
+      .${PREFIX}-btn svg {
         width: 22px;
         height: 22px;
       }
 
-      .${d}-divider {
+      .${PREFIX}-divider {
         height: 28px;
         margin: 0 6px;
       }
 
-      .${d}-color-picker {
+      .${PREFIX}-color-picker {
         width: 44px;
         height: 44px;
         padding: 6px;
         border-radius: 8px;
       }
 
-      .${d}-slider {
+      .${PREFIX}-slider {
         width: 56px;
         height: 36px;
         font-size: 14px;
         border-radius: 8px;
       }
 
-      .${d}-fullscreen-btn {
+      .${PREFIX}-fullscreen-btn {
         width: 44px;
         height: 44px;
         border-radius: 8px;
       }
 
-      .${d}-fullscreen-btn svg {
+      .${PREFIX}-fullscreen-btn svg {
         width: 22px;
         height: 22px;
       }
@@ -582,27 +774,27 @@
     }
 
     /* Fullscreen mode with safe area support */
-    :fullscreen .${d}-container,
-    :-webkit-full-screen .${d}-container {
+    :fullscreen .${PREFIX}-container,
+    :-webkit-full-screen .${PREFIX}-container {
       margin-top: max(8px, env(safe-area-inset-top, 8px));
     }
 
-    :fullscreen .${d}-player-controls,
-    :-webkit-full-screen .${d}-player-controls {
+    :fullscreen .${PREFIX}-player-controls,
+    :-webkit-full-screen .${PREFIX}-player-controls {
       margin-bottom: max(8px, env(safe-area-inset-bottom, 8px));
     }
 
     /* Mobile fullscreen - extra adjustments */
     @media (max-width: 960px) {
-      :fullscreen .${d}-container,
-      :-webkit-full-screen .${d}-container {
+      :fullscreen .${PREFIX}-container,
+      :-webkit-full-screen .${PREFIX}-container {
         margin-top: max(4px, env(safe-area-inset-top, 4px));
         padding-left: max(6px, env(safe-area-inset-left, 6px));
         padding-right: max(6px, env(safe-area-inset-right, 6px));
       }
 
-      :fullscreen .${d}-player-controls,
-      :-webkit-full-screen .${d}-player-controls {
+      :fullscreen .${PREFIX}-player-controls,
+      :-webkit-full-screen .${PREFIX}-player-controls {
         margin-bottom: max(4px, env(safe-area-inset-bottom, 4px));
         padding-left: max(6px, env(safe-area-inset-left, 6px));
         padding-right: max(6px, env(safe-area-inset-right, 6px));
@@ -611,59 +803,104 @@
 
     /* Landscape orientation on mobile - compact mode */
     @media (max-width: 960px) and (orientation: landscape) and (max-height: 500px) {
-      .${d}-container {
+      .${PREFIX}-container {
         padding: 4px;
         gap: 2px;
       }
 
-      .${d}-btn {
+      .${PREFIX}-btn {
         width: 36px;
         height: 36px;
       }
 
-      .${d}-btn svg {
+      .${PREFIX}-btn svg {
         width: 18px;
         height: 18px;
       }
 
-      .${d}-divider {
+      .${PREFIX}-divider {
         height: 24px;
         margin: 0 4px;
       }
 
-      .${d}-color-picker {
+      .${PREFIX}-color-picker {
         width: 36px;
         height: 36px;
         padding: 4px;
       }
 
-      .${d}-slider {
+      .${PREFIX}-slider {
         width: 48px;
         height: 32px;
         font-size: 12px;
       }
 
-      .${d}-fullscreen-btn {
+      .${PREFIX}-fullscreen-btn {
         width: 36px;
         height: 36px;
       }
 
-      .${d}-fullscreen-btn svg {
+      .${PREFIX}-fullscreen-btn svg {
         width: 18px;
         height: 18px;
       }
 
-      .${d}-player-controls {
+      .${PREFIX}-player-controls {
         padding: 4px;
         gap: 2px;
       }
     }
-  `}var It=null;function pe(i="dark"){It||(It=document.createElement("style"),It.id=`${d}-theme-styles`,document.head.appendChild(It));let o=Un[i];It.textContent=`
-    :root {
-      ${jn(o)}
+  `;
+  }
+  var styleElement = null;
+  function injectThemeStyles(theme = "dark") {
+    if (!styleElement) {
+      styleElement = document.createElement("style");
+      styleElement.id = `${PREFIX}-theme-styles`;
+      document.head.appendChild(styleElement);
     }
-    ${_n()}
-  `}function j(i){i.classList.add(`${d}-btn`)}function Re(i){i.classList.add(`${d}-container`)}function Le(i){i.classList.add(`${d}-player-controls`)}function Ae(i){i.classList.add(`${d}-color-picker`)}function De(i){i.classList.add(`${d}-slider`)}function $e(i){i.classList.add(`${d}-fullscreen-btn`)}function kt(){let i=document.createElement("div");return i.classList.add(`${d}-divider`),i}function bt(){return d}function Be(i){let o=document.createElement("button");o.type="button",o.dataset.tooltip="Toggle theme",j(o);let t=()=>{let e=i.theme==="dark";o.innerHTML=e?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    const themeColors = themes[theme];
+    styleElement.textContent = `
+    :root {
+      ${generateThemeCSS(themeColors)}
+    }
+    ${generateStyles()}
+  `;
+  }
+  function applyButtonStyle(button) {
+    button.classList.add(`${PREFIX}-btn`);
+  }
+  function applyContainerStyle(container) {
+    container.classList.add(`${PREFIX}-container`);
+  }
+  function applyPlayerControlsStyle(container) {
+    container.classList.add(`${PREFIX}-player-controls`);
+  }
+  function applyColorPickerStyle(input) {
+    input.classList.add(`${PREFIX}-color-picker`);
+  }
+  function applySliderStyle(input) {
+    input.classList.add(`${PREFIX}-slider`);
+  }
+  function applyFullscreenButtonStyle(button) {
+    button.classList.add(`${PREFIX}-fullscreen-btn`);
+  }
+  function createDivider() {
+    const divider = document.createElement("div");
+    divider.classList.add(`${PREFIX}-divider`);
+    return divider;
+  }
+  function getCSSPrefix() {
+    return PREFIX;
+  }
+  function createThemeToggleButton(tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.tooltip = "Toggle theme";
+    applyButtonStyle(button);
+    const updateIcon = () => {
+      const isDark = tool.theme === "dark";
+      button.innerHTML = isDark ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/>
           <line x1="12" y1="1" x2="12" y2="3"/>
           <line x1="12" y1="21" x2="12" y2="23"/>
@@ -673,34 +910,1763 @@
           <line x1="21" y1="12" x2="23" y2="12"/>
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        </svg>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>`};return t(),i.addEvent(o,"click",()=>{i.setTheme(i.theme==="dark"?"light":"dark"),t()}),o}function He(i,o){let t=document.createElement("button");t.type="button",j(t),t.style.float="right",t.dataset.tooltip="Download frame",t.dataset.tooltipPosition="bottom",t.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>',o.addEvent(t,"click",()=>{let e=o.frameToDataUrl();if(!e)return;let n=document.createElement("a");n.download=`frame_${String(o.activeTimeFrame).padStart(3,"0")}.png`,n.href=e,n.click()}),o.buttons.push(t),o.playerControlsContainer.appendChild(t)}var Oe='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-x"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>',ze='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';function Ve(i,o){let t=document.createElement("button");t.type="button",j(t),t.dataset.tooltip="Mute/Unmute",t.dataset.tooltipPosition="bottom",i.muted||i.volume===0?t.innerHTML=Oe:t.innerHTML=ze,o.addEvent(i,"volumechange",()=>{i.muted||i.volume===0?t.innerHTML=Oe:t.innerHTML=ze}),o.addEvent(t,"click",()=>{if(i.muted){i.muted=!1;return}i.volume===0?i.volume=1:i.volume=0}),o.buttons.push(t),o.playerControlsContainer.appendChild(t)}var lt=[{value:0,label:"off"},{value:.25,label:"25%"},{value:.5,label:"50%"},{value:.7,label:"70%"},{value:1,label:"100%"}];function We(i,o=!1){let t=o?'<circle cx="18" cy="6" r="4" fill="currentColor" opacity="0.7"/>':"";return`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        </svg>`;
+    };
+    updateIcon();
+    tool.addEvent(button, "click", () => {
+      tool.setTheme(tool.theme === "dark" ? "light" : "dark");
+      updateIcon();
+    });
+    return button;
+  }
+
+  // src/ui/download-current-frame-button.ts
+  function createDownloadCurrentFrameButton(video2, tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    applyButtonStyle(button);
+    button.style.float = "right";
+    button.dataset.tooltip = "Download frame";
+    button.dataset.tooltipPosition = "bottom";
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>';
+    tool.addEvent(button, "click", () => {
+      const url = tool.frameToDataUrl();
+      if (!url) return;
+      const link = document.createElement("a");
+      link.download = `frame_${String(tool.activeTimeFrame).padStart(3, "0")}.png`;
+      link.href = url;
+      link.click();
+    });
+    tool.buttons.push(button);
+    tool.playerControlsContainer.appendChild(button);
+  }
+
+  // src/ui/mute-unmute-button.ts
+  var muteIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-x"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>';
+  var unmuteIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
+  function createMuteUnmuteButton(video2, tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    applyButtonStyle(button);
+    button.dataset.tooltip = "Mute/Unmute";
+    button.dataset.tooltipPosition = "bottom";
+    if (video2.muted || video2.volume === 0) {
+      button.innerHTML = muteIcon;
+    } else {
+      button.innerHTML = unmuteIcon;
+    }
+    tool.addEvent(video2, "volumechange", () => {
+      if (video2.muted || video2.volume === 0) {
+        button.innerHTML = muteIcon;
+      } else {
+        button.innerHTML = unmuteIcon;
+      }
+    });
+    tool.addEvent(button, "click", () => {
+      if (video2.muted) {
+        video2.muted = false;
+        return;
+      }
+      if (video2.volume === 0) {
+        video2.volume = 1;
+      } else {
+        video2.volume = 0;
+      }
+    });
+    tool.buttons.push(button);
+    tool.playerControlsContainer.appendChild(button);
+  }
+
+  // src/ui/overlay-opacity-button.ts
+  var OPACITY_STATES = [
+    { value: 0, label: "off" },
+    { value: 0.25, label: "25%" },
+    { value: 0.5, label: "50%" },
+    { value: 0.7, label: "70%" },
+    { value: 1, label: "100%" }
+  ];
+  function iconForOpacity(state, isShapeMode = false) {
+    const shapeIndicator = isShapeMode ? '<circle cx="18" cy="6" r="4" fill="currentColor" opacity="0.7"/>' : "";
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <style>
       .label {
         font-family: sans-serif;
         font-size: 9px;
       }
     </style>
-    <rect x="3" y="3" width="18" height="18" rx="2" opacity="${i.value===0?.3:i.value}"/>
-    <text x="12" y="14" text-anchor="middle" class="label" fill="currentColor">${i.label}</text>
-    ${t}
-  </svg>`}function fe(i){let o=lt.findIndex(t=>t.value===i);return o===-1?4:o}function Ne(i){let o=document.createElement("button");o.type="button",o.dataset.tooltip="Opacity";let t=fe(i.overlayOpacity),e=()=>{var c;let a=i.currentTool==="move"?i.pluginForTool("move"):null,r=a==null?void 0:a.getSelectedShape();if(r){let l=(c=r.opacity)!=null?c:1,s=fe(l);o.innerHTML=We(lt[s],!0),o.dataset.tooltip="Shape opacity"}else o.innerHTML=We(lt[t],!1),o.dataset.tooltip="Overlay opacity"};e(),j(o),i.addEvent(o,"click",()=>{var c;let a=i.currentTool==="move"?i.pluginForTool("move"):null,r=a==null?void 0:a.getSelectedShape();if(r&&a){let l=(c=r.opacity)!=null?c:1,s=fe(l);s=(s+1)%lt.length;let h=lt[s].value;a.setSelectedShapeOpacity(h)}else t=(t+1)%lt.length,i.overlayOpacity=lt[t].value,i.redrawFullCanvas();e()});let n=i.redrawFullCanvas.bind(i);return i.redrawFullCanvas=()=>{n(),e()},i.buttons.push(o),i.uiContainer.appendChild(o),o}var Xe='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',Gn='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect width="4" height="16" x="6" y="4"></rect><rect width="4" height="16" x="14" y="4"></rect></svg>';function Ye(i,o){let t=document.createElement("button");t.type="button",t.innerHTML=Xe,j(t),t.dataset.tooltip="Play/Pause",t.dataset.tooltipPosition="bottom",o.addEvent(i,"play",()=>{t.innerHTML=Gn}),o.addEvent(i,"pause",()=>{t.innerHTML=Xe}),o.addEvent(t,"click",()=>{o.withRefVideo(e=>{e.paused&&e.play().then(()=>{o.showButton("compare")})}),i.paused?i.play().then(()=>{o.redrawFullCanvas()}):(i.pause(),o.raf(()=>{o.redrawFullCanvas()}))}),o.buttons.push(t),o.playerControlsContainer.appendChild(t)}function Ue(i){return`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-superscript">
+    <rect x="3" y="3" width="18" height="18" rx="2" opacity="${state.value === 0 ? 0.3 : state.value}"/>
+    <text x="12" y="14" text-anchor="middle" class="label" fill="currentColor">${state.label}</text>
+    ${shapeIndicator}
+  </svg>`;
+  }
+  function findStateIndex(opacity) {
+    const index = OPACITY_STATES.findIndex((s) => s.value === opacity);
+    return index === -1 ? 4 : index;
+  }
+  function createOverlayOpacityButton(tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.tooltip = "Opacity";
+    let overlayIndex = findStateIndex(tool.overlayOpacity);
+    const updateButton = () => {
+      const movePlugin = tool.currentTool === "move" ? tool.pluginForTool("move") : null;
+      const selectedShape = movePlugin?.getSelectedShape();
+      if (selectedShape) {
+        const shapeOpacity = selectedShape.opacity ?? 1;
+        const stateIndex = findStateIndex(shapeOpacity);
+        button.innerHTML = iconForOpacity(OPACITY_STATES[stateIndex], true);
+        button.dataset.tooltip = "Shape opacity";
+      } else {
+        button.innerHTML = iconForOpacity(OPACITY_STATES[overlayIndex], false);
+        button.dataset.tooltip = "Overlay opacity";
+      }
+    };
+    updateButton();
+    applyButtonStyle(button);
+    tool.addEvent(button, "click", () => {
+      const movePlugin = tool.currentTool === "move" ? tool.pluginForTool("move") : null;
+      const selectedShape = movePlugin?.getSelectedShape();
+      if (selectedShape && movePlugin) {
+        const currentOpacity = selectedShape.opacity ?? 1;
+        let shapeIndex = findStateIndex(currentOpacity);
+        shapeIndex = (shapeIndex + 1) % OPACITY_STATES.length;
+        const newOpacity = OPACITY_STATES[shapeIndex].value;
+        movePlugin.setSelectedShapeOpacity(newOpacity);
+      } else {
+        overlayIndex = (overlayIndex + 1) % OPACITY_STATES.length;
+        tool.overlayOpacity = OPACITY_STATES[overlayIndex].value;
+        tool.redrawFullCanvas();
+      }
+      updateButton();
+    });
+    const originalRedraw = tool.redrawFullCanvas.bind(tool);
+    tool.redrawFullCanvas = () => {
+      originalRedraw();
+      updateButton();
+    };
+    tool.buttons.push(button);
+    tool.uiContainer.appendChild(button);
+    return button;
+  }
+
+  // src/ui/play-pause-button.ts
+  var playIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+  var pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect width="4" height="16" x="6" y="4"></rect><rect width="4" height="16" x="14" y="4"></rect></svg>';
+  function createPlayPauseButton(video2, tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = playIcon;
+    applyButtonStyle(button);
+    button.dataset.tooltip = "Play/Pause";
+    button.dataset.tooltipPosition = "bottom";
+    tool.addEvent(video2, "play", () => {
+      button.innerHTML = pauseIcon;
+    });
+    tool.addEvent(video2, "pause", () => {
+      button.innerHTML = playIcon;
+    });
+    tool.addEvent(button, "click", () => {
+      tool.withRefVideo((refVideo) => {
+        if (refVideo.paused) {
+          refVideo.play().then(() => {
+            tool.showButton("compare");
+          });
+        }
+      });
+      if (video2.paused) {
+        video2.play().then(() => {
+          tool.redrawFullCanvas();
+        });
+      } else {
+        video2.pause();
+        tool.raf(() => {
+          tool.redrawFullCanvas();
+        });
+      }
+    });
+    tool.buttons.push(button);
+    tool.playerControlsContainer.appendChild(button);
+  }
+
+  // src/ui/playback-speed-button.ts
+  function iconForSpeed(speed) {
+    const ratioMap = {
+      "0.25": "\xBC",
+      "0.5": "\xBD",
+      "0.75": "\xBE",
+      "1": "1\xD7"
+    };
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-superscript">
         <style>
             .small {
                 font-family: auto;
-                font-size: ${i===1?"16":"24"}px;
+                font-size: ${speed === 1 ? "16" : "24"}px;
             }
         </style>
-        <text x="${i===1?3:2}" y="${i===1?17:20}" font-weight="normal" class="small">${{"0.25":"\xBC","0.5":"\xBD","0.75":"\xBE",1:"1\xD7"}[String(i)]}</text>
+        <text x="${speed === 1 ? 3 : 2}" y="${speed === 1 ? 17 : 20}" font-weight="normal" class="small">${ratioMap[String(speed)]}</text>
         
-    </svg>`}function je(i,o){let t=[.25,.5,.75,1],e=document.createElement("button"),n=t[t.length-1];e.type="button",i.playbackRate=n,e.innerHTML=Ue(n),j(e),e.dataset.tooltip="Playback speed",e.dataset.tooltipPosition="bottom",o.addEvent(e,"click",()=>{let a=t.indexOf(i.playbackRate),r=a+1>=t.length?0:a+1;i.playbackRate=t[r],e.innerHTML=Ue(t[r])}),o.buttons.push(e),o.playerControlsContainer.appendChild(e)}var qn=500;function _e(i,o,t){let e=null,n=!1,a=()=>{n=!1,e=setTimeout(()=>{n=!0,t(),o.redrawFullCanvas()},qn)},r=()=>{e&&(clearTimeout(e),e=null)},c=()=>{e&&(clearTimeout(e),e=null)},l=s=>{n&&(s.preventDefault(),s.stopImmediatePropagation(),n=!1)};o.addEvent(i,"click",l),i.addEventListener("pointerdown",a),i.addEventListener("pointerup",r),i.addEventListener("pointerleave",c),o.destructors.push(()=>{i.removeEventListener("pointerdown",a),i.removeEventListener("pointerup",r),i.removeEventListener("pointerleave",c),e&&clearTimeout(e)})}var Ht=class{constructor(o,t){this.create=(o,t,e=this.uiContainer,n,a="top")=>{let r=document.createElement("button");if(r.type="button",r.innerHTML=o,j(r),n&&(r.dataset.tooltip=n,a==="bottom"&&(r.dataset.tooltipPosition="bottom")),e.appendChild(r),this.buttons.push(r),typeof t=="function")this.addEvent(r,"click",t);else{r.dataset.tool=t;let c=()=>{this.currentTool===t?this.currentTool=null:this.currentTool=t};try{this.tool.pluginForTool(t),this.addEvent(r,"click",c)}catch(l){console.error(l),r.disabled=!0}}return r};this.tool=o,this.uiContainer=t}get buttons(){return this.tool.buttons}get addEvent(){return this.tool.addEvent.bind(this.tool)}get currentTool(){return this.tool.currentTool}set currentTool(o){this.tool.currentTool=o}};function Ge(i,o){let t=i.videoElement.tagName==="VIDEO"?i.videoElement:null;if(o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>',"rectangle",o.uiContainer,"Rectangle"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',"circle",o.uiContainer,"Circle"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"></path><path d="m7.5 10.5 2 2"></path><path d="m10.5 7.5 2 2"></path><path d="m13.5 4.5 2 2"></path><path d="m4.5 13.5 2 2"></path></svg>',"line",o.uiContainer,"Line"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"></path></svg>',"curve",o.uiContainer,"Freehand"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>',"arrow",o.uiContainer,"Arrow"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>',"text",o.uiContainer,"Text"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>',"eraser",o.uiContainer,"Eraser"),o.uiContainer.appendChild(kt()),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>',"move",o.uiContainer,"Move shape"),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flip-horizontal"><path d="M8 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path><path d="M12 20v2"></path><path d="M12 14v2"></path><path d="M12 8v2"></path><path d="M12 2v2"></path></svg>',"compare",o.uiContainer,"Compare videos"),Ne(i),o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>',()=>{i.handleUndo()},o.uiContainer,"Undo (Ctrl+Z)"),t){let e=o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>',()=>{i.prevFrame()},i.playerControlsContainer,"Previous frame (hold for annotation)","bottom");_e(e,i,()=>i.prevAnnotatedFrame()),Ye(t,i);let n=o.create('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',()=>{i.nextFrame()},i.playerControlsContainer,"Next frame (hold for annotation)","bottom");_e(n,i,()=>i.nextAnnotatedFrame()),Ve(t,i),je(t,i),He(t,i)}o.create(`<svg viewBox="0 0 24 24" width="24" height="24">
+    </svg>`;
+  }
+  function createPlaybackSpeedControlButton(video2, tool) {
+    const states = [0.25, 0.5, 0.75, 1];
+    const button = document.createElement("button");
+    const defaultState = states[states.length - 1];
+    button.type = "button";
+    video2.playbackRate = defaultState;
+    button.innerHTML = iconForSpeed(defaultState);
+    applyButtonStyle(button);
+    button.dataset.tooltip = "Playback speed";
+    button.dataset.tooltipPosition = "bottom";
+    tool.addEvent(button, "click", () => {
+      const currentState = states.indexOf(video2.playbackRate);
+      const nextState = currentState + 1 >= states.length ? 0 : currentState + 1;
+      video2.playbackRate = states[nextState];
+      button.innerHTML = iconForSpeed(states[nextState]);
+    });
+    tool.buttons.push(button);
+    tool.playerControlsContainer.appendChild(button);
+  }
+
+  // src/buttons.ts
+  var LONG_PRESS_DURATION = 500;
+  function setupLongPress(button, tool, onLongPress) {
+    let longPressTimer = null;
+    let isLongPress = false;
+    const onPointerDown = () => {
+      isLongPress = false;
+      longPressTimer = setTimeout(() => {
+        isLongPress = true;
+        onLongPress();
+        tool.redrawFullCanvas();
+      }, LONG_PRESS_DURATION);
+    };
+    const onPointerUp = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+    const onPointerLeave = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+    const onClick = (e) => {
+      if (isLongPress) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        isLongPress = false;
+      }
+    };
+    tool.addEvent(button, "click", onClick);
+    button.addEventListener("pointerdown", onPointerDown);
+    button.addEventListener("pointerup", onPointerUp);
+    button.addEventListener("pointerleave", onPointerLeave);
+    tool.destructors.push(() => {
+      button.removeEventListener("pointerdown", onPointerDown);
+      button.removeEventListener("pointerup", onPointerUp);
+      button.removeEventListener("pointerleave", onPointerLeave);
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+      }
+    });
+  }
+  var ButtonConstructor = class {
+    constructor(tool, container) {
+      this.create = (icon, tool, container = this.uiContainer, tooltip, tooltipPosition = "top") => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.innerHTML = icon;
+        applyButtonStyle(button);
+        if (tooltip) {
+          button.dataset.tooltip = tooltip;
+          if (tooltipPosition === "bottom") {
+            button.dataset.tooltipPosition = "bottom";
+          }
+        }
+        container.appendChild(button);
+        this.buttons.push(button);
+        if (typeof tool === "function") {
+          this.addEvent(button, "click", tool);
+        } else {
+          button.dataset.tool = tool;
+          const onClick = () => {
+            if (this.currentTool === tool) {
+              this.currentTool = null;
+            } else {
+              this.currentTool = tool;
+            }
+          };
+          try {
+            this.tool.pluginForTool(tool);
+            this.addEvent(button, "click", onClick);
+          } catch (e) {
+            console.error(e);
+            button.disabled = true;
+          }
+        }
+        return button;
+      };
+      this.tool = tool;
+      this.uiContainer = container;
+    }
+    get buttons() {
+      return this.tool.buttons;
+    }
+    get addEvent() {
+      return this.tool.addEvent.bind(this.tool);
+    }
+    get currentTool() {
+      return this.tool.currentTool;
+    }
+    set currentTool(value) {
+      this.tool.currentTool = value;
+    }
+  };
+  function addButtons(tool, Button) {
+    const video2 = tool.videoElement.tagName === "VIDEO" ? tool.videoElement : null;
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>',
+      "rectangle",
+      Button.uiContainer,
+      "Rectangle"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',
+      "circle",
+      Button.uiContainer,
+      "Circle"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"></path><path d="m7.5 10.5 2 2"></path><path d="m10.5 7.5 2 2"></path><path d="m13.5 4.5 2 2"></path><path d="m4.5 13.5 2 2"></path></svg>',
+      "line",
+      Button.uiContainer,
+      "Line"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"></path></svg>',
+      "curve",
+      Button.uiContainer,
+      "Freehand"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>',
+      "arrow",
+      Button.uiContainer,
+      "Arrow"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
+      "text",
+      Button.uiContainer,
+      "Text"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>',
+      "eraser",
+      Button.uiContainer,
+      "Eraser"
+    );
+    Button.uiContainer.appendChild(createDivider());
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>',
+      "move",
+      Button.uiContainer,
+      "Move shape"
+    );
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flip-horizontal"><path d="M8 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path><path d="M12 20v2"></path><path d="M12 14v2"></path><path d="M12 8v2"></path><path d="M12 2v2"></path></svg>',
+      "compare",
+      Button.uiContainer,
+      "Compare videos"
+    );
+    createOverlayOpacityButton(tool);
+    Button.create(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>',
+      () => {
+        tool.handleUndo();
+      },
+      Button.uiContainer,
+      "Undo (Ctrl+Z)"
+    );
+    if (video2) {
+      const prevFrameBtn = Button.create(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>',
+        () => {
+          tool.prevFrame();
+        },
+        tool.playerControlsContainer,
+        "Previous frame (hold for annotation)",
+        "bottom"
+      );
+      setupLongPress(prevFrameBtn, tool, () => tool.prevAnnotatedFrame());
+      createPlayPauseButton(video2, tool);
+      const nextFrameBtn = Button.create(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
+        () => {
+          tool.nextFrame();
+        },
+        tool.playerControlsContainer,
+        "Next frame (hold for annotation)",
+        "bottom"
+      );
+      setupLongPress(nextFrameBtn, tool, () => tool.nextAnnotatedFrame());
+      createMuteUnmuteButton(video2, tool);
+      createPlaybackSpeedControlButton(video2, tool);
+      createDownloadCurrentFrameButton(video2, tool);
+    }
+    Button.create(
+      `<svg viewBox="0 0 24 24" width="24" height="24">
       <path fill="currentColor" d="M3 3h18v18H3V3m2 2v14h14V5H5z"/>
       <path fill="currentColor" d="M7 7h10v10H7V7m2 2v6h6V9H9z"/>
-    </svg>`,"selection",o.uiContainer,"Select region")}var Z=(i,o)=>{let t=i.target===document.body,e=o.uiContainer.contains(i.target),n=o.playerControlsContainer.contains(i.target),a=o.videoElement.contains(i.target),r=o.canvas.contains(i.target);return e||n||a||r||t};function Ot(i){return i.pointerType==="pen"?!1:i.pointerType==="touch"&&i.isPrimary===!1}function qe(i,o){if(!Z(i,o))return;let t=o.uiContainer.contains(i.target),e=o.playerControlsContainer.contains(i.target);if(t||e)return;let n=o.videoElement;n.tagName==="VIDEO"&&(n.paused||(o.currentTool=null,n.pause(),o.raf(()=>k(this,null,function*(){o.redrawFullCanvas()}))))}function Ke(i,o){var t;Z(i,o)&&(i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation(),(t=i.clipboardData)==null||t.setData("application/json",JSON.stringify(o.saveCurrentFrame())))}function Je(i,o){var e;if(!Z(i,o))return;i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation();let t=o.saveCurrentFrame();o.replaceFrame(o.playbackFrame,[]),o.redrawFullCanvas(),(e=i.clipboardData)==null||e.setData("application/json",JSON.stringify(t))}function Ze(i,o){if(!Z(i,o))return;let t=o.videoElement;t.tagName==="VIDEO"&&(i.key==="ArrowLeft"||i.key==="ArrowRight"?(i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation(),i.key==="ArrowLeft"?o.prevFrame():i.key==="ArrowRight"&&o.nextFrame()):i.code==="Space"&&(i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation(),t.paused?t.play().then(()=>{o.redrawFullCanvas()}):(t.pause(),o.raf(()=>{o.redrawFullCanvas()}))))}function Qe(i,o){var a,r,c,l,s;if(!Z(i,o))return;let t=(r=(a=i.clipboardData)==null?void 0:a.types)!=null?r:[];if(t.includes("application/json"))i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation();else if(t.includes("Files")){let h=(c=i.clipboardData)==null?void 0:c.files;if(h&&h.length>0){let m=h[0];if(m.type.startsWith("image/")){i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation();let u=new Image,p=URL.createObjectURL(m);u.addEventListener("load",()=>{URL.revokeObjectURL(p);let f=u.naturalWidth/u.naturalHeight,v=.25,y=v/f*o.aspectRatio;o.addShapesToFrame(o.playbackFrame,[{type:"image",image:u,x:0,y:0,width:v,height:y,strokeStyle:"red",fillStyle:"red",lineWidth:2}]),o.redrawFullCanvas(),o.raf(()=>{o.show()}),o.currentTool="move"},{once:!0}),u.addEventListener("error",()=>{URL.revokeObjectURL(p)},{once:!0}),u.src=p,o.redrawFullCanvas()}}}else if(t.includes("text/plain")){let h=(l=i.clipboardData)==null?void 0:l.getData("text/plain");h&&(i.preventDefault(),i.stopPropagation(),i.stopImmediatePropagation(),o.addShapesToFrame(o.playbackFrame,[{type:"text",text:h,x:.4,y:.4,strokeStyle:o.ctx.strokeStyle,fillStyle:o.ctx.fillStyle,lineWidth:o.ctx.lineWidth}]),o.show(),o.currentTool="move",o.redrawFullCanvas())}else return;let e=(s=i.clipboardData)==null?void 0:s.getData("application/json");if(!e)return;let n=JSON.parse(e);n&&n.shapes&&n.version===1&&(o.addShapesToFrame(o.playbackFrame,n.shapes),o.redrawFullCanvas())}var ct={r:"#d31a3b",g:"#15d33b",b:"#0085CA",y:"#F3CE32",a:"#7fffd4",c:"#00ffff",d:"#696969",e:"#50c878",f:"#ff00ff",h:"#f0fff0",i:"#4b0082",j:"#00a86b",k:"#f0e68c",l:"#e6e6fa",m:"#98ff98",n:"#000080",o:"#ffa500",p:"#800080",q:"#e5acc8",s:"#0f52ba",t:"#008080",u:"#3f00ff",v:"#ee82ee",w:"#ffffff",x:"#738678",z:"#0014a8"};function tn(i,o){let t=document.createElement("input");t.type="color",t.value=i,t.dataset.tooltip="Stroke color";let e=n=>{o.ctx.strokeStyle=n.target.value,o.ctx.fillStyle=n.target.value,o.focusOnMediaNode()};return o.addEvent(t,"input",e),t}function en(i){let o=document.createElement("input");o.type="number",o.step="1",o.min="1",o.max="10",o.value="5",o.style.margin="5px",o.dataset.tooltip="Stroke width";let t=e=>{i.ctx.lineWidth=e.target.valueAsNumber,i.focusOnMediaNode()};return i.addEvent(o,"input",t),o}var Kn=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    </svg>`,
+      "selection",
+      Button.uiContainer,
+      "Select region"
+    );
+  }
+
+  // src/events/utils/index.ts
+  var isTargetBelongsToVideo = (event, tool) => {
+    const isBody = event.target === document.body;
+    const isTool = tool.uiContainer.contains(event.target);
+    const isControl = tool.playerControlsContainer.contains(event.target);
+    const isVideo = tool.videoElement.contains(event.target);
+    const isCanvas = tool.canvas.contains(event.target);
+    return isTool || isControl || isVideo || isCanvas || isBody;
+  };
+  function isMultiTouch(event) {
+    if (event.pointerType === "pen") {
+      return false;
+    }
+    return event.pointerType === "touch" && event.isPrimary === false;
+  }
+
+  // src/events/document-click.ts
+  function onDocumentClick(event, tool) {
+    if (!isTargetBelongsToVideo(event, tool)) {
+      return;
+    }
+    const isTool = tool.uiContainer.contains(event.target);
+    const isControl = tool.playerControlsContainer.contains(event.target);
+    if (isTool || isControl) {
+      return;
+    }
+    const video2 = tool.videoElement;
+    if (video2.tagName !== "VIDEO") {
+      return;
+    }
+    if (video2.paused) {
+      return;
+    }
+    tool.currentTool = null;
+    video2.pause();
+    tool.raf(async () => {
+      tool.redrawFullCanvas();
+    });
+  }
+
+  // src/events/document-copy.ts
+  function onDocumentCopy(event, tool) {
+    if (!isTargetBelongsToVideo(event, tool)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.clipboardData?.setData(
+      "application/json",
+      JSON.stringify(tool.saveCurrentFrame())
+    );
+  }
+
+  // src/events/document-cut.ts
+  function onDocumentCut(event, tool) {
+    if (!isTargetBelongsToVideo(event, tool)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const data = tool.saveCurrentFrame();
+    tool.replaceFrame(tool.playbackFrame, []);
+    tool.redrawFullCanvas();
+    event.clipboardData?.setData("application/json", JSON.stringify(data));
+  }
+
+  // src/events/document-keydown.ts
+  function onDocumentKeydown(event, tool) {
+    if (!isTargetBelongsToVideo(event, tool)) {
+      return;
+    }
+    const video2 = tool.videoElement;
+    if (video2.tagName !== "VIDEO") {
+      return;
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      if (event.key === "ArrowLeft") {
+        tool.prevFrame();
+      } else if (event.key === "ArrowRight") {
+        tool.nextFrame();
+      }
+    } else if (event.code === "Space") {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      if (video2.paused) {
+        video2.play().then(() => {
+          tool.redrawFullCanvas();
+        });
+      } else {
+        video2.pause();
+        tool.raf(() => {
+          tool.redrawFullCanvas();
+        });
+      }
+    }
+  }
+
+  // src/events/document-paste.ts
+  function onDocumentPaste(event, tool) {
+    if (!isTargetBelongsToVideo(event, tool)) {
+      return;
+    }
+    const dataTypes = event.clipboardData?.types ?? [];
+    if (dataTypes.includes("application/json")) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+    } else if (dataTypes.includes("Files")) {
+      const files = event.clipboardData?.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith("image/")) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          const img = new Image();
+          const blobUrl = URL.createObjectURL(file);
+          img.addEventListener(
+            "load",
+            () => {
+              URL.revokeObjectURL(blobUrl);
+              const imageRatio = img.naturalWidth / img.naturalHeight;
+              const pasteWidth = 0.25;
+              const pasteHeight = pasteWidth / imageRatio * tool.aspectRatio;
+              tool.addShapesToFrame(tool.playbackFrame, [
+                {
+                  type: "image",
+                  image: img,
+                  x: 0,
+                  y: 0,
+                  width: pasteWidth,
+                  height: pasteHeight,
+                  strokeStyle: "red",
+                  fillStyle: "red",
+                  lineWidth: 2
+                }
+              ]);
+              tool.redrawFullCanvas();
+              tool.raf(() => {
+                tool.show();
+              });
+              tool.currentTool = "move";
+            },
+            {
+              once: true
+            }
+          );
+          img.addEventListener(
+            "error",
+            () => {
+              URL.revokeObjectURL(blobUrl);
+            },
+            {
+              once: true
+            }
+          );
+          img.src = blobUrl;
+          tool.redrawFullCanvas();
+        }
+      }
+    } else if (dataTypes.includes("text/plain")) {
+      const text = event.clipboardData?.getData("text/plain");
+      if (text) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        tool.addShapesToFrame(tool.playbackFrame, [
+          {
+            type: "text",
+            text,
+            x: 0.4,
+            y: 0.4,
+            strokeStyle: tool.ctx.strokeStyle,
+            fillStyle: tool.ctx.fillStyle,
+            lineWidth: tool.ctx.lineWidth
+          }
+        ]);
+        tool.show();
+        tool.currentTool = "move";
+        tool.redrawFullCanvas();
+      }
+    } else {
+      return;
+    }
+    const json = event.clipboardData?.getData("application/json");
+    if (!json) {
+      return;
+    }
+    const data = JSON.parse(json);
+    if (!data) {
+      return;
+    }
+    if (!data.shapes) {
+      return;
+    }
+    if (data.version !== 1) {
+      return;
+    }
+    tool.addShapesToFrame(tool.playbackFrame, data.shapes);
+    tool.redrawFullCanvas();
+  }
+
+  // src/plugins/utils/color-map.ts
+  var colorMap = {
+    r: "#d31a3b",
+    g: "#15d33b",
+    b: "#0085CA",
+    y: "#F3CE32",
+    "a": "#7fffd4",
+    // "b": "#0000ff",
+    "c": "#00ffff",
+    "d": "#696969",
+    "e": "#50c878",
+    "f": "#ff00ff",
+    // "g": "#008000",
+    "h": "#f0fff0",
+    "i": "#4b0082",
+    "j": "#00a86b",
+    "k": "#f0e68c",
+    "l": "#e6e6fa",
+    "m": "#98ff98",
+    "n": "#000080",
+    "o": "#ffa500",
+    "p": "#800080",
+    "q": "#e5acc8",
+    // "r": "#e0115f",
+    "s": "#0f52ba",
+    "t": "#008080",
+    "u": "#3f00ff",
+    "v": "#ee82ee",
+    "w": "#ffffff",
+    "x": "#738678",
+    // "y": "#ffff00",
+    "z": "#0014a8"
+  };
+
+  // src/ui/color-picker.ts
+  function createColorPicker(defaultColor2, tool) {
+    const colorPicker = document.createElement("input");
+    colorPicker.type = "color";
+    colorPicker.value = defaultColor2;
+    colorPicker.dataset.tooltip = "Stroke color";
+    const onColorChange = (event) => {
+      tool.ctx.strokeStyle = event.target.value;
+      tool.ctx.fillStyle = event.target.value;
+      tool.focusOnMediaNode();
+    };
+    tool.addEvent(colorPicker, "input", onColorChange);
+    return colorPicker;
+  }
+
+  // src/ui/stroke-width-slider.ts
+  function createStrokeWidthSlider(tool) {
+    const strokeWidthSlider = document.createElement("input");
+    strokeWidthSlider.type = "number";
+    strokeWidthSlider.step = "1";
+    strokeWidthSlider.min = "1";
+    strokeWidthSlider.max = "10";
+    strokeWidthSlider.value = "5";
+    strokeWidthSlider.style.margin = "5px";
+    strokeWidthSlider.dataset.tooltip = "Stroke width";
+    const onStrokeWidthChange = (event) => {
+      tool.ctx.lineWidth = event.target.valueAsNumber;
+      tool.focusOnMediaNode();
+    };
+    tool.addEvent(strokeWidthSlider, "input", onStrokeWidthChange);
+    return strokeWidthSlider;
+  }
+
+  // src/ui/toggle-fullscreen-button.ts
+  var fullscreenIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-</svg>`;function Jn(){var i,o;return(o=(i=document.fullscreenElement)!=null?i:document.webkitFullscreenElement)!=null?o:null}function Zn(i){if(i.requestFullscreen)return i.requestFullscreen();let o=i;if(o.webkitRequestFullscreen)return o.webkitRequestFullscreen()}function Qn(){if(document.exitFullscreen)return document.exitFullscreen();let i=document;if(i.webkitExitFullscreen)return i.webkitExitFullscreen()}function to(){var i;return!!((i=document.fullscreenEnabled)!=null?i:document.webkitFullscreenEnabled)}function nn(i){let o=document.createElement("button");if(o.innerHTML=Kn,o.type="button",o.dataset.tooltip="Fullscreen",o.dataset.tooltipPosition="bottom",$e(o),!to())return o.style.display="none",o;let t=()=>{if(Jn())Qn();else{let n=i.videoElement.parentElement;n&&Zn(n)}};o.addEventListener("click",t);let e=()=>{i.setCanvasSize(),i.playbackFrame=i.playbackFrame,i.canvas.focus(),i.redrawFullCanvas(),o.blur()};return document.addEventListener("fullscreenchange",e),document.addEventListener("webkitfullscreenchange",e),i.destructors.push(()=>{o.removeEventListener("click",t),document.removeEventListener("fullscreenchange",e),document.removeEventListener("webkitfullscreenchange",e)}),o}var eo=ct.r,no="",oo="";function on(){var c,l;let i=document.createElement("div");i.style.cssText=oo,Re(i),(c=this.canvas.parentNode)==null||c.insertBefore(i,this.canvas);let o=document.createElement("div");o.style.cssText=no,Le(o),(l=this.canvas.parentNode)==null||l.insertBefore(o,this.canvas.nextSibling),this.playerControlsContainer=o;let t=this.videoElement.tagName==="VIDEO"?this.videoElement:null;this.uiContainer=i;let e=()=>{let s=document.createElement("div");return s.style.display="inline-flex",s.style.alignItems="center",s},n=new Ht(this,i);Ge(this,n),this.isMobile&&(this.hideButton("line"),this.hideButton("circle"),this.hideButton("rectangle"),this.hideButton("eraser")),this.hideButton("compare"),i.appendChild(kt()),this.colorPicker=tn(eo,this),Ae(this.colorPicker),i.appendChild(this.colorPicker);let a=e();this.strokeSizePicker=en(this),De(this.strokeSizePicker),a.appendChild(this.strokeSizePicker),i.appendChild(a),i.appendChild(kt());let r=Be(this);if(i.appendChild(r),t){this.hide(),this.addEvent(t,"pause",()=>{this.show()}),this.addEvent(t,"seek",()=>{t.paused&&this.show()}),this.addEvent(t,"timeupdate",()=>{t.currentTime<2e-4&&!t.paused&&this.startAnnotationsAsVideo()}),this.addEvent(t,"error",()=>{this.hide()}),this.addEvent(t,"stalled",()=>{this.hide()}),this.addEvent(t,"play",()=>{this.hideControls(),this.startAnnotationsAsVideo()}),this.addEvent(document,"copy",h=>{Ke(h,this)}),this.addEvent(document,"cut",h=>{Je(h,this)}),this.addEvent(document,"paste",h=>{Qe(h,this)}),this.addEvent(document,"click",h=>{qe(h,this)}),this.addEvent(document,"keydown",h=>{Ze(h,this)}),this.addEvent(document.body.querySelector("div"),"drop",h=>{var m;(m=h.dataTransfer)!=null&&m.types});let s=nn(this);o.appendChild(s)}}function an(){var i;this.canvas=document.createElement("canvas"),this.ctx=this.canvas.getContext("2d"),(i=this.videoElement.parentNode)==null||i.insertBefore(this.canvas,this.videoElement.nextSibling),this.canvas.style.position="absolute",this.canvas.style.backgroundColor="transparent",this.canvas.style.top="0",this.canvas.style.left="0",this.canvas.style.zIndex="1",this.addEvent(this.canvas,"pointerdown",this.handleMouseDown),this.addEvent(this.canvas,"pointermove",this.handleMouseMove),this.addEvent(this.canvas,"pointerup",this.handleMouseUp),this.addEvent(this.canvas,"pointercancel",this.handleMouseUp),this.addEvent(this.canvas,"pointerenter",()=>{this.isCursorOverCanvas=!0}),this.addEvent(this.canvas,"pointerleave",()=>{this.isCursorOverCanvas=!1}),this.addEvent(this.canvas,"touchmove",o=>{o.stopImmediatePropagation(),o.stopPropagation(),o.preventDefault()}),this.addEvent(window,"resize",this.setCanvasSize),this.addEvent(document,"keydown",this.onKeyDown)}var zt=class{constructor(){this.destructors=[];this.isDestroyed=!1;this.activeTimeFrame=1;this.globalShapes=[];this.timeStack=new Map;this.undoTimeStack=new Map}cleanFrameStacks(){this.timeStack.clear(),this.undoTimeStack.clear()}destroy(){this.destructors.forEach(o=>o()),this.destructors=[],this.globalShapes=[],this.cleanFrameStacks()}raf(o){return requestAnimationFrame(o)}addEvent(o,t,e){let n=a=>{this.isDestroyed||e(a)};o.addEventListener(t,n),this.destructors.push(()=>{o.removeEventListener(t,n)})}addProgressBarOverlay(){throw new Error("Method not implemented.")}initUI(){throw new Error("Method not implemented.")}initCanvas(){throw new Error("Method not implemented.")}addFrameSquareOverlay(o=this.activeTimeFrame){throw new Error("Method not implemented.")}addVideoOverlay(){throw new Error("Method not implemented.")}withRefVideo(o){this.isDestroyed||this.referenceVideoElement&&o(this.referenceVideoElement)}withVideo(o){if(this.isDestroyed)return;let t=this.videoElement;!t||t.tagName!=="VIDEO"||o(t)}};var B=class{constructor(o){this.startX=0;this.startY=0;this.isDrawing=!1;this.annotationTool=o}isPointerAtShape(o,t,e){return!1}on(o,t){}get ctx(){return this.annotationTool.ctx}onDeactivate(){}onActivate(){}reset(){this.startX=0,this.startY=0,this.isDrawing=!1}save(o){this.annotationTool.addShape(o)}applyRotation(o,t,e){return o.rotation?(this.ctx.save(),this.ctx.translate(t,e),this.ctx.rotate(o.rotation),this.ctx.translate(-t,-e),!0):!1}restoreRotation(){this.ctx.restore()}getRotationCenter(o,t,e){return o.rotationCenterX!==void 0&&o.rotationCenterY!==void 0?{x:o.rotationCenterX*this.annotationTool.canvasWidth,y:o.rotationCenterY*this.annotationTool.canvasHeight}:{x:t,y:e}}};var Vt=class extends B{constructor(){super(...arguments);this.name="rectangle"}move(t,e,n){return t.x+=e,t.y+=n,t}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n,width:t.width/e,height:t.height/n})}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.drawRectangle(this.startX,this.startY,e-this.startX,n-this.startY)}onPointerUp(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.save({type:"rectangle",x:this.startX,y:this.startY,width:e-this.startX,height:n-this.startY,strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth}),this.drawRectangle(this.startX,this.startY,e-this.startX,n-this.startY),this.isDrawing=!1}drawRectangle(t,e,n,a){this.ctx.beginPath(),this.ctx.rect(t,e,n,a),this.ctx.stroke()}draw(t){let e=t.x+t.width/2,n=t.y+t.height/2,a=this.getRotationCenter(t,e,n),r=this.applyRotation(t,a.x,a.y);this.drawRectangle(t.x,t.y,t.width,t.height),r&&this.restoreRotation()}isPointerAtShape(t,e,n){let r=Math.min(t.x,t.x+t.width),c=Math.max(t.x,t.x+t.width),l=Math.min(t.y,t.y+t.height),s=Math.max(t.y,t.y+t.height),h=Math.abs(e-r)<=5,m=Math.abs(e-c)<=5,u=Math.abs(n-l)<=5,p=Math.abs(n-s)<=5,f=n>=l-5&&n<=s+5,v=e>=r-5&&e<=c+5;return(h||m)&&f||(u||p)&&v}};var Wt=class extends B{constructor(){super(...arguments);this.name="circle"}move(t,e,n){return t.x+=e,t.y+=n,t}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n,radius:t.radius/e})}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t),a=Math.sqrt(Math.pow(e-this.startX,2)+Math.pow(n-this.startY,2));this.drawCircle(this.startX,this.startY,a)}onPointerUp(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t),a=Math.sqrt(Math.pow(e-this.startX,2)+Math.pow(n-this.startY,2));this.save({type:"circle",x:this.startX,y:this.startY,radius:a,strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth}),this.drawCircle(this.startX,this.startY,a),this.isDrawing=!1}drawCircle(t,e,n){this.ctx.beginPath(),this.ctx.arc(t,e,n,0,2*Math.PI),this.ctx.stroke()}draw(t){if(t.radius===void 0||t.radius<0)return;let e=this.getRotationCenter(t,t.x,t.y),n=this.applyRotation(t,e.x,e.y);this.drawCircle(t.x,t.y,t.radius),n&&this.restoreRotation()}isPointerAtShape(t,e,n){var s;if(t.radius===void 0||t.radius<0)return!1;let a=e-t.x,r=n-t.y,c=Math.sqrt(a*a+r*r),l=Math.max(((s=t.lineWidth)!=null?s:1)/2,5);return c<=t.radius+l}};var Nt=class{constructor(o,t){this.x=o;this.y=t}distanceToLine(o,t){let e=t.x-o.x,n=t.y-o.y,a=Math.abs(n*this.x-e*this.y+t.x*o.y-t.y*o.x),r=Math.sqrt(n*n+e*e);return a/r}};function Xt(i,o){if(i.length<=2)return i;let t=i[0],e=i[i.length-1],n=-1,a=0;for(let r=1;r<i.length-1;r++){let c=i[r].distanceToLine(t,e);c>a&&(n=r,a=c)}if(a>o){let r=Xt(i.slice(0,n+1),o),c=Xt(i.slice(n),o);return r.slice(0,r.length-1).concat(c)}else return[t,e]}var Yt=class extends B{constructor(){super(...arguments);this.name="curve";this.curvePoints=[];this.zoomScale=2;this.zoomRadius=100;this.zoomCtx=null;this.zoomCanvas=null;this.onKeyPress=t=>{let e=t.key;if(e===null||e===" "||t.isComposing)return;let n=Number(e);if(isNaN(n)||!n){e in ct&&(this.annotationTool.colorPicker.value=ct[e],this.annotationTool.setCanvasSettings());return}this.annotationTool.strokeSizePicker.value=e,this.annotationTool.setCanvasSettings()}}move(t,e,n){return t.points=t.points.map(a=>({x:a.x+e,y:a.y+n})),t}onActivate(){this.initZoomCanvas(),document.addEventListener("keypress",this.onKeyPress)}onDeactivate(){this.zoomCtx=null,this.zoomCanvas=null,document.removeEventListener("keypress",this.onKeyPress)}normalize(t,e,n){return H(M({},t),{points:t.points.map(a=>({x:a.x/e,y:a.y/n}))})}draw(t){if(!t.points||t.points.length===0)return;let e=0,n=0;for(let s of t.points)e+=s.x,n+=s.y;let a=e/t.points.length,r=n/t.points.length,c=this.getRotationCenter(t,a,r),l=this.applyRotation(t,c.x,c.y);this.drawCurve(t),l&&this.restoreRotation()}reset(){super.reset(),this.curvePoints=[]}onPointerDown(t){if(this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.curvePoints=[],this.startX=e,this.startY=n,this.isDrawing=!0,this.curvePoints.push({x:e,y:n})}onPointerMove(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);if(!this.isDrawing){this.drawZoomCircle(e,n,t.shiftKey);return}this.curvePoints.push({x:e,y:n}),this.drawCurve({points:this.curvePoints,lineWidth:this.ctx.lineWidth}),this.drawZoomCircle(e,n,t.shiftKey)}onPointerUp(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);if(this.drawZoomCircle(e,n,t.shiftKey),!this.isDrawing)return;this.curvePoints.push({x:e,y:n});let a=this.curvePoints.map(h=>new Nt(h.x,h.y)),s={type:"curve",points:Xt(a,.5).map(h=>({x:h.x,y:h.y})),strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth};this.save(s),this.curvePoints=[],this.isDrawing=!1}drawCurve(t){if(t.points.length===2&&t.points[0].x===t.points[1].x&&t.points[0].y===t.points[1].y){let e=t.lineWidth/4,n=0,a=2*Math.PI;this.ctx.beginPath(),this.ctx.arc(t.points[0].x,t.points[0].y,e,n,a),this.ctx.stroke()}else{this.ctx.beginPath(),this.ctx.moveTo(t.points[0].x,t.points[0].y);for(let e=0;e<t.points.length-1;e++){let n=t.points[e],a=t.points[e+1];this.ctx.quadraticCurveTo(n.x,n.y,a.x,a.y)}this.ctx.stroke()}}initZoomCanvas(){let t=document.createElement("canvas"),e=2;t.width=this.zoomRadius*2*e,t.height=this.zoomRadius*2*e;let n=t.getContext("2d");n&&(n.imageSmoothingQuality="high",n.imageSmoothingEnabled=!0,this.zoomCtx=n,this.zoomCanvas=t)}isPointerAtShape(t,e,n){var r;if(!t.points||t.points.length===0)return!1;let a=Math.max(((r=t.lineWidth)!=null?r:this.ctx.lineWidth)/2,5);for(let c=0;c<t.points.length-1;c++){let l=t.points[c],s=t.points[c+1],h=e-l.x,m=n-l.y,u=s.x-l.x,p=s.y-l.y,f=h*u+m*p,v=u*u+p*p,y=-1;v!==0&&(y=f/v);let g,x;y<0?(g=l.x,x=l.y):y>1?(g=s.x,x=s.y):(g=l.x+y*u,x=l.y+y*p);let E=e-g,R=n-x;if(Math.sqrt(E*E+R*R)<a)return!0}return!1}drawZoomCircle(t,e,n=!1){if(!n)return;this.isDrawing||(this.annotationTool.clearCanvas(),this.annotationTool.addVideoOverlay(),this.annotationTool.drawShapesOverlay());let a=this.zoomCtx;if(!a)return;let r=this.annotationTool.pixelRatio,c=this.zoomRadius*2/this.zoomScale,l=t-c/2,s=e-c/2;a.clearRect(0,0,this.zoomCanvas.width,this.zoomCanvas.height),a.drawImage(this.ctx.canvas,l*r,s*r,c*r,c*r,0,0,this.zoomRadius*2,this.zoomRadius*2),this.ctx.save(),this.ctx.beginPath(),this.ctx.arc(t,e,this.zoomRadius,0,2*Math.PI),this.ctx.closePath(),this.ctx.clip(),this.ctx.drawImage(this.zoomCanvas,t-this.zoomRadius,e-this.zoomRadius),this.ctx.restore()}};var Ut=class extends B{constructor(){super(...arguments);this.name="line"}move(t,e,n){return t.x1+=e,t.y1+=n,t.x2+=e,t.y2+=n,t}normalize(t,e,n){return H(M({},t),{x1:t.x1/e,y1:t.y1/n,x2:t.x2/e,y2:t.y2/n})}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.drawLine(this.startX,this.startY,e,n)}onPointerUp(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.save({type:"line",x1:this.startX,y1:this.startY,x2:e,y2:n,fillStyle:this.ctx.fillStyle,strokeStyle:this.ctx.strokeStyle,lineWidth:this.ctx.lineWidth}),this.drawLine(this.startX,this.startY,e,n),this.isDrawing=!1}drawLine(t,e,n,a){this.ctx.beginPath(),this.ctx.moveTo(t,e),this.ctx.lineTo(n,a),this.ctx.stroke()}draw(t){let e=(t.x1+t.x2)/2,n=(t.y1+t.y2)/2,a=this.getRotationCenter(t,e,n),r=this.applyRotation(t,a.x,a.y);this.drawLine(t.x1,t.y1,t.x2,t.y2),r&&this.restoreRotation()}isPointerAtShape(t,e,n){var u;let{x1:a,y1:r,x2:c,y2:l}=t,s=Math.max(((u=t.lineWidth)!=null?u:1)/2,5),h=(c-a)*(r-n)-(a-e)*(l-r),m=nt(c-a,2)+nt(l-r,2);if(m===0){let p=e-a,f=n-r;return Math.sqrt(p*p+f*f)<=s}return Math.abs(h)/Math.sqrt(m)<=s&&e>=Math.min(a,c)-s&&e<=Math.max(a,c)+s&&n>=Math.min(r,l)-s&&n<=Math.max(r,l)+s}};var jt=class extends B{constructor(){super(...arguments);this.name="arrow"}normalize(t,e,n){return H(M({},t),{x1:t.x1/e,y1:t.y1/n,x2:t.x2/e,y2:t.y2/n})}move(t,e,n){return t.x1+=e,t.y1+=n,t.x2+=e,t.y2+=n,t}draw(t){let e=(t.x1+t.x2)/2,n=(t.y1+t.y2)/2,a=this.getRotationCenter(t,e,n),r=this.applyRotation(t,a.x,a.y);this.drawArrow(t.x1,t.y1,t.x2,t.y2,t.lineWidth),r&&this.restoreRotation()}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.drawArrow(this.startX,this.startY,e,n)}onPointerUp(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.save({type:"arrow",x1:this.startX,y1:this.startY,x2:e,y2:n,strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth}),this.drawArrow(this.startX,this.startY,e,n),this.isDrawing=!1}drawArrow(t,e,n,a,r){let c=10+2.5*(r!=null?r:this.ctx.lineWidth),l=Math.PI/6,s=Math.atan2(a-e,n-t);this.ctx.beginPath(),this.ctx.moveTo(t,e),this.ctx.lineTo(n,a),this.ctx.stroke(),this.ctx.beginPath(),this.ctx.moveTo(n,a),this.ctx.lineTo(n-c*Math.cos(s+l),a-c*Math.sin(s+l)),this.ctx.moveTo(n,a),this.ctx.lineTo(n-c*Math.cos(s-l),a-c*Math.sin(s-l)),this.ctx.stroke()}isPointerAtShape(t,e,n){var u;let{x1:a,y1:r,x2:c,y2:l}=t,s=Math.max(((u=t.lineWidth)!=null?u:1)/2,5),h=(c-a)*(r-n)-(a-e)*(l-r),m=nt(c-a,2)+nt(l-r,2);if(m===0){let p=e-a,f=n-r;return Math.sqrt(p*p+f*f)<=s}return Math.abs(h)/Math.sqrt(m)<=s&&e>=Math.min(a,c)-s&&e<=Math.max(a,c)+s&&n>=Math.min(r,l)-s&&n<=Math.max(r,l)+s}};var _t=class extends B{constructor(){super(...arguments);this.name="text";this.activePopup=null;this.handleKeyDown=t=>{}}move(t,e,n){return t.x+=e,t.y+=n,t}onActivate(){this.annotationTool.canvas.style.cursor="text",this.isDrawing=!0}onDeactivate(){this.destroyPopup(),this.annotationTool.canvas.style.cursor="default",this.isDrawing=!1}draw(t){var p;if(!t.text)return;let e=t.text.split(`
-`),n=16+((p=t.lineWidth)!=null?p:this.ctx.lineWidth)*.5,a=n*1.25;this.ctx.font=`${n}px Helvetica Neue, Arial`;let r=e.map(f=>this.ctx.measureText(f).width),c=r.length>0?Math.max(...r):0,l=e.length*a,s=t.x+c/2,h=t.y-n/2+l/2,m=this.getRotationCenter(t,s,h),u=this.applyRotation(t,m.x,m.y);for(let f=0;f<e.length;f++)this.drawTextLine(t.x,t.y+f*a,e[f],n);u&&this.restoreRotation()}drawText(t,e,n){let a=16+this.ctx.lineWidth*.5;this.ctx.font=`${a}px Helvetica Neue, Arial`,this.ctx.fillText(n,t,e)}drawTextLine(t,e,n,a){this.ctx.font=`${a}px Helvetica Neue, Arial`,this.ctx.fillText(n,t,e)}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n}onPointerMove(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.ctx.beginPath(),this.ctx.arc(e,n,5,0,2*Math.PI),this.ctx.fill()}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n})}destroyPopup(){var t;this.activePopup&&((t=this.annotationTool.canvas.parentElement)==null||t.removeChild(this.activePopup),this.activePopup=null,document.removeEventListener("keydown",this.handleKeyDown))}createTextInputPopup(t,e){var p;this.destroyPopup();let n=document.createElement("div");this.activePopup=n,n.style.cssText=`
+</svg>`;
+  function getFullscreenElement() {
+    return document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
+  }
+  function requestFullscreen(element) {
+    if (element.requestFullscreen) {
+      return element.requestFullscreen();
+    }
+    const el = element;
+    if (el.webkitRequestFullscreen) {
+      return el.webkitRequestFullscreen();
+    }
+  }
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      return document.exitFullscreen();
+    }
+    const doc = document;
+    if (doc.webkitExitFullscreen) {
+      return doc.webkitExitFullscreen();
+    }
+  }
+  function isFullscreenSupported() {
+    return !!(document.fullscreenEnabled ?? document.webkitFullscreenEnabled);
+  }
+  function createFullscreenButton(tool) {
+    const button = document.createElement("button");
+    button.innerHTML = fullscreenIcon;
+    button.type = "button";
+    button.dataset.tooltip = "Fullscreen";
+    button.dataset.tooltipPosition = "bottom";
+    applyFullscreenButtonStyle(button);
+    if (!isFullscreenSupported()) {
+      button.style.display = "none";
+      return button;
+    }
+    const toggleFullScreen = () => {
+      if (!getFullscreenElement()) {
+        const container = tool.videoElement.parentElement;
+        if (container) {
+          requestFullscreen(container);
+        }
+      } else {
+        exitFullscreen();
+      }
+    };
+    button.addEventListener("click", toggleFullScreen);
+    const onFullscreenChange = () => {
+      tool.setCanvasSize();
+      tool.playbackFrame = tool.playbackFrame;
+      tool.canvas.focus();
+      tool.redrawFullCanvas();
+      button.blur();
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    tool.destructors.push(() => {
+      button.removeEventListener("click", toggleFullScreen);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+    });
+    return button;
+  }
+
+  // src/ui.ts
+  var defaultColor = colorMap.r;
+  var playerControlsDefaultStyle = "";
+  var uiContainerDefaultStyle = "";
+  function initUI() {
+    const uiContainer = document.createElement("div");
+    uiContainer.style.cssText = uiContainerDefaultStyle;
+    applyContainerStyle(uiContainer);
+    this.canvas.parentNode?.insertBefore(uiContainer, this.canvas);
+    const playerControls = document.createElement("div");
+    playerControls.style.cssText = playerControlsDefaultStyle;
+    applyPlayerControlsStyle(playerControls);
+    this.canvas.parentNode?.insertBefore(playerControls, this.canvas.nextSibling);
+    this.playerControlsContainer = playerControls;
+    const video2 = this.videoElement.tagName === "VIDEO" ? this.videoElement : null;
+    this.uiContainer = uiContainer;
+    const createWrapper = () => {
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "inline-flex";
+      wrapper.style.alignItems = "center";
+      return wrapper;
+    };
+    const Button = new ButtonConstructor(this, uiContainer);
+    addButtons(this, Button);
+    if (this.isMobile) {
+      this.hideButton("line");
+      this.hideButton("circle");
+      this.hideButton("rectangle");
+      this.hideButton("eraser");
+    }
+    this.hideButton("compare");
+    uiContainer.appendChild(createDivider());
+    this.colorPicker = createColorPicker(defaultColor, this);
+    applyColorPickerStyle(this.colorPicker);
+    uiContainer.appendChild(this.colorPicker);
+    const strokeControlWrapper = createWrapper();
+    this.strokeSizePicker = createStrokeWidthSlider(this);
+    applySliderStyle(this.strokeSizePicker);
+    strokeControlWrapper.appendChild(this.strokeSizePicker);
+    uiContainer.appendChild(strokeControlWrapper);
+    uiContainer.appendChild(createDivider());
+    const themeToggleBtn = createThemeToggleButton(this);
+    uiContainer.appendChild(themeToggleBtn);
+    if (video2) {
+      this.hide();
+      this.addEvent(video2, "pause", () => {
+        this.show();
+      });
+      this.addEvent(video2, "seek", () => {
+        if (video2.paused) {
+          this.show();
+        }
+      });
+      this.addEvent(video2, "timeupdate", () => {
+        if (video2.currentTime < 2e-4 && !video2.paused) {
+          this.startAnnotationsAsVideo();
+        }
+      });
+      this.addEvent(video2, "error", () => {
+        this.hide();
+      });
+      this.addEvent(video2, "stalled", () => {
+        this.hide();
+      });
+      this.addEvent(video2, "play", () => {
+        this.hideControls();
+        this.startAnnotationsAsVideo();
+      });
+      this.addEvent(document, "copy", (event) => {
+        onDocumentCopy(event, this);
+      });
+      this.addEvent(document, "cut", (event) => {
+        onDocumentCut(event, this);
+      });
+      this.addEvent(document, "paste", (event) => {
+        onDocumentPaste(event, this);
+      });
+      this.addEvent(document, "click", (event) => {
+        onDocumentClick(event, this);
+      });
+      this.addEvent(document, "keydown", (event) => {
+        onDocumentKeydown(event, this);
+      });
+      this.addEvent(document.body.querySelector("div"), "drop", (event) => {
+        if (event.dataTransfer?.types) {
+        }
+      });
+      const fullscreenButton = createFullscreenButton(this);
+      playerControls.appendChild(fullscreenButton);
+    }
+  }
+
+  // src/canvas.ts
+  function initCanvas() {
+    this.canvas = document.createElement("canvas");
+    this.ctx = this.canvas.getContext("2d");
+    this.videoElement.parentNode?.insertBefore(
+      this.canvas,
+      this.videoElement.nextSibling
+    );
+    this.canvas.style.position = "absolute";
+    this.canvas.style.backgroundColor = "transparent";
+    this.canvas.style.top = "0";
+    this.canvas.style.left = "0";
+    this.canvas.style.zIndex = "1";
+    this.addEvent(this.canvas, "pointerdown", this.handleMouseDown);
+    this.addEvent(this.canvas, "pointermove", this.handleMouseMove);
+    this.addEvent(this.canvas, "pointerup", this.handleMouseUp);
+    this.addEvent(this.canvas, "pointercancel", this.handleMouseUp);
+    this.addEvent(this.canvas, "pointerenter", () => {
+      this.isCursorOverCanvas = true;
+    });
+    this.addEvent(this.canvas, "pointerleave", () => {
+      this.isCursorOverCanvas = false;
+    });
+    this.addEvent(this.canvas, "touchmove", (e) => {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    this.addEvent(window, "resize", this.setCanvasSize);
+    this.addEvent(document, "keydown", this.onKeyDown);
+  }
+
+  // src/base.ts
+  var AnnotationToolBase = class {
+    constructor() {
+      this.destructors = [];
+      this.isDestroyed = false;
+      this.activeTimeFrame = 1;
+      this.globalShapes = [];
+      this.timeStack = /* @__PURE__ */ new Map();
+      // timeFrame -> shapes
+      this.undoTimeStack = /* @__PURE__ */ new Map();
+    }
+    // timeFrame -> shapes
+    cleanFrameStacks() {
+      this.timeStack.clear();
+      this.undoTimeStack.clear();
+    }
+    destroy() {
+      this.destructors.forEach((destructor) => destructor());
+      this.destructors = [];
+      this.globalShapes = [];
+      this.cleanFrameStacks();
+    }
+    raf(cb) {
+      return requestAnimationFrame(cb);
+    }
+    addEvent(node, event, callback) {
+      const safeCallback = (e) => {
+        if (this.isDestroyed) return;
+        callback(e);
+      };
+      node.addEventListener(event, safeCallback);
+      this.destructors.push(() => {
+        node.removeEventListener(event, safeCallback);
+      });
+    }
+    addProgressBarOverlay() {
+      throw new Error("Method not implemented.");
+    }
+    initUI() {
+      throw new Error("Method not implemented.");
+    }
+    initCanvas() {
+      throw new Error("Method not implemented.");
+    }
+    addFrameSquareOverlay(_ = this.activeTimeFrame) {
+      throw new Error("Method not implemented.");
+    }
+    addVideoOverlay() {
+      throw new Error("Method not implemented.");
+    }
+    withRefVideo(cb) {
+      if (this.isDestroyed) {
+        return;
+      }
+      if (this.referenceVideoElement) {
+        cb(this.referenceVideoElement);
+      }
+    }
+    withVideo(cb) {
+      if (this.isDestroyed) {
+        return;
+      }
+      const video2 = this.videoElement;
+      if (!video2 || video2.tagName !== "VIDEO") {
+        return;
+      }
+      cb(video2);
+    }
+  };
+
+  // src/plugins/base.ts
+  var BasePlugin = class {
+    constructor(annotationTool) {
+      this.startX = 0;
+      this.startY = 0;
+      this.isDrawing = false;
+      this.annotationTool = annotationTool;
+    }
+    isPointerAtShape(_shape, _x, _y) {
+      return false;
+    }
+    on(event, arg) {
+    }
+    get ctx() {
+      return this.annotationTool.ctx;
+    }
+    onDeactivate() {
+    }
+    onActivate() {
+    }
+    reset() {
+      this.startX = 0;
+      this.startY = 0;
+      this.isDrawing = false;
+    }
+    save(shape) {
+      this.annotationTool.addShape(shape);
+    }
+    /**
+     * Apply rotation transform before drawing a shape.
+     * Must be paired with restoreRotation() after drawing.
+     * @param shape The shape being drawn
+     * @param centerX The rotation center X in canvas coordinates
+     * @param centerY The rotation center Y in canvas coordinates
+     * @returns true if rotation was applied (and restore is needed)
+     */
+    applyRotation(shape, centerX, centerY) {
+      if (!shape.rotation) {
+        return false;
+      }
+      this.ctx.save();
+      this.ctx.translate(centerX, centerY);
+      this.ctx.rotate(shape.rotation);
+      this.ctx.translate(-centerX, -centerY);
+      return true;
+    }
+    /**
+     * Restore canvas state after rotation. Only call if applyRotation returned true.
+     */
+    restoreRotation() {
+      this.ctx.restore();
+    }
+    /**
+     * Get the rotation center for a shape in canvas coordinates.
+     * Uses custom center if set, otherwise uses provided default center.
+     * @param shape The shape
+     * @param defaultCenterX Default center X in canvas coordinates
+     * @param defaultCenterY Default center Y in canvas coordinates
+     */
+    getRotationCenter(shape, defaultCenterX, defaultCenterY) {
+      if (shape.rotationCenterX !== void 0 && shape.rotationCenterY !== void 0) {
+        return {
+          x: shape.rotationCenterX * this.annotationTool.canvasWidth,
+          y: shape.rotationCenterY * this.annotationTool.canvasHeight
+        };
+      }
+      return { x: defaultCenterX, y: defaultCenterY };
+    }
+  };
+
+  // src/plugins/rectangle.ts
+  var RectangleToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "rectangle";
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight,
+        width: shape.width / canvasWidth,
+        height: shape.height / canvasHeight
+      };
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.drawRectangle(
+        this.startX,
+        this.startY,
+        x - this.startX,
+        y - this.startY
+      );
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.save({
+        type: "rectangle",
+        x: this.startX,
+        y: this.startY,
+        width: x - this.startX,
+        height: y - this.startY,
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth
+      });
+      this.drawRectangle(
+        this.startX,
+        this.startY,
+        x - this.startX,
+        y - this.startY
+      );
+      this.isDrawing = false;
+    }
+    drawRectangle(x, y, width, height) {
+      this.ctx.beginPath();
+      this.ctx.rect(x, y, width, height);
+      this.ctx.stroke();
+    }
+    draw(shape) {
+      const centerX = shape.x + shape.width / 2;
+      const centerY = shape.y + shape.height / 2;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.drawRectangle(shape.x, shape.y, shape.width, shape.height);
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    isPointerAtShape(shape, x, y) {
+      const tolerance = 5;
+      const minX = Math.min(shape.x, shape.x + shape.width);
+      const maxX = Math.max(shape.x, shape.x + shape.width);
+      const minY = Math.min(shape.y, shape.y + shape.height);
+      const maxY = Math.max(shape.y, shape.y + shape.height);
+      const nearLeftEdge = Math.abs(x - minX) <= tolerance;
+      const nearRightEdge = Math.abs(x - maxX) <= tolerance;
+      const nearTopEdge = Math.abs(y - minY) <= tolerance;
+      const nearBottomEdge = Math.abs(y - maxY) <= tolerance;
+      const withinVerticalBounds = y >= minY - tolerance && y <= maxY + tolerance;
+      const withinHorizontalBounds = x >= minX - tolerance && x <= maxX + tolerance;
+      return (nearLeftEdge || nearRightEdge) && withinVerticalBounds || (nearTopEdge || nearBottomEdge) && withinHorizontalBounds;
+    }
+  };
+
+  // src/plugins/circle.ts
+  var CircleToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "circle";
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight,
+        radius: shape.radius / canvasWidth
+      };
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      const radius = Math.sqrt(
+        Math.pow(x - this.startX, 2) + Math.pow(y - this.startY, 2)
+      );
+      this.drawCircle(this.startX, this.startY, radius);
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      const radius = Math.sqrt(
+        Math.pow(x - this.startX, 2) + Math.pow(y - this.startY, 2)
+      );
+      this.save({
+        type: "circle",
+        x: this.startX,
+        y: this.startY,
+        radius,
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth
+      });
+      this.drawCircle(this.startX, this.startY, radius);
+      this.isDrawing = false;
+    }
+    drawCircle(x, y, radius) {
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      this.ctx.stroke();
+    }
+    draw(shape) {
+      if (shape.radius === void 0 || shape.radius < 0) {
+        return;
+      }
+      const rotationCenter = this.getRotationCenter(shape, shape.x, shape.y);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.drawCircle(shape.x, shape.y, shape.radius);
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    isPointerAtShape(shape, x, y) {
+      if (shape.radius === void 0 || shape.radius < 0) return false;
+      const dx = x - shape.x;
+      const dy = y - shape.y;
+      const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+      const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
+      return distanceFromCenter <= shape.radius + tolerance;
+    }
+  };
+
+  // src/plugins/utils/douglas-peucker.ts
+  var Point = class {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+    distanceToLine(p1, p2) {
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const numerator = Math.abs(
+        dy * this.x - dx * this.y + p2.x * p1.y - p2.y * p1.x
+      );
+      const denominator = Math.sqrt(dy * dy + dx * dx);
+      return numerator / denominator;
+    }
+  };
+  function douglasPeucker(points, epsilon) {
+    if (points.length <= 2) return points;
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+    let index = -1;
+    let maxDistance = 0;
+    for (let i = 1; i < points.length - 1; i++) {
+      const distance = points[i].distanceToLine(firstPoint, lastPoint);
+      if (distance > maxDistance) {
+        index = i;
+        maxDistance = distance;
+      }
+    }
+    if (maxDistance > epsilon) {
+      const left = douglasPeucker(points.slice(0, index + 1), epsilon);
+      const right = douglasPeucker(points.slice(index), epsilon);
+      return left.slice(0, left.length - 1).concat(right);
+    } else {
+      return [firstPoint, lastPoint];
+    }
+  }
+
+  // src/plugins/curve.ts
+  var CurveToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "curve";
+      this.curvePoints = [];
+      this.zoomScale = 2;
+      // Controls the magnification level
+      this.zoomRadius = 100;
+      // Radius of the zoom circle
+      this.zoomCtx = null;
+      // Context for the zoom canvas
+      this.zoomCanvas = null;
+      this.onKeyPress = (e) => {
+        const key = e.key;
+        if (key === null || key === " " || e.isComposing) {
+          return;
+        }
+        const maybeNumeric = Number(key);
+        if (isNaN(maybeNumeric) || !maybeNumeric) {
+          if (key in colorMap) {
+            this.annotationTool.colorPicker.value = colorMap[key];
+            this.annotationTool.setCanvasSettings();
+          }
+          return;
+        }
+        this.annotationTool.strokeSizePicker.value = key;
+        this.annotationTool.setCanvasSettings();
+      };
+    }
+    // Zoom canvas element
+    move(shape, dx, dy) {
+      shape.points = shape.points.map((point) => ({
+        x: point.x + dx,
+        y: point.y + dy
+      }));
+      return shape;
+    }
+    onActivate() {
+      this.initZoomCanvas();
+      document.addEventListener("keypress", this.onKeyPress);
+    }
+    onDeactivate() {
+      this.zoomCtx = null;
+      this.zoomCanvas = null;
+      document.removeEventListener("keypress", this.onKeyPress);
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        points: shape.points.map((point) => ({
+          x: point.x / canvasWidth,
+          y: point.y / canvasHeight
+        }))
+      };
+    }
+    draw(shape) {
+      if (!shape.points || shape.points.length === 0) {
+        return;
+      }
+      let sumX = 0, sumY = 0;
+      for (const p2 of shape.points) {
+        sumX += p2.x;
+        sumY += p2.y;
+      }
+      const centerX = sumX / shape.points.length;
+      const centerY = sumY / shape.points.length;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.drawCurve(shape);
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    reset() {
+      super.reset();
+      this.curvePoints = [];
+    }
+    onPointerDown(event) {
+      if (this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.curvePoints = [];
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+      this.curvePoints.push({ x, y });
+    }
+    onPointerMove(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      if (!this.isDrawing) {
+        this.drawZoomCircle(x, y, event.shiftKey);
+        return;
+      }
+      this.curvePoints.push({ x, y });
+      this.drawCurve({
+        points: this.curvePoints,
+        lineWidth: this.ctx.lineWidth
+      });
+      this.drawZoomCircle(x, y, event.shiftKey);
+    }
+    onPointerUp(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.drawZoomCircle(x, y, event.shiftKey);
+      if (!this.isDrawing) {
+        return;
+      }
+      this.curvePoints.push({ x, y });
+      const curvePointsAsPoints = this.curvePoints.map(
+        (pt) => new Point(pt.x, pt.y)
+      );
+      const epsilon = 0.5;
+      const optimizedPoints = douglasPeucker(curvePointsAsPoints, epsilon);
+      const optimizedCurvePoints = optimizedPoints.map((pt) => ({
+        x: pt.x,
+        y: pt.y
+      }));
+      const shape = {
+        type: "curve",
+        points: optimizedCurvePoints,
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth
+      };
+      this.save(shape);
+      this.curvePoints = [];
+      this.isDrawing = false;
+    }
+    drawCurve(shape) {
+      if (shape.points.length === 2 && shape.points[0].x === shape.points[1].x && shape.points[0].y === shape.points[1].y) {
+        const radius = shape.lineWidth / 4;
+        const startAngle = 0;
+        const endAngle = 2 * Math.PI;
+        this.ctx.beginPath();
+        this.ctx.arc(
+          shape.points[0].x,
+          shape.points[0].y,
+          radius,
+          startAngle,
+          endAngle
+        );
+        this.ctx.stroke();
+      } else {
+        this.ctx.beginPath();
+        this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
+        for (let i = 0; i < shape.points.length - 1; i++) {
+          const controlPoint = shape.points[i];
+          const endPoint = shape.points[i + 1];
+          this.ctx.quadraticCurveTo(
+            controlPoint.x,
+            controlPoint.y,
+            endPoint.x,
+            endPoint.y
+          );
+        }
+        this.ctx.stroke();
+      }
+    }
+    initZoomCanvas() {
+      const zoomCanvas = document.createElement("canvas");
+      const zoomResolutionMultiplier = 2;
+      zoomCanvas.width = this.zoomRadius * 2 * zoomResolutionMultiplier;
+      zoomCanvas.height = this.zoomRadius * 2 * zoomResolutionMultiplier;
+      const zoomCtx = zoomCanvas.getContext("2d");
+      if (!zoomCtx) return;
+      zoomCtx.imageSmoothingQuality = "high";
+      zoomCtx.imageSmoothingEnabled = true;
+      this.zoomCtx = zoomCtx;
+      this.zoomCanvas = zoomCanvas;
+    }
+    isPointerAtShape(shape, x, y) {
+      if (!shape.points || shape.points.length === 0) return false;
+      const threshold = Math.max((shape.lineWidth ?? this.ctx.lineWidth) / 2, 5);
+      for (let i = 0; i < shape.points.length - 1; i++) {
+        const point = shape.points[i];
+        const nextPoint = shape.points[i + 1];
+        const A = x - point.x;
+        const B2 = y - point.y;
+        const C = nextPoint.x - point.x;
+        const D = nextPoint.y - point.y;
+        const dot = A * C + B2 * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        if (lenSq !== 0) {
+          param = dot / lenSq;
+        }
+        let xx, yy;
+        if (param < 0) {
+          xx = point.x;
+          yy = point.y;
+        } else if (param > 1) {
+          xx = nextPoint.x;
+          yy = nextPoint.y;
+        } else {
+          xx = point.x + param * C;
+          yy = point.y + param * D;
+        }
+        const dx = x - xx;
+        const dy = y - yy;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < threshold) {
+          return true;
+        }
+      }
+      return false;
+    }
+    // Function to draw the zoomed circle centered on the current event coordinates without any visible offset
+    drawZoomCircle(x, y, isEnabled = false) {
+      if (!isEnabled) {
+        return;
+      }
+      if (!this.isDrawing) {
+        this.annotationTool.clearCanvas();
+        this.annotationTool.addVideoOverlay();
+        this.annotationTool.drawShapesOverlay();
+      }
+      const zoomCtx = this.zoomCtx;
+      if (!zoomCtx) return;
+      const pixelRatio2 = this.annotationTool.pixelRatio;
+      const sourceSize = this.zoomRadius * 2 / this.zoomScale;
+      const sourceX = x - sourceSize / 2;
+      const sourceY = y - sourceSize / 2;
+      zoomCtx.clearRect(0, 0, this.zoomCanvas.width, this.zoomCanvas.height);
+      zoomCtx.drawImage(
+        this.ctx.canvas,
+        sourceX * pixelRatio2,
+        // Source X, adjusted for pixel ratio
+        sourceY * pixelRatio2,
+        // Source Y, adjusted for pixel ratio
+        sourceSize * pixelRatio2,
+        // Source width, adjusted for pixel ratio
+        sourceSize * pixelRatio2,
+        // Source height, adjusted for pixel ratio
+        0,
+        // Destination X
+        0,
+        // Destination Y
+        this.zoomRadius * 2,
+        // Destination width
+        this.zoomRadius * 2
+        // Destination height
+      );
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, this.zoomRadius, 0, 2 * Math.PI);
+      this.ctx.closePath();
+      this.ctx.clip();
+      this.ctx.drawImage(
+        this.zoomCanvas,
+        x - this.zoomRadius,
+        y - this.zoomRadius
+      );
+      this.ctx.restore();
+    }
+  };
+
+  // src/plugins/line.ts
+  var LineToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "line";
+    }
+    move(shape, dx, dy) {
+      shape.x1 += dx;
+      shape.y1 += dy;
+      shape.x2 += dx;
+      shape.y2 += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x1: shape.x1 / canvasWidth,
+        y1: shape.y1 / canvasHeight,
+        x2: shape.x2 / canvasWidth,
+        y2: shape.y2 / canvasHeight
+      };
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.drawLine(this.startX, this.startY, x, y);
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.save({
+        type: "line",
+        x1: this.startX,
+        y1: this.startY,
+        x2: x,
+        y2: y,
+        fillStyle: this.ctx.fillStyle,
+        strokeStyle: this.ctx.strokeStyle,
+        lineWidth: this.ctx.lineWidth
+      });
+      this.drawLine(this.startX, this.startY, x, y);
+      this.isDrawing = false;
+    }
+    drawLine(x1, y1, x2, y2) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
+    }
+    draw(shape) {
+      const centerX = (shape.x1 + shape.x2) / 2;
+      const centerY = (shape.y1 + shape.y2) / 2;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.drawLine(shape.x1, shape.y1, shape.x2, shape.y2);
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    isPointerAtShape(shape, x, y) {
+      const { x1, y1, x2, y2 } = shape;
+      const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
+      const distance = (x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1);
+      const lengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+      if (lengthSquared === 0) {
+        const dx = x - x1;
+        const dy = y - y1;
+        return Math.sqrt(dx * dx + dy * dy) <= tolerance;
+      }
+      return Math.abs(distance) / Math.sqrt(lengthSquared) <= tolerance && x >= Math.min(x1, x2) - tolerance && x <= Math.max(x1, x2) + tolerance && y >= Math.min(y1, y2) - tolerance && y <= Math.max(y1, y2) + tolerance;
+    }
+  };
+
+  // src/plugins/arrow.ts
+  var ArrowToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "arrow";
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x1: shape.x1 / canvasWidth,
+        y1: shape.y1 / canvasHeight,
+        x2: shape.x2 / canvasWidth,
+        y2: shape.y2 / canvasHeight
+      };
+    }
+    move(shape, dx, dy) {
+      shape.x1 += dx;
+      shape.y1 += dy;
+      shape.x2 += dx;
+      shape.y2 += dy;
+      return shape;
+    }
+    draw(shape) {
+      const centerX = (shape.x1 + shape.x2) / 2;
+      const centerY = (shape.y1 + shape.y2) / 2;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.drawArrow(shape.x1, shape.y1, shape.x2, shape.y2, shape.lineWidth);
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.drawArrow(this.startX, this.startY, x, y);
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.save({
+        type: "arrow",
+        x1: this.startX,
+        y1: this.startY,
+        x2: x,
+        y2: y,
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth
+      });
+      this.drawArrow(this.startX, this.startY, x, y);
+      this.isDrawing = false;
+    }
+    drawArrow(x1, y1, x2, y2, lineWidth) {
+      const headLength = 10 + 2.5 * (lineWidth ?? this.ctx.lineWidth);
+      const headAngle = Math.PI / 6;
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(x2, y2);
+      this.ctx.lineTo(
+        x2 - headLength * Math.cos(angle + headAngle),
+        y2 - headLength * Math.sin(angle + headAngle)
+      );
+      this.ctx.moveTo(x2, y2);
+      this.ctx.lineTo(
+        x2 - headLength * Math.cos(angle - headAngle),
+        y2 - headLength * Math.sin(angle - headAngle)
+      );
+      this.ctx.stroke();
+    }
+    isPointerAtShape(shape, x, y) {
+      const { x1, y1, x2, y2 } = shape;
+      const tolerance = Math.max((shape.lineWidth ?? 1) / 2, 5);
+      const distance = (x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1);
+      const lengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+      if (lengthSquared === 0) {
+        const dx = x - x1;
+        const dy = y - y1;
+        return Math.sqrt(dx * dx + dy * dy) <= tolerance;
+      }
+      return Math.abs(distance) / Math.sqrt(lengthSquared) <= tolerance && x >= Math.min(x1, x2) - tolerance && x <= Math.max(x1, x2) + tolerance && y >= Math.min(y1, y2) - tolerance && y <= Math.max(y1, y2) + tolerance;
+    }
+  };
+
+  // src/plugins/text.ts
+  var TextToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "text";
+      this.activePopup = null;
+      this.handleKeyDown = (_e) => void 0;
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    onActivate() {
+      this.annotationTool.canvas.style.cursor = "text";
+      this.isDrawing = true;
+    }
+    onDeactivate() {
+      this.destroyPopup();
+      this.annotationTool.canvas.style.cursor = "default";
+      this.isDrawing = false;
+    }
+    draw(shape) {
+      if (!shape.text) {
+        return;
+      }
+      const lines = shape.text.split("\n");
+      const fontSize = 16 + (shape.lineWidth ?? this.ctx.lineWidth) * 0.5;
+      const lineHeight = fontSize * 1.25;
+      this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+      const lineWidths = lines.map((line) => this.ctx.measureText(line).width);
+      const textWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
+      const textHeight = lines.length * lineHeight;
+      const centerX = shape.x + textWidth / 2;
+      const centerY = shape.y - fontSize / 2 + textHeight / 2;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      for (let i = 0; i < lines.length; i++) {
+        this.drawTextLine(shape.x, shape.y + i * lineHeight, lines[i], fontSize);
+      }
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    drawText(x, y, text) {
+      const fontSize = 16 + this.ctx.lineWidth * 0.5;
+      this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+      this.ctx.fillText(text, x, y);
+    }
+    drawTextLine(x, y, text, fontSize) {
+      this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+      this.ctx.fillText(text, x, y);
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+    }
+    onPointerMove(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+      this.ctx.fill();
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight
+      };
+    }
+    destroyPopup() {
+      if (this.activePopup) {
+        this.annotationTool.canvas.parentElement?.removeChild(this.activePopup);
+        this.activePopup = null;
+        document.removeEventListener("keydown", this.handleKeyDown);
+      }
+    }
+    createTextInputPopup(x, y) {
+      this.destroyPopup();
+      const popup = document.createElement("div");
+      this.activePopup = popup;
+      popup.style.cssText = `
       position: absolute;
       top: 50%;
       left: 50%;
@@ -711,7 +2677,11 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       z-index: 1000;
       min-width: 280px;
-    `;let a=document.createElement("input");a.type="text",a.placeholder="Enter text to draw",a.style.cssText=`
+    `;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Enter text to draw";
+      input.style.cssText = `
       display: block;
       width: 100%;
       padding: 8px 12px;
@@ -723,11 +2693,20 @@
       box-sizing: border-box;
       outline: none;
       transition: border-color 0.2s;
-    `,a.addEventListener("focus",()=>{a.style.borderColor="#007bff"}),a.addEventListener("blur",()=>{a.style.borderColor="#ddd"});let r=document.createElement("div");r.style.cssText=`
+    `;
+      input.addEventListener("focus", () => {
+        input.style.borderColor = "#007bff";
+      });
+      input.addEventListener("blur", () => {
+        input.style.borderColor = "#ddd";
+      });
+      const buttonContainer = document.createElement("div");
+      buttonContainer.style.cssText = `
       display: flex;
       gap: 12px;
       justify-content: flex-end;
-    `;let c=`
+    `;
+      const buttonStyles = `
       height: 36px;
       min-width: 80px;
       padding: 0 16px;
@@ -740,44 +2719,8095 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-    `,l=document.createElement("button");l.textContent="Cancel",l.style.cssText=`
-      ${c}
+    `;
+      const cancelButton = document.createElement("button");
+      cancelButton.textContent = "Cancel";
+      cancelButton.style.cssText = `
+      ${buttonStyles}
       background: #f0f0f0;
       color: #333;
-    `,l.addEventListener("mouseover",()=>{l.style.opacity="0.8"}),l.addEventListener("mouseout",()=>{l.style.opacity="1"});let s=document.createElement("button");s.textContent="OK",s.style.cssText=`
-      ${c}
+    `;
+      cancelButton.addEventListener("mouseover", () => {
+        cancelButton.style.opacity = "0.8";
+      });
+      cancelButton.addEventListener("mouseout", () => {
+        cancelButton.style.opacity = "1";
+      });
+      const okButton = document.createElement("button");
+      okButton.textContent = "OK";
+      okButton.style.cssText = `
+      ${buttonStyles}
       background: #007bff;
       color: white;
-    `,s.addEventListener("mouseover",()=>{s.style.opacity="0.8"}),s.addEventListener("mouseout",()=>{s.style.opacity="1"});let h=()=>{this.destroyPopup()},m=()=>{let f=a.value.trim();f&&(this.save({type:"text",x:t,y:e,text:f,strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth}),this.annotationTool.currentTool=null),h()},u=f=>{f.key==="Escape"?h():f.key==="Enter"&&m()};this.handleKeyDown=u,s.onclick=m,l.onclick=h,a.onkeyup=u,document.addEventListener("keydown",u),r.appendChild(l),r.appendChild(s),n.appendChild(a),n.appendChild(r),(p=this.annotationTool.canvas.parentElement)==null||p.appendChild(n),requestAnimationFrame(()=>{a.focus()})}onPointerUp(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.createTextInputPopup(e,n)}isPointerAtShape(t,e,n){var m;if(!t.text)return!1;let a=t.text.split(`
-`);if(a.length===0)return!1;let r=16+((m=t.lineWidth)!=null?m:1)*.5,c=r*1.25,l=a.length*c;this.ctx.font=`${r}px Helvetica Neue, Arial`;let s=a.map(u=>this.ctx.measureText(u).width),h=s.length>0?Math.max(...s):0;return h===0?!1:e>=t.x&&e<=t.x+h&&n>=t.y-r&&n<=t.y+l-r}};var Gt=class extends B{constructor(){super(...arguments);this.name="eraser"}move(t,e,n){return t.x+=e,t.y+=n,t}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n,width:t.width/e,height:t.height/n})}draw(t){this.drawEraser(t.x,t.y,t.width,t.height)}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.ctx.save(),this.ctx.strokeStyle="rgba(255, 255, 255, 0.5)",this.ctx.lineWidth=1,this.ctx.fillStyle="rgba(255, 255, 255, 0.3)",this.ctx.fillRect(this.startX,this.startY,e-this.startX,n-this.startY),this.ctx.strokeRect(this.startX,this.startY,e-this.startX,n-this.startY),this.ctx.restore()}onPointerUp(t){if(!this.isDrawing)return;this.isDrawing=!1;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.save({type:"eraser",x:this.startX,y:this.startY,width:e-this.startX,height:n-this.startY,strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth})}drawEraser(t,e,n,a){this.ctx.clearRect(t,e,n,a)}isPointerAtShape(t,e,n){let a=Math.min(t.x,t.x+t.width),r=Math.max(t.x,t.x+t.width),c=Math.min(t.y,t.y+t.height),l=Math.max(t.y,t.y+t.height);return e>=a&&e<=r&&n>=c&&n<=l}};var qt=class extends B{constructor(){super(...arguments);this.name="move";this.shape=null;this.shapeIndex=-1;this.lastDrawnShape=null;this.isScale=!1;this.selectedShapeIndex=-1;this.boundHandleKeyDown=null;this.activeHandle=null;this.handleSize=8;this.resizeStartBounds=null;this.resizeOriginalShape=null;this.rotationActive=!1;this.rotationStartAngle=0;this.rotationShapeStartAngle=0;this.centerDragActive=!1;this.rotationHandleDistance=40}cloneShape(t){if(t.type==="image"){let e=t;return H(M({},JSON.parse(JSON.stringify(t))),{image:e.image})}return JSON.parse(JSON.stringify(t))}getSelectedShape(){return this.selectedShapeIndex<0||this.selectedShapeIndex>=this.annotationTool.shapes.length?null:this.annotationTool.shapes[this.selectedShapeIndex]}setSelectedShapeOpacity(t){return this.selectedShapeIndex<0||this.selectedShapeIndex>=this.annotationTool.shapes.length?!1:(this.annotationTool.undoStack.push([...this.annotationTool.shapes]),this.annotationTool.shapes[this.selectedShapeIndex].opacity=t,this.annotationTool.redrawFullCanvas(),!0)}move(t){return t}normalize(t){return M({},t)}onActivate(){this.boundHandleKeyDown=this.handleKeyDown.bind(this),document.addEventListener("keydown",this.boundHandleKeyDown)}onDeactivate(){this.boundHandleKeyDown&&(document.removeEventListener("keydown",this.boundHandleKeyDown),this.boundHandleKeyDown=null),this.selectedShapeIndex=-1}handleKeyDown(t){if((t.key==="Backspace"||t.key==="Delete")&&this.selectedShapeIndex>=0){t.preventDefault(),this.deleteSelectedShape();return}if((t.ctrlKey||t.metaKey)&&t.key.toLowerCase()==="d"&&this.selectedShapeIndex>=0){t.preventDefault(),this.duplicateSelectedShape();return}if((t.ctrlKey||t.metaKey)&&t.shiftKey&&t.key==="ArrowRight"){t.preventDefault(),this.copyAnnotationsToNextFrame();return}if((t.ctrlKey||t.metaKey)&&t.shiftKey&&t.key==="ArrowLeft"){t.preventDefault(),this.copyAnnotationsToPrevFrame();return}}duplicateSelectedShape(){let t=this.getSelectedShape();if(!t)return;let e=this.cloneShape(t),n=20;this.getShapeBounds(e)&&this.offsetShape(e,n,n),this.annotationTool.undoStack.push([...this.annotationTool.shapes]);let r=this.annotationTool.serialize([e])[0];this.annotationTool.shapes.push(r),this.selectedShapeIndex=this.annotationTool.shapes.length-1,this.annotationTool.redrawFullCanvas()}copyAnnotationsToNextFrame(){let e=this.annotationTool.activeTimeFrame+1;if(e>this.annotationTool.totalFrames||this.annotationTool.shapes.length===0)return;let n=this.annotationTool.timeStack.get(e)||[],a=this.annotationTool.shapes.map(c=>this.cloneShape(c)),r=[...n,...a];this.annotationTool.timeStack.set(e,r),this.annotationTool.playbackFrame=e,this.annotationTool.redrawFullCanvas()}copyAnnotationsToPrevFrame(){let e=this.annotationTool.activeTimeFrame-1;if(e<1||this.annotationTool.shapes.length===0)return;let n=this.annotationTool.timeStack.get(e)||[],a=this.annotationTool.shapes.map(c=>this.cloneShape(c)),r=[...n,...a];this.annotationTool.timeStack.set(e,r),this.annotationTool.playbackFrame=e,this.annotationTool.redrawFullCanvas()}offsetShape(t,e,n){let a=this.annotationTool.deserialize([t])[0],c=this.annotationTool.pluginForTool(a.type).move(a,e,n);Object.assign(t,this.annotationTool.serialize([c])[0])}getShapeBounds(t){var n;let e=this.annotationTool.deserialize([t])[0];switch(e.type){case"rectangle":{let a=e;return{x:Math.min(a.x,a.x+a.width),y:Math.min(a.y,a.y+a.height),width:Math.abs(a.width),height:Math.abs(a.height)}}case"image":{let a=e;return{x:Math.min(a.x,a.x+a.width),y:Math.min(a.y,a.y+a.height),width:Math.abs(a.width),height:Math.abs(a.height)}}case"selection":{let a=e;return{x:Math.min(a.x,a.x+a.width),y:Math.min(a.y,a.y+a.height),width:Math.abs(a.width),height:Math.abs(a.height)}}case"circle":{let a=e;return{x:a.x-a.radius,y:a.y-a.radius,width:a.radius*2,height:a.radius*2}}case"line":{let a=e,r=Math.min(a.x1,a.x2),c=Math.min(a.y1,a.y2),l=Math.max(a.x1,a.x2),s=Math.max(a.y1,a.y2);return{x:r,y:c,width:l-r||10,height:s-c||10}}case"arrow":{let a=e,r=Math.min(a.x1,a.x2),c=Math.min(a.y1,a.y2),l=Math.max(a.x1,a.x2),s=Math.max(a.y1,a.y2);return{x:r,y:c,width:l-r||10,height:s-c||10}}case"curve":{let a=e;if(!a.points||a.points.length===0)return null;let r=1/0,c=1/0,l=-1/0,s=-1/0;for(let h of a.points)r=Math.min(r,h.x),c=Math.min(c,h.y),l=Math.max(l,h.x),s=Math.max(s,h.y);return{x:r,y:c,width:l-r||10,height:s-c||10}}case"text":{let a=e;if(!a.text)return null;let c=16+((n=t.lineWidth)!=null?n:1)*.5,l=a.text.length*c*.6;return{x:a.x,y:a.y-c,width:l||50,height:c*1.2}}default:return null}}drawResizeHandles(){let t=this.getSelectedShape();if(!t)return;let e=this.getShapeBounds(t);if(!e)return;let n=this.annotationTool.ctx,a=this.handleSize,r=a/2,c=[{pos:"nw",x:e.x,y:e.y},{pos:"n",x:e.x+e.width/2,y:e.y},{pos:"ne",x:e.x+e.width,y:e.y},{pos:"e",x:e.x+e.width,y:e.y+e.height/2},{pos:"se",x:e.x+e.width,y:e.y+e.height},{pos:"s",x:e.x+e.width/2,y:e.y+e.height},{pos:"sw",x:e.x,y:e.y+e.height},{pos:"w",x:e.x,y:e.y+e.height/2}];n.save(),n.strokeStyle="#5b9fff",n.lineWidth=1,n.setLineDash([4,4]),n.strokeRect(e.x,e.y,e.width,e.height),n.setLineDash([]),n.fillStyle="#ffffff",n.strokeStyle="#5b9fff",n.lineWidth=1;for(let l of c)n.fillRect(l.x-r,l.y-r,a,a),n.strokeRect(l.x-r,l.y-r,a,a);n.restore(),this.drawRotationHandles(e)}getShapeRotationCenter(t,e){return t.rotationCenterX!==void 0&&t.rotationCenterY!==void 0?{x:t.rotationCenterX*this.annotationTool.canvasWidth,y:t.rotationCenterY*this.annotationTool.canvasHeight}:{x:e.x+e.width/2,y:e.y+e.height/2}}drawRotationHandles(t){var h;let e=this.getSelectedShape();if(!e)return;let n=this.annotationTool.ctx,a=this.getShapeRotationCenter(e,t),r=(h=e.rotation)!=null?h:0,c=a.x+Math.sin(r)*this.rotationHandleDistance,l=a.y-Math.cos(r)*this.rotationHandleDistance;n.save(),n.beginPath(),n.strokeStyle="#5b9fff",n.lineWidth=1,n.setLineDash([]),n.moveTo(a.x,a.y),n.lineTo(c,l),n.stroke();let s=6;n.beginPath(),n.strokeStyle="#5b9fff",n.lineWidth=1.5,n.moveTo(a.x-s,a.y),n.lineTo(a.x+s,a.y),n.moveTo(a.x,a.y-s),n.lineTo(a.x,a.y+s),n.stroke(),n.beginPath(),n.fillStyle="#ffffff",n.strokeStyle="#5b9fff",n.lineWidth=1.5,n.arc(a.x,a.y,4,0,Math.PI*2),n.fill(),n.stroke(),n.beginPath(),n.fillStyle="#ffffff",n.strokeStyle="#5b9fff",n.lineWidth=1.5,n.arc(c,l,6,0,Math.PI*2),n.fill(),n.stroke(),n.beginPath(),n.strokeStyle="#5b9fff",n.lineWidth=1,n.arc(c,l,3,-Math.PI*.7,Math.PI*.5),n.stroke(),n.restore()}isPointerAtRotationHandle(t,e){var p;let n=this.getSelectedShape();if(!n)return!1;let a=this.getShapeBounds(n);if(!a)return!1;let r=this.getShapeRotationCenter(n,a),c=(p=n.rotation)!=null?p:0,l=r.x+Math.sin(c)*this.rotationHandleDistance,s=r.y-Math.cos(c)*this.rotationHandleDistance,h=t-l,m=e-s;return Math.sqrt(h*h+m*m)<=12}isPointerAtRotationCenter(t,e){let n=this.getSelectedShape();if(!n)return!1;let a=this.getShapeBounds(n);if(!a)return!1;let r=this.getShapeRotationCenter(n,a),c=t-r.x,l=e-r.y;return Math.sqrt(c*c+l*l)<=10}calculateAngle(t,e,n,a){return Math.atan2(n-t,-(a-e))}getHandleAtPosition(t,e){let n=this.getSelectedShape();if(!n)return null;let a=this.getShapeBounds(n);if(!a)return null;let c=(this.handleSize+4)/2,l=[{pos:"nw",x:a.x,y:a.y},{pos:"n",x:a.x+a.width/2,y:a.y},{pos:"ne",x:a.x+a.width,y:a.y},{pos:"e",x:a.x+a.width,y:a.y+a.height/2},{pos:"se",x:a.x+a.width,y:a.y+a.height},{pos:"s",x:a.x+a.width/2,y:a.y+a.height},{pos:"sw",x:a.x,y:a.y+a.height},{pos:"w",x:a.x,y:a.y+a.height/2}];for(let s of l)if(t>=s.x-c&&t<=s.x+c&&e>=s.y-c&&e<=s.y+c)return s.pos;return null}getCursorForHandle(t){return{nw:"nw-resize",n:"n-resize",ne:"ne-resize",e:"e-resize",se:"se-resize",s:"s-resize",sw:"sw-resize",w:"w-resize"}[t]}resizeShape(t,e,n,a,r,c=!1){var y;if(!this.resizeOriginalShape)return;let l=this.annotationTool.deserialize([this.resizeOriginalShape])[0],s=r.x,h=r.y,m=r.width,u=r.height;switch(e){case"nw":s+=n,h+=a,m-=n,u-=a;break;case"n":h+=a,u-=a;break;case"ne":h+=a,m+=n,u-=a;break;case"e":m+=n;break;case"se":m+=n,u+=a;break;case"s":u+=a;break;case"sw":s+=n,m-=n,u+=a;break;case"w":s+=n,m-=n;break}if(c&&r.width>0&&r.height>0){let g=r.width/r.height;if(e==="n"||e==="s"){let x=u*g,E=x-m;m=x,s-=E/2}else if(e==="e"||e==="w"){let x=m/g,E=x-u;u=x,h-=E/2}else{let x=m/r.width,E=u/r.height,R=Math.max(Math.abs(x),Math.abs(E)),O=x>=0?1:-1,L=E>=0?1:-1,D=r.width*R*O,w=r.height*R*L;e==="nw"?(s=r.x+r.width-D,h=r.y+r.height-w):e==="ne"?h=r.y+r.height-w:e==="sw"&&(s=r.x+r.width-D),m=D,u=w}}let p=10;m<p&&(e.includes("w")&&(s=r.x+r.width-p),m=p),u<p&&(e.includes("n")&&(h=r.y+r.height-p),u=p);let f=r.width>0?m/r.width:1,v=r.height>0?u/r.height:1;switch(l.type){case"rectangle":{let g=t;g.x=s/this.annotationTool.canvasWidth,g.y=h/this.annotationTool.canvasHeight,g.width=m/this.annotationTool.canvasWidth,g.height=u/this.annotationTool.canvasHeight;break}case"selection":{let g=t;g.x=s/this.annotationTool.canvasWidth,g.y=h/this.annotationTool.canvasHeight,g.width=m/this.annotationTool.canvasWidth,g.height=u/this.annotationTool.canvasHeight;break}case"circle":{let g=t,x=Math.min(m,u)/2,E=s+m/2,R=h+u/2;g.x=E/this.annotationTool.canvasWidth,g.y=R/this.annotationTool.canvasHeight,g.radius=x/this.annotationTool.canvasWidth;break}case"line":{let g=t,x=l,E=(x.x1-r.x)*f+s,R=(x.y1-r.y)*v+h,O=(x.x2-r.x)*f+s,L=(x.y2-r.y)*v+h;g.x1=E/this.annotationTool.canvasWidth,g.y1=R/this.annotationTool.canvasHeight,g.x2=O/this.annotationTool.canvasWidth,g.y2=L/this.annotationTool.canvasHeight;break}case"arrow":{let g=t,x=l,E=(x.x1-r.x)*f+s,R=(x.y1-r.y)*v+h,O=(x.x2-r.x)*f+s,L=(x.y2-r.y)*v+h;g.x1=E/this.annotationTool.canvasWidth,g.y1=R/this.annotationTool.canvasHeight,g.x2=O/this.annotationTool.canvasWidth,g.y2=L/this.annotationTool.canvasHeight;break}case"curve":{let g=t,x=l;if(!x.points||x.points.length===0)break;g.points=x.points.map(E=>({x:((E.x-r.x)*f+s)/this.annotationTool.canvasWidth,y:((E.y-r.y)*v+h)/this.annotationTool.canvasHeight}));break}case"text":{let g=t,x=l,R=16+((y=this.resizeOriginalShape.lineWidth)!=null?y:1)*.5,O=(x.x-r.x)*f+s,L=(x.y-r.y)*v+h;g.x=O/this.annotationTool.canvasWidth,g.y=L/this.annotationTool.canvasHeight;let D=(f+v)/2,w=R*D;g.lineWidth=Math.max(1,(w-16)*2);break}case"image":{let g=t;g.x=s/this.annotationTool.canvasWidth,g.y=h/this.annotationTool.canvasHeight,g.width=m/this.annotationTool.canvasWidth,g.height=u/this.annotationTool.canvasHeight;break}}}deleteSelectedShape(){this.selectedShapeIndex<0||this.selectedShapeIndex>=this.annotationTool.shapes.length||(this.annotationTool.undoStack.push([...this.annotationTool.shapes]),this.annotationTool.shapes.splice(this.selectedShapeIndex,1),this.selectedShapeIndex=-1,this.shapeIndex=-1,this.annotationTool.redrawFullCanvas())}onPointerDown(t){var s;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);if(this.selectedShapeIndex>=0&&this.isPointerAtRotationHandle(e,n)){let h=this.getSelectedShape();if(h){let m=this.getShapeBounds(h);if(m){let u=this.getShapeRotationCenter(h,m);this.rotationActive=!0,this.rotationStartAngle=this.calculateAngle(u.x,u.y,e,n),this.rotationShapeStartAngle=(s=h.rotation)!=null?s:0,this.isDrawing=!0,this.annotationTool.undoStack.push([...this.annotationTool.shapes]),this.annotationTool.canvas.style.cursor="grabbing";return}}}if(this.selectedShapeIndex>=0&&this.isPointerAtRotationCenter(e,n)){this.centerDragActive=!0,this.startX=e,this.startY=n,this.isDrawing=!0,this.annotationTool.undoStack.push([...this.annotationTool.shapes]),this.annotationTool.canvas.style.cursor="move";return}let a=this.getHandleAtPosition(e,n);if(a&&this.selectedShapeIndex>=0){this.activeHandle=a,this.startX=e,this.startY=n,this.isDrawing=!0;let h=this.getSelectedShape();h&&(this.resizeStartBounds=this.getShapeBounds(h),this.resizeOriginalShape=this.cloneShape(h),this.annotationTool.undoStack.push([...this.annotationTool.shapes])),this.annotationTool.canvas.style.cursor=this.getCursorForHandle(a);return}let r=this.annotationTool.shapes,c=r.slice().reverse(),l=!1;for(let h of c)if(this.isPointerAtShape(h,e,n)){this.shape=this.cloneShape(h),this.shapeIndex=r.indexOf(h),this.selectedShapeIndex=this.shapeIndex,l=!0;break}l||(this.selectedShapeIndex=-1,this.annotationTool.redrawFullCanvas()),this.shape&&(this.lastDrawnShape=null,this.startX=e,this.startY=n,this.isDrawing=!0,this.isScale=this.shape.type==="image"?this.isPointerAtCorner(this.shape,e,n):!1,this.isScale?this.annotationTool.canvas.style.cursor="nw-resize":this.annotationTool.canvas.style.cursor="move")}isPointerAtShape(t,e,n){let a=this.annotationTool.deserialize([t])[0];if(a.rotation){let c=this.getShapeBounds(t);if(c){let l=this.getShapeRotationCenter(t,c),s=Math.cos(-a.rotation),h=Math.sin(-a.rotation),m=e-l.x,u=n-l.y;e=l.x+m*s-u*h,n=l.y+m*h+u*s}}return this.annotationTool.pluginForTool(a.type).isPointerAtShape(a,e,n)}isPointerAtCorner(t,e,n){if(!("type"in t))return!1;let a=this.annotationTool.deserialize([t])[0],r=15,c=Math.abs(a.y-n)<r,l=Math.abs(a.x-e)<r,s=Math.abs(a.x+a.width-e)<r,h=Math.abs(a.y+a.height-n)<r;return c&&l||c&&s||h&&l||h&&s}onPointerMove(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);if(this.isDrawing&&this.rotationActive){let s=this.annotationTool.shapes[this.selectedShapeIndex];if(s){let h=this.getShapeBounds(s);if(h){let m=this.getShapeRotationCenter(s,h),u=this.calculateAngle(m.x,m.y,e,n),p=this.rotationShapeStartAngle+(u-this.rotationStartAngle);if(t.shiftKey){let f=Math.PI/12;p=Math.round(p/f)*f}s.rotation=p,this.annotationTool.redrawFullCanvas()}}return}if(this.isDrawing&&this.centerDragActive){let s=this.annotationTool.shapes[this.selectedShapeIndex];s&&(s.rotationCenterX=e/this.annotationTool.canvasWidth,s.rotationCenterY=n/this.annotationTool.canvasHeight,this.annotationTool.redrawFullCanvas());return}if(this.isDrawing&&this.activeHandle&&this.resizeStartBounds){let s=e-this.startX,h=n-this.startY,m=this.annotationTool.shapes[this.selectedShapeIndex];m&&(this.resizeShape(m,this.activeHandle,s,h,this.resizeStartBounds,t.shiftKey),this.annotationTool.redrawFullCanvas());return}if(!this.isDrawing&&this.selectedShapeIndex>=0){if(this.isPointerAtRotationHandle(e,n)){this.annotationTool.canvas.style.cursor="grab";return}if(this.isPointerAtRotationCenter(e,n)){this.annotationTool.canvas.style.cursor="move";return}let s=this.getHandleAtPosition(e,n);if(s){this.annotationTool.canvas.style.cursor=this.getCursorForHandle(s);return}}if(!this.isDrawing||!this.shape){this.isDrawing||(this.annotationTool.canvas.style.cursor="default");return}let a=e-this.startX,r=n-this.startY;this.startX=e-a,this.startY=n-r;let c=this.annotationTool.deserialize([this.shape])[0],l=c.type==="image"?c:JSON.parse(JSON.stringify(c));if(l.type!=="audio-peaks")if(l.type==="image")if(this.isScale){let{width:s,height:h}=l,m=s/h,u=s+a,p=u/m;l.width=u,l.height=p,this.lastDrawnShape=l,this.annotationTool.pluginForTool(l.type).draw(l)}else{let s=this.annotationTool.pluginForTool(l.type).move(l,a,r);this.lastDrawnShape=s,this.annotationTool.pluginForTool(l.type).draw(s)}else{let s=this.annotationTool.pluginForTool(l.type).move(l,a,r);this.lastDrawnShape=s,this.annotationTool.pluginForTool(l.type).draw(s)}}onPointerUp(t){if(this.rotationActive){this.rotationActive=!1,this.isDrawing=!1,this.annotationTool.canvas.style.cursor="default",this.annotationTool.redrawFullCanvas();return}if(this.centerDragActive){this.centerDragActive=!1,this.isDrawing=!1,this.annotationTool.canvas.style.cursor="default",this.annotationTool.redrawFullCanvas();return}if(this.activeHandle){this.activeHandle=null,this.resizeStartBounds=null,this.resizeOriginalShape=null,this.isDrawing=!1,this.annotationTool.canvas.style.cursor="default",this.annotationTool.redrawFullCanvas();return}if(!this.isDrawing||!this.lastDrawnShape){this.isDrawing=!1,this.annotationTool.redrawFullCanvas();return}this.lastDrawnShape&&this.shape&&(this.lastDrawnShape.fillStyle=this.shape.fillStyle,this.lastDrawnShape.strokeStyle=this.shape.strokeStyle,this.lastDrawnShape.lineWidth=this.shape.lineWidth,this.shape.opacity!==void 0&&(this.lastDrawnShape.opacity=this.shape.opacity),this.save(this.lastDrawnShape)),this.isDrawing=!1,this.isScale=!1,this.shape=null,this.lastDrawnShape=null,this.annotationTool.canvas.style.cursor="default",this.annotationTool.redrawFullCanvas()}draw(){throw new Error("Method not implemented.")}reset(){this.isDrawing=!1,this.shape=null,this.isScale=!1,this.lastDrawnShape=null,this.shapeIndex=-1,this.selectedShapeIndex=-1,this.activeHandle=null,this.resizeStartBounds=null,this.resizeOriginalShape=null,this.rotationActive=!1,this.centerDragActive=!1,this.annotationTool.canvas.style.cursor="default"}save(t){this.annotationTool.replaceShape(t,this.shapeIndex)}};var Kt=class extends B{constructor(){super(...arguments);this.name="image"}move(t,e,n){return t.x+=e,t.y+=n,t}onPointerDown(t){}onPointerMove(t){}onPointerUp(t){}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n,width:t.width/e,height:t.height/n})}draw(t){if(!(t.image instanceof HTMLImageElement)){console.error("Image is not an instance of HTMLImageElement");return}if(t.width===0||t.height===0)return;let e=t.x+t.width/2,n=t.y+t.height/2,a=this.getRotationCenter(t,e,n),r=this.applyRotation(t,a.x,a.y);this.ctx.drawImage(t.image,t.x,t.y,t.width,t.height),r&&this.restoreRotation()}isPointerAtShape(t,e,n){let a=Math.min(t.x,t.x+t.width),r=Math.max(t.x,t.x+t.width),c=Math.min(t.y,t.y+t.height),l=Math.max(t.y,t.y+t.height);return e>=a&&e<=r&&n>=c&&n<=l}};var Jt=class extends B{constructor(){super(...arguments);this.name="compare";this.comparisonLine=0;this.leftOpacity=1;this.isDrawing=!1}get rightOpacity(){return this.annotationTool.overlayOpacity}move(t,e,n){return t.x+=e,t}onActivate(){this.comparisonLine=this.annotationTool.canvasWidth/2,this.leftOpacity=1,this.annotationTool.canvas.style.cursor="col-resize"}onDeactivate(){this.annotationTool.canvas.style.cursor="default",this.comparisonLine=0,this.leftOpacity=1,this.isDrawing=!1}normalize(t,e,n){return H(M({},t),{x:t.x/e})}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0,this.disablePreviousCompare(),this.onPointerMove(t)}onPointerMove(t){if(!this.isDrawing){if(this.annotationTool.globalShapes.length>0){let a=this.annotationTool.globalShapes[0];if(a.type==="compare"){let r=this.annotationTool.deserialize([a])[0];this.draw(r),this.annotationTool.addFrameSquareOverlay()}}return}let{x:e}=this.annotationTool.getRelativeCoords(t);this.comparisonLine=e;let n={type:"compare",strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth,x:e};this.draw(n),this.drawDelimiter(n)}onPointerUp(){this.isDrawing&&(this.save({type:"compare",strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth,disabled:!1,x:this.comparisonLine}),this.isDrawing=!1)}removePreviousCompare(){this.annotationTool.globalShapes=this.annotationTool.globalShapes.filter(t=>t.type!=="compare")}disablePreviousCompare(){this.annotationTool.globalShapes=this.annotationTool.globalShapes.map(t=>t.type==="compare"?H(M({},t),{disabled:!0}):t)}save(t){this.removePreviousCompare();let e=this.annotationTool.serialize([t])[0];e.x<.05||e.x>.95||this.annotationTool.addGlobalShape(e)}drawDelimiter(t){this.ctx.beginPath(),this.ctx.moveTo(t.x,0),this.ctx.lineTo(t.x,this.annotationTool.canvasWidth),this.ctx.stroke()}drawShape(t){var at,St,K,rt,st,Et,Ct,xt;let e=this.annotationTool.videoElement,n=this.annotationTool.referenceVideoElement;if(!e||!n)return;let a=this.ctx.globalAlpha,r=this.annotationTool.canvasWidth,c=this.annotationTool.canvasHeight,l=t.x,s=n.videoHeight-e.videoHeight,h=n.videoWidth-e.videoWidth,m=this.annotationTool.isMobile;this.ctx.globalAlpha=this.leftOpacity;let u=(St=(at=this.annotationTool.referenceVideoFrameBuffer)==null?void 0:at.frameNumberFromTime(e.currentTime))!=null?St:1,p=u;if(h>e.videoWidth&&s>e.videoHeight&&!this.annotationTool.isMobile){let b=(Et=(st=this.annotationTool.referenceVideoFrameBuffer)==null?void 0:st.getFrameNumberBySignature((rt=(K=this.annotationTool.videoFrameBuffer)==null?void 0:K.getAudioFingerprint(u))!=null?rt:null,u))!=null?Et:u,F=Math.abs(u-b);F>=1&&F<=3&&(p=b)}let v=(Ct=this.annotationTool.referenceVideoFrameBuffer)==null?void 0:Ct.getFrame(p),y=(xt=this.annotationTool.videoFrameBuffer)==null?void 0:xt.getFrame(u);if(m){this.ctx.imageSmoothingQuality="low";let b=l/r,F=l;this.ctx.drawImage(y!=null?y:e,0,0,b*e.videoWidth,e.videoHeight,0,0,F,c)}else{let b=y?y.width:e.videoWidth,F=y?y.height:e.videoHeight;this.ctx.drawImage(y!=null?y:e,0,0,b,F,0,0,r,c)}this.ctx.globalAlpha=this.rightOpacity;let g=0,x=0,E=e.videoWidth/e.videoHeight,R=n.videoWidth/n.videoHeight,L=Math.abs(E-R)>.1,D=10,w=Math.abs(s)>D,T=e.videoWidth,C=e.videoHeight,S=0;if(h<-D)if(L){let b=e.videoWidth/r;S=Math.abs(h/2),S=S/b,S<=D&&(S=0)}else T=n.videoWidth;else h>D&&(T=n.videoWidth);if(s===0)g=0;else if(s>0)L?(g=s/2,g<=D&&(g=0)):C=w?n.videoHeight:e.videoHeight;else if(!L)C=w?n.videoHeight:e.videoHeight;else{x=Math.abs(s/2);let b=e.videoHeight/c;x=x/b,x<=D&&(x=0)}let $=l-S,W=r-$,q=W/r*T;v&&this.rightOpacity>0&&(m&&(this.ctx.imageSmoothingQuality="low"),this.ctx.drawImage(v,$/r*T,g,q,C,$+S,x,W,c)),this.ctx.globalAlpha=a}draw(t){if(t.disabled)return;let e=this.annotationTool.videoElement,n=this.annotationTool.referenceVideoElement;!e||!n||this.drawShape(t)}};function ro(i){let o=i[0],t=i[0];for(let e=1;e<i.length;e++)i[e]<o&&(o=i[e]),i[e]>t&&(t=i[e]);return[o,t]}var Qt=class extends B{constructor(t){super(t);this.name="audio-peaks";this.canvas=document.createElement("canvas");this.props={peaks:new Int8Array,theme:{waveOutlineColor:"rgba(255,192,203,0.7)",waveFillColor:"grey",waveProgressColor:"orange"},waveHeight:40,bits:16};this.drawCtx=this.canvas.getContext("2d")}onVideoBlobSet(t){return k(this,null,function*(){let e=yield t.arrayBuffer();this.init(e)})}on(t,e){t==="videoBlobSet"&&this.onVideoBlobSet(e)}extractPeaks(t){return k(this,null,function*(){let{default:e}=yield Promise.resolve().then(()=>Nn(hn(),1)),n=this.progressBarCoordinates.width,a=Math.ceil(t.length/n);return e(t,a,!0)})}setProps(t){let[e,n]=ro(t.data[0]),a=Math.pow(2,t.bits-1)-1,r=-Math.pow(2,t.bits-1);this.props.peaks=t.data[0].map(c=>c<0?Math.round(c/e*r):Math.round(c/n*a)),this.props.bits=t.bits}init(t){return k(this,null,function*(){try{let n=yield new AudioContext().decodeAudioData(t),a=yield this.extractPeaks(n);this.initCanvas(),this.setProps(a),this.annotationTool.removeGlobalShape("audio-peaks"),this.annotationTool.addGlobalShape({x:0,y:0,strokeStyle:"red",fillStyle:"red",lineWidth:1,type:"audio-peaks"}),this.clearLocalCanvas(),this.drawOnCanvas()}catch(e){this.initCanvas(),this.props.peaks=new Int8Array,this.annotationTool.removeGlobalShape("audio-peaks"),this.clearLocalCanvas(),console.error(e)}})}initCanvas(){this.canvas.width=this.progressBarCoordinates.width*this.pixelRatio,this.canvas.height=this.props.waveHeight*this.pixelRatio,this.drawCtx.scale(this.pixelRatio,this.pixelRatio)}move(t,e,n){return t.x+=e,t.y+=n,t}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n})}onPointerDown(t){}onPointerMove(t){}onPointerUp(t){}reset(){this.clearLocalCanvas(),this.props.peaks=new Int8Array,this.annotationTool.removeGlobalShape("audio-peaks")}draw(t){let e=this.annotationTool.videoElement;if(!e||e.tagName!=="VIDEO"||e.muted||e.volume===0)return;this.ctx.clearRect(0,0,this.annotationTool.canvasWidth,this.annotationTool.canvasHeight);let{waveHeight:a,theme:r}=this.props,c=this.ctx,l=a/2,s=this.progressBarCoordinates.y-20,{x:h,width:m}=this.progressBarCoordinates,u=this.annotationTool.playbackFrame,p=this.annotationTool.totalFrames,f=Math.ceil(u/p*m)+h;this.ctx.drawImage(this.canvas,h,s,m,a),c.fillStyle=r.waveProgressColor,c.fillRect(f,s+0,1,l*2)}get pixelRatio(){return this.annotationTool.pixelRatio}get progressBarCoordinates(){return this.annotationTool.progressBarCoordinates}clearLocalCanvas(){this.drawCtx.clearRect(0,0,this.canvas.width,this.canvas.height)}drawOnCanvas(){let{peaks:t,bits:e,waveHeight:n,theme:a}=this.props,r=this.drawCtx,c=0,l=0,s=n/2,h=nt(2,e-1),m=0,u=t.length;r.fillStyle=a.waveOutlineColor;for(let p=0;p<u;p+=1){let f=t[(p+c)*2+1]/h,v=Math.abs(f*s);r.fillRect(p+l,m+0+s-v,1,v)}}};var te=class extends B{constructor(){super(...arguments);this.name="selection";this.selectedArea=null}move(t,e,n){return t.x+=e,t.y+=n,t}normalize(t,e,n){return H(M({},t),{x:t.x/e,y:t.y/n,width:t.width/e,height:t.height/n})}onPointerDown(t){let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.startX=e,this.startY=n,this.isDrawing=!0,this.selectedArea=null}onPointerMove(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t);this.annotationTool.clearCanvas(),this.annotationTool.globalShapes.length>0?this.annotationTool.drawShapesOverlay():this.annotationTool.addVideoOverlay(),this.drawSelectionRect(this.startX,this.startY,e-this.startX,n-this.startY)}onPointerUp(t){if(!this.isDrawing)return;let{x:e,y:n}=this.annotationTool.getRelativeCoords(t),a=Math.min(e,this.startX),r=Math.min(n,this.startY),c=Math.abs(e-this.startX),l=Math.abs(n-this.startY);if(c<1||l<1){this.isDrawing=!1,this.annotationTool.redrawFullCanvas();return}let s=document.createElement("canvas"),h=s.getContext("2d"),m=this.annotationTool.videoElement;if(!(m instanceof HTMLVideoElement))return;let u=m.videoWidth/m.videoHeight,p=this.annotationTool.canvasWidth/this.annotationTool.canvasHeight,f=this.annotationTool.canvasWidth,v=this.annotationTool.canvasHeight,y=0,g=0;u>p?(v=this.annotationTool.canvasWidth/u,g=(this.annotationTool.canvasHeight-v)/2):(f=this.annotationTool.canvasHeight*u,y=(this.annotationTool.canvasWidth-f)/2);let x=m.videoWidth/f,E=m.videoHeight/v,R=(a-y)*x,O=(r-g)*E,L=c*x,D=l*E;s.width=Math.max(1,L),s.height=Math.max(1,D);try{h.drawImage(this.annotationTool.videoElement,R,O,L,D,0,0,L,D);let w=h.getImageData(0,0,s.width,s.height);this.selectedArea=w;let T=document.createElement("canvas");T.width=L+4,T.height=D+4,T.style.width=`${c+4}px`,T.style.height=`${l+4}px`;let C=T.getContext("2d");C.strokeStyle="black",C.lineWidth=2,C.strokeRect(1,1,L+2,D+2),C.strokeStyle="black",C.lineWidth=2,C.strokeRect(2,2,L,D),C.putImageData(w,2,2);let S=new Image;S.onload=()=>{this.annotationTool.pluginForTool("image").save({type:"image",x:a-2,y:r-2,width:c+4,height:l+4,image:S,strokeStyle:"transparent",fillStyle:"transparent",lineWidth:0}),this.isDrawing=!1,this.selectedArea=null,this.annotationTool.redrawFullCanvas()},S.src=T.toDataURL(),this.annotationTool.currentTool="move"}catch(w){console.error("Error capturing selection:",w),this.isDrawing=!1,this.annotationTool.redrawFullCanvas();return}}drawSelectionRect(t,e,n,a){var p,f,v;let r=Math.min(t,t+n),c=Math.min(e,e+a),l=Math.abs(n),s=Math.abs(a),h=this.annotationTool.pixelRatio,m=null;if(l>0&&s>0)try{m=this.ctx.getImageData(r*h,c*h,l*h,s*h)}catch(y){m=null}if(this.ctx.fillStyle="rgba(0, 0, 0, 0.5)",this.ctx.fillRect(0,0,this.annotationTool.canvasWidth,this.annotationTool.canvasHeight),m&&l>0&&s>0)this.ctx.putImageData(m,r*h,c*h);else if(l>0&&s>0){let y=this.annotationTool.videoElement;if(y instanceof HTMLVideoElement){let g=(p=this.annotationTool.videoFrameBuffer)==null?void 0:p.frameNumberFromTime(y.currentTime),x=(v=(f=this.annotationTool.videoFrameBuffer)==null?void 0:f.getFrame(g||0))!=null?v:y,E=x?x.width:y.videoWidth,R=x?x.height:y.videoHeight,O=E/this.annotationTool.canvasWidth,L=R/this.annotationTool.canvasHeight;this.ctx.drawImage(x,r*O,c*L,l*O,s*L,r,c,l,s)}}this.ctx.beginPath();let u=this.ctx.strokeStyle;this.ctx.strokeStyle="#ffffff",this.ctx.lineWidth=2,this.ctx.setLineDash([5,5]),this.ctx.strokeRect(r,c,l,s),this.ctx.setLineDash([]),this.ctx.strokeStyle=u}draw(t){this.drawSelectionRect(t.x,t.y,t.width,t.height)}reset(){super.reset(),this.selectedArea=null}isPointerAtShape(t,e,n){let a=Math.min(t.x,t.x+t.width),r=Math.max(t.x,t.x+t.width),c=Math.min(t.y,t.y+t.height),l=Math.max(t.y,t.y+t.height);return e>=a&&e<=r&&n>=c&&n<=l}};var dn=[Vt,Wt,Ut,jt,_t,Gt,Yt,qt,Kt,Jt,Qt,te];function un(i,o){let t,e,n,a=[],r=!0,c=!1;function l(m,u){if(c)return;let p=Math.abs(u.mediaTime-t),f=Math.abs(u.presentedFrames-e),v=p/f;v&&v<1&&r&&a.length<50&&i.playbackRate===1&&document.hasFocus()&&(a.push(v),n=Math.round(1/h()),o(n,a.length*2)),r=!0,t=u.mediaTime,e=u.presentedFrames,c||i.requestVideoFrameCallback(l)}i.requestVideoFrameCallback(l);let s=()=>{a.pop(),r=!1};i.addEventListener("seeked",s);function h(){return a.reduce((m,u)=>m+u)/a.length}return()=>{c=!0,i.removeEventListener("seeked",s)}}var ne=class ne extends Array{constructor(...o){super(...o),this.id=ne.nextId++}};ne.nextId=0;var ge=ne,mn=new Map;function so(i,o){return`${Math.min(i.id,o.id)}-${Math.max(i.id,o.id)}`}function ve(i,o){let t=so(i,o),e=mn.get(t);if(e!==void 0)return e;if(i.length===0||o.length===0)return 0;let n=Math.min(i.length,o.length),a=0,r=0;for(let u=0;u<n;u++)a+=i[u],r+=o[u];a/=n,r/=n;let c=0,l=0,s=0;for(let u=0;u<n;u++){let p=i[u]-a,f=o[u]-r;c+=p*f,l+=p*p,s+=f*f}let h=Math.sqrt(l*s),m=h===0?0:(c/h+1)/2;return mn.set(t,m),m}var pn=128,ee=class{constructor(o,t){this.video=o;this.fps=t;this.audioContext=null;this.audioBuffer=null;this.fingerprints=new Map;this.isInitialized=!1;this.initPromise=null}init(){return k(this,null,function*(){if(!this.isInitialized)return this.initPromise?this.initPromise:(this.initPromise=this.doInit(),this.initPromise)})}doInit(){return k(this,null,function*(){try{let e=yield(yield(yield fetch(this.video.currentSrc||this.video.src)).blob()).arrayBuffer();this.audioContext=new AudioContext,this.audioBuffer=yield this.audioContext.decodeAudioData(e),this.isInitialized=!0}catch(o){console.warn("Could not extract audio for fingerprinting:",o),this.isInitialized=!0,this.audioBuffer=null}})}hasAudio(){return this.audioBuffer!==null}get totalFrames(){return Math.round(this.video.duration*this.fps)}extractFingerprint(o){if(!this.audioBuffer)return null;let t=(o-1)/this.fps,e=1/this.fps,n=this.audioBuffer.sampleRate,a=Math.floor(t*n),c=Math.floor((t+e)*n)-a;if(c<=0||a>=this.audioBuffer.length)return null;let l=this.audioBuffer.getChannelData(0),s=new ge,h=Math.max(1,Math.floor(c/pn));for(let m=0;m<pn;m++){let u=a+m*h,p=Math.min(u+h,this.audioBuffer.length),f=0,v=0;for(let g=u;g<p;g++)g<l.length&&(f+=l[g]*l[g],v++);let y=v>0?Math.sqrt(f/v):0;s.push(y)}return s}getFingerprint(o){if(this.fingerprints.has(o))return this.fingerprints.get(o);let t=this.extractFingerprint(o);return t&&this.fingerprints.set(o,t),t}extractRange(o,t){for(let e=o;e<=t;e++)this.getFingerprint(e)}setFingerprint(o,t){this.fingerprints.set(o,t)}findBestMatch(o,t,e=3){if(!o||!(this.fingerprints.size>0)&&!this.hasAudio())return t;let a=0,r=t,c=Math.max(1,t-e),l=Math.min(this.totalFrames,t+e);for(let s=c;s<=l;s++){let h=this.getFingerprint(s);if(h){let m=ve(o,h);m>a&&(a=m,r=s)}}return r}destroy(){this.fingerprints.clear(),this.audioContext&&(this.audioContext.close().catch(()=>{}),this.audioContext=null),this.audioBuffer=null,this.isInitialized=!1,this.initPromise=null}};var fn=64,ht=class{constructor(o,t,e=!0){this.isDestroyed=!1;this.autoHide=!0;this.isMobile=!1;this.audioExtractor=null;this.audioInitPromise=null;this.seenFrames=0;this.isCanvasSizeSet=!1;this.frames=new Map;this.audioFingerprints=new Map;this.video=o,this.fps=t,this.autoHide=e,this.createCanvas(),this.createTransformCanvas()}createTransformCanvas(){this.transformCanvas=document.createElement("canvas"),this.transformCanvasCtx=this.canvas.getContext("2d",{willReadFrequently:!0,alpha:!1}),this.transformCanvas.width=fn,this.transformCanvas.height=fn}initAudioSync(){return k(this,null,function*(){var o;return this.audioExtractor?(o=this.audioInitPromise)!=null?o:Promise.resolve():(this.audioExtractor=new ee(this.video,this.fps),this.audioInitPromise=this.audioExtractor.init(),this.audioInitPromise)})}hasAudioSync(){var o,t;return(t=(o=this.audioExtractor)==null?void 0:o.hasAudio())!=null?t:!1}start(){this.addRequestFrameCallback(),this.isMobile||this.initAudioSync().catch(()=>{})}destroy(){this.isDestroyed=!0,this.frames.forEach(o=>o.close()),this.frames.clear(),this.audioFingerprints.clear(),this.audioExtractor&&(this.audioExtractor.destroy(),this.audioExtractor=null),this.audioInitPromise=null}tick(o,t){if(this.setCanvasSize(),t.expectedDisplayTime-performance.now()>10,this.isDestroyed)return!1;if(this.seenFrames>=this.totalFrames){if(this.autoHide)try{this.video.paused||this.video.pause(),this.video.style.display="none"}catch(c){}return!1}if(this.video.videoWidth===0||this.video.videoHeight===0)return!0;let n=this.video,a=this.frameNumberFromTime(t.mediaTime);if(!Math.max(1,t.presentedFrames>this.totalFrames?t.presentedFrames%this.totalFrames:t.presentedFrames))throw new Error("expectedFrame is 0");if(this.hasFrame(a))this.seenFrames++;else{this.ctx.drawImage(n,0,0,this.width,this.height,0,0,this.width,this.height);let c=this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);createImageBitmap(c,0,0,this.width,this.height).then(l=>k(this,null,function*(){var s;if(this.setFrame(a,l),!this.isMobile&&((s=this.audioExtractor)!=null&&s.hasAudio())){let h=this.audioExtractor.getFingerprint(a);h&&this.setAudioFingerprint(a,h)}}))}return!0}addRequestFrameCallback(){this.isDestroyed||this.video.requestVideoFrameCallback((o,t)=>{this.tick(o,t)&&this.addRequestFrameCallback()})}createCanvas(){this.canvas=document.createElement("canvas"),this.ctx=this.canvas.getContext("2d",{willReadFrequently:!0,alpha:!1})}setCanvasSize(){this.isCanvasSizeSet||(this.canvas.width=this.video.videoWidth,this.canvas.height=this.video.videoHeight,this.isCanvasSizeSet=!0)}get width(){return this.video.videoWidth}get height(){return this.video.videoHeight}hasFrame(o){return this.frames.has(o)}getFrame(o){return this.frames.has(o)?this.frames.get(o):null}getFrameNumberBySignature(o,t){if(!o)return t;let e=0,n=t;return[t-3,t-2,t-1,t,t+1,t+2,t+3].filter(r=>r>0&&r<=this.totalFrames).forEach(r=>{let c=this.getAudioFingerprint(r);if(c){let l=ve(o,c);l>e&&(e=l,n=r)}}),n}setFrame(o,t){this.frames.set(o,t)}setAudioFingerprint(o,t){this.audioFingerprints.set(o,t)}getAudioFingerprint(o){var t;if(this.audioFingerprints.has(o))return this.audioFingerprints.get(o);if((t=this.audioExtractor)!=null&&t.hasAudio()){let e=this.audioExtractor.getFingerprint(o);if(e)return this.audioFingerprints.set(o,e),e}return null}get totalFrames(){return Math.round(this.video.duration*this.fps)}frameNumberFromTime(o){return Math.max(1,Math.round(o*this.fps))}};var dt={layout:"horizontal",mobile:{collapsibleToolbars:!0,gesturesEnabled:!0,autoCollapse:!0,breakpoint:960},theme:"dark",toolbar:{draggable:!1,sidebarPosition:"left",defaultTool:"curve"},features:{showThemeToggle:!0,showFullscreen:!0,showProgressBar:!0,showFrameCounter:!0}};function gn(i){var o,t;return i?{layout:(o=i.layout)!=null?o:dt.layout,theme:(t=i.theme)!=null?t:dt.theme,mobile:M(M({},dt.mobile),i.mobile),toolbar:M(M({},dt.toolbar),i.toolbar),features:M(M({},dt.features),i.features)}:M({},dt)}var Mt=class{constructor(o){this.tool=o;this.currentRenderer=null;this.rootElement=null;this.prefix=bt()}getRootElement(){if(!this.rootElement){let o=this.tool.canvas;o!=null&&o.parentElement&&(this.rootElement=o.parentElement,this.rootElement.classList.add(`${this.prefix}-root`))}return this.rootElement}clearLayoutClasses(){let o=this.getRootElement();o&&o.classList.remove(`${this.prefix}-layout-horizontal`,`${this.prefix}-layout-vertical`,`${this.prefix}-layout-minimal`,`${this.prefix}-layout-bottom-dock`,`${this.prefix}-sidebar-right`)}setLayout(o,t){this.currentRenderer&&this.currentRenderer.cleanup(),this.clearLayoutClasses();let e=this.getRootElement();e&&(e.classList.add(`${this.prefix}-layout-${o}`),o==="vertical"&&(t==null?void 0:t.sidebarPosition)==="right"&&e.classList.add(`${this.prefix}-sidebar-right`)),this.currentRenderer=this.createRenderer(o),this.currentRenderer.apply(this.tool)}getCurrentLayout(){var o,t;return(t=(o=this.currentRenderer)==null?void 0:o.name)!=null?t:null}createRenderer(o){switch(o){case"horizontal":return new ye;case"vertical":return new xe;case"minimal":return new be;case"bottom-dock":return new we}}destroy(){this.currentRenderer&&(this.currentRenderer.cleanup(),this.currentRenderer=null),this.clearLayoutClasses(),this.rootElement=null}},ye=class{constructor(){this.name="horizontal"}apply(o){}cleanup(){}},xe=class{constructor(){this.name="vertical"}apply(o){}cleanup(){}},be=class{constructor(){this.name="minimal";this.dragState={isDragging:!1,startX:0,startY:0,offsetX:0,offsetY:0};this.container=null;this.boundHandlers={};this.prefix=bt()}apply(o){var e;if(this.container=o.uiContainer,!this.container)return;this.boundHandlers.mousedown=this.handleMouseDown.bind(this),this.boundHandlers.mousemove=this.handleMouseMove.bind(this),this.boundHandlers.mouseup=this.handleMouseUp.bind(this),this.container.addEventListener("mousedown",this.boundHandlers.mousedown),document.addEventListener("mousemove",this.boundHandlers.mousemove),document.addEventListener("mouseup",this.boundHandlers.mouseup);let t=o.config;(e=t==null?void 0:t.toolbar)!=null&&e.position&&(this.container.style.left=`${t.toolbar.position.x}px`,this.container.style.top=`${t.toolbar.position.y}px`)}cleanup(){this.container&&this.boundHandlers.mousedown&&this.container.removeEventListener("mousedown",this.boundHandlers.mousedown),this.boundHandlers.mousemove&&document.removeEventListener("mousemove",this.boundHandlers.mousemove),this.boundHandlers.mouseup&&document.removeEventListener("mouseup",this.boundHandlers.mouseup),this.container&&(this.container.style.left="",this.container.style.top=""),this.container=null,this.boundHandlers={}}handleMouseDown(o){if(!this.container||o.target.closest("button, input"))return;this.dragState.isDragging=!0,this.dragState.startX=o.clientX,this.dragState.startY=o.clientY;let t=this.container.getBoundingClientRect();this.dragState.offsetX=t.left,this.dragState.offsetY=t.top,this.container.classList.add(`${this.prefix}-dragging`),o.preventDefault()}handleMouseMove(o){if(!this.dragState.isDragging||!this.container)return;let t=o.clientX-this.dragState.startX,e=o.clientY-this.dragState.startY;this.container.style.left=`${this.dragState.offsetX+t}px`,this.container.style.top=`${this.dragState.offsetY+e}px`}handleMouseUp(){this.container&&(this.dragState.isDragging=!1,this.container.classList.remove(`${this.prefix}-dragging`))}},we=class{constructor(){this.name="bottom-dock";this.movedElements=[];this.playerControls=null;this.divider=null;this.prefix=bt()}apply(o){let t=o.uiContainer,e=o.playerControlsContainer;if(t&&e)for(this.playerControls=e,this.divider=document.createElement("div"),this.divider.classList.add(`${this.prefix}-divider`),t.appendChild(this.divider);e.firstChild;){let n=e.firstChild;this.movedElements.push(n),t.appendChild(n)}}cleanup(){if(this.playerControls)for(let o of this.movedElements)this.playerControls.appendChild(o);this.divider&&this.divider.parentNode&&this.divider.parentNode.removeChild(this.divider),this.movedElements=[],this.playerControls=null,this.divider=null}};var oe=class{constructor(o,t=!0){this.container=o;this.autoCollapse=t;this.isCollapsed=!1;this.collapseButton=null;this.prefix=bt()}init(){this.container.classList.add(`${this.prefix}-collapsible`),this.createCollapseButton()}createCollapseButton(){var o;this.collapseButton=document.createElement("button"),this.collapseButton.type="button",this.collapseButton.classList.add(`${this.prefix}-collapse-btn`),this.collapseButton.setAttribute("aria-label","Toggle toolbar"),this.collapseButton.setAttribute("data-tooltip","Toggle toolbar"),this.updateButtonIcon(),this.collapseButton.addEventListener("click",t=>{t.stopPropagation(),this.toggle()}),(o=this.container.parentElement)==null||o.insertBefore(this.collapseButton,this.container.nextSibling)}updateButtonIcon(){this.collapseButton&&(this.collapseButton.innerHTML=`
+    `;
+      okButton.addEventListener("mouseover", () => {
+        okButton.style.opacity = "0.8";
+      });
+      okButton.addEventListener("mouseout", () => {
+        okButton.style.opacity = "1";
+      });
+      const closePopup = () => {
+        this.destroyPopup();
+      };
+      const handleSave = () => {
+        const inputText = input.value.trim();
+        if (inputText) {
+          this.save({
+            type: "text",
+            x,
+            y,
+            text: inputText,
+            strokeStyle: this.ctx.strokeStyle,
+            fillStyle: this.ctx.fillStyle,
+            lineWidth: this.ctx.lineWidth
+          });
+          this.annotationTool.currentTool = null;
+        }
+        closePopup();
+      };
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          closePopup();
+        } else if (e.key === "Enter") {
+          handleSave();
+        }
+      };
+      this.handleKeyDown = handleKeyDown;
+      okButton.onclick = handleSave;
+      cancelButton.onclick = closePopup;
+      input.onkeyup = handleKeyDown;
+      document.addEventListener("keydown", handleKeyDown);
+      buttonContainer.appendChild(cancelButton);
+      buttonContainer.appendChild(okButton);
+      popup.appendChild(input);
+      popup.appendChild(buttonContainer);
+      this.annotationTool.canvas.parentElement?.appendChild(popup);
+      requestAnimationFrame(() => {
+        input.focus();
+      });
+    }
+    onPointerUp(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.createTextInputPopup(x, y);
+    }
+    isPointerAtShape(shape, x, y) {
+      if (!shape.text) return false;
+      const lines = shape.text.split("\n");
+      if (lines.length === 0) return false;
+      const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
+      const lineHeight = fontSize * 1.25;
+      const textHeight = lines.length * lineHeight;
+      this.ctx.font = `${fontSize}px Helvetica Neue, Arial`;
+      const lineWidths = lines.map((line) => this.ctx.measureText(line).width);
+      const textWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
+      if (textWidth === 0) return false;
+      return x >= shape.x && x <= shape.x + textWidth && y >= shape.y - fontSize && y <= shape.y + textHeight - fontSize;
+    }
+  };
+
+  // src/plugins/eraser.ts
+  var EraserToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "eraser";
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight,
+        width: shape.width / canvasWidth,
+        height: shape.height / canvasHeight
+      };
+    }
+    draw(shape) {
+      this.drawEraser(shape.x, shape.y, shape.width, shape.height);
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.ctx.save();
+      this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+      this.ctx.lineWidth = 1;
+      this.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      this.ctx.fillRect(
+        this.startX,
+        this.startY,
+        x - this.startX,
+        y - this.startY
+      );
+      this.ctx.strokeRect(
+        this.startX,
+        this.startY,
+        x - this.startX,
+        y - this.startY
+      );
+      this.ctx.restore();
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      this.isDrawing = false;
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.save({
+        type: "eraser",
+        x: this.startX,
+        y: this.startY,
+        width: x - this.startX,
+        height: y - this.startY,
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth
+      });
+    }
+    drawEraser(x, y, width, height) {
+      this.ctx.clearRect(x, y, width, height);
+    }
+    isPointerAtShape(shape, x, y) {
+      const minX = Math.min(shape.x, shape.x + shape.width);
+      const maxX = Math.max(shape.x, shape.x + shape.width);
+      const minY = Math.min(shape.y, shape.y + shape.height);
+      const maxY = Math.max(shape.y, shape.y + shape.height);
+      return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    }
+  };
+
+  // src/plugins/move.ts
+  var MoveToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "move";
+      this.shape = null;
+      this.shapeIndex = -1;
+      this.lastDrawnShape = null;
+      this.isScale = false;
+      // Track selected shape for deletion with Backspace
+      this.selectedShapeIndex = -1;
+      this.boundHandleKeyDown = null;
+      // Resize handle tracking
+      this.activeHandle = null;
+      this.handleSize = 8;
+      this.resizeStartBounds = null;
+      this.resizeOriginalShape = null;
+      // Rotation handle tracking
+      this.rotationActive = false;
+      this.rotationStartAngle = 0;
+      this.rotationShapeStartAngle = 0;
+      this.centerDragActive = false;
+      this.rotationHandleDistance = 40;
+    }
+    // Distance from center to rotation handle
+    /**
+     * Deep clone a shape, preserving HTMLImageElement references that JSON.stringify can't handle
+     */
+    cloneShape(shape) {
+      if (shape.type === "image") {
+        const imgShape = shape;
+        return { ...JSON.parse(JSON.stringify(shape)), image: imgShape.image };
+      }
+      return JSON.parse(JSON.stringify(shape));
+    }
+    /**
+     * Get the currently selected shape, if any
+     */
+    getSelectedShape() {
+      if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+        return null;
+      }
+      return this.annotationTool.shapes[this.selectedShapeIndex];
+    }
+    /**
+     * Set opacity for the currently selected shape
+     */
+    setSelectedShapeOpacity(opacity) {
+      if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+        return false;
+      }
+      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.annotationTool.shapes[this.selectedShapeIndex].opacity = opacity;
+      this.annotationTool.redrawFullCanvas();
+      return true;
+    }
+    move(shape) {
+      return shape;
+    }
+    normalize(shape) {
+      return {
+        ...shape
+      };
+    }
+    onActivate() {
+      this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+      document.addEventListener("keydown", this.boundHandleKeyDown);
+    }
+    onDeactivate() {
+      if (this.boundHandleKeyDown) {
+        document.removeEventListener("keydown", this.boundHandleKeyDown);
+        this.boundHandleKeyDown = null;
+      }
+      this.selectedShapeIndex = -1;
+    }
+    handleKeyDown(event) {
+      if ((event.key === "Backspace" || event.key === "Delete") && this.selectedShapeIndex >= 0) {
+        event.preventDefault();
+        this.deleteSelectedShape();
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && this.selectedShapeIndex >= 0) {
+        event.preventDefault();
+        this.duplicateSelectedShape();
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === "ArrowRight") {
+        event.preventDefault();
+        this.copyAnnotationsToNextFrame();
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === "ArrowLeft") {
+        event.preventDefault();
+        this.copyAnnotationsToPrevFrame();
+        return;
+      }
+    }
+    /**
+     * Duplicate the currently selected shape with an offset
+     */
+    duplicateSelectedShape() {
+      const shape = this.getSelectedShape();
+      if (!shape) return;
+      const clonedShape = this.cloneShape(shape);
+      const offset = 20;
+      const bounds = this.getShapeBounds(clonedShape);
+      if (bounds) {
+        this.offsetShape(clonedShape, offset, offset);
+      }
+      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      const serializedShape = this.annotationTool.serialize([clonedShape])[0];
+      this.annotationTool.shapes.push(serializedShape);
+      this.selectedShapeIndex = this.annotationTool.shapes.length - 1;
+      this.annotationTool.redrawFullCanvas();
+    }
+    /**
+     * Copy current frame's annotations to the next frame
+     */
+    copyAnnotationsToNextFrame() {
+      const currentFrame = this.annotationTool.activeTimeFrame;
+      const nextFrame = currentFrame + 1;
+      if (nextFrame > this.annotationTool.totalFrames) return;
+      if (this.annotationTool.shapes.length === 0) return;
+      const existingShapes = this.annotationTool.timeStack.get(nextFrame) || [];
+      const clonedShapes = this.annotationTool.shapes.map((s) => this.cloneShape(s));
+      const mergedShapes = [...existingShapes, ...clonedShapes];
+      this.annotationTool.timeStack.set(nextFrame, mergedShapes);
+      this.annotationTool.playbackFrame = nextFrame;
+      this.annotationTool.redrawFullCanvas();
+    }
+    /**
+     * Copy current frame's annotations to the previous frame
+     */
+    copyAnnotationsToPrevFrame() {
+      const currentFrame = this.annotationTool.activeTimeFrame;
+      const prevFrame = currentFrame - 1;
+      if (prevFrame < 1) return;
+      if (this.annotationTool.shapes.length === 0) return;
+      const existingShapes = this.annotationTool.timeStack.get(prevFrame) || [];
+      const clonedShapes = this.annotationTool.shapes.map((s) => this.cloneShape(s));
+      const mergedShapes = [...existingShapes, ...clonedShapes];
+      this.annotationTool.timeStack.set(prevFrame, mergedShapes);
+      this.annotationTool.playbackFrame = prevFrame;
+      this.annotationTool.redrawFullCanvas();
+    }
+    /**
+     * Offset a shape by dx, dy
+     */
+    offsetShape(shape, dx, dy) {
+      const deserialized = this.annotationTool.deserialize([shape])[0];
+      const plugin = this.annotationTool.pluginForTool(deserialized.type);
+      const moved = plugin.move(deserialized, dx, dy);
+      Object.assign(shape, this.annotationTool.serialize([moved])[0]);
+    }
+    /**
+     * Get bounding box for any shape
+     */
+    getShapeBounds(rawShape) {
+      const shape = this.annotationTool.deserialize([rawShape])[0];
+      switch (shape.type) {
+        case "rectangle": {
+          const s = shape;
+          return {
+            x: Math.min(s.x, s.x + s.width),
+            y: Math.min(s.y, s.y + s.height),
+            width: Math.abs(s.width),
+            height: Math.abs(s.height)
+          };
+        }
+        case "image": {
+          const s = shape;
+          return {
+            x: Math.min(s.x, s.x + s.width),
+            y: Math.min(s.y, s.y + s.height),
+            width: Math.abs(s.width),
+            height: Math.abs(s.height)
+          };
+        }
+        case "selection": {
+          const s = shape;
+          return {
+            x: Math.min(s.x, s.x + s.width),
+            y: Math.min(s.y, s.y + s.height),
+            width: Math.abs(s.width),
+            height: Math.abs(s.height)
+          };
+        }
+        case "circle": {
+          const c = shape;
+          return {
+            x: c.x - c.radius,
+            y: c.y - c.radius,
+            width: c.radius * 2,
+            height: c.radius * 2
+          };
+        }
+        case "line": {
+          const l = shape;
+          const minX = Math.min(l.x1, l.x2);
+          const minY = Math.min(l.y1, l.y2);
+          const maxX = Math.max(l.x1, l.x2);
+          const maxY = Math.max(l.y1, l.y2);
+          return {
+            x: minX,
+            y: minY,
+            width: maxX - minX || 10,
+            height: maxY - minY || 10
+          };
+        }
+        case "arrow": {
+          const a = shape;
+          const minX = Math.min(a.x1, a.x2);
+          const minY = Math.min(a.y1, a.y2);
+          const maxX = Math.max(a.x1, a.x2);
+          const maxY = Math.max(a.y1, a.y2);
+          return {
+            x: minX,
+            y: minY,
+            width: maxX - minX || 10,
+            height: maxY - minY || 10
+          };
+        }
+        case "curve": {
+          const c = shape;
+          if (!c.points || c.points.length === 0) return null;
+          let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          for (const p2 of c.points) {
+            minX = Math.min(minX, p2.x);
+            minY = Math.min(minY, p2.y);
+            maxX = Math.max(maxX, p2.x);
+            maxY = Math.max(maxY, p2.y);
+          }
+          return {
+            x: minX,
+            y: minY,
+            width: maxX - minX || 10,
+            height: maxY - minY || 10
+          };
+        }
+        case "text": {
+          const t = shape;
+          if (!t.text) return null;
+          const lineWidth = rawShape.lineWidth ?? 1;
+          const fontSize = 16 + lineWidth * 0.5;
+          const estimatedWidth = t.text.length * fontSize * 0.6;
+          return {
+            x: t.x,
+            y: t.y - fontSize,
+            width: estimatedWidth || 50,
+            height: fontSize * 1.2
+          };
+        }
+        default:
+          return null;
+      }
+    }
+    /**
+     * Draw resize handles for the selected shape
+     */
+    drawResizeHandles() {
+      const shape = this.getSelectedShape();
+      if (!shape) return;
+      const bounds = this.getShapeBounds(shape);
+      if (!bounds) return;
+      const ctx = this.annotationTool.ctx;
+      const hs = this.handleSize;
+      const halfHs = hs / 2;
+      const handles = [
+        { pos: "nw", x: bounds.x, y: bounds.y },
+        { pos: "n", x: bounds.x + bounds.width / 2, y: bounds.y },
+        { pos: "ne", x: bounds.x + bounds.width, y: bounds.y },
+        { pos: "e", x: bounds.x + bounds.width, y: bounds.y + bounds.height / 2 },
+        { pos: "se", x: bounds.x + bounds.width, y: bounds.y + bounds.height },
+        { pos: "s", x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height },
+        { pos: "sw", x: bounds.x, y: bounds.y + bounds.height },
+        { pos: "w", x: bounds.x, y: bounds.y + bounds.height / 2 }
+      ];
+      ctx.save();
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1;
+      for (const handle of handles) {
+        ctx.fillRect(handle.x - halfHs, handle.y - halfHs, hs, hs);
+        ctx.strokeRect(handle.x - halfHs, handle.y - halfHs, hs, hs);
+      }
+      ctx.restore();
+      this.drawRotationHandles(bounds);
+    }
+    /**
+     * Get the rotation center for the selected shape in canvas coordinates
+     */
+    getShapeRotationCenter(shape, bounds) {
+      if (shape.rotationCenterX !== void 0 && shape.rotationCenterY !== void 0) {
+        return {
+          x: shape.rotationCenterX * this.annotationTool.canvasWidth,
+          y: shape.rotationCenterY * this.annotationTool.canvasHeight
+        };
+      }
+      return {
+        x: bounds.x + bounds.width / 2,
+        y: bounds.y + bounds.height / 2
+      };
+    }
+    /**
+     * Draw rotation handle and center point for the selected shape
+     */
+    drawRotationHandles(bounds) {
+      const shape = this.getSelectedShape();
+      if (!shape) return;
+      const ctx = this.annotationTool.ctx;
+      const center = this.getShapeRotationCenter(shape, bounds);
+      const rotation = shape.rotation ?? 0;
+      const handleX = center.x + Math.sin(rotation) * this.rotationHandleDistance;
+      const handleY = center.y - Math.cos(rotation) * this.rotationHandleDistance;
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+      ctx.moveTo(center.x, center.y);
+      ctx.lineTo(handleX, handleY);
+      ctx.stroke();
+      const crossSize = 6;
+      ctx.beginPath();
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1.5;
+      ctx.moveTo(center.x - crossSize, center.y);
+      ctx.lineTo(center.x + crossSize, center.y);
+      ctx.moveTo(center.x, center.y - crossSize);
+      ctx.lineTo(center.x, center.y + crossSize);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1.5;
+      ctx.arc(center.x, center.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1.5;
+      ctx.arc(handleX, handleY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.strokeStyle = "#5b9fff";
+      ctx.lineWidth = 1;
+      ctx.arc(handleX, handleY, 3, -Math.PI * 0.7, Math.PI * 0.5);
+      ctx.stroke();
+      ctx.restore();
+    }
+    /**
+     * Check if pointer is at the rotation handle
+     */
+    isPointerAtRotationHandle(x, y) {
+      const shape = this.getSelectedShape();
+      if (!shape) return false;
+      const bounds = this.getShapeBounds(shape);
+      if (!bounds) return false;
+      const center = this.getShapeRotationCenter(shape, bounds);
+      const rotation = shape.rotation ?? 0;
+      const handleX = center.x + Math.sin(rotation) * this.rotationHandleDistance;
+      const handleY = center.y - Math.cos(rotation) * this.rotationHandleDistance;
+      const dx = x - handleX;
+      const dy = y - handleY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= 12;
+    }
+    /**
+     * Check if pointer is at the rotation center
+     */
+    isPointerAtRotationCenter(x, y) {
+      const shape = this.getSelectedShape();
+      if (!shape) return false;
+      const bounds = this.getShapeBounds(shape);
+      if (!bounds) return false;
+      const center = this.getShapeRotationCenter(shape, bounds);
+      const dx = x - center.x;
+      const dy = y - center.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= 10;
+    }
+    /**
+     * Calculate angle from center to point
+     */
+    calculateAngle(centerX, centerY, x, y) {
+      return Math.atan2(x - centerX, -(y - centerY));
+    }
+    /**
+     * Check if pointer is on a resize handle
+     */
+    getHandleAtPosition(x, y) {
+      const shape = this.getSelectedShape();
+      if (!shape) return null;
+      const bounds = this.getShapeBounds(shape);
+      if (!bounds) return null;
+      const hs = this.handleSize + 4;
+      const halfHs = hs / 2;
+      const handles = [
+        { pos: "nw", x: bounds.x, y: bounds.y },
+        { pos: "n", x: bounds.x + bounds.width / 2, y: bounds.y },
+        { pos: "ne", x: bounds.x + bounds.width, y: bounds.y },
+        { pos: "e", x: bounds.x + bounds.width, y: bounds.y + bounds.height / 2 },
+        { pos: "se", x: bounds.x + bounds.width, y: bounds.y + bounds.height },
+        { pos: "s", x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height },
+        { pos: "sw", x: bounds.x, y: bounds.y + bounds.height },
+        { pos: "w", x: bounds.x, y: bounds.y + bounds.height / 2 }
+      ];
+      for (const handle of handles) {
+        if (x >= handle.x - halfHs && x <= handle.x + halfHs && y >= handle.y - halfHs && y <= handle.y + halfHs) {
+          return handle.pos;
+        }
+      }
+      return null;
+    }
+    /**
+     * Get cursor for handle position
+     */
+    getCursorForHandle(handle) {
+      const cursors = {
+        "nw": "nw-resize",
+        "n": "n-resize",
+        "ne": "ne-resize",
+        "e": "e-resize",
+        "se": "se-resize",
+        "s": "s-resize",
+        "sw": "sw-resize",
+        "w": "w-resize"
+      };
+      return cursors[handle];
+    }
+    /**
+     * Resize shape based on handle drag
+     * @param keepAspectRatio - When true (shift key), maintains original aspect ratio
+     */
+    resizeShape(shape, handle, dx, dy, startBounds, keepAspectRatio = false) {
+      if (!this.resizeOriginalShape) return;
+      const deserialized = this.annotationTool.deserialize([this.resizeOriginalShape])[0];
+      let newX = startBounds.x;
+      let newY = startBounds.y;
+      let newWidth = startBounds.width;
+      let newHeight = startBounds.height;
+      switch (handle) {
+        case "nw":
+          newX += dx;
+          newY += dy;
+          newWidth -= dx;
+          newHeight -= dy;
+          break;
+        case "n":
+          newY += dy;
+          newHeight -= dy;
+          break;
+        case "ne":
+          newY += dy;
+          newWidth += dx;
+          newHeight -= dy;
+          break;
+        case "e":
+          newWidth += dx;
+          break;
+        case "se":
+          newWidth += dx;
+          newHeight += dy;
+          break;
+        case "s":
+          newHeight += dy;
+          break;
+        case "sw":
+          newX += dx;
+          newWidth -= dx;
+          newHeight += dy;
+          break;
+        case "w":
+          newX += dx;
+          newWidth -= dx;
+          break;
+      }
+      if (keepAspectRatio && startBounds.width > 0 && startBounds.height > 0) {
+        const aspectRatio = startBounds.width / startBounds.height;
+        if (handle === "n" || handle === "s") {
+          const constrainedWidth = newHeight * aspectRatio;
+          const widthDiff = constrainedWidth - newWidth;
+          newWidth = constrainedWidth;
+          newX -= widthDiff / 2;
+        } else if (handle === "e" || handle === "w") {
+          const constrainedHeight = newWidth / aspectRatio;
+          const heightDiff = constrainedHeight - newHeight;
+          newHeight = constrainedHeight;
+          newY -= heightDiff / 2;
+        } else {
+          const scaleFromWidth = newWidth / startBounds.width;
+          const scaleFromHeight = newHeight / startBounds.height;
+          const uniformScale = Math.max(Math.abs(scaleFromWidth), Math.abs(scaleFromHeight));
+          const signX = scaleFromWidth >= 0 ? 1 : -1;
+          const signY = scaleFromHeight >= 0 ? 1 : -1;
+          const constrainedWidth = startBounds.width * uniformScale * signX;
+          const constrainedHeight = startBounds.height * uniformScale * signY;
+          if (handle === "nw") {
+            newX = startBounds.x + startBounds.width - constrainedWidth;
+            newY = startBounds.y + startBounds.height - constrainedHeight;
+          } else if (handle === "ne") {
+            newY = startBounds.y + startBounds.height - constrainedHeight;
+          } else if (handle === "sw") {
+            newX = startBounds.x + startBounds.width - constrainedWidth;
+          }
+          newWidth = constrainedWidth;
+          newHeight = constrainedHeight;
+        }
+      }
+      const minSize = 10;
+      if (newWidth < minSize) {
+        if (handle.includes("w")) {
+          newX = startBounds.x + startBounds.width - minSize;
+        }
+        newWidth = minSize;
+      }
+      if (newHeight < minSize) {
+        if (handle.includes("n")) {
+          newY = startBounds.y + startBounds.height - minSize;
+        }
+        newHeight = minSize;
+      }
+      const scaleX = startBounds.width > 0 ? newWidth / startBounds.width : 1;
+      const scaleY = startBounds.height > 0 ? newHeight / startBounds.height : 1;
+      switch (deserialized.type) {
+        case "rectangle": {
+          const rectShape = shape;
+          rectShape.x = newX / this.annotationTool.canvasWidth;
+          rectShape.y = newY / this.annotationTool.canvasHeight;
+          rectShape.width = newWidth / this.annotationTool.canvasWidth;
+          rectShape.height = newHeight / this.annotationTool.canvasHeight;
+          break;
+        }
+        case "selection": {
+          const selShape = shape;
+          selShape.x = newX / this.annotationTool.canvasWidth;
+          selShape.y = newY / this.annotationTool.canvasHeight;
+          selShape.width = newWidth / this.annotationTool.canvasWidth;
+          selShape.height = newHeight / this.annotationTool.canvasHeight;
+          break;
+        }
+        case "circle": {
+          const circleShape = shape;
+          const radius = Math.min(newWidth, newHeight) / 2;
+          const centerX = newX + newWidth / 2;
+          const centerY = newY + newHeight / 2;
+          circleShape.x = centerX / this.annotationTool.canvasWidth;
+          circleShape.y = centerY / this.annotationTool.canvasHeight;
+          circleShape.radius = radius / this.annotationTool.canvasWidth;
+          break;
+        }
+        case "line": {
+          const lineShape = shape;
+          const origLine = deserialized;
+          const relX1 = (origLine.x1 - startBounds.x) * scaleX + newX;
+          const relY1 = (origLine.y1 - startBounds.y) * scaleY + newY;
+          const relX2 = (origLine.x2 - startBounds.x) * scaleX + newX;
+          const relY2 = (origLine.y2 - startBounds.y) * scaleY + newY;
+          lineShape.x1 = relX1 / this.annotationTool.canvasWidth;
+          lineShape.y1 = relY1 / this.annotationTool.canvasHeight;
+          lineShape.x2 = relX2 / this.annotationTool.canvasWidth;
+          lineShape.y2 = relY2 / this.annotationTool.canvasHeight;
+          break;
+        }
+        case "arrow": {
+          const arrowShape = shape;
+          const origArrow = deserialized;
+          const relX1 = (origArrow.x1 - startBounds.x) * scaleX + newX;
+          const relY1 = (origArrow.y1 - startBounds.y) * scaleY + newY;
+          const relX2 = (origArrow.x2 - startBounds.x) * scaleX + newX;
+          const relY2 = (origArrow.y2 - startBounds.y) * scaleY + newY;
+          arrowShape.x1 = relX1 / this.annotationTool.canvasWidth;
+          arrowShape.y1 = relY1 / this.annotationTool.canvasHeight;
+          arrowShape.x2 = relX2 / this.annotationTool.canvasWidth;
+          arrowShape.y2 = relY2 / this.annotationTool.canvasHeight;
+          break;
+        }
+        case "curve": {
+          const curveShape = shape;
+          const origCurve = deserialized;
+          if (!origCurve.points || origCurve.points.length === 0) break;
+          curveShape.points = origCurve.points.map((p2) => ({
+            x: ((p2.x - startBounds.x) * scaleX + newX) / this.annotationTool.canvasWidth,
+            y: ((p2.y - startBounds.y) * scaleY + newY) / this.annotationTool.canvasHeight
+          }));
+          break;
+        }
+        case "text": {
+          const textShape = shape;
+          const origText = deserialized;
+          const origLineWidth = this.resizeOriginalShape.lineWidth ?? 1;
+          const origFontSize = 16 + origLineWidth * 0.5;
+          const relX = (origText.x - startBounds.x) * scaleX + newX;
+          const relY = (origText.y - startBounds.y) * scaleY + newY;
+          textShape.x = relX / this.annotationTool.canvasWidth;
+          textShape.y = relY / this.annotationTool.canvasHeight;
+          const avgScale = (scaleX + scaleY) / 2;
+          const newFontSize = origFontSize * avgScale;
+          textShape.lineWidth = Math.max(1, (newFontSize - 16) * 2);
+          break;
+        }
+        case "image": {
+          const imgShape = shape;
+          imgShape.x = newX / this.annotationTool.canvasWidth;
+          imgShape.y = newY / this.annotationTool.canvasHeight;
+          imgShape.width = newWidth / this.annotationTool.canvasWidth;
+          imgShape.height = newHeight / this.annotationTool.canvasHeight;
+          break;
+        }
+      }
+    }
+    deleteSelectedShape() {
+      if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
+        return;
+      }
+      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.annotationTool.shapes.splice(this.selectedShapeIndex, 1);
+      this.selectedShapeIndex = -1;
+      this.shapeIndex = -1;
+      this.annotationTool.redrawFullCanvas();
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      if (this.selectedShapeIndex >= 0 && this.isPointerAtRotationHandle(x, y)) {
+        const shape = this.getSelectedShape();
+        if (shape) {
+          const bounds = this.getShapeBounds(shape);
+          if (bounds) {
+            const center = this.getShapeRotationCenter(shape, bounds);
+            this.rotationActive = true;
+            this.rotationStartAngle = this.calculateAngle(center.x, center.y, x, y);
+            this.rotationShapeStartAngle = shape.rotation ?? 0;
+            this.isDrawing = true;
+            this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+            this.annotationTool.canvas.style.cursor = "grabbing";
+            return;
+          }
+        }
+      }
+      if (this.selectedShapeIndex >= 0 && this.isPointerAtRotationCenter(x, y)) {
+        this.centerDragActive = true;
+        this.startX = x;
+        this.startY = y;
+        this.isDrawing = true;
+        this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+        this.annotationTool.canvas.style.cursor = "move";
+        return;
+      }
+      const handle = this.getHandleAtPosition(x, y);
+      if (handle && this.selectedShapeIndex >= 0) {
+        this.activeHandle = handle;
+        this.startX = x;
+        this.startY = y;
+        this.isDrawing = true;
+        const selectedShape = this.getSelectedShape();
+        if (selectedShape) {
+          this.resizeStartBounds = this.getShapeBounds(selectedShape);
+          this.resizeOriginalShape = this.cloneShape(selectedShape);
+          this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+        }
+        this.annotationTool.canvas.style.cursor = this.getCursorForHandle(handle);
+        return;
+      }
+      const originalShapes = this.annotationTool.shapes;
+      const shapes = originalShapes.slice().reverse();
+      let foundShape = false;
+      for (const shape of shapes) {
+        if (this.isPointerAtShape(shape, x, y)) {
+          this.shape = this.cloneShape(shape);
+          this.shapeIndex = originalShapes.indexOf(shape);
+          this.selectedShapeIndex = this.shapeIndex;
+          foundShape = true;
+          break;
+        }
+      }
+      if (!foundShape) {
+        this.selectedShapeIndex = -1;
+        this.annotationTool.redrawFullCanvas();
+      }
+      if (!this.shape) {
+        return;
+      }
+      this.lastDrawnShape = null;
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+      this.isScale = this.shape.type === "image" ? this.isPointerAtCorner(this.shape, x, y) : false;
+      if (this.isScale) {
+        this.annotationTool.canvas.style.cursor = "nw-resize";
+      } else {
+        this.annotationTool.canvas.style.cursor = "move";
+      }
+    }
+    isPointerAtShape(shape, x, y) {
+      const deserializedShape = this.annotationTool.deserialize([shape])[0];
+      if (deserializedShape.rotation) {
+        const bounds = this.getShapeBounds(shape);
+        if (bounds) {
+          const center = this.getShapeRotationCenter(shape, bounds);
+          const cos = Math.cos(-deserializedShape.rotation);
+          const sin = Math.sin(-deserializedShape.rotation);
+          const dx = x - center.x;
+          const dy = y - center.y;
+          x = center.x + dx * cos - dy * sin;
+          y = center.y + dx * sin + dy * cos;
+        }
+      }
+      const plugin = this.annotationTool.pluginForTool(deserializedShape.type);
+      return plugin.isPointerAtShape(deserializedShape, x, y);
+    }
+    isPointerAtCorner(rawShape, x, y) {
+      if (!("type" in rawShape)) {
+        return false;
+      }
+      const shapeToResolve = this.annotationTool.deserialize([
+        rawShape
+      ])[0];
+      const tolerance = 15;
+      const isPointer5pxCloseToImageTop = Math.abs(shapeToResolve.y - y) < tolerance;
+      const isPointer5pxCloseToImageLeft = Math.abs(shapeToResolve.x - x) < tolerance;
+      const isPointer5pxCloseToImageRight = Math.abs(shapeToResolve.x + shapeToResolve.width - x) < tolerance;
+      const isPointer5pxCloseToImageBottom = Math.abs(shapeToResolve.y + shapeToResolve.height - y) < tolerance;
+      const isTopLeftCorner = isPointer5pxCloseToImageTop && isPointer5pxCloseToImageLeft;
+      const isTopRightCorner = isPointer5pxCloseToImageTop && isPointer5pxCloseToImageRight;
+      const isBottomLeftCorner = isPointer5pxCloseToImageBottom && isPointer5pxCloseToImageLeft;
+      const isBottomRightCorner = isPointer5pxCloseToImageBottom && isPointer5pxCloseToImageRight;
+      const isInCorner = isTopLeftCorner || isTopRightCorner || isBottomLeftCorner || isBottomRightCorner;
+      return isInCorner;
+    }
+    onPointerMove(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      if (this.isDrawing && this.rotationActive) {
+        const shape = this.annotationTool.shapes[this.selectedShapeIndex];
+        if (shape) {
+          const bounds = this.getShapeBounds(shape);
+          if (bounds) {
+            const center = this.getShapeRotationCenter(shape, bounds);
+            const currentAngle = this.calculateAngle(center.x, center.y, x, y);
+            let newRotation = this.rotationShapeStartAngle + (currentAngle - this.rotationStartAngle);
+            if (event.shiftKey) {
+              const snapAngle = Math.PI / 12;
+              newRotation = Math.round(newRotation / snapAngle) * snapAngle;
+            }
+            shape.rotation = newRotation;
+            this.annotationTool.redrawFullCanvas();
+          }
+        }
+        return;
+      }
+      if (this.isDrawing && this.centerDragActive) {
+        const shape = this.annotationTool.shapes[this.selectedShapeIndex];
+        if (shape) {
+          shape.rotationCenterX = x / this.annotationTool.canvasWidth;
+          shape.rotationCenterY = y / this.annotationTool.canvasHeight;
+          this.annotationTool.redrawFullCanvas();
+        }
+        return;
+      }
+      if (this.isDrawing && this.activeHandle && this.resizeStartBounds) {
+        const dx2 = x - this.startX;
+        const dy2 = y - this.startY;
+        const shape = this.annotationTool.shapes[this.selectedShapeIndex];
+        if (shape) {
+          this.resizeShape(shape, this.activeHandle, dx2, dy2, this.resizeStartBounds, event.shiftKey);
+          this.annotationTool.redrawFullCanvas();
+        }
+        return;
+      }
+      if (!this.isDrawing && this.selectedShapeIndex >= 0) {
+        if (this.isPointerAtRotationHandle(x, y)) {
+          this.annotationTool.canvas.style.cursor = "grab";
+          return;
+        }
+        if (this.isPointerAtRotationCenter(x, y)) {
+          this.annotationTool.canvas.style.cursor = "move";
+          return;
+        }
+        const handle = this.getHandleAtPosition(x, y);
+        if (handle) {
+          this.annotationTool.canvas.style.cursor = this.getCursorForHandle(handle);
+          return;
+        }
+      }
+      if (!this.isDrawing || !this.shape) {
+        if (!this.isDrawing) {
+          this.annotationTool.canvas.style.cursor = "default";
+        }
+        return;
+      }
+      const dx = x - this.startX;
+      const dy = y - this.startY;
+      this.startX = x - dx;
+      this.startY = y - dy;
+      const lastShape = this.annotationTool.deserialize([this.shape])[0];
+      const shapeCopy = lastShape.type === "image" ? lastShape : JSON.parse(JSON.stringify(lastShape));
+      if (shapeCopy.type === "audio-peaks") {
+        return;
+      }
+      if (shapeCopy.type === "image") {
+        if (this.isScale) {
+          const { width, height } = shapeCopy;
+          const ratio = width / height;
+          const newWidth = width + dx;
+          const newHeight = newWidth / ratio;
+          shapeCopy.width = newWidth;
+          shapeCopy.height = newHeight;
+          this.lastDrawnShape = shapeCopy;
+          this.annotationTool.pluginForTool(shapeCopy.type).draw(shapeCopy);
+        } else {
+          const item = this.annotationTool.pluginForTool(shapeCopy.type).move(shapeCopy, dx, dy);
+          this.lastDrawnShape = item;
+          this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
+        }
+      } else {
+        const item = this.annotationTool.pluginForTool(shapeCopy.type).move(shapeCopy, dx, dy);
+        this.lastDrawnShape = item;
+        this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
+      }
+    }
+    onPointerUp(event) {
+      if (this.rotationActive) {
+        this.rotationActive = false;
+        this.isDrawing = false;
+        this.annotationTool.canvas.style.cursor = "default";
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+      if (this.centerDragActive) {
+        this.centerDragActive = false;
+        this.isDrawing = false;
+        this.annotationTool.canvas.style.cursor = "default";
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+      if (this.activeHandle) {
+        this.activeHandle = null;
+        this.resizeStartBounds = null;
+        this.resizeOriginalShape = null;
+        this.isDrawing = false;
+        this.annotationTool.canvas.style.cursor = "default";
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+      if (!this.isDrawing || !this.lastDrawnShape) {
+        this.isDrawing = false;
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+      if (this.lastDrawnShape && this.shape) {
+        this.lastDrawnShape.fillStyle = this.shape.fillStyle;
+        this.lastDrawnShape.strokeStyle = this.shape.strokeStyle;
+        this.lastDrawnShape.lineWidth = this.shape.lineWidth;
+        if (this.shape.opacity !== void 0) {
+          this.lastDrawnShape.opacity = this.shape.opacity;
+        }
+        this.save(this.lastDrawnShape);
+      }
+      this.isDrawing = false;
+      this.isScale = false;
+      this.shape = null;
+      this.lastDrawnShape = null;
+      this.annotationTool.canvas.style.cursor = "default";
+      this.annotationTool.redrawFullCanvas();
+    }
+    draw() {
+      throw new Error("Method not implemented.");
+    }
+    reset() {
+      this.isDrawing = false;
+      this.shape = null;
+      this.isScale = false;
+      this.lastDrawnShape = null;
+      this.shapeIndex = -1;
+      this.selectedShapeIndex = -1;
+      this.activeHandle = null;
+      this.resizeStartBounds = null;
+      this.resizeOriginalShape = null;
+      this.rotationActive = false;
+      this.centerDragActive = false;
+      this.annotationTool.canvas.style.cursor = "default";
+    }
+    save(shape) {
+      this.annotationTool.replaceShape(shape, this.shapeIndex);
+    }
+  };
+
+  // src/plugins/image.ts
+  var ImageToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "image";
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    onPointerDown(event) {
+    }
+    onPointerMove(event) {
+    }
+    onPointerUp(event) {
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight,
+        width: shape.width / canvasWidth,
+        height: shape.height / canvasHeight
+      };
+    }
+    draw(shape) {
+      if (!(shape.image instanceof HTMLImageElement)) {
+        console.error("Image is not an instance of HTMLImageElement");
+        return;
+      }
+      if (shape.width === 0 || shape.height === 0) {
+        return;
+      }
+      const centerX = shape.x + shape.width / 2;
+      const centerY = shape.y + shape.height / 2;
+      const rotationCenter = this.getRotationCenter(shape, centerX, centerY);
+      const rotated = this.applyRotation(shape, rotationCenter.x, rotationCenter.y);
+      this.ctx.drawImage(
+        shape.image,
+        shape.x,
+        shape.y,
+        shape.width,
+        shape.height
+      );
+      if (rotated) {
+        this.restoreRotation();
+      }
+    }
+    isPointerAtShape(shape, x, y) {
+      const minX = Math.min(shape.x, shape.x + shape.width);
+      const maxX = Math.max(shape.x, shape.x + shape.width);
+      const minY = Math.min(shape.y, shape.y + shape.height);
+      const maxY = Math.max(shape.y, shape.y + shape.height);
+      return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    }
+  };
+
+  // src/plugins/compare.ts
+  var CompareToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "compare";
+      this.comparisonLine = 0;
+      this.leftOpacity = 1;
+      this.isDrawing = false;
+    }
+    get rightOpacity() {
+      return this.annotationTool.overlayOpacity;
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      return shape;
+    }
+    onActivate() {
+      this.comparisonLine = this.annotationTool.canvasWidth / 2;
+      this.leftOpacity = 1;
+      this.annotationTool.canvas.style.cursor = "col-resize";
+    }
+    onDeactivate() {
+      this.annotationTool.canvas.style.cursor = "default";
+      this.comparisonLine = 0;
+      this.leftOpacity = 1;
+      this.isDrawing = false;
+    }
+    normalize(shape, canvasWidth, _canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth
+      };
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+      this.disablePreviousCompare();
+      this.onPointerMove(event);
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        if (this.annotationTool.globalShapes.length > 0) {
+          const shape = this.annotationTool.globalShapes[0];
+          if (shape.type === "compare") {
+            const deserialized = this.annotationTool.deserialize([
+              shape
+            ])[0];
+            this.draw(deserialized);
+            this.annotationTool.addFrameSquareOverlay();
+          }
+        }
+        return;
+      }
+      const { x } = this.annotationTool.getRelativeCoords(event);
+      this.comparisonLine = x;
+      const item = {
+        type: "compare",
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth,
+        x
+      };
+      this.draw(item);
+      this.drawDelimiter(item);
+    }
+    onPointerUp() {
+      if (!this.isDrawing) {
+        return;
+      }
+      this.save({
+        type: "compare",
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth,
+        disabled: false,
+        x: this.comparisonLine
+      });
+      this.isDrawing = false;
+    }
+    removePreviousCompare() {
+      this.annotationTool.globalShapes = this.annotationTool.globalShapes.filter(
+        (s) => s.type !== "compare"
+      );
+    }
+    disablePreviousCompare() {
+      this.annotationTool.globalShapes = this.annotationTool.globalShapes.map(
+        (s) => {
+          if (s.type === "compare") {
+            return {
+              ...s,
+              disabled: true
+            };
+          }
+          return s;
+        }
+      );
+    }
+    save(shape) {
+      this.removePreviousCompare();
+      const serialized = this.annotationTool.serialize([shape])[0];
+      if (serialized.x < 0.05 || serialized.x > 0.95) {
+        return;
+      }
+      this.annotationTool.addGlobalShape(serialized);
+    }
+    drawDelimiter(shape) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(shape.x, 0);
+      this.ctx.lineTo(shape.x, this.annotationTool.canvasWidth);
+      this.ctx.stroke();
+    }
+    drawShape(shape) {
+      const video1 = this.annotationTool.videoElement;
+      const video2 = this.annotationTool.referenceVideoElement;
+      if (!video1 || !video2) {
+        return;
+      }
+      const globalAlpha = this.ctx.globalAlpha;
+      const w = this.annotationTool.canvasWidth;
+      const h = this.annotationTool.canvasHeight;
+      const x = shape.x;
+      const heightDiff = video2.videoHeight - video1.videoHeight;
+      const widthDiff = video2.videoWidth - video1.videoWidth;
+      const isMobile = this.annotationTool.isMobile;
+      this.ctx.globalAlpha = this.leftOpacity;
+      const frameNumber = this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+        video1.currentTime
+      ) ?? 1;
+      let referenceVideoFrameNumber = frameNumber;
+      const AUDIO_SYNC_ENABLED = widthDiff > video1.videoWidth && heightDiff > video1.videoHeight && !this.annotationTool.isMobile;
+      if (AUDIO_SYNC_ENABLED) {
+        const bestFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrameNumberBySignature(
+          this.annotationTool.videoFrameBuffer?.getAudioFingerprint(frameNumber) ?? null,
+          frameNumber
+        ) ?? frameNumber;
+        const fDiff = Math.abs(frameNumber - bestFrame);
+        if (fDiff >= 1 && fDiff <= 3) {
+          referenceVideoFrameNumber = bestFrame;
+        }
+      }
+      const referenceVideoFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrame(
+        referenceVideoFrameNumber
+      );
+      const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(frameNumber);
+      if (isMobile) {
+        this.ctx.imageSmoothingQuality = "low";
+        const normalizedX = x / w;
+        const cropWidth = x;
+        this.ctx.drawImage(
+          videoFrame ?? video1,
+          0,
+          0,
+          normalizedX * video1.videoWidth,
+          video1.videoHeight,
+          // Source cropping parameters
+          0,
+          0,
+          cropWidth,
+          h
+          // Destination position and size
+        );
+      } else {
+        const vw = videoFrame ? videoFrame.width : video1.videoWidth;
+        const vh = videoFrame ? videoFrame.height : video1.videoHeight;
+        this.ctx.drawImage(videoFrame ?? video1, 0, 0, vw, vh, 0, 0, w, h);
+      }
+      this.ctx.globalAlpha = this.rightOpacity;
+      let topCrop = 0;
+      let topOffset = 0;
+      const ar1 = video1.videoWidth / video1.videoHeight;
+      const ar2 = video2.videoWidth / video2.videoHeight;
+      const arDiff = Math.abs(ar1 - ar2);
+      const isAspectRatioDifferent = arDiff > 0.1;
+      const acceptablePixelDiff = 10;
+      const isHeightDifferent = Math.abs(heightDiff) > acceptablePixelDiff;
+      let sourceWidth = video1.videoWidth;
+      let sourceHeight = video1.videoHeight;
+      let xOffset = 0;
+      if (widthDiff < -acceptablePixelDiff) {
+        if (isAspectRatioDifferent) {
+          const mainVideoPixelToCanvasRatio = video1.videoWidth / w;
+          xOffset = Math.abs(widthDiff / 2);
+          xOffset = xOffset / mainVideoPixelToCanvasRatio;
+          if (xOffset <= acceptablePixelDiff) {
+            xOffset = 0;
+          }
+        } else {
+          sourceWidth = video2.videoWidth;
+        }
+      } else if (widthDiff > acceptablePixelDiff) {
+        sourceWidth = video2.videoWidth;
+      }
+      if (heightDiff === 0) {
+        topCrop = 0;
+      } else if (heightDiff > 0) {
+        if (!isAspectRatioDifferent) {
+          sourceHeight = isHeightDifferent ? video2.videoHeight : video1.videoHeight;
+        } else {
+          topCrop = heightDiff / 2;
+          if (topCrop <= acceptablePixelDiff) {
+            topCrop = 0;
+          }
+        }
+      } else {
+        if (!isAspectRatioDifferent) {
+          sourceHeight = isHeightDifferent ? video2.videoHeight : video1.videoHeight;
+        } else {
+          topOffset = Math.abs(heightDiff / 2);
+          const mainVideoPixelToCanvasRatio = video1.videoHeight / h;
+          topOffset = topOffset / mainVideoPixelToCanvasRatio;
+          if (topOffset <= acceptablePixelDiff) {
+            topOffset = 0;
+          }
+        }
+      }
+      const cropX = x - xOffset;
+      const cropWidth1 = w - cropX;
+      const normalizedCrop = cropWidth1 / w * sourceWidth;
+      if (referenceVideoFrame && this.rightOpacity > 0) {
+        if (isMobile) {
+          this.ctx.imageSmoothingQuality = "low";
+        }
+        this.ctx.drawImage(
+          referenceVideoFrame,
+          cropX / w * sourceWidth,
+          topCrop,
+          normalizedCrop,
+          sourceHeight,
+          // Source cropping parameters
+          cropX + xOffset,
+          topOffset,
+          cropWidth1,
+          h
+          // Destination position and size
+        );
+      }
+      this.ctx.globalAlpha = globalAlpha;
+    }
+    draw(shape) {
+      if (shape.disabled) {
+        return;
+      }
+      const video1 = this.annotationTool.videoElement;
+      const video2 = this.annotationTool.referenceVideoElement;
+      if (!video1 || !video2) {
+        return;
+      }
+      this.drawShape(shape);
+    }
+  };
+
+  // src/plugins/audio-peaks.ts
+  function findMinMaxNumbers(array) {
+    let min = array[0];
+    let max = array[0];
+    for (let i = 1; i < array.length; i++) {
+      if (array[i] < min) min = array[i];
+      if (array[i] > max) max = array[i];
+    }
+    return [min, max];
+  }
+  var AudioPeaksPlugin = class extends BasePlugin {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    constructor(annotationTool) {
+      super(annotationTool);
+      this.name = "audio-peaks";
+      this.canvas = document.createElement("canvas");
+      this.props = {
+        peaks: new Int8Array(),
+        theme: {
+          // color of the waveform outline
+          waveOutlineColor: "rgba(255,192,203,0.7)",
+          waveFillColor: "grey",
+          waveProgressColor: "orange"
+        },
+        waveHeight: 40,
+        bits: 16
+      };
+      this.drawCtx = this.canvas.getContext("2d");
+    }
+    async onVideoBlobSet(blob) {
+      const buffer = await blob.arrayBuffer();
+      this.init(buffer);
+    }
+    on(event, arg) {
+      if (event === "videoBlobSet") {
+        this.onVideoBlobSet(arg);
+      }
+    }
+    async extractPeaks(decodedData) {
+      const { default: extractPeaks } = await Promise.resolve().then(() => __toESM(require_webaudio_peaks(), 1));
+      const progressBarWidth = this.progressBarCoordinates.width;
+      const perPixel = Math.ceil(decodedData.length / progressBarWidth);
+      const peaks = extractPeaks(decodedData, perPixel, true);
+      return peaks;
+    }
+    setProps(peaks) {
+      const [min, max] = findMinMaxNumbers(peaks.data[0]);
+      const maxNumber = Math.pow(2, peaks.bits - 1) - 1;
+      const minNumber = -Math.pow(2, peaks.bits - 1);
+      this.props.peaks = peaks.data[0].map((peak) => {
+        if (peak < 0) {
+          return Math.round(peak / min * minNumber);
+        } else {
+          return Math.round(peak / max * maxNumber);
+        }
+      });
+      this.props.bits = peaks.bits;
+    }
+    async init(blob) {
+      try {
+        const audioContext = new AudioContext();
+        const decodedData = await audioContext.decodeAudioData(blob);
+        const peaks = await this.extractPeaks(decodedData);
+        this.initCanvas();
+        this.setProps(peaks);
+        this.annotationTool.removeGlobalShape("audio-peaks");
+        this.annotationTool.addGlobalShape({
+          x: 0,
+          y: 0,
+          strokeStyle: "red",
+          fillStyle: "red",
+          lineWidth: 1,
+          type: "audio-peaks"
+        });
+        this.clearLocalCanvas();
+        this.drawOnCanvas();
+      } catch (e) {
+        this.initCanvas();
+        this.props.peaks = new Int8Array();
+        this.annotationTool.removeGlobalShape("audio-peaks");
+        this.clearLocalCanvas();
+        console.error(e);
+      }
+    }
+    initCanvas() {
+      this.canvas.width = this.progressBarCoordinates.width * this.pixelRatio;
+      this.canvas.height = this.props.waveHeight * this.pixelRatio;
+      this.drawCtx.scale(this.pixelRatio, this.pixelRatio);
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight
+      };
+    }
+    onPointerDown(event) {
+      return;
+    }
+    onPointerMove(event) {
+      return;
+    }
+    onPointerUp(event) {
+      return;
+    }
+    reset() {
+      this.clearLocalCanvas();
+      this.props.peaks = new Int8Array();
+      this.annotationTool.removeGlobalShape("audio-peaks");
+    }
+    draw(_) {
+      const maybeVideoElement = this.annotationTool.videoElement;
+      if (!maybeVideoElement || maybeVideoElement.tagName !== "VIDEO") {
+        return;
+      }
+      const isMuted = maybeVideoElement.muted;
+      if (isMuted || maybeVideoElement.volume === 0) {
+        return;
+      }
+      this.ctx.clearRect(
+        0,
+        0,
+        this.annotationTool.canvasWidth,
+        this.annotationTool.canvasHeight
+      );
+      const { waveHeight, theme } = this.props;
+      const cc = this.ctx;
+      const h2 = waveHeight / 2;
+      let y = this.progressBarCoordinates.y - 20;
+      const { x, width } = this.progressBarCoordinates;
+      const currentFrame = this.annotationTool.playbackFrame;
+      const totalFrames = this.annotationTool.totalFrames;
+      const currentFrameCoordinate = Math.ceil(currentFrame / totalFrames * width) + x;
+      this.ctx.drawImage(this.canvas, x, y, width, waveHeight);
+      cc.fillStyle = theme.waveProgressColor;
+      cc.fillRect(currentFrameCoordinate, y + 0, 1, h2 * 2);
+    }
+    get pixelRatio() {
+      return this.annotationTool.pixelRatio;
+    }
+    get progressBarCoordinates() {
+      return this.annotationTool.progressBarCoordinates;
+    }
+    clearLocalCanvas() {
+      this.drawCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    drawOnCanvas() {
+      const { peaks, bits, waveHeight, theme } = this.props;
+      const cc = this.drawCtx;
+      let offset = 0;
+      let shift = 0;
+      const h2 = waveHeight / 2;
+      const maxValue = 2 ** (bits - 1);
+      let y = 0;
+      const peakSegmentLength = peaks.length;
+      cc.fillStyle = theme.waveOutlineColor;
+      for (let i = 0; i < peakSegmentLength; i += 1) {
+        const maxPeak = peaks[(i + offset) * 2 + 1] / maxValue;
+        const max = Math.abs(maxPeak * h2);
+        cc.fillRect(i + shift, y + 0 + h2 - max, 1, max);
+      }
+    }
+  };
+
+  // src/plugins/selection.ts
+  var SelectionToolPlugin = class extends BasePlugin {
+    constructor() {
+      super(...arguments);
+      this.name = "selection";
+      this.selectedArea = null;
+    }
+    move(shape, dx, dy) {
+      shape.x += dx;
+      shape.y += dy;
+      return shape;
+    }
+    normalize(shape, canvasWidth, canvasHeight) {
+      return {
+        ...shape,
+        x: shape.x / canvasWidth,
+        y: shape.y / canvasHeight,
+        width: shape.width / canvasWidth,
+        height: shape.height / canvasHeight
+      };
+    }
+    onPointerDown(event) {
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.startX = x;
+      this.startY = y;
+      this.isDrawing = true;
+      this.selectedArea = null;
+    }
+    onPointerMove(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      this.annotationTool.clearCanvas();
+      if (this.annotationTool.globalShapes.length > 0) {
+        this.annotationTool.drawShapesOverlay();
+      } else {
+        this.annotationTool.addVideoOverlay();
+      }
+      this.drawSelectionRect(
+        this.startX,
+        this.startY,
+        x - this.startX,
+        y - this.startY
+      );
+    }
+    onPointerUp(event) {
+      if (!this.isDrawing) {
+        return;
+      }
+      const { x, y } = this.annotationTool.getRelativeCoords(event);
+      const startX = Math.min(x, this.startX);
+      const startY = Math.min(y, this.startY);
+      const width = Math.abs(x - this.startX);
+      const height = Math.abs(y - this.startY);
+      if (width < 1 || height < 1) {
+        this.isDrawing = false;
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      const video2 = this.annotationTool.videoElement;
+      if (!(video2 instanceof HTMLVideoElement)) {
+        return;
+      }
+      const videoAspectRatio = video2.videoWidth / video2.videoHeight;
+      const canvasAspectRatio = this.annotationTool.canvasWidth / this.annotationTool.canvasHeight;
+      let scaledVideoWidth = this.annotationTool.canvasWidth;
+      let scaledVideoHeight = this.annotationTool.canvasHeight;
+      let offsetX = 0;
+      let offsetY = 0;
+      if (videoAspectRatio > canvasAspectRatio) {
+        scaledVideoHeight = this.annotationTool.canvasWidth / videoAspectRatio;
+        offsetY = (this.annotationTool.canvasHeight - scaledVideoHeight) / 2;
+      } else {
+        scaledVideoWidth = this.annotationTool.canvasHeight * videoAspectRatio;
+        offsetX = (this.annotationTool.canvasWidth - scaledVideoWidth) / 2;
+      }
+      const scaleX = video2.videoWidth / scaledVideoWidth;
+      const scaleY = video2.videoHeight / scaledVideoHeight;
+      const scaledStartX = (startX - offsetX) * scaleX;
+      const scaledStartY = (startY - offsetY) * scaleY;
+      const scaledWidth = width * scaleX;
+      const scaledHeight = height * scaleY;
+      tempCanvas.width = Math.max(1, scaledWidth);
+      tempCanvas.height = Math.max(1, scaledHeight);
+      try {
+        tempCtx.drawImage(
+          this.annotationTool.videoElement,
+          scaledStartX,
+          scaledStartY,
+          scaledWidth,
+          scaledHeight,
+          0,
+          0,
+          scaledWidth,
+          scaledHeight
+        );
+        const imageData = tempCtx.getImageData(
+          0,
+          0,
+          tempCanvas.width,
+          tempCanvas.height
+        );
+        this.selectedArea = imageData;
+        const canvas = document.createElement("canvas");
+        canvas.width = scaledWidth + 4;
+        canvas.height = scaledHeight + 4;
+        canvas.style.width = `${width + 4}px`;
+        canvas.style.height = `${height + 4}px`;
+        const ctx = canvas.getContext("2d");
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, scaledWidth + 2, scaledHeight + 2);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(2, 2, scaledWidth, scaledHeight);
+        ctx.putImageData(imageData, 2, 2);
+        const img = new Image();
+        img.onload = () => {
+          this.annotationTool.pluginForTool("image").save({
+            type: "image",
+            x: startX - 2,
+            // Adjust position to account for border
+            y: startY - 2,
+            width: width + 4,
+            // Adjust size to account for border
+            height: height + 4,
+            image: img,
+            strokeStyle: "transparent",
+            fillStyle: "transparent",
+            lineWidth: 0
+          });
+          this.isDrawing = false;
+          this.selectedArea = null;
+          this.annotationTool.redrawFullCanvas();
+        };
+        img.src = canvas.toDataURL();
+        this.annotationTool.currentTool = "move";
+      } catch (error) {
+        console.error("Error capturing selection:", error);
+        this.isDrawing = false;
+        this.annotationTool.redrawFullCanvas();
+        return;
+      }
+    }
+    drawSelectionRect(x, y, width, height) {
+      const startX = Math.min(x, x + width);
+      const startY = Math.min(y, y + height);
+      const rectWidth = Math.abs(width);
+      const rectHeight = Math.abs(height);
+      const pixelRatio2 = this.annotationTool.pixelRatio;
+      let savedImageData = null;
+      if (rectWidth > 0 && rectHeight > 0) {
+        try {
+          savedImageData = this.ctx.getImageData(
+            startX * pixelRatio2,
+            startY * pixelRatio2,
+            rectWidth * pixelRatio2,
+            rectHeight * pixelRatio2
+          );
+        } catch (e) {
+          savedImageData = null;
+        }
+      }
+      this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      this.ctx.fillRect(
+        0,
+        0,
+        this.annotationTool.canvasWidth,
+        this.annotationTool.canvasHeight
+      );
+      if (savedImageData && rectWidth > 0 && rectHeight > 0) {
+        this.ctx.putImageData(savedImageData, startX * pixelRatio2, startY * pixelRatio2);
+      } else if (rectWidth > 0 && rectHeight > 0) {
+        const video2 = this.annotationTool.videoElement;
+        if (video2 instanceof HTMLVideoElement) {
+          const frameNumber = this.annotationTool.videoFrameBuffer?.frameNumberFromTime(
+            video2.currentTime
+          );
+          const videoFrame = this.annotationTool.videoFrameBuffer?.getFrame(frameNumber || 0) ?? video2;
+          const vw = videoFrame ? videoFrame.width : video2.videoWidth;
+          const vh = videoFrame ? videoFrame.height : video2.videoHeight;
+          const scaleX = vw / this.annotationTool.canvasWidth;
+          const scaleY = vh / this.annotationTool.canvasHeight;
+          this.ctx.drawImage(
+            videoFrame,
+            startX * scaleX,
+            startY * scaleY,
+            rectWidth * scaleX,
+            rectHeight * scaleY,
+            startX,
+            startY,
+            rectWidth,
+            rectHeight
+          );
+        }
+      }
+      this.ctx.beginPath();
+      const oldStrokeStyle = this.ctx.strokeStyle;
+      this.ctx.strokeStyle = "#ffffff";
+      this.ctx.lineWidth = 2;
+      this.ctx.setLineDash([5, 5]);
+      this.ctx.strokeRect(startX, startY, rectWidth, rectHeight);
+      this.ctx.setLineDash([]);
+      this.ctx.strokeStyle = oldStrokeStyle;
+    }
+    draw(shape) {
+      this.drawSelectionRect(shape.x, shape.y, shape.width, shape.height);
+    }
+    reset() {
+      super.reset();
+      this.selectedArea = null;
+    }
+    isPointerAtShape(shape, x, y) {
+      const minX = Math.min(shape.x, shape.x + shape.width);
+      const maxX = Math.max(shape.x, shape.x + shape.width);
+      const minY = Math.min(shape.y, shape.y + shape.height);
+      const maxY = Math.max(shape.y, shape.y + shape.height);
+      return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    }
+  };
+
+  // src/plugins/index.ts
+  var plugins = [
+    RectangleToolPlugin,
+    CircleToolPlugin,
+    LineToolPlugin,
+    ArrowToolPlugin,
+    TextToolPlugin,
+    EraserToolPlugin,
+    CurveToolPlugin,
+    MoveToolPlugin,
+    ImageToolPlugin,
+    CompareToolPlugin,
+    AudioPeaksPlugin,
+    SelectionToolPlugin
+  ];
+
+  // src/utils/detect-framerate.ts
+  function detectFrameRate(videoElement, callback) {
+    let lastMediaTime;
+    let lastFrameNum;
+    let fps;
+    const fpsRounder = [];
+    let frameNotSeeked = true;
+    let isDestroyed = false;
+    function ticker(_, metadata) {
+      if (isDestroyed) return;
+      const mediaTimeDiff = Math.abs(metadata.mediaTime - lastMediaTime);
+      const frameNumDiff = Math.abs(metadata.presentedFrames - lastFrameNum);
+      const diff = mediaTimeDiff / frameNumDiff;
+      if (diff && diff < 1 && frameNotSeeked && fpsRounder.length < 50 && videoElement.playbackRate === 1 && document.hasFocus()) {
+        fpsRounder.push(diff);
+        fps = Math.round(1 / getFpsAverage());
+        callback(fps, fpsRounder.length * 2);
+      }
+      frameNotSeeked = true;
+      lastMediaTime = metadata.mediaTime;
+      lastFrameNum = metadata.presentedFrames;
+      if (!isDestroyed) {
+        videoElement.requestVideoFrameCallback(ticker);
+      }
+    }
+    videoElement.requestVideoFrameCallback(ticker);
+    const onSeeked = () => {
+      fpsRounder.pop();
+      frameNotSeeked = false;
+    };
+    videoElement.addEventListener("seeked", onSeeked);
+    function getFpsAverage() {
+      return fpsRounder.reduce((a, b2) => a + b2) / fpsRounder.length;
+    }
+    return () => {
+      isDestroyed = true;
+      videoElement.removeEventListener("seeked", onSeeked);
+    };
+  }
+
+  // src/plugins/utils/audio-fingerprint.ts
+  var AudioFingerprint = class _AudioFingerprint extends Array {
+    static {
+      this.nextId = 0;
+    }
+    constructor(...items) {
+      super(...items);
+      this.id = _AudioFingerprint.nextId++;
+    }
+  };
+  var similarityCache = /* @__PURE__ */ new Map();
+  function getCacheKey(fp1, fp2) {
+    return `${Math.min(fp1.id, fp2.id)}-${Math.max(fp1.id, fp2.id)}`;
+  }
+  function calculateAudioSimilarity(fp1, fp2) {
+    const key = getCacheKey(fp1, fp2);
+    const cached = similarityCache.get(key);
+    if (cached !== void 0) {
+      return cached;
+    }
+    if (fp1.length === 0 || fp2.length === 0) {
+      return 0;
+    }
+    const len = Math.min(fp1.length, fp2.length);
+    let mean1 = 0;
+    let mean2 = 0;
+    for (let i = 0; i < len; i++) {
+      mean1 += fp1[i];
+      mean2 += fp2[i];
+    }
+    mean1 /= len;
+    mean2 /= len;
+    let numerator = 0;
+    let denom1 = 0;
+    let denom2 = 0;
+    for (let i = 0; i < len; i++) {
+      const diff1 = fp1[i] - mean1;
+      const diff2 = fp2[i] - mean2;
+      numerator += diff1 * diff2;
+      denom1 += diff1 * diff1;
+      denom2 += diff2 * diff2;
+    }
+    const denominator = Math.sqrt(denom1 * denom2);
+    const correlation = denominator === 0 ? 0 : (numerator / denominator + 1) / 2;
+    similarityCache.set(key, correlation);
+    return correlation;
+  }
+  var SAMPLES_PER_FINGERPRINT = 128;
+  var AudioFingerprintExtractor = class {
+    constructor(video2, fps) {
+      this.video = video2;
+      this.fps = fps;
+      this.audioContext = null;
+      this.audioBuffer = null;
+      this.fingerprints = /* @__PURE__ */ new Map();
+      this.isInitialized = false;
+      this.initPromise = null;
+    }
+    /**
+     * Initialize the audio extractor by decoding video audio.
+     * This should be called once before extracting fingerprints.
+     */
+    async init() {
+      if (this.isInitialized) {
+        return;
+      }
+      if (this.initPromise) {
+        return this.initPromise;
+      }
+      this.initPromise = this.doInit();
+      return this.initPromise;
+    }
+    async doInit() {
+      try {
+        const response = await fetch(this.video.currentSrc || this.video.src);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        this.audioContext = new AudioContext();
+        this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.isInitialized = true;
+      } catch (error) {
+        console.warn("Could not extract audio for fingerprinting:", error);
+        this.isInitialized = true;
+        this.audioBuffer = null;
+      }
+    }
+    /**
+     * Check if audio extraction was successful.
+     */
+    hasAudio() {
+      return this.audioBuffer !== null;
+    }
+    /**
+     * Get the total number of frames in the video.
+     */
+    get totalFrames() {
+      return Math.round(this.video.duration * this.fps);
+    }
+    /**
+     * Extract audio fingerprint for a specific frame.
+     * The fingerprint covers a small window around the frame time.
+     */
+    extractFingerprint(frameNumber) {
+      if (!this.audioBuffer) {
+        return null;
+      }
+      const frameTime = (frameNumber - 1) / this.fps;
+      const windowDuration = 1 / this.fps;
+      const sampleRate = this.audioBuffer.sampleRate;
+      const startSample = Math.floor(frameTime * sampleRate);
+      const endSample = Math.floor((frameTime + windowDuration) * sampleRate);
+      const numSamples = endSample - startSample;
+      if (numSamples <= 0 || startSample >= this.audioBuffer.length) {
+        return null;
+      }
+      const channelData = this.audioBuffer.getChannelData(0);
+      const fingerprint = new AudioFingerprint();
+      const samplesPerSegment = Math.max(1, Math.floor(numSamples / SAMPLES_PER_FINGERPRINT));
+      for (let i = 0; i < SAMPLES_PER_FINGERPRINT; i++) {
+        const segmentStart = startSample + i * samplesPerSegment;
+        const segmentEnd = Math.min(segmentStart + samplesPerSegment, this.audioBuffer.length);
+        let energy = 0;
+        let count = 0;
+        for (let j = segmentStart; j < segmentEnd; j++) {
+          if (j < channelData.length) {
+            energy += channelData[j] * channelData[j];
+            count++;
+          }
+        }
+        const rms = count > 0 ? Math.sqrt(energy / count) : 0;
+        fingerprint.push(rms);
+      }
+      return fingerprint;
+    }
+    /**
+     * Get fingerprint for a frame, extracting if not cached.
+     */
+    getFingerprint(frameNumber) {
+      if (this.fingerprints.has(frameNumber)) {
+        return this.fingerprints.get(frameNumber);
+      }
+      const fp = this.extractFingerprint(frameNumber);
+      if (fp) {
+        this.fingerprints.set(frameNumber, fp);
+      }
+      return fp;
+    }
+    /**
+     * Pre-extract fingerprints for a range of frames.
+     */
+    extractRange(startFrame, endFrame) {
+      for (let i = startFrame; i <= endFrame; i++) {
+        this.getFingerprint(i);
+      }
+    }
+    /**
+     * Set a fingerprint for a specific frame (used when buffering frames).
+     */
+    setFingerprint(frameNumber, fingerprint) {
+      this.fingerprints.set(frameNumber, fingerprint);
+    }
+    /**
+     * Find the best matching frame in this extractor for a given fingerprint.
+     * Searches within a window around the reference frame number.
+     *
+     * @param signature - The audio fingerprint to match
+     * @param refFrameNumber - The reference frame number to search around
+     * @param windowSize - Number of frames to search in each direction (default: 3)
+     * @returns The best matching frame number
+     */
+    findBestMatch(signature, refFrameNumber, windowSize = 3) {
+      if (!signature) {
+        return refFrameNumber;
+      }
+      const hasCachedFingerprints = this.fingerprints.size > 0;
+      if (!hasCachedFingerprints && !this.hasAudio()) {
+        return refFrameNumber;
+      }
+      let bestScore = 0;
+      let bestFrame = refFrameNumber;
+      const startFrame = Math.max(1, refFrameNumber - windowSize);
+      const endFrame = Math.min(this.totalFrames, refFrameNumber + windowSize);
+      for (let frame = startFrame; frame <= endFrame; frame++) {
+        const fp = this.getFingerprint(frame);
+        if (fp) {
+          const score = calculateAudioSimilarity(signature, fp);
+          if (score > bestScore) {
+            bestScore = score;
+            bestFrame = frame;
+          }
+        }
+      }
+      return bestFrame;
+    }
+    /**
+     * Clean up resources.
+     */
+    destroy() {
+      this.fingerprints.clear();
+      if (this.audioContext) {
+        this.audioContext.close().catch(() => {
+        });
+        this.audioContext = null;
+      }
+      this.audioBuffer = null;
+      this.isInitialized = false;
+      this.initPromise = null;
+    }
+  };
+
+  // src/plugins/utils/video-frame-buffer.ts
+  var SIGNATURE_SCALE = 64;
+  var VideoFrameBuffer = class {
+    constructor(video2, fps, autoHide = true) {
+      this.isDestroyed = false;
+      this.autoHide = true;
+      this.isMobile = false;
+      this.audioExtractor = null;
+      this.audioInitPromise = null;
+      this.seenFrames = 0;
+      this.isCanvasSizeSet = false;
+      this.frames = /* @__PURE__ */ new Map();
+      this.audioFingerprints = /* @__PURE__ */ new Map();
+      this.video = video2;
+      this.fps = fps;
+      this.autoHide = autoHide;
+      this.createCanvas();
+      this.createTransformCanvas();
+    }
+    createTransformCanvas() {
+      this.transformCanvas = document.createElement("canvas");
+      this.transformCanvasCtx = this.canvas.getContext("2d", {
+        willReadFrequently: true,
+        alpha: false
+      });
+      this.transformCanvas.width = SIGNATURE_SCALE;
+      this.transformCanvas.height = SIGNATURE_SCALE;
+    }
+    /**
+     * Initialize audio fingerprinting for frame sync.
+     * Call this after the video is ready.
+     */
+    async initAudioSync() {
+      if (this.audioExtractor) {
+        return this.audioInitPromise ?? Promise.resolve();
+      }
+      this.audioExtractor = new AudioFingerprintExtractor(this.video, this.fps);
+      this.audioInitPromise = this.audioExtractor.init();
+      return this.audioInitPromise;
+    }
+    /**
+     * Check if audio sync is available.
+     */
+    hasAudioSync() {
+      return this.audioExtractor?.hasAudio() ?? false;
+    }
+    start() {
+      this.addRequestFrameCallback();
+      if (!this.isMobile) {
+        this.initAudioSync().catch(() => {
+        });
+      }
+    }
+    destroy() {
+      this.isDestroyed = true;
+      this.frames.forEach((frame) => frame.close());
+      this.frames.clear();
+      this.audioFingerprints.clear();
+      if (this.audioExtractor) {
+        this.audioExtractor.destroy();
+        this.audioExtractor = null;
+      }
+      this.audioInitPromise = null;
+    }
+    tick(_, metadata) {
+      this.setCanvasSize();
+      const delta = metadata.expectedDisplayTime - performance.now();
+      if (delta > 10) {
+      }
+      if (this.isDestroyed) {
+        return false;
+      }
+      if (this.seenFrames >= this.totalFrames) {
+        if (this.autoHide) {
+          try {
+            if (!this.video.paused) {
+              this.video.pause();
+            }
+            this.video.style.display = "none";
+          } catch (e) {
+          }
+        }
+        return false;
+      }
+      if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
+        return true;
+      }
+      const video2 = this.video;
+      const frameNumber = this.frameNumberFromTime(metadata.mediaTime);
+      const expectedFrame = Math.max(
+        1,
+        metadata.presentedFrames > this.totalFrames ? metadata.presentedFrames % this.totalFrames : metadata.presentedFrames
+      );
+      if (!expectedFrame) {
+        throw new Error("expectedFrame is 0");
+      }
+      if (!this.hasFrame(frameNumber)) {
+        this.ctx.drawImage(
+          video2,
+          0,
+          0,
+          this.width,
+          this.height,
+          0,
+          0,
+          this.width,
+          this.height
+        );
+        const imageData = this.ctx.getImageData(
+          0,
+          0,
+          this.canvas.width,
+          this.canvas.height
+        );
+        createImageBitmap(imageData, 0, 0, this.width, this.height).then(
+          async (imageBitmap) => {
+            this.setFrame(frameNumber, imageBitmap);
+            if (!this.isMobile && this.audioExtractor?.hasAudio()) {
+              const fp = this.audioExtractor.getFingerprint(frameNumber);
+              if (fp) {
+                this.setAudioFingerprint(frameNumber, fp);
+              }
+            }
+          }
+        );
+      } else {
+        this.seenFrames++;
+      }
+      return true;
+    }
+    addRequestFrameCallback() {
+      if (this.isDestroyed) {
+        return;
+      }
+      this.video.requestVideoFrameCallback((_, metadata) => {
+        const repeat = this.tick(_, metadata);
+        if (repeat) {
+          this.addRequestFrameCallback();
+        }
+      });
+    }
+    createCanvas() {
+      this.canvas = document.createElement("canvas");
+      this.ctx = this.canvas.getContext("2d", {
+        willReadFrequently: true,
+        alpha: false
+      });
+    }
+    setCanvasSize() {
+      if (this.isCanvasSizeSet) {
+        return;
+      }
+      this.canvas.width = this.video.videoWidth;
+      this.canvas.height = this.video.videoHeight;
+      this.isCanvasSizeSet = true;
+    }
+    get width() {
+      return this.video.videoWidth;
+    }
+    get height() {
+      return this.video.videoHeight;
+    }
+    hasFrame(frame) {
+      return this.frames.has(frame);
+    }
+    getFrame(frame) {
+      if (this.frames.has(frame)) {
+        return this.frames.get(frame);
+      } else {
+        return null;
+      }
+    }
+    /**
+     * Find the best matching frame number using audio fingerprint comparison.
+     * Searches within a ±3 frame window around the reference frame.
+     *
+     * @param signature - Audio fingerprint from the main video frame
+     * @param refFrameNumber - Reference frame number to search around
+     * @returns Best matching frame number based on audio similarity
+     */
+    getFrameNumberBySignature(signature, refFrameNumber) {
+      if (!signature) {
+        return refFrameNumber;
+      }
+      let bestSimilarityScore = 0;
+      let bestFrameNumber = refFrameNumber;
+      const frameNumbers = [
+        refFrameNumber - 3,
+        refFrameNumber - 2,
+        refFrameNumber - 1,
+        refFrameNumber,
+        refFrameNumber + 1,
+        refFrameNumber + 2,
+        refFrameNumber + 3
+      ].filter(
+        (frameNumber) => frameNumber > 0 && frameNumber <= this.totalFrames
+      );
+      frameNumbers.forEach((frameNumber) => {
+        const fingerprint = this.getAudioFingerprint(frameNumber);
+        if (fingerprint) {
+          const result = calculateAudioSimilarity(signature, fingerprint);
+          if (result > bestSimilarityScore) {
+            bestSimilarityScore = result;
+            bestFrameNumber = frameNumber;
+          }
+        }
+      });
+      return bestFrameNumber;
+    }
+    setFrame(frame, data) {
+      this.frames.set(frame, data);
+    }
+    /**
+     * Store audio fingerprint for a frame.
+     */
+    setAudioFingerprint(frame, data) {
+      this.audioFingerprints.set(frame, data);
+    }
+    /**
+     * Get audio fingerprint for a frame.
+     * Falls back to extracting from audio extractor if not cached.
+     */
+    getAudioFingerprint(frame) {
+      if (this.audioFingerprints.has(frame)) {
+        return this.audioFingerprints.get(frame);
+      }
+      if (this.audioExtractor?.hasAudio()) {
+        const fp = this.audioExtractor.getFingerprint(frame);
+        if (fp) {
+          this.audioFingerprints.set(frame, fp);
+          return fp;
+        }
+      }
+      return null;
+    }
+    get totalFrames() {
+      return Math.round(this.video.duration * this.fps);
+    }
+    frameNumberFromTime(time) {
+      return Math.max(1, Math.round(time * this.fps));
+    }
+  };
+
+  // src/config.ts
+  var defaultConfig = {
+    layout: "horizontal",
+    mobile: {
+      collapsibleToolbars: true,
+      gesturesEnabled: true,
+      autoCollapse: true,
+      breakpoint: 960
+    },
+    theme: "dark",
+    toolbar: {
+      draggable: false,
+      sidebarPosition: "left",
+      defaultTool: "curve"
+    },
+    features: {
+      showThemeToggle: true,
+      showFullscreen: true,
+      showProgressBar: true,
+      showFrameCounter: true
+    }
+  };
+  function mergeConfig(partial) {
+    if (!partial) {
+      return { ...defaultConfig };
+    }
+    return {
+      layout: partial.layout ?? defaultConfig.layout,
+      theme: partial.theme ?? defaultConfig.theme,
+      mobile: {
+        ...defaultConfig.mobile,
+        ...partial.mobile
+      },
+      toolbar: {
+        ...defaultConfig.toolbar,
+        ...partial.toolbar
+      },
+      features: {
+        ...defaultConfig.features,
+        ...partial.features
+      }
+    };
+  }
+
+  // src/ui/layout/index.ts
+  var LayoutManager = class {
+    constructor(tool) {
+      this.tool = tool;
+      this.currentRenderer = null;
+      this.rootElement = null;
+      this.prefix = getCSSPrefix();
+    }
+    /**
+     * Get the root container element that holds layout classes
+     */
+    getRootElement() {
+      if (!this.rootElement) {
+        const canvas = this.tool.canvas;
+        if (canvas?.parentElement) {
+          this.rootElement = canvas.parentElement;
+          this.rootElement.classList.add(`${this.prefix}-root`);
+        }
+      }
+      return this.rootElement;
+    }
+    /**
+     * Remove all layout classes from root element
+     */
+    clearLayoutClasses() {
+      const root = this.getRootElement();
+      if (root) {
+        root.classList.remove(
+          `${this.prefix}-layout-horizontal`,
+          `${this.prefix}-layout-vertical`,
+          `${this.prefix}-layout-minimal`,
+          `${this.prefix}-layout-bottom-dock`,
+          `${this.prefix}-sidebar-right`
+        );
+      }
+    }
+    /**
+     * Set the active layout mode
+     */
+    setLayout(mode, options) {
+      if (this.currentRenderer) {
+        this.currentRenderer.cleanup();
+      }
+      this.clearLayoutClasses();
+      const root = this.getRootElement();
+      if (root) {
+        root.classList.add(`${this.prefix}-layout-${mode}`);
+        if (mode === "vertical" && options?.sidebarPosition === "right") {
+          root.classList.add(`${this.prefix}-sidebar-right`);
+        }
+      }
+      this.currentRenderer = this.createRenderer(mode);
+      this.currentRenderer.apply(this.tool);
+    }
+    /**
+     * Get current layout mode
+     */
+    getCurrentLayout() {
+      return this.currentRenderer?.name ?? null;
+    }
+    /**
+     * Create a layout renderer for the given mode
+     */
+    createRenderer(mode) {
+      switch (mode) {
+        case "horizontal":
+          return new HorizontalLayout();
+        case "vertical":
+          return new VerticalLayout();
+        case "minimal":
+          return new MinimalLayout();
+        case "bottom-dock":
+          return new BottomDockLayout();
+      }
+    }
+    /**
+     * Cleanup the layout manager
+     */
+    destroy() {
+      if (this.currentRenderer) {
+        this.currentRenderer.cleanup();
+        this.currentRenderer = null;
+      }
+      this.clearLayoutClasses();
+      this.rootElement = null;
+    }
+  };
+  var HorizontalLayout = class {
+    constructor() {
+      this.name = "horizontal";
+    }
+    apply(_tool) {
+    }
+    cleanup() {
+    }
+  };
+  var VerticalLayout = class {
+    constructor() {
+      this.name = "vertical";
+    }
+    apply(_tool) {
+    }
+    cleanup() {
+    }
+  };
+  var MinimalLayout = class {
+    constructor() {
+      this.name = "minimal";
+      this.dragState = {
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        offsetX: 0,
+        offsetY: 0
+      };
+      this.container = null;
+      this.boundHandlers = {};
+      this.prefix = getCSSPrefix();
+    }
+    apply(tool) {
+      this.container = tool.uiContainer;
+      if (!this.container) return;
+      this.boundHandlers.mousedown = this.handleMouseDown.bind(this);
+      this.boundHandlers.mousemove = this.handleMouseMove.bind(this);
+      this.boundHandlers.mouseup = this.handleMouseUp.bind(this);
+      this.container.addEventListener("mousedown", this.boundHandlers.mousedown);
+      document.addEventListener("mousemove", this.boundHandlers.mousemove);
+      document.addEventListener("mouseup", this.boundHandlers.mouseup);
+      const config = tool.config;
+      if (config?.toolbar?.position) {
+        this.container.style.left = `${config.toolbar.position.x}px`;
+        this.container.style.top = `${config.toolbar.position.y}px`;
+      }
+    }
+    cleanup() {
+      if (this.container && this.boundHandlers.mousedown) {
+        this.container.removeEventListener("mousedown", this.boundHandlers.mousedown);
+      }
+      if (this.boundHandlers.mousemove) {
+        document.removeEventListener("mousemove", this.boundHandlers.mousemove);
+      }
+      if (this.boundHandlers.mouseup) {
+        document.removeEventListener("mouseup", this.boundHandlers.mouseup);
+      }
+      if (this.container) {
+        this.container.style.left = "";
+        this.container.style.top = "";
+      }
+      this.container = null;
+      this.boundHandlers = {};
+    }
+    handleMouseDown(e) {
+      if (!this.container) return;
+      if (e.target.closest("button, input")) return;
+      this.dragState.isDragging = true;
+      this.dragState.startX = e.clientX;
+      this.dragState.startY = e.clientY;
+      const rect = this.container.getBoundingClientRect();
+      this.dragState.offsetX = rect.left;
+      this.dragState.offsetY = rect.top;
+      this.container.classList.add(`${this.prefix}-dragging`);
+      e.preventDefault();
+    }
+    handleMouseMove(e) {
+      if (!this.dragState.isDragging || !this.container) return;
+      const dx = e.clientX - this.dragState.startX;
+      const dy = e.clientY - this.dragState.startY;
+      this.container.style.left = `${this.dragState.offsetX + dx}px`;
+      this.container.style.top = `${this.dragState.offsetY + dy}px`;
+    }
+    handleMouseUp() {
+      if (!this.container) return;
+      this.dragState.isDragging = false;
+      this.container.classList.remove(`${this.prefix}-dragging`);
+    }
+  };
+  var BottomDockLayout = class {
+    constructor() {
+      this.name = "bottom-dock";
+      this.movedElements = [];
+      this.playerControls = null;
+      this.divider = null;
+      this.prefix = getCSSPrefix();
+    }
+    apply(tool) {
+      const container = tool.uiContainer;
+      const playerControls = tool.playerControlsContainer;
+      if (container && playerControls) {
+        this.playerControls = playerControls;
+        this.divider = document.createElement("div");
+        this.divider.classList.add(`${this.prefix}-divider`);
+        container.appendChild(this.divider);
+        while (playerControls.firstChild) {
+          const child = playerControls.firstChild;
+          this.movedElements.push(child);
+          container.appendChild(child);
+        }
+      }
+    }
+    cleanup() {
+      if (this.playerControls) {
+        for (const element of this.movedElements) {
+          this.playerControls.appendChild(element);
+        }
+      }
+      if (this.divider && this.divider.parentNode) {
+        this.divider.parentNode.removeChild(this.divider);
+      }
+      this.movedElements = [];
+      this.playerControls = null;
+      this.divider = null;
+    }
+  };
+
+  // src/ui/collapse-controller.ts
+  var CollapseController = class {
+    constructor(container, autoCollapse = true) {
+      this.container = container;
+      this.autoCollapse = autoCollapse;
+      this.isCollapsed = false;
+      this.collapseButton = null;
+      this.prefix = getCSSPrefix();
+    }
+    /**
+     * Initialize the collapse controller
+     */
+    init() {
+      this.container.classList.add(`${this.prefix}-collapsible`);
+      this.createCollapseButton();
+    }
+    /**
+     * Create the collapse/expand toggle button
+     */
+    createCollapseButton() {
+      this.collapseButton = document.createElement("button");
+      this.collapseButton.type = "button";
+      this.collapseButton.classList.add(`${this.prefix}-collapse-btn`);
+      this.collapseButton.setAttribute("aria-label", "Toggle toolbar");
+      this.collapseButton.setAttribute("data-tooltip", "Toggle toolbar");
+      this.updateButtonIcon();
+      this.collapseButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggle();
+      });
+      this.container.parentElement?.insertBefore(
+        this.collapseButton,
+        this.container.nextSibling
+      );
+    }
+    /**
+     * Update the button icon based on collapsed state
+     */
+    updateButtonIcon() {
+      if (!this.collapseButton) return;
+      this.collapseButton.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="18 15 12 9 6 15"/>
       </svg>
-    `)}collapse(){this.isCollapsed||(this.isCollapsed=!0,this.container.classList.add(`${this.prefix}-collapsed`))}expand(){this.isCollapsed&&(this.isCollapsed=!1,this.container.classList.remove(`${this.prefix}-collapsed`))}toggle(){this.isCollapsed?this.expand():this.collapse()}get collapsed(){return this.isCollapsed}get autoCollapseEnabled(){return this.autoCollapse}setAutoCollapse(o){this.autoCollapse=o}destroy(){this.collapseButton&&(this.collapseButton.remove(),this.collapseButton=null),this.container.classList.remove(`${this.prefix}-collapsible`,`${this.prefix}-collapsed`)}};var Pt=class{constructor(o,t){this.canvas=o;this.onGestureChange=t;this.initialDistance=0;this.initialScale=1;this.currentScale=1;this.panStart={x:0,y:0};this.panOffset={x:0,y:0};this.isGesturing=!1;this.activeTouches=0;this.minScale=.5;this.maxScale=3;this.handleTouchStart=o=>{this.activeTouches=o.touches.length,o.touches.length===2&&(o.preventDefault(),this.isGesturing=!0,this.initialDistance=this.getDistance(o.touches[0],o.touches[1]),this.initialScale=this.currentScale,this.panStart=this.getMidpoint(o.touches[0],o.touches[1]))};this.handleTouchMove=o=>{if(o.touches.length===2&&this.isGesturing){o.preventDefault();let e=this.getDistance(o.touches[0],o.touches[1])/this.initialDistance;this.currentScale=Math.max(this.minScale,Math.min(this.maxScale,this.initialScale*e));let n=this.getMidpoint(o.touches[0],o.touches[1]);this.panOffset={x:this.panOffset.x+(n.x-this.panStart.x),y:this.panOffset.y+(n.y-this.panStart.y)},this.panStart=n,this.onGestureChange(this.getState())}};this.handleTouchEnd=o=>{this.activeTouches=o.touches.length,o.touches.length<2&&(this.isGesturing=!1,o.touches.length===1&&(this.panStart={x:o.touches[0].clientX,y:o.touches[0].clientY}))}}init(){this.canvas.addEventListener("touchstart",this.handleTouchStart,{passive:!1}),this.canvas.addEventListener("touchmove",this.handleTouchMove,{passive:!1}),this.canvas.addEventListener("touchend",this.handleTouchEnd,{passive:!1}),this.canvas.addEventListener("touchcancel",this.handleTouchEnd,{passive:!1})}getDistance(o,t){let e=t.clientX-o.clientX,n=t.clientY-o.clientY;return Math.sqrt(e*e+n*n)}getMidpoint(o,t){return{x:(o.clientX+t.clientX)/2,y:(o.clientY+t.clientY)/2}}getState(){return{scale:this.currentScale,panX:this.panOffset.x,panY:this.panOffset.y}}isActive(){return this.isGesturing}hasTwoFingers(){return this.activeTouches>=2}reset(){this.currentScale=1,this.panOffset={x:0,y:0},this.initialScale=1,this.initialDistance=0,this.isGesturing=!1,this.onGestureChange(this.getState())}setScale(o){this.currentScale=Math.max(this.minScale,Math.min(this.maxScale,o)),this.onGestureChange(this.getState())}setPan(o,t){this.panOffset={x:o,y:t},this.onGestureChange(this.getState())}destroy(){this.canvas.removeEventListener("touchstart",this.handleTouchStart),this.canvas.removeEventListener("touchmove",this.handleTouchMove),this.canvas.removeEventListener("touchend",this.handleTouchEnd),this.canvas.removeEventListener("touchcancel",this.handleTouchEnd)}};var lo=window.devicePixelRatio||1,vn=25,Q=class extends zt{constructor(t,e){super();this.referenceVideoFrameBuffer=null;this.videoFrameBuffer=null;this.ffmpegFrameExtractor=null;this.isMouseDown=!1;this.buttons=[];this.plugins=[];this.annotatedFrameCoordinates=[];this.videoBlobUrl=null;this.referenceVideoBlobUrl=null;this.frameCounterTimeoutId=null;this._enforcedTotalFrames=null;this.isCursorOverCanvas=!1;this.overlayOpacity=.7;this._theme="dark";this.themeChangeListeners=[];this.layoutManager=null;this.collapseController=null;this.gestureHandler=null;this.gestureState={scale:1,panX:0,panY:0};this.fps=vn;this.plannedFn=null;this.ct=0;this.isCanvasInitialized=!1;this.enforcedCanvasSize=null;this.lastNavigatedFrame=0;this.isProgressBarNavigation=!1;this.isAnnotationsAsVideoActive=!1;this.config=gn(e),this._theme=this.config.theme,this.plugins=dn.map(n=>new n(this)),this.init(t)}prevFrame(){let e=this.playbackFrame-1;e<1?this.playbackFrame=this.totalFrames:this.playbackFrame=e}nextFrame(){let e=this.playbackFrame+1;e>this.totalFrames?this.playbackFrame=1:this.playbackFrame=e}getAnnotatedFrames(){let t=[];return this.timeStack.forEach((e,n)=>{e&&e.length>0&&t.push(n)}),t.sort((e,n)=>e-n)}prevAnnotatedFrame(){let t=this.getAnnotatedFrames();if(t.length===0)return;let e=this.playbackFrame;for(let n=t.length-1;n>=0;n--)if(t[n]<e){this.playbackFrame=t[n];return}this.playbackFrame=t[t.length-1]}nextAnnotatedFrame(){let t=this.getAnnotatedFrames();if(t.length===0)return;let e=this.playbackFrame;for(let n of t)if(n>e){this.playbackFrame=n;return}this.playbackFrame=t[0]}get theme(){return this._theme}setTheme(t){this._theme=t,pe(t),this.themeChangeListeners.forEach(e=>e(t))}onThemeChange(t){return this.themeChangeListeners.push(t),()=>{let e=this.themeChangeListeners.indexOf(t);e!==-1&&this.themeChangeListeners.splice(e,1)}}setLayout(t){this.layoutManager||(this.layoutManager=new Mt(this)),this.layoutManager.setLayout(t,{sidebarPosition:this.config.toolbar.sidebarPosition})}getLayout(){var t,e;return(e=(t=this.layoutManager)==null?void 0:t.getCurrentLayout())!=null?e:this.config.layout}collapseToolbar(){var t;(t=this.collapseController)==null||t.collapse()}expandToolbar(){var t;(t=this.collapseController)==null||t.expand()}toggleToolbar(){var t;(t=this.collapseController)==null||t.toggle()}isToolbarCollapsed(){var t,e;return(e=(t=this.collapseController)==null?void 0:t.collapsed)!=null?e:!1}setGesturesEnabled(t){t&&!this.gestureHandler?(this.gestureHandler=new Pt(this.canvas,e=>{this.applyGestureTransform(e)}),this.gestureHandler.init()):!t&&this.gestureHandler&&(this.gestureHandler.destroy(),this.gestureHandler=null,this.resetZoom())}isGesturesEnabled(){return this.gestureHandler!==null}resetZoom(){var t;this.gestureState={scale:1,panX:0,panY:0},(t=this.gestureHandler)==null||t.reset(),this.redrawFullCanvas()}getZoomScale(){return this.gestureState.scale}applyGestureTransform(t){this.gestureState=t,this.redrawFullCanvas()}removeGlobalShape(t){this.globalShapes=this.globalShapes.filter(e=>e.type!==t)}addGlobalShape(t){this.globalShapes.push(t)}get selectedColor(){return this.colorPicker.value}get selectedStrokeSize(){return this.strokeSizePicker.valueAsNumber}get currentTool(){return this._currentTool}set currentTool(t){let e=this._currentTool;e&&(this.getButtonForTool(e).classList.remove("active"),this.pluginForTool(e).onDeactivate()),this._currentTool=t,this.canvas.style.cursor=t?"pointer":"default",t&&(this.getButtonForTool(t).classList.add("active"),this.pluginForTool(t).onActivate())}enableFrameRateDetection(){if(this.destructors.find(n=>n.name==="frameRateDetector"))return;let t=this.videoElement;if(t.tagName==="IMG")return;let e=un(t,n=>{this.fps=n});Object.defineProperty(e,"name",{value:"frameRateDetector"}),this.destructors.push(e)}timeToFrame(t){return Math.max(1,Math.round(t*this.fps))}get playbackFrame(){return this.videoElement instanceof HTMLImageElement?1:this.timeToFrame(this.videoElement.currentTime)}set playbackFrame(t){if(this.videoElement instanceof HTMLImageElement)return;let e=t/this.fps;this.videoElement.currentTime=e,this.rvf(()=>{this.show()})}rvf(t){this.plannedFn=t}get canvasWidth(){var t,e;return(e=(t=this.enforcedCanvasSize)==null?void 0:t.width)!=null?e:0}get canvasHeight(){var t,e;return(e=(t=this.enforcedCanvasSize)==null?void 0:t.height)!=null?e:0}get aspectRatio(){return this.canvasHeight===0?0:this.canvasWidth/this.canvasHeight}get isMobile(){var e,n,a;let t=(a=(n=(e=this.config)==null?void 0:e.mobile)==null?void 0:n.breakpoint)!=null?a:960;return window.innerWidth<t}get progressBarCoordinates(){let t=this.isMobile?30:10,e=5,a=this.canvasWidth-e-55,r=e,c=this.canvasHeight-t;return{x:r,y:c,width:a,height:t}}get shapes(){return this.timeStack.has(this.activeTimeFrame)||this.timeStack.set(this.activeTimeFrame,[]),this.timeStack.get(this.activeTimeFrame)}set shapes(t){this.timeStack.set(this.activeTimeFrame,t)}get undoStack(){return this.undoTimeStack.has(this.activeTimeFrame)||this.undoTimeStack.set(this.activeTimeFrame,[]),this.undoTimeStack.get(this.activeTimeFrame)}set undoStack(t){this.undoTimeStack.set(this.activeTimeFrame,t)}get pixelRatio(){return lo}setVideoBlob(n){return k(this,arguments,function*(t,e=this.fps){this.videoBlobUrl&&URL.revokeObjectURL(this.videoBlobUrl);let a=URL.createObjectURL(t);this.videoBlobUrl=a,yield this.setVideoUrl(a,e),this.plugins.forEach(r=>{r.on("videoBlobSet",t)})})}setVideoUrl(n){return k(this,arguments,function*(t,e=this.fps){if(this.videoElement instanceof HTMLImageElement)return;let a=this.videoElement;a.src=t.toString(),yield this.videoElement.load(),this.setFrameRate(e),this.videoFrameBuffer&&(this.videoFrameBuffer.destroy(),this.videoFrameBuffer=new ht(a,e,!1),this.videoFrameBuffer.isMobile=this.isMobile),this.setCanvasSize()})}enableVideoFrameBuffer(){this.videoElement instanceof HTMLImageElement||(this.videoFrameBuffer=new ht(this.videoElement,this.fps,!1),this.videoFrameBuffer.isMobile=this.isMobile)}setFFmpegFrameExtractor(t){this.ffmpegFrameExtractor=t,this.redrawFullCanvas()}hasFFmpegFrame(t){var e,n;return(n=(e=this.ffmpegFrameExtractor)==null?void 0:e.hasFrame(t))!=null?n:!1}hide(){this.stopAnnotationsAsVideo(),this.hideControls(),this.hideCanvas()}showControls(){this.uiContainer.style.display=""}hideControls(){this.uiContainer.style.display="none"}showCanvas(){this.canvas.style.display="block"}hideCanvas(){this.canvas.style.display="none"}updateActiveTimeFrame(t=void 0){this.activeTimeFrame=t?this.timeToFrame(t):this.playbackFrame}show(){this.stopAnnotationsAsVideo(),this.updateActiveTimeFrame(),this.showCanvas(),this.showControls(),this.redrawFullCanvas()}setCanvasSettings(){this.ctx.strokeStyle=this.selectedColor,this.ctx.fillStyle=this.selectedColor,this.ctx.lineWidth=this.selectedStrokeSize}pluginForTool(t){if(this.isDestroyed)throw new Error("AnnotationTool is destroyed");let e=this.plugins.find(n=>n.name===t);if(!e)throw new Error(`No plugin found for tool ${t}`);return e}getButtonForTool(t){return this.buttons.find(e=>e.dataset.tool===t)}bindContext(){this.handleMouseDown=this.handleMouseDown.bind(this),this.handleMouseMove=this.handleMouseMove.bind(this),this.handleMouseUp=this.handleMouseUp.bind(this),this.setCanvasSize=this.setCanvasSize.bind(this),this.onKeyDown=this.onKeyDown.bind(this)}initProperties(){var t;this.isDestroyed=!1,this.isProgressBarNavigation=!1,this.shapes=[],this.globalShapes=[],this.currentTool=this.isMobile?null:(t=this.config.toolbar.defaultTool)!=null?t:null,pe(this._theme),this.layoutManager=new Mt(this),this.layoutManager.setLayout(this.config.layout,{sidebarPosition:this.config.toolbar.sidebarPosition}),this.isMobile&&this.config.mobile.collapsibleToolbars&&(this.collapseController=new oe(this.uiContainer,this.config.mobile.autoCollapse),this.collapseController.init()),this.isMobile&&this.config.mobile.gesturesEnabled&&(this.gestureHandler=new Pt(this.canvas,e=>{this.applyGestureTransform(e)}),this.gestureHandler.init())}setVideoStyles(){this.videoElement.style.objectFit="cover",this.videoElement.style.objectPosition="left top"}get frameCallbackSupported(){return"requestVideoFrameCallback"in HTMLVideoElement.prototype}initFrameCounter(){if(!this.frameCallbackSupported){this.frameCounterTimeoutId=setTimeout(()=>{var t;this.isDestroyed||((t=this.plannedFn)==null||t.call(this),this.plannedFn=null,this.initFrameCounter(),this.updateActiveTimeFrame(),this.playAnnotationsAsVideo())},1e3/this.fps);return}this.withVideo(t=>{t.requestVideoFrameCallback((e,n)=>{var a,r;this.isCanvasInitialized||this._setCanvasSize(),(a=this.videoFrameBuffer)==null||a.tick(e,n),(r=this.plannedFn)==null||r.call(this),this.plannedFn=null,this.raf(()=>{this.initFrameCounter(),this.updateActiveTimeFrame(n.mediaTime),this.playAnnotationsAsVideo()})})})}init(t){this.videoElement=t,this.setVideoStyles(),this.initFrameCounter(),this.bindContext(),this.initCanvas(),this.initUI(),this.initProperties(),this.setCanvasSize()}onKeyDown(t){(t.ctrlKey||t.metaKey)&&t.key.toLowerCase()==="z"&&this.handleUndo()}handleUndo(){this.undoStack.length>0&&(this.shapes=this.undoStack.pop(),this.redrawFullCanvas())}destroy(){var a,r,c,l,s,h,m,u,p,f,v;if(this.isDestroyed)return;super.destroy(),this.stopAnnotationsAsVideo(),this.frameCounterTimeoutId&&(clearTimeout(this.frameCounterTimeoutId),this.frameCounterTimeoutId=null),this.videoBlobUrl&&(URL.revokeObjectURL(this.videoBlobUrl),this.videoBlobUrl=null),this.referenceVideoBlobUrl&&(URL.revokeObjectURL(this.referenceVideoBlobUrl),this.referenceVideoBlobUrl=null),this.currentTool=null,this.plugins.forEach(y=>y.reset()),this.annotatedFrameCoordinates=[],this.setFrameRate(vn);let t=this.strokeSizePicker.parentElement;if((a=t==null?void 0:t.parentNode)==null||a.removeChild(t),this.referenceVideoElement){let y=this.referenceVideoElement.parentElement;(r=y==null?void 0:y.parentNode)==null||r.removeChild(y),this.referenceVideoElement=null}let e=this.colorPicker.parentElement;(c=e==null?void 0:e.parentNode)==null||c.removeChild(e),this.buttons.forEach(y=>{var g;(g=y.parentNode)==null||g.removeChild(y)}),this.buttons=[],(l=this.uiContainer.parentNode)==null||l.removeChild(this.uiContainer),(s=this.canvas.parentNode)==null||s.removeChild(this.canvas),(h=this.playerControlsContainer.parentElement)==null||h.removeChild(this.playerControlsContainer),["strokeSizePicker","colorPicker","uiContainer","playerControlsContainer","canvas","ctx","videoElement"].forEach(y=>{delete this[y]}),this.activeTimeFrame=0,this.isDestroyed=!0,(m=this.referenceVideoFrameBuffer)==null||m.destroy(),this.referenceVideoFrameBuffer=null,(u=this.videoFrameBuffer)==null||u.destroy(),this.videoFrameBuffer=null,(p=this.layoutManager)==null||p.destroy(),this.layoutManager=null,(f=this.collapseController)==null||f.destroy(),this.collapseController=null,(v=this.gestureHandler)==null||v.destroy(),this.gestureHandler=null,this.gestureState={scale:1,panX:0,panY:0}}_setCanvasSize(){var u;let t=getComputedStyle(this.videoElement),e=parseInt(t.width,10),n=this.videoElement,a=n.videoWidth/n.videoHeight;if(isNaN(e)||!n.videoWidth||!n.videoHeight)return this.isCanvasInitialized=!1,this.setCanvasSettings(),!1;let r=n.parentElement,c=!!((u=document.fullscreenElement)!=null?u:document.webkitFullscreenElement),l=Math.min(e,n.videoWidth),s=Math.floor(l/a);if(c&&r){let v=window.innerWidth,y=window.innerHeight-90;v/y>a?(s=y,l=s*a):(l=v,s=l/a),n.style.width=`${l}px`,n.style.height=`${s}px`,n.style.marginTop="40px",n.style.marginBottom="50px"}else n.style.width=`${l}px`,n.style.height=`${s}px`,n.style.marginTop="",n.style.marginBottom="";this.isCanvasInitialized=n.videoWidth>0&&n.videoHeight>0,this.canvas.width=l*this.pixelRatio,this.canvas.height=s*this.pixelRatio,this.canvas.style.width=`${l}px`,this.canvas.style.height=`${s}px`,this.canvas.style.position="absolute";let h=n.offsetTop,m=n.offsetLeft;return this.canvas.style.top=`${h}px`,this.canvas.style.left=`${m}px`,this.enforcedCanvasSize={width:l,height:s},this.ctx.scale(this.pixelRatio,this.pixelRatio),this.setCanvasSettings(),!0}setCanvasSize(){this._setCanvasSize()&&(this.syncVideoSizes(),this.redrawFullCanvas())}replaceShape(t,e){let n=this.serialize([t])[0];this.undoStack.push([...this.shapes]),this.shapes[e]=n}addShape(t){let e=this.serialize([t])[0];this.undoStack.push([...this.shapes]),this.shapes.push(e)}get msPerFrame(){return 1e3/this.fps}syncVideoSizes(){this.withRefVideo(t=>{let n=this.videoElement.getBoundingClientRect();t.style.position="fixed",t.style.top=`${n.top}px`,t.style.left=`${n.left}px`})}addReferenceVideoByURL(a){return k(this,arguments,function*(t,e=this.fps,n="video/mp4"){var s;let r=yield fetch(t).then(h=>h.blob()),c=new Blob([r],{type:n});this.referenceVideoBlobUrl&&URL.revokeObjectURL(this.referenceVideoBlobUrl);let l=window.URL.createObjectURL(c);this.referenceVideoBlobUrl=l,this.referenceVideoElement?((s=this.referenceVideoFrameBuffer)==null||s.destroy(),this.referenceVideoFrameBuffer=new ht(this.referenceVideoElement,e),this.referenceVideoFrameBuffer.isMobile=this.isMobile,this.referenceVideoFrameBuffer.start()):(this.referenceVideoElement=document.createElement("video"),this.withRefVideo(h=>{this.isMobile?(h.style.zIndex="2",h.style.display="block",h.style.top="0",h.style.left="0",h.style.opacity="0.25",h.style.width="20px",h.style.height="15px"):(h.style.zIndex="-1",h.style.display="none",h.style.width="100px",h.style.height="70px"),h.style.objectFit="cover",h.style.objectPosition="left top",h.muted=!0,h.volume=0,h.playsInline=!0,h.autoplay=!1,h.controls=!1,h.loop=!0,this.videoElement.after(h),this.referenceVideoFrameBuffer=new ht(h,e),this.referenceVideoFrameBuffer.isMobile=this.isMobile,this.referenceVideoFrameBuffer.start()}),this.syncVideoSizes()),this.referenceVideoElement.src=l,this.referenceVideoElement.play().then(()=>{this.showButton("compare")}).catch(()=>{this.hideButton("compare")})})}hideButton(t){let e=this.getButtonForTool(t);e.style.display="none"}showButton(t){let e=this.getButtonForTool(t);e.style.display=""}addSingletonShape(t){let e=this.serialize([t])[0],n=this.shapes.filter(a=>a.type!==t.type);this.replaceFrame(this.playbackFrame,[...n,e])}serialize(t=this.shapes){let e=this.canvasWidth,n=this.canvasHeight;return t.map(a=>this.pluginForTool(a.type).normalize(a,e,n))}deserialize(t){let e=1/this.canvasWidth,n=1/this.canvasHeight;return t.map(a=>this.pluginForTool(a.type).normalize(a,e,n))}getRelativeCoords(t){let e=this.canvas.getBoundingClientRect();return{x:this.getEventX(t)-e.left,y:this.getEventY(t)-e.top}}handleMouseDown(t){var n,a;if(t.preventDefault(),this.isMouseDown=!0,Ot(t)||(n=this.gestureHandler)!=null&&n.hasTwoFingers())return;let e=this.frameFromProgressBar(t,!0);if(e){this.isProgressBarNavigation=!0;let r=this.getAnnotationFrame(t);this.isVideoPaused&&(r!==null?this.playbackFrame=r:this.playbackFrame=e);return}this.currentTool&&((a=this.collapseController)!=null&&a.autoCollapseEnabled)&&this.collapseController.collapse(),this.currentTool&&this.pluginForTool(this.currentTool).onPointerDown(t)}get isDrawing(){return this.currentTool?this.pluginForTool(this.currentTool).isDrawing:!1}get isVideoPaused(){return this.videoElement.tagName==="VIDEO"?this.videoElement.paused:!0}get hasGlobalOverlays(){return this.globalShapes.length>0}handleMouseMove(t){if(t.preventDefault(),!Ot(t)){if(this.isMouseDown){let e=this.isProgressBarNavigation?this.frameFromProgressBar(t,!1):null;if(e!==null&&!this.isDrawing){if(e===this.lastNavigatedFrame)return;this.lastNavigatedFrame=e,this.activeTimeFrame=e,this.isVideoPaused&&(this.playbackFrame=e),this.clearCanvas(),this.hasGlobalOverlays||this.addVideoOverlay(),this.drawShapesOverlay(),this.addProgressBarOverlay();return}else this.hideControls(),this.clearCanvas(),this.hasGlobalOverlays||this.addVideoOverlay(),this.drawShapesOverlay()}else this.redrawFullCanvas();this.currentTool&&this.pluginForTool(this.currentTool).onPointerMove(t)}}getEventX(t){return t.clientX}getEventY(t){return t.clientY}handleMouseUp(t){var e;this.isMouseDown=!1,this.isProgressBarNavigation=!1,this.showControls(),!Ot(t)&&(this.currentTool&&this.pluginForTool(this.currentTool).onPointerUp(t),(e=this.collapseController)!=null&&e.autoCollapseEnabled&&this.collapseController.expand(),this.redrawFullCanvas())}focusOnMediaNode(){this.videoElement.focus()}drawShapesOverlay(){var n,a;let t={strokeStyle:this.ctx.strokeStyle,fillStyle:this.ctx.fillStyle,lineWidth:this.ctx.lineWidth,globalAlpha:this.ctx.globalAlpha},e=this.gestureState.scale!==1||this.gestureState.panX!==0||this.gestureState.panY!==0;if(e){this.ctx.save(),this.ctx.translate(this.gestureState.panX,this.gestureState.panY);let r=this.canvasWidth/2,c=this.canvasHeight/2;this.ctx.translate(r,c),this.ctx.scale(this.gestureState.scale,this.gestureState.scale),this.ctx.translate(-r,-c)}for(let r of this.deserialize(this.globalShapes)){this.ctx.strokeStyle=r.strokeStyle,this.ctx.fillStyle=r.fillStyle,this.ctx.lineWidth=r.lineWidth,this.ctx.globalAlpha=(n=r.opacity)!=null?n:1;try{this.pluginForTool(r.type).draw(r)}catch(c){console.error(c)}}for(let r of this.deserialize(this.shapes)){this.ctx.strokeStyle=r.strokeStyle,this.ctx.fillStyle=r.fillStyle,this.ctx.lineWidth=r.lineWidth,this.ctx.globalAlpha=(a=r.opacity)!=null?a:1;try{this.pluginForTool(r.type).draw(r)}catch(c){console.error(c)}}e&&this.ctx.restore(),this.ctx.strokeStyle=t.strokeStyle,this.ctx.fillStyle=t.fillStyle,this.ctx.lineWidth=t.lineWidth,this.ctx.globalAlpha=t.globalAlpha}clearCanvas(){this.ctx.clearRect(0,0,this.canvasWidth,this.canvasHeight)}frameToDataUrl(){try{this.clearCanvas(),this.addVideoOverlay(),this.addFrameSquareOverlay(),this.drawShapesOverlay();let t=this.canvas.toDataURL("image/png");return this.redrawFullCanvas(),t}catch(t){return console.error(t),null}}redrawFullCanvas(){this.clearCanvas(),this.addVideoOverlay(),this.drawShapesOverlay(),this.drawSelectionHandles(),this.addFrameSquareOverlay(),this.addProgressBarOverlay()}drawSelectionHandles(){if(this.currentTool==="move")try{this.pluginForTool("move").drawResizeHandles()}catch(t){}}replaceFrame(t,e){this.timeStack.set(t,this.parseShapes(this.stringifyShapes(e)))}addShapesToFrame(t,e){let n=this.timeStack.get(t)||[];this.timeStack.set(t,[...n,...this.parseShapes(this.stringifyShapes(e))])}setFrameRate(t){var e;(e=this.destructors.find(n=>n.name==="frameRateDetector"))==null||e(),this.fps=t}stringifyShapes(t){return JSON.stringify(t,(e,n)=>e==="image"?n.src:n)}parseShapes(t){return JSON.parse(t,(e,n)=>{if(e==="image"){let a=new Image;return a.src=n,a}return n})}filterNonSerializableShapes(t){return t.filter(e=>e.type!=="image")}saveCurrentFrame(){return{frame:this.playbackFrame,version:1,fps:this.fps,shapes:this.parseShapes(this.stringifyShapes(this.filterNonSerializableShapes(this.shapes)))}}loadAllFrames(t){this.cleanFrameStacks(),t.forEach(e=>{let n=e.shapes||[];this.timeStack.set(e.frame,this.parseShapes(this.stringifyShapes(n)))})}appendFrames(t){t.forEach(e=>{this.addShapesToFrame(e.frame,e.shapes)})}saveAllFrames(){return Array.from(this.timeStack.keys()).filter(a=>{var r;return(r=this.timeStack.get(a))==null?void 0:r.length}).map(a=>{var r;return{frame:a,fps:this.fps,version:1,shapes:this.filterNonSerializableShapes((r=this.timeStack.get(a))!=null?r:[])}})}getAnnotationFrame(t){var c,l;let e=t.offsetX,n=t.offsetY,a=this.isMobile?20:12;return(l=(c=this.annotatedFrameCoordinates.find(s=>e>=s.x-a&&e<=s.x+a&&n>=s.y-a&&n<=s.y+a))==null?void 0:c.frame)!=null?l:null}get totalFrames(){if(this._enforcedTotalFrames!==null)return this._enforcedTotalFrames;let t=this.videoElement;return t.tagName!=="VIDEO"?1:Math.round(t.duration*this.fps)}setTotalFrames(t){this._enforcedTotalFrames=t!==null?Math.max(1,Math.round(t)):null}getEnforcedTotalFrames(){return this._enforcedTotalFrames}frameFromProgressBar(t,e=!0){if(this.videoElement.tagName!=="VIDEO")return null;let{x:a,width:r,height:c,y:l}=this.progressBarCoordinates,s=t.offsetX,h=t.offsetY,m=()=>{let u=Math.round((s-a)/r*this.totalFrames);return Math.max(1,Math.min(u,this.totalFrames))};return e?s>=a&&s<=a+r&&h>=l&&h<=l+c?m():null:s>=a&&s<=a+r?m():null}hasAnnotationsForFrame(t){if(this.globalShapes.length>0)return!0;if(this.timeStack.has(t)){let e=this.timeStack.get(t);return e&&e.length>0}return!1}stopAnnotationsAsVideo(){this.isAnnotationsAsVideoActive=!1}startAnnotationsAsVideo(){this.isAnnotationsAsVideoActive=!0,this.playAnnotationsAsVideo()}playAnnotationsAsVideo(){this.isAnnotationsAsVideoActive&&(this.clearCanvas(),this.addVideoOverlay(),this.drawShapesOverlay(),(this.isCursorOverCanvas||this.isMobile)&&(this.addFrameSquareOverlay(),this.addProgressBarOverlay()))}};function yn(i=this.activeTimeFrame){this.ctx.save(),this.ctx.fillStyle="rgba(0, 0, 0, 0.5)";let o=50,t=30,e=20;this.ctx.fillRect(this.canvasWidth-o,this.canvasHeight-t,o,t),this.ctx.fillStyle="white",this.ctx.font=`${e}px sans-serif`,this.ctx.fillText(`${i}`.padStart(3,"0"),this.canvasWidth-40,this.canvasHeight-7),this.ctx.restore()}function xn(){var h,m;let i=this.videoElement;if(i.tagName!=="VIDEO")return;let o=i.getBoundingClientRect(),t=this.canvas.getBoundingClientRect(),e=o.left-t.left,n=o.top-t.top,a=this.activeTimeFrame,r=null,c,l,s=(h=this.ffmpegFrameExtractor)==null?void 0:h.getFrame(a||1);if(s)r=s,c=s.width,l=s.height;else{let u=(m=this.videoFrameBuffer)==null?void 0:m.getFrame(a||0);u?(r=u,c=u.width,l=u.height):(r=i,c=i.videoWidth,l=i.videoHeight)}this.ctx.drawImage(r,0,0,c,l,e,n,this.canvasWidth,this.canvasHeight)}function bn(){if(this.videoElement.tagName!=="VIDEO")return;this.annotatedFrameCoordinates=[];let t=Array.from(this.timeStack.keys()).filter(f=>{var v;return(v=this.timeStack.get(f))==null?void 0:v.length}),e=this.totalFrames,{x:n,width:a,height:r,y:c}=this.progressBarCoordinates,l=t.map(f=>Math.round(f/e*a));this.ctx.save(),this.ctx.fillStyle="rgba(0, 0, 0, 0.5)",this.ctx.fillRect(n,c,a,r),this.ctx.fillStyle=ct.y;let s=this.isMobile?16:8;l.forEach((f,v)=>{this.ctx.beginPath();let y=n+f,g=this.canvasHeight-r/2;this.ctx.fillRect(y-s/2,g-s/2,s,s),this.annotatedFrameCoordinates.push({x:y,y:g,frame:t[v]})});let h=this.isProgressBarNavigation&&this.lastNavigatedFrame>0?this.lastNavigatedFrame:this.playbackFrame,m=Math.round(h/e*a)+n;this.ctx.fillStyle="white",this.ctx.beginPath();let u=m,p=this.canvasHeight-r/2;this.ctx.beginPath(),this.ctx.fillRect(u-s/2,p-s/2,s,s),this.ctx.fill(),this.ctx.restore()}function Te(i,o=1){let t=i.replace(/^#/,""),e=0,n=0,a=0;return t.length===3?(e=parseInt(t[0]+t[0],16)/255,n=parseInt(t[1]+t[1],16)/255,a=parseInt(t[2]+t[2],16)/255):t.length===6?(e=parseInt(t.substring(0,2),16)/255,n=parseInt(t.substring(2,4),16)/255,a=parseInt(t.substring(4,6),16)/255):t.length===8&&(e=parseInt(t.substring(0,2),16)/255,n=parseInt(t.substring(2,4),16)/255,a=parseInt(t.substring(4,6),16)/255,o=parseInt(t.substring(6,8),16)/255),[e,n,a,o]}function wt(i,o=1){if(typeof i=="string"){if(i.startsWith("rgb")){let t=i.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);if(t)return[parseInt(t[1])/255,parseInt(t[2])/255,parseInt(t[3])/255,t[4]?parseFloat(t[4]):o]}return Te(i,o)}return[1,0,0,o]}function wn(i,o,t,e){let n=Math.cos(e),a=Math.sin(e),r=i.x-o,c=i.y-t;return{x:o+r*n-c*a,y:t+r*a+c*n}}function ut(i,o,t,e){if(!o.rotation)return i;let n=o.rotationCenterX!==void 0?o.rotationCenterX:t,a=o.rotationCenterY!==void 0?o.rotationCenterY:e;return i.map(r=>wn(r,n,a,o.rotation))}function Tn(i,o,t){return{x:i*2-1,y:(1-o*2)/t}}function ft(i){return`[ [ ${i.map(o=>ie(o)).join(" ")} ] ]`}function mt(i){return`[ ${i.map(o=>ie(o)).join(" ")} ]`}function ie(i){return Number.isInteger(i)?String(i):i.toFixed(9).replace(/\.?0+$/,"")||"0"}function pt(i,o){return`[ ${i.map(e=>{let n=Tn(e.x,e.y,o);return`[ ${ie(n.x)} ${ie(n.y)} ]`}).join(" ")} ]`}function co(i,o,t,e,n){var u;let a=wt(i.strokeStyle,(u=i.opacity)!=null?u:1),r=e/n,c=0,l=0;for(let p of i.points)c+=p.x,l+=p.y;c/=i.points.length,l/=i.points.length;let s=ut(i.points,i,c,l),h=i.lineWidth/n,m=new Array(s.length).fill(h);return{name:`"pen:${o}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:ft(a)},{type:"float",name:"width",value:mt(m)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(s,r)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]}}function ho(i,o,t,e,n){var u;let a=wt(i.strokeStyle,(u=i.opacity)!=null?u:1),r=e/n,c=(i.x1+i.x2)/2,l=(i.y1+i.y2)/2,s=[{x:i.x1,y:i.y1},{x:i.x2,y:i.y2}];s=ut(s,i,c,l);let h=i.lineWidth/n,m=new Array(s.length).fill(h);return{name:`"pen:${o}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:ft(a)},{type:"float",name:"width",value:mt(m)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(s,r)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]}}function uo(i,o,t,e,n){var E;let a=wt(i.strokeStyle,(E=i.opacity)!=null?E:1),r=ft(a),c=e/n,l=(i.x1+i.x2)/2,s=(i.y1+i.y2)/2,h=[{x:i.x1,y:i.y1},{x:i.x2,y:i.y2}],u=(10+2.5*i.lineWidth)/((e+n)/2),p=Math.PI/6,f=Math.atan2(i.y2-i.y1,i.x2-i.x1),v=[{x:i.x2,y:i.y2},{x:i.x2-u*Math.cos(f+p),y:i.y2-u*Math.sin(f+p)}],y=[{x:i.x2,y:i.y2},{x:i.x2-u*Math.cos(f-p),y:i.y2-u*Math.sin(f-p)}];h=ut(h,i,l,s),v=ut(v,i,l,s),y=ut(y,i,l,s);let g=i.lineWidth/n,x=new Array(2).fill(g);return[{name:`"pen:${o}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:r},{type:"float",name:"width",value:mt(x)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(h,c)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]},{name:`"pen:${o+1}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:r},{type:"float",name:"width",value:mt(x)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(v,c)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]},{name:`"pen:${o+2}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:r},{type:"float",name:"width",value:mt(x)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(y,c)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]}]}function mo(i,o,t,e,n){var u;let a=wt(i.strokeStyle,(u=i.opacity)!=null?u:1),r=e/n,c=i.x+i.width/2,l=i.y+i.height/2,s=[{x:i.x,y:i.y},{x:i.x+i.width,y:i.y},{x:i.x+i.width,y:i.y+i.height},{x:i.x,y:i.y+i.height},{x:i.x,y:i.y}];s=ut(s,i,c,l);let h=i.lineWidth/n,m=new Array(s.length).fill(h);return{name:`"pen:${o}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:ft(a)},{type:"float",name:"width",value:mt(m)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(s,r)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]}}function po(i,o,t,e,n,a=32){var p;let r=wt(i.strokeStyle,(p=i.opacity)!=null?p:1),c=e/n,l=i.x,s=i.y,h=[];for(let f=0;f<=a;f++){let v=f/a*Math.PI*2;h.push({x:i.x+Math.cos(v)*i.radius,y:i.y+Math.sin(v)*i.radius})}h=ut(h,i,l,s);let m=i.lineWidth/n,u=new Array(h.length).fill(m);return{name:`"pen:${o}:${t}:User"`,properties:[{type:"float",dimensions:4,name:"color",value:ft(r)},{type:"float",name:"width",value:mt(u)},{type:"string",name:"brush",value:'"circle"'},{type:"float",dimensions:2,name:"points",value:pt(h,c)},{type:"int",name:"debug",value:0},{type:"int",name:"join",value:3},{type:"int",name:"cap",value:1},{type:"int",name:"splat",value:0}]}}function fo(i,o,t,e,n){var p,f,v,y;let a=wt(i.fillStyle,(p=i.opacity)!=null?p:1),r=e/n,c=i.x,l=i.y,s=0;if(i.rotation){let g=(f=i.rotationCenterX)!=null?f:i.x,x=(v=i.rotationCenterY)!=null?v:i.y,E=wn({x:i.x,y:i.y},g,x,i.rotation);c=E.x,l=E.y,s=i.rotation*180/Math.PI}let h=Tn(c,l,r),u=(16+((y=i.lineWidth)!=null?y:1)*.5)/n;return{name:`"text:${o}:${t}:User"`,properties:[{type:"float",dimensions:2,name:"position",value:ft([h.x,h.y])},{type:"float",dimensions:4,name:"color",value:ft(a)},{type:"float",name:"spacing",value:.8},{type:"float",name:"size",value:u},{type:"float",name:"scale",value:1},{type:"float",name:"rotation",value:s},{type:"string",name:"font",value:'""'},{type:"string",name:"text",value:`"${i.text.replace(/"/g,'\\"').replace(/\n/g,"\\n")}"`},{type:"string",name:"origin",value:'""'},{type:"int",name:"debug",value:0}]}}function go(i,o,t,e,n){switch(i.type){case"curve":return[co(i,o,t,e,n)];case"line":return[ho(i,o,t,e,n)];case"arrow":return uo(i,o,t,e,n);case"rectangle":return[mo(i,o,t,e,n)];case"circle":return[po(i,o,t,e,n)];case"text":return[fo(i,o,t,e,n)];case"eraser":case"move":case"image":case"compare":case"audio-peaks":case"selection":return[];default:return[]}}function vo(i){let o=[];o.push(`    ${i.name}`),o.push("    {");for(let t of i.properties){let e=t.dimensions?`${t.type}[${t.dimensions}]`:t.type,n=typeof t.value=="string"?t.value:String(t.value);o.push(`        ${e} ${t.name} = ${n}`)}return o.push("    }"),o.join(`
-`)}function Se(i,o){let{mediaPath:t,width:e,height:n,sessionName:a="sm-annotate-session"}=o,r=[];r.push("GTOa (4)"),r.push(""),r.push("# Generated by sm-annotate OpenRV exporter"),r.push(`# Media: ${t}`),r.push(`# Resolution: ${e}x${n}`),r.push(""),r.push("RVSession : RVSession (4)"),r.push("{"),r.push("    session"),r.push("    {"),r.push(`        string name = "${a}"`),r.push("        int version = 4"),r.push("    }"),r.push("}"),r.push(""),r.push("sourceGroup000000_source : RVFileSource (1)"),r.push("{"),r.push("    media"),r.push("    {"),r.push(`        string movie = "${t}"`),r.push("    }"),r.push("    request"),r.push("    {"),r.push(`        int width = ${e}`),r.push(`        int height = ${n}`),r.push("    }"),r.push("}"),r.push("");let c=[],l=0;for(let s of i)for(let h of s.shapes){let m=go(h,l,s.frame,e,n);c.push(...m),l+=m.length}if(c.length>0){let s=new Map;for(let h of c){let m=h.name.match(/:\d+:(\d+):/);if(m){let u=parseInt(m[1]);s.has(u)||s.set(u,[]);let p=h.name.startsWith('"')&&h.name.endsWith('"')?h.name.slice(1,-1):h.name;s.get(u).push(p)}}r.push("sourceGroup000000_paint : RVPaint (3)"),r.push("{"),r.push("    paint"),r.push("    {"),r.push(`        int nextId = ${l}`),r.push("        int nextAnnotationId = 0"),r.push("        int show = 1"),r.push("        string exclude = [ ]"),r.push("        string include = [ ]"),r.push("    }");for(let h of c)r.push(vo(h));for(let[h,m]of s)r.push(`    "frame:${h}"`),r.push("    {"),r.push(`        string order = [ ${m.map(u=>`"${u}"`).join(" ")} ]`),r.push("    }");r.push("}")}return r.join(`
-`)}function ae(i,o,t="annotations.rv"){let e=Se(i,o),n=new Blob([e],{type:"text/plain"}),a=URL.createObjectURL(n),r=document.createElement("a");r.href=a,r.download=t,document.body.appendChild(r),r.click(),document.body.removeChild(r),URL.revokeObjectURL(a)}function re(i){if(i.length<3)return"#000000";let o=Math.round(i[0]*255),t=Math.round(i[1]*255),e=Math.round(i[2]*255);return`#${o.toString(16).padStart(2,"0")}${t.toString(16).padStart(2,"0")}${e.toString(16).padStart(2,"0")}`}function yo(i,o){if(i=i.trim(),i.startsWith("[")&&i.endsWith("]")){let t=i.slice(1,-1).trim();if(t==="")return o==="string"?[]:[];if(o==="string"){let n=t.match(/"([^"\\]|\\.)*"/g);return n?n.map(a=>a.slice(1,-1).replace(/\\"/g,'"').replace(/\\n/g,`
-`)):[]}if(t.includes("[")){let n=[],a=t.match(/-?\d+\.?\d*(?:e[+-]?\d+)?/gi);if(a)for(let r of a)n.push(Number(r));return n}return t.split(/\s+/).filter(n=>n.length>0&&!isNaN(Number(n))).map(Number)}return i.startsWith('"')&&i.endsWith('"')?i.slice(1,-1).replace(/\\"/g,'"').replace(/\\n/g,`
-`):Number(i)}function xo(i){var r;let o=[],t=i.split(`
-`),e=null,n=null,a=0;for(let c=0;c<t.length;c++){let l=t[c].trim();if(l===""||l.startsWith("#")||l==="GTOa (4)")continue;let s=l.match(/^(\S+)\s*:\s*(\S+)\s*\((\d+)\)\s*$/);if(s&&a===0){e={name:s[1],protocol:s[2],version:parseInt(s[3]),components:new Map},o.push(e);continue}if(l==="{"){a++;continue}if(l==="}"){a--,a===1&&(n=null),a===0&&(e=null);continue}if(e&&a>=1){if(a===1){let m=l.match(/^"([^"]+)"(\s*\{)?$/);if(m){n=m[1],e.components.has(n)||e.components.set(n,new Map),m[2]&&a++;continue}let u=l.match(/^([^\s=\[]+)(\s*\{)?$/);if(u&&!l.includes("=")){n=u[1],e.components.has(n)||e.components.set(n,new Map),u[2]&&a++;continue}}let h=l.match(/^(\w+)(?:\[([^\]]*)\])?\s+(\w+)\s*=\s*(.+)$/);if(h&&n){let[,m,,u,p]=h,f=yo(p,m);(r=e.components.get(n))==null||r.set(u,f)}}}return o}function Sn(i,o,t){return{x:(i+1)/2,y:(1-o*t)/2}}function bo(i,o,t,e,n,a){let r=i.get("points"),c=i.get("color"),l=i.get("width");if(!r||r.length<4)return null;let s=o/t,h=[];for(let f=0;f<r.length;f+=2){let v=Sn(r[f],r[f+1],s);v=En(v.x,v.y,n,a),h.push(v)}let m=c?re(c):"#000000",u=c&&c.length>=4?c[3]:1,p=2;if(typeof l=="number")p=l*e;else if(Array.isArray(l)&&l.length>0){let f=l[0];typeof f=="number"&&(p=f*e)}return n!==void 0&&n!==1&&(p*=n),p=Math.max(1,Math.min(p,50)),{type:"curve",points:h,strokeStyle:m,fillStyle:m,lineWidth:p,opacity:u}}function wo(i,o,t,e,n,a){let r=i.get("position"),c=i.get("color"),l=i.get("text"),s=i.get("size");if(!r||r.length<2||!l)return null;let h=o/t,m=Sn(r[0],r[1],h);m=En(m.x,m.y,n,a);let u=c?re(c):"#000000",p=c&&c.length>=4?c[3]:1,v=(s!=null?s:.01)*e;n!==void 0&&n!==1&&(v*=n);let y=Math.max(1,(v-16)/.5);return{type:"text",x:m.x,y:m.y,text:l,strokeStyle:u,fillStyle:u,lineWidth:y,opacity:p}}function En(i,o,t,e){let n=i,a=o;return t!==void 0&&t!==1&&(n=.5+(i-.5)*t,a=.5+(o-.5)*t),e&&(n-=e.x,a-=e.y),{x:n,y:a}}function Rt(i,o={}){var v,y,g,x,E,R,O,L,D;let t={frames:[]},e=xo(i),n=e.find(w=>w.protocol==="RVSession");if(n){let w=n.components.get("session");if(w){let T=w.get("name");typeof T=="string"&&(t.sessionName=T)}}let a=e.find(w=>w.protocol==="RVFileSource");if(a){let w=a.components.get("media");if(w){let C=w.get("movie");typeof C=="string"&&(t.mediaPath=C)}let T=a.components.get("proxy");if(T){let C=T.get("size");C&&C.length>=2&&(t.dimensions={width:C[0],height:C[1]})}if(!t.dimensions){let C=a.components.get("request");if(C){let S=C.get("width"),$=C.get("height");typeof S=="number"&&typeof $=="number"&&(t.dimensions={width:S,height:$})}}}if(!t.dimensions){let w=e.find(T=>T.protocol==="RVStack");if(w){let T=w.components.get("output");if(T){let C=T.get("size");C&&C.length>=2&&(t.dimensions={width:C[0],height:C[1]})}}}if(!t.dimensions){let w=e.find(T=>T.protocol==="RVSequence");if(w){let T=w.components.get("output");if(T){let C=T.get("size");C&&C.length>=2&&(t.dimensions={width:C[0],height:C[1]})}}}let r=(g=(y=(v=t.dimensions)==null?void 0:v.width)!=null?y:o.width)!=null?g:1920,c=(R=(E=(x=t.dimensions)==null?void 0:x.height)!=null?E:o.height)!=null?R:1080,l=(O=o.targetHeight)!=null?O:c,s=(L=o.fps)!=null?L:25,h=o.coordinateScale,m=o.coordinateOffset,u=(D=o.debug)!=null?D:!1;t.fps=s,u&&(console.log("[OpenRV Parser] Source dimensions:",r,"x",c),console.log("[OpenRV Parser] Target height:",l),console.log("[OpenRV Parser] Coordinate scale:",h),console.log("[OpenRV Parser] Coordinate offset:",m));let p=e.filter(w=>w.protocol==="RVPaint");if(p.length===0)return u&&console.log("[OpenRV Parser] No RVPaint objects found"),t;u&&console.log("[OpenRV Parser] Found",p.length,"RVPaint objects");let f=new Map;for(let w of p)for(let[T,C]of w.components){let S=T.match(/^pen:\d+:(\d+):/i);if(S){let W=parseInt(S[1]),q=bo(C,r,c,l,h,m);q&&(f.has(W)||f.set(W,[]),f.get(W).push(q));continue}let $=T.match(/^text:\d+:(\d+):/i);if($){let W=parseInt($[1]),q=wo(C,r,c,l,h,m);q&&(f.has(W)||f.set(W,[]),f.get(W).push(q))}}for(let[w,T]of f)t.frames.push({frame:w,fps:s,version:1,shapes:T});return t.frames.sort((w,T)=>w.frame-T.frame),t}var So="0.12.9",qr=`https://unpkg.com/@ffmpeg/core@${So}/dist/umd/ffmpeg-core.js`,A;(function(i){i.LOAD="LOAD",i.EXEC="EXEC",i.FFPROBE="FFPROBE",i.WRITE_FILE="WRITE_FILE",i.READ_FILE="READ_FILE",i.DELETE_FILE="DELETE_FILE",i.RENAME="RENAME",i.CREATE_DIR="CREATE_DIR",i.LIST_DIR="LIST_DIR",i.DELETE_DIR="DELETE_DIR",i.ERROR="ERROR",i.DOWNLOAD="DOWNLOAD",i.PROGRESS="PROGRESS",i.LOG="LOG",i.MOUNT="MOUNT",i.UNMOUNT="UNMOUNT"})(A||(A={}));var Cn=(()=>{let i=0;return()=>i++})();var Zr=new Error("unknown message type"),Fn=new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"),In=new Error("called FFmpeg.terminate()"),Qr=new Error("failed to import ffmpeg-core.js");var kn={};var _,it,tt,gt,vt,le,U,se=class{constructor(){ot(this,_,null);ot(this,it,{});ot(this,tt,{});ot(this,gt,[]);ot(this,vt,[]);Y(this,"loaded",!1);ot(this,le,()=>{I(this,_)&&(I(this,_).onmessage=({data:{id:o,type:t,data:e}})=>{switch(t){case A.LOAD:this.loaded=!0,I(this,it)[o](e);break;case A.MOUNT:case A.UNMOUNT:case A.EXEC:case A.FFPROBE:case A.WRITE_FILE:case A.READ_FILE:case A.DELETE_FILE:case A.RENAME:case A.CREATE_DIR:case A.LIST_DIR:case A.DELETE_DIR:I(this,it)[o](e);break;case A.LOG:I(this,gt).forEach(n=>n(e));break;case A.PROGRESS:I(this,vt).forEach(n=>n(e));break;case A.ERROR:I(this,tt)[o](e);break}delete I(this,it)[o],delete I(this,tt)[o]})});ot(this,U,({type:o,data:t},e=[],n)=>I(this,_)?new Promise((a,r)=>{let c=Cn();I(this,_)&&I(this,_).postMessage({id:c,type:o,data:t},e),I(this,it)[c]=a,I(this,tt)[c]=r,n==null||n.addEventListener("abort",()=>{r(new DOMException(`Message # ${c} was aborted`,"AbortError"))},{once:!0})}):Promise.reject(Fn));Y(this,"load",(n={},{signal:e}={})=>{var a=n,{classWorkerURL:o}=a,t=Me(a,["classWorkerURL"]);return I(this,_)||(Ft(this,_,o?new Worker(new URL(o,kn.url),{type:"module"}):new Worker(new URL("./worker.js",kn.url),{type:"module"})),I(this,le).call(this)),I(this,U).call(this,{type:A.LOAD,data:t},void 0,e)});Y(this,"exec",(o,t=-1,{signal:e}={})=>I(this,U).call(this,{type:A.EXEC,data:{args:o,timeout:t}},void 0,e));Y(this,"ffprobe",(o,t=-1,{signal:e}={})=>I(this,U).call(this,{type:A.FFPROBE,data:{args:o,timeout:t}},void 0,e));Y(this,"terminate",()=>{let o=Object.keys(I(this,tt));for(let t of o)I(this,tt)[t](In),delete I(this,tt)[t],delete I(this,it)[t];I(this,_)&&(I(this,_).terminate(),Ft(this,_,null),this.loaded=!1)});Y(this,"writeFile",(o,t,{signal:e}={})=>{let n=[];return t instanceof Uint8Array&&n.push(t.buffer),I(this,U).call(this,{type:A.WRITE_FILE,data:{path:o,data:t}},n,e)});Y(this,"mount",(o,t,e)=>{let n=[];return I(this,U).call(this,{type:A.MOUNT,data:{fsType:o,options:t,mountPoint:e}},n)});Y(this,"unmount",o=>{let t=[];return I(this,U).call(this,{type:A.UNMOUNT,data:{mountPoint:o}},t)});Y(this,"readFile",(o,t="binary",{signal:e}={})=>I(this,U).call(this,{type:A.READ_FILE,data:{path:o,encoding:t}},void 0,e));Y(this,"deleteFile",(o,{signal:t}={})=>I(this,U).call(this,{type:A.DELETE_FILE,data:{path:o}},void 0,t));Y(this,"rename",(o,t,{signal:e}={})=>I(this,U).call(this,{type:A.RENAME,data:{oldPath:o,newPath:t}},void 0,e));Y(this,"createDir",(o,{signal:t}={})=>I(this,U).call(this,{type:A.CREATE_DIR,data:{path:o}},void 0,t));Y(this,"listDir",(o,{signal:t}={})=>I(this,U).call(this,{type:A.LIST_DIR,data:{path:o}},void 0,t));Y(this,"deleteDir",(o,{signal:t}={})=>I(this,U).call(this,{type:A.DELETE_DIR,data:{path:o}},void 0,t))}on(o,t){o==="log"?I(this,gt).push(t):o==="progress"&&I(this,vt).push(t)}off(o,t){o==="log"?Ft(this,gt,I(this,gt).filter(e=>e!==t)):o==="progress"&&Ft(this,vt,I(this,vt).filter(e=>e!==t))}};_=new WeakMap,it=new WeakMap,tt=new WeakMap,gt=new WeakMap,vt=new WeakMap,le=new WeakMap,U=new WeakMap;var Mn;(function(i){i.MEMFS="MEMFS",i.NODEFS="NODEFS",i.NODERAWFS="NODERAWFS",i.IDBFS="IDBFS",i.WORKERFS="WORKERFS",i.PROXYFS="PROXYFS"})(Mn||(Mn={}));var Pn=new Error("failed to get response body reader"),Rn=new Error("failed to complete download");var Ln="Content-Length";var Eo=i=>new Promise((o,t)=>{let e=new FileReader;e.onload=()=>{let{result:n}=e;n instanceof ArrayBuffer?o(new Uint8Array(n)):o(new Uint8Array)},e.onerror=n=>{var a,r;t(Error(`File could not be read! Code=${((r=(a=n==null?void 0:n.target)==null?void 0:a.error)==null?void 0:r.code)||-1}`))},e.readAsArrayBuffer(i)}),Lt=i=>k(void 0,null,function*(){let o;if(typeof i=="string")/data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(i)?o=atob(i.split(",")[1]).split("").map(t=>t.charCodeAt(0)):o=yield(yield fetch(i)).arrayBuffer();else if(i instanceof URL)o=yield(yield fetch(i)).arrayBuffer();else if(i instanceof File||i instanceof Blob)o=yield Eo(i);else return new Uint8Array;return new Uint8Array(o)});var Co=(i,o)=>k(void 0,null,function*(){var n;let t=yield fetch(i),e;try{let a=parseInt(t.headers.get(Ln)||"-1"),r=(n=t.body)==null?void 0:n.getReader();if(!r)throw Pn;let c=[],l=0;for(;;){let{done:m,value:u}=yield r.read(),p=u?u.length:0;if(m){if(a!=-1&&a!==l)throw Rn;o&&o({url:i,total:a,received:l,delta:p,done:m});break}c.push(u),l+=p,o&&o({url:i,total:a,received:l,delta:p,done:m})}let s=new Uint8Array(l),h=0;for(let m of c)s.set(m,h),h+=m.length;e=s.buffer}catch(a){console.log("failed to send download progress event: ",a),e=yield t.arrayBuffer(),o&&o({url:i,total:e.byteLength,received:e.byteLength,delta:0,done:!0})}return e}),Ee=(i,o,t=!1,e)=>k(void 0,null,function*(){let n=t?yield Co(i,e):yield(yield fetch(i)).arrayBuffer(),a=new Blob([n],{type:o});return URL.createObjectURL(a)});var At=class{constructor(){this.ffmpeg=null;this.loadPromise=null;this.frames=new Map;this.videoInfo=null;this.isDestroyed=!1;this.extractionAbortController=null}load(o){return k(this,null,function*(){if(!this.ffmpeg)return this.loadPromise?this.loadPromise:(this.loadPromise=this._load(o),this.loadPromise)})}_load(o){return k(this,null,function*(){let t=typeof SharedArrayBuffer!="undefined";console.log(`SharedArrayBuffer available: ${t}`),t||console.warn(`SharedArrayBuffer not available. FFmpeg may not work correctly.
-To enable, add these headers to your server:
-  Cross-Origin-Embedder-Policy: require-corp
-  Cross-Origin-Opener-Policy: same-origin`),this.ffmpeg=new se,this.ffmpeg.on("log",({message:m})=>{console.log("FFmpeg:",m),this.parseFFmpegLog(m)}),this.ffmpeg.on("progress",({progress:m})=>{console.log("FFmpeg progress:",m),o==null||o({loaded:m,total:1,phase:"extracting"})}),o==null||o({loaded:0,total:1,phase:"loading"});let e="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm",n="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm",r=yield(yield fetch(`${n}/worker.js`)).text();r=r.replace(/from\s*["']\.\/([^"']+)["']/g,`from "${n}/$1"`),r=r.replace(/import\s*["']\.\/([^"']+)["']/g,`import "${n}/$1"`);let c=new Blob([r],{type:"text/javascript"}),l=URL.createObjectURL(c);o==null||o({loaded:.25,total:1,phase:"loading"});let s=yield Ee(`${e}/ffmpeg-core.js`,"text/javascript");o==null||o({loaded:.5,total:1,phase:"loading"});let h=yield Ee(`${e}/ffmpeg-core.wasm`,"application/wasm");o==null||o({loaded:.75,total:1,phase:"loading"}),yield this.ffmpeg.load({coreURL:s,wasmURL:h,classWorkerURL:l}),o==null||o({loaded:1,total:1,phase:"loading"})})}isLoaded(){return this.ffmpeg!==null}parseFFmpegLog(o){let t=o.match(/(\d+(?:\.\d+)?)\s*fps/);if(t&&this.videoInfo){let a=parseFloat(t[1]);a>0&&a<1e3&&(this.videoInfo.fps=a)}if(this.videoInfo&&this.videoInfo.fps===25){let a=o.match(/(\d+(?:\.\d+)?)\s*tbr/);if(a){let r=parseFloat(a[1]);r>0&&r<1e3&&(this.videoInfo.fps=r)}}let e=o.match(/Duration:\s*(\d{2}):(\d{2}):(\d{2})\.(\d+)/);if(e&&this.videoInfo){let a=parseInt(e[1],10),r=parseInt(e[2],10),c=parseInt(e[3],10),l=parseInt(e[4],10);this.videoInfo.duration=a*3600+r*60+c+l/100}let n=o.match(/(\d{2,5})x(\d{2,5})/);if(n&&this.videoInfo){let a=parseInt(n[1],10),r=parseInt(n[2],10);a>0&&r>0&&(this.videoInfo.width=a,this.videoInfo.height=r)}}probe(o){return k(this,null,function*(){if(yield this.load(),!this.ffmpeg)throw new Error("FFmpeg not loaded");this.videoInfo={fps:25,duration:0,width:0,height:0,totalFrames:0};let t="mp4";typeof o!="string"&&o.type&&(t={"video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","video/x-msvideo":"avi","video/x-matroska":"mkv","video/ogg":"ogv"}[o.type]||"mp4");let e=`input_probe.${t}`,n=typeof o=="string"?yield Lt(o):yield Lt(o);yield this.ffmpeg.writeFile(e,n);try{yield this.ffmpeg.exec(["-i",e])}catch(a){}try{yield this.ffmpeg.deleteFile(e)}catch(a){}return this.videoInfo.duration>0&&this.videoInfo.fps>0&&(this.videoInfo.totalFrames=Math.round(this.videoInfo.duration*this.videoInfo.fps)),console.log("Probed video info:",this.videoInfo),this.videoInfo})}extractFrames(e){return k(this,arguments,function*(o,t={}){var g,x,E,R,O,L,D,w,T,C;if(yield this.load(t.onProgress),!this.ffmpeg)throw new Error("FFmpeg not loaded");if(this.isDestroyed)throw new Error("Extractor has been destroyed");this.extractionAbortController=new AbortController,this.clearFrames(),this.videoInfo||(yield this.probe(o));let n=(E=(x=t.fps)!=null?x:(g=this.videoInfo)==null?void 0:g.fps)!=null?E:25,a=(R=t.format)!=null?R:"png",r=(D=(L=t.endFrame)!=null?L:(O=this.videoInfo)==null?void 0:O.totalFrames)!=null?D:0,c=(w=t.startFrame)!=null?w:1,l="mp4";typeof o!="string"&&o.type&&(l={"video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","video/x-msvideo":"avi","video/x-matroska":"mkv","video/ogg":"ogv"}[o.type]||"mp4");let s=`input.${l}`;(T=t.onProgress)==null||T.call(t,{loaded:0,total:r,phase:"extracting"});let h=typeof o=="string"?yield Lt(o):yield Lt(o),m=h.byteLength/(1024*1024);if(console.log(`Video file size: ${m.toFixed(2)} MB`),m>100)throw new Error(`Video file too large (${m.toFixed(0)}MB). FFmpeg WASM has memory limits. Please use a smaller video file (<100MB).`);yield this.ffmpeg.writeFile(s,h);try{let S=yield this.ffmpeg.readFile(s),$=S instanceof Uint8Array?S.byteLength:S.length;console.log(`Input file written: ${$} bytes`)}catch(S){console.error("Failed to verify input file:",S)}let u=(S,$=3e4)=>k(this,null,function*(){console.log("FFmpeg command:",S.join(" "));let W=new Promise((q,at)=>{setTimeout(()=>at(new Error(`FFmpeg timeout after ${$}ms`)),$)});yield Promise.race([this.ffmpeg.exec(S),W])});console.log("Testing FFmpeg with single frame extraction (this may take a while for h264)...");let p=a==="png"?"png":"jpg";try{let S=["-y","-nostdin","-i",s,"-frames:v","1"];p==="jpg"&&S.push("-q:v","8"),S.push(`test_frame.${p}`),yield u(S,6e4);let $=yield this.ffmpeg.readFile(`test_frame.${p}`),W=$ instanceof Uint8Array?$.byteLength:$.length;console.log(`Test frame extracted: ${W} bytes`),yield this.ffmpeg.deleteFile(`test_frame.${p}`)}catch(S){console.error("Single frame test failed:",S);try{yield this.ffmpeg.deleteFile(s)}catch($){}throw new Error(`FFmpeg cannot process this video (h264 decoding may be too slow in WASM). Error: ${S}`)}let f=Math.max(3e5,r*2e3);console.log(`Extracting ${r} frames as ${a.toUpperCase()} at fps=${n} (estimated timeout: ${(f/1e3).toFixed(0)}s)...`);let v=["-y","-nostdin","-i",s,"-vf",`fps=${n}`];a==="jpg"&&v.push("-q:v","8"),v.push(`frame_%06d.${a}`);try{yield u(v,f)}catch(S){console.error("Frame extraction failed:",S);try{yield this.ffmpeg.deleteFile(s)}catch($){}throw new Error(`Failed to extract frames: ${S}`)}let y=1;for(;!this.isDestroyed;){let S=`frame_${String(y).padStart(6,"0")}.${a}`;try{let $=yield this.ffmpeg.readFile(S);if($ instanceof Uint8Array){let W=new Blob([$],{type:a==="png"?"image/png":"image/jpeg"}),q=yield createImageBitmap(W);this.frames.set(y,q),yield this.ffmpeg.deleteFile(S),(C=t.onProgress)==null||C.call(t,{loaded:y,total:r||y,phase:"processing"})}y++}catch($){break}}console.log(`Extraction complete: ${this.frames.size} frames`);try{yield this.ffmpeg.deleteFile(s)}catch(S){}return this.extractionAbortController=null,this.frames})}extractFramesInChunks(a,r,c){return k(this,arguments,function*(o,t,e,n={}){var m;let l=yield this.probe(o),s=l.totalFrames,h=(m=n.fps)!=null?m:l.fps;for(let u=1;u<=s&&!this.isDestroyed;u+=t){let p=Math.min(u+t-1,s);this.clearFrames(),yield this.extractFrames(o,{fps:h,startFrame:u,endFrame:p,onProgress:n.onProgress}),e(this.frames,u,p)}})}getFrame(o){var t;return(t=this.frames.get(o))!=null?t:null}hasFrame(o){return this.frames.has(o)}getAllFrames(){return this.frames}getVideoInfo(){return this.videoInfo}get frameCount(){return this.frames.size}clearFrames(){this.frames.forEach(o=>o.close()),this.frames.clear()}abort(){var o;(o=this.extractionAbortController)==null||o.abort()}destroy(){var o;this.isDestroyed=!0,this.abort(),this.clearFrames(),(o=this.ffmpeg)==null||o.terminate(),this.ffmpeg=null,this.loadPromise=null,this.videoInfo=null}};Q.prototype.initUI=on;Q.prototype.initCanvas=an;Q.prototype.addFrameSquareOverlay=yn;Q.prototype.addVideoOverlay=xn;Q.prototype.addProgressBarOverlay=bn;new EventSource("/esbuild").addEventListener("change",()=>location.reload());var V=null,Tt=null,Dt=!1,yt=null,G=document.querySelector("video");function An(){return k(this,null,function*(){let i=yield fetch(G.currentSrc).then(b=>b.blob()),o=new Promise(b=>{setTimeout(()=>{b(!0)},250),G.addEventListener("loadeddata",()=>{b(!0)},{once:!0})}),t=yield fetch("./frame_29.png").then(b=>k(this,null,function*(){let F=yield b.blob(),P=new Blob([F],{type:"image/png"}),z=new Image,N=new Promise(X=>{z.addEventListener("load",()=>{X(!0)},{once:!0})});return z.src=window.URL.createObjectURL(P),yield N,z}));G.paused||G.pause();let e=new Blob([i],{type:"video/mp4"}),n=new Q(G,{toolbar:{defaultTool:null}});yield n.setVideoBlob(e,30),yield o,yield n.addReferenceVideoByURL("./mov_bbb_g.mp4"),requestAnimationFrame(()=>{n.setCanvasSize()}),n.enableVideoFrameBuffer(),console.log({tool:n}),n.addShapesToFrame(29,[{type:"image",image:t,x:0,y:0,width:1,height:1,strokeStyle:"red",lineWidth:2,fillStyle:"red"}]),G.paused||G.pause(),setInterval(()=>{n.destroy(),n.init(G)},1e8),setInterval(()=>{console.log(n.saveAllFrames())},1e5);let a=document.getElementById("file"),r=document.getElementById("download"),c=document.getElementById("sample"),l=document.getElementById("video"),s=document.getElementById("ref-video");l.addEventListener("change",b=>k(this,null,function*(){if(!l.files||l.files.length===0)return;let F=l.files[0],P=new Blob([F],{type:F.type});Tt=P;function z(){return k(this,null,function*(){let N=document.getElementById("ffmpeg-extract"),X=document.getElementById("ffmpeg-info"),ce=document.getElementById("ffmpeg-fps"),he=document.getElementById("ffmpeg-frames"),et=document.getElementById("ffmpeg-status");N.innerHTML=`
+    `;
+    }
+    /**
+     * Collapse the toolbar
+     */
+    collapse() {
+      if (this.isCollapsed) return;
+      this.isCollapsed = true;
+      this.container.classList.add(`${this.prefix}-collapsed`);
+    }
+    /**
+     * Expand the toolbar
+     */
+    expand() {
+      if (!this.isCollapsed) return;
+      this.isCollapsed = false;
+      this.container.classList.remove(`${this.prefix}-collapsed`);
+    }
+    /**
+     * Toggle collapse state
+     */
+    toggle() {
+      if (this.isCollapsed) {
+        this.expand();
+      } else {
+        this.collapse();
+      }
+    }
+    /**
+     * Check if toolbar is collapsed
+     */
+    get collapsed() {
+      return this.isCollapsed;
+    }
+    /**
+     * Check if auto-collapse is enabled
+     */
+    get autoCollapseEnabled() {
+      return this.autoCollapse;
+    }
+    /**
+     * Set auto-collapse behavior
+     */
+    setAutoCollapse(enabled) {
+      this.autoCollapse = enabled;
+    }
+    /**
+     * Cleanup the controller
+     */
+    destroy() {
+      if (this.collapseButton) {
+        this.collapseButton.remove();
+        this.collapseButton = null;
+      }
+      this.container.classList.remove(
+        `${this.prefix}-collapsible`,
+        `${this.prefix}-collapsed`
+      );
+    }
+  };
+
+  // src/gestures/gesture-handler.ts
+  var GestureHandler = class {
+    constructor(canvas, onGestureChange) {
+      this.canvas = canvas;
+      this.onGestureChange = onGestureChange;
+      this.initialDistance = 0;
+      this.initialScale = 1;
+      this.currentScale = 1;
+      this.panStart = { x: 0, y: 0 };
+      this.panOffset = { x: 0, y: 0 };
+      this.isGesturing = false;
+      this.activeTouches = 0;
+      /** Minimum zoom scale */
+      this.minScale = 0.5;
+      /** Maximum zoom scale */
+      this.maxScale = 3;
+      /**
+       * Handle touch start - detect two-finger gesture
+       */
+      this.handleTouchStart = (e) => {
+        this.activeTouches = e.touches.length;
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          this.isGesturing = true;
+          this.initialDistance = this.getDistance(e.touches[0], e.touches[1]);
+          this.initialScale = this.currentScale;
+          this.panStart = this.getMidpoint(e.touches[0], e.touches[1]);
+        }
+      };
+      /**
+       * Handle touch move - process pinch and pan
+       */
+      this.handleTouchMove = (e) => {
+        if (e.touches.length === 2 && this.isGesturing) {
+          e.preventDefault();
+          const distance = this.getDistance(e.touches[0], e.touches[1]);
+          const scaleChange = distance / this.initialDistance;
+          this.currentScale = Math.max(
+            this.minScale,
+            Math.min(this.maxScale, this.initialScale * scaleChange)
+          );
+          const midpoint = this.getMidpoint(e.touches[0], e.touches[1]);
+          this.panOffset = {
+            x: this.panOffset.x + (midpoint.x - this.panStart.x),
+            y: this.panOffset.y + (midpoint.y - this.panStart.y)
+          };
+          this.panStart = midpoint;
+          this.onGestureChange(this.getState());
+        }
+      };
+      /**
+       * Handle touch end - finish gesture
+       */
+      this.handleTouchEnd = (e) => {
+        this.activeTouches = e.touches.length;
+        if (e.touches.length < 2) {
+          this.isGesturing = false;
+          if (e.touches.length === 1) {
+            this.panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }
+        }
+      };
+    }
+    /**
+     * Initialize gesture listeners
+     */
+    init() {
+      this.canvas.addEventListener("touchstart", this.handleTouchStart, { passive: false });
+      this.canvas.addEventListener("touchmove", this.handleTouchMove, { passive: false });
+      this.canvas.addEventListener("touchend", this.handleTouchEnd, { passive: false });
+      this.canvas.addEventListener("touchcancel", this.handleTouchEnd, { passive: false });
+    }
+    /**
+     * Calculate distance between two touch points
+     */
+    getDistance(t1, t2) {
+      const dx = t2.clientX - t1.clientX;
+      const dy = t2.clientY - t1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    /**
+     * Calculate midpoint between two touch points
+     */
+    getMidpoint(t1, t2) {
+      return {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2
+      };
+    }
+    /**
+     * Get current gesture state
+     */
+    getState() {
+      return {
+        scale: this.currentScale,
+        panX: this.panOffset.x,
+        panY: this.panOffset.y
+      };
+    }
+    /**
+     * Check if a gesture is currently active
+     */
+    isActive() {
+      return this.isGesturing;
+    }
+    /**
+     * Check if there are two fingers touching
+     */
+    hasTwoFingers() {
+      return this.activeTouches >= 2;
+    }
+    /**
+     * Reset gesture state to defaults
+     */
+    reset() {
+      this.currentScale = 1;
+      this.panOffset = { x: 0, y: 0 };
+      this.initialScale = 1;
+      this.initialDistance = 0;
+      this.isGesturing = false;
+      this.onGestureChange(this.getState());
+    }
+    /**
+     * Set the zoom scale directly
+     */
+    setScale(scale) {
+      this.currentScale = Math.max(this.minScale, Math.min(this.maxScale, scale));
+      this.onGestureChange(this.getState());
+    }
+    /**
+     * Set the pan offset directly
+     */
+    setPan(x, y) {
+      this.panOffset = { x, y };
+      this.onGestureChange(this.getState());
+    }
+    /**
+     * Cleanup gesture listeners
+     */
+    destroy() {
+      this.canvas.removeEventListener("touchstart", this.handleTouchStart);
+      this.canvas.removeEventListener("touchmove", this.handleTouchMove);
+      this.canvas.removeEventListener("touchend", this.handleTouchEnd);
+      this.canvas.removeEventListener("touchcancel", this.handleTouchEnd);
+    }
+  };
+
+  // src/core.ts
+  var pixelRatio = window.devicePixelRatio || 1;
+  var DEFAULT_FPS = 25;
+  var AnnotationTool = class extends AnnotationToolBase {
+    constructor(videoElement, config) {
+      super();
+      this.referenceVideoFrameBuffer = null;
+      this.videoFrameBuffer = null;
+      this.ffmpegFrameExtractor = null;
+      this.isMouseDown = false;
+      this.buttons = [];
+      this.plugins = [];
+      this.annotatedFrameCoordinates = [];
+      // Track blob URLs for cleanup to prevent memory leaks
+      this.videoBlobUrl = null;
+      this.referenceVideoBlobUrl = null;
+      this.frameCounterTimeoutId = null;
+      // Enforced total frames count (overrides calculated value from video duration)
+      this._enforcedTotalFrames = null;
+      // Track cursor hover state for showing progress bar during playback
+      this.isCursorOverCanvas = false;
+      // Overlay opacity for compare mode (0 = off, 0.25, 0.5, 0.7, 1)
+      this.overlayOpacity = 0.7;
+      // Theme for UI elements
+      this._theme = "dark";
+      // Listeners for theme changes
+      this.themeChangeListeners = [];
+      // Layout manager for switching between layouts
+      this.layoutManager = null;
+      // Collapse controller for toolbar visibility
+      this.collapseController = null;
+      // Gesture handler for pinch-to-zoom and pan
+      this.gestureHandler = null;
+      // Current gesture transform state
+      this.gestureState = { scale: 1, panX: 0, panY: 0 };
+      this.fps = DEFAULT_FPS;
+      this.plannedFn = null;
+      this.ct = 0;
+      this.isCanvasInitialized = false;
+      this.enforcedCanvasSize = null;
+      this.lastNavigatedFrame = 0;
+      this.isProgressBarNavigation = false;
+      this.isAnnotationsAsVideoActive = false;
+      this.config = mergeConfig(config);
+      this._theme = this.config.theme;
+      this.plugins = plugins.map((Plugin) => new Plugin(this));
+      this.init(videoElement);
+    }
+    prevFrame() {
+      const activeTimeFrame = this.playbackFrame;
+      const newFrame = activeTimeFrame - 1;
+      if (newFrame < 1) {
+        this.playbackFrame = this.totalFrames;
+      } else {
+        this.playbackFrame = newFrame;
+      }
+    }
+    nextFrame() {
+      const activeTimeFrame = this.playbackFrame;
+      const newFrame = activeTimeFrame + 1;
+      if (newFrame > this.totalFrames) {
+        this.playbackFrame = 1;
+      } else {
+        this.playbackFrame = newFrame;
+      }
+    }
+    /**
+     * Get sorted list of frames that have annotations
+     */
+    getAnnotatedFrames() {
+      const frames = [];
+      this.timeStack.forEach((shapes, frame) => {
+        if (shapes && shapes.length > 0) {
+          frames.push(frame);
+        }
+      });
+      return frames.sort((a, b2) => a - b2);
+    }
+    /**
+     * Jump to the previous annotated frame
+     */
+    prevAnnotatedFrame() {
+      const annotatedFrames = this.getAnnotatedFrames();
+      if (annotatedFrames.length === 0) return;
+      const currentFrame = this.playbackFrame;
+      for (let i = annotatedFrames.length - 1; i >= 0; i--) {
+        if (annotatedFrames[i] < currentFrame) {
+          this.playbackFrame = annotatedFrames[i];
+          return;
+        }
+      }
+      this.playbackFrame = annotatedFrames[annotatedFrames.length - 1];
+    }
+    /**
+     * Jump to the next annotated frame
+     */
+    nextAnnotatedFrame() {
+      const annotatedFrames = this.getAnnotatedFrames();
+      if (annotatedFrames.length === 0) return;
+      const currentFrame = this.playbackFrame;
+      for (const frame of annotatedFrames) {
+        if (frame > currentFrame) {
+          this.playbackFrame = frame;
+          return;
+        }
+      }
+      this.playbackFrame = annotatedFrames[0];
+    }
+    get theme() {
+      return this._theme;
+    }
+    setTheme(theme) {
+      this._theme = theme;
+      injectThemeStyles(theme);
+      this.themeChangeListeners.forEach((listener) => listener(theme));
+    }
+    onThemeChange(listener) {
+      this.themeChangeListeners.push(listener);
+      return () => {
+        const index = this.themeChangeListeners.indexOf(listener);
+        if (index !== -1) {
+          this.themeChangeListeners.splice(index, 1);
+        }
+      };
+    }
+    // ==================== LAYOUT API ====================
+    /**
+     * Set the layout mode for the annotation tool
+     */
+    setLayout(mode) {
+      if (!this.layoutManager) {
+        this.layoutManager = new LayoutManager(this);
+      }
+      this.layoutManager.setLayout(mode, {
+        sidebarPosition: this.config.toolbar.sidebarPosition
+      });
+    }
+    /**
+     * Get the current layout mode
+     */
+    getLayout() {
+      return this.layoutManager?.getCurrentLayout() ?? this.config.layout;
+    }
+    // ==================== COLLAPSE API ====================
+    /**
+     * Collapse the toolbar
+     */
+    collapseToolbar() {
+      this.collapseController?.collapse();
+    }
+    /**
+     * Expand the toolbar
+     */
+    expandToolbar() {
+      this.collapseController?.expand();
+    }
+    /**
+     * Toggle toolbar collapse state
+     */
+    toggleToolbar() {
+      this.collapseController?.toggle();
+    }
+    /**
+     * Check if toolbar is collapsed
+     */
+    isToolbarCollapsed() {
+      return this.collapseController?.collapsed ?? false;
+    }
+    // ==================== GESTURE API ====================
+    /**
+     * Enable or disable gesture support
+     */
+    setGesturesEnabled(enabled) {
+      if (enabled && !this.gestureHandler) {
+        this.gestureHandler = new GestureHandler(this.canvas, (state) => {
+          this.applyGestureTransform(state);
+        });
+        this.gestureHandler.init();
+      } else if (!enabled && this.gestureHandler) {
+        this.gestureHandler.destroy();
+        this.gestureHandler = null;
+        this.resetZoom();
+      }
+    }
+    /**
+     * Check if gestures are enabled
+     */
+    isGesturesEnabled() {
+      return this.gestureHandler !== null;
+    }
+    /**
+     * Reset zoom and pan to default
+     */
+    resetZoom() {
+      this.gestureState = { scale: 1, panX: 0, panY: 0 };
+      this.gestureHandler?.reset();
+      this.redrawFullCanvas();
+    }
+    /**
+     * Get current zoom scale
+     */
+    getZoomScale() {
+      return this.gestureState.scale;
+    }
+    /**
+     * Apply gesture transform to canvas
+     */
+    applyGestureTransform(state) {
+      this.gestureState = state;
+      this.redrawFullCanvas();
+    }
+    removeGlobalShape(shapeType) {
+      this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
+    }
+    addGlobalShape(shape) {
+      this.globalShapes.push(shape);
+    }
+    get selectedColor() {
+      return this.colorPicker.value;
+    }
+    get selectedStrokeSize() {
+      return this.strokeSizePicker.valueAsNumber;
+    }
+    get currentTool() {
+      return this._currentTool;
+    }
+    set currentTool(tool) {
+      const prevTool = this._currentTool;
+      if (prevTool) {
+        this.getButtonForTool(prevTool).classList.remove("active");
+        this.pluginForTool(prevTool).onDeactivate();
+      }
+      this._currentTool = tool;
+      this.canvas.style.cursor = tool ? "pointer" : "default";
+      if (tool) {
+        this.getButtonForTool(tool).classList.add("active");
+        this.pluginForTool(tool).onActivate();
+      }
+    }
+    enableFrameRateDetection() {
+      if (this.destructors.find((d) => d.name === "frameRateDetector")) return;
+      const video2 = this.videoElement;
+      if (video2.tagName === "IMG") return;
+      const destructor = detectFrameRate(video2, (fps) => {
+        this.fps = fps;
+      });
+      Object.defineProperty(destructor, "name", { value: "frameRateDetector" });
+      this.destructors.push(destructor);
+    }
+    timeToFrame(time) {
+      return Math.max(1, Math.round(time * this.fps));
+    }
+    get playbackFrame() {
+      if (this.videoElement instanceof HTMLImageElement) return 1;
+      return this.timeToFrame(this.videoElement.currentTime);
+    }
+    set playbackFrame(frame) {
+      if (this.videoElement instanceof HTMLImageElement) return;
+      const newTime = frame / this.fps;
+      this.videoElement.currentTime = newTime;
+      this.rvf(() => {
+        this.show();
+      });
+    }
+    rvf(fn) {
+      this.plannedFn = fn;
+    }
+    get canvasWidth() {
+      return this.enforcedCanvasSize?.width ?? 0;
+    }
+    get canvasHeight() {
+      return this.enforcedCanvasSize?.height ?? 0;
+    }
+    get aspectRatio() {
+      if (this.canvasHeight === 0) {
+        return 0;
+      }
+      return this.canvasWidth / this.canvasHeight;
+    }
+    get isMobile() {
+      const breakpoint = this.config?.mobile?.breakpoint ?? 960;
+      return window.innerWidth < breakpoint;
+    }
+    get progressBarCoordinates() {
+      const height = this.isMobile ? 30 : 10;
+      const progressBarLeftMargin = 5;
+      const frameOverlayOffset = 55;
+      const progressBarWidth = this.canvasWidth - progressBarLeftMargin - frameOverlayOffset;
+      const x = progressBarLeftMargin;
+      const y = this.canvasHeight - height;
+      const width = progressBarWidth;
+      return { x, y, width, height };
+    }
+    get shapes() {
+      if (!this.timeStack.has(this.activeTimeFrame)) {
+        this.timeStack.set(this.activeTimeFrame, []);
+      }
+      return this.timeStack.get(this.activeTimeFrame);
+    }
+    set shapes(shapes) {
+      this.timeStack.set(this.activeTimeFrame, shapes);
+    }
+    get undoStack() {
+      if (!this.undoTimeStack.has(this.activeTimeFrame)) {
+        this.undoTimeStack.set(this.activeTimeFrame, []);
+      }
+      return this.undoTimeStack.get(this.activeTimeFrame);
+    }
+    set undoStack(shapes) {
+      this.undoTimeStack.set(this.activeTimeFrame, shapes);
+    }
+    get pixelRatio() {
+      return pixelRatio;
+    }
+    async setVideoBlob(blob, fps = this.fps) {
+      if (this.videoBlobUrl) {
+        URL.revokeObjectURL(this.videoBlobUrl);
+      }
+      const url = URL.createObjectURL(blob);
+      this.videoBlobUrl = url;
+      await this.setVideoUrl(url, fps);
+      this.plugins.forEach((p2) => {
+        p2.on("videoBlobSet", blob);
+      });
+    }
+    async setVideoUrl(url, fps = this.fps) {
+      if (this.videoElement instanceof HTMLImageElement) return;
+      const video2 = this.videoElement;
+      video2.src = url.toString();
+      await this.videoElement.load();
+      this.setFrameRate(fps);
+      if (this.videoFrameBuffer) {
+        this.videoFrameBuffer.destroy();
+        this.videoFrameBuffer = new VideoFrameBuffer(video2, fps, false);
+        this.videoFrameBuffer.isMobile = this.isMobile;
+      }
+      this.setCanvasSize();
+    }
+    enableVideoFrameBuffer() {
+      if (this.videoElement instanceof HTMLImageElement) return;
+      this.videoFrameBuffer = new VideoFrameBuffer(
+        this.videoElement,
+        this.fps,
+        false
+      );
+      this.videoFrameBuffer.isMobile = this.isMobile;
+    }
+    /**
+     * Set FFmpeg frame extractor for precise frame-accurate playback.
+     * When set, extracted frames will be used instead of video element frames.
+     */
+    setFFmpegFrameExtractor(extractor) {
+      this.ffmpegFrameExtractor = extractor;
+      this.redrawFullCanvas();
+    }
+    /**
+     * Check if FFmpeg frames are available for the current frame.
+     */
+    hasFFmpegFrame(frameNumber) {
+      return this.ffmpegFrameExtractor?.hasFrame(frameNumber) ?? false;
+    }
+    hide() {
+      this.stopAnnotationsAsVideo();
+      this.hideControls();
+      this.hideCanvas();
+    }
+    showControls() {
+      this.uiContainer.style.display = "";
+    }
+    hideControls() {
+      this.uiContainer.style.display = "none";
+    }
+    showCanvas() {
+      this.canvas.style.display = "block";
+    }
+    hideCanvas() {
+      this.canvas.style.display = "none";
+    }
+    updateActiveTimeFrame(mediaTime = void 0) {
+      this.activeTimeFrame = mediaTime ? this.timeToFrame(mediaTime) : this.playbackFrame;
+    }
+    show() {
+      this.stopAnnotationsAsVideo();
+      this.updateActiveTimeFrame();
+      this.showCanvas();
+      this.showControls();
+      this.redrawFullCanvas();
+    }
+    setCanvasSettings() {
+      this.ctx.strokeStyle = this.selectedColor;
+      this.ctx.fillStyle = this.selectedColor;
+      this.ctx.lineWidth = this.selectedStrokeSize;
+    }
+    pluginForTool(tool) {
+      if (this.isDestroyed) {
+        throw new Error("AnnotationTool is destroyed");
+      }
+      const maybePlugin = this.plugins.find((p2) => p2.name === tool);
+      if (!maybePlugin) {
+        throw new Error(`No plugin found for tool ${tool}`);
+      }
+      return maybePlugin;
+    }
+    getButtonForTool(tool) {
+      return this.buttons.find(
+        (button) => button.dataset.tool === tool
+      );
+    }
+    bindContext() {
+      this.handleMouseDown = this.handleMouseDown.bind(this);
+      this.handleMouseMove = this.handleMouseMove.bind(this);
+      this.handleMouseUp = this.handleMouseUp.bind(this);
+      this.setCanvasSize = this.setCanvasSize.bind(this);
+      this.onKeyDown = this.onKeyDown.bind(this);
+    }
+    initProperties() {
+      this.isDestroyed = false;
+      this.isProgressBarNavigation = false;
+      this.shapes = [];
+      this.globalShapes = [];
+      this.currentTool = this.isMobile ? null : this.config.toolbar.defaultTool ?? null;
+      injectThemeStyles(this._theme);
+      this.layoutManager = new LayoutManager(this);
+      this.layoutManager.setLayout(this.config.layout, {
+        sidebarPosition: this.config.toolbar.sidebarPosition
+      });
+      if (this.isMobile && this.config.mobile.collapsibleToolbars) {
+        this.collapseController = new CollapseController(
+          this.uiContainer,
+          this.config.mobile.autoCollapse
+        );
+        this.collapseController.init();
+      }
+      if (this.isMobile && this.config.mobile.gesturesEnabled) {
+        this.gestureHandler = new GestureHandler(this.canvas, (state) => {
+          this.applyGestureTransform(state);
+        });
+        this.gestureHandler.init();
+      }
+    }
+    setVideoStyles() {
+      this.videoElement.style.objectFit = "cover";
+      this.videoElement.style.objectPosition = "left top";
+    }
+    get frameCallbackSupported() {
+      return "requestVideoFrameCallback" in HTMLVideoElement.prototype;
+    }
+    initFrameCounter() {
+      if (!this.frameCallbackSupported) {
+        this.frameCounterTimeoutId = setTimeout(() => {
+          if (this.isDestroyed) return;
+          this.plannedFn?.();
+          this.plannedFn = null;
+          this.initFrameCounter();
+          this.updateActiveTimeFrame();
+          this.playAnnotationsAsVideo();
+        }, 1e3 / this.fps);
+        return;
+      }
+      this.withVideo((video2) => {
+        video2.requestVideoFrameCallback((_, metadata) => {
+          if (!this.isCanvasInitialized) {
+            this._setCanvasSize();
+          }
+          this.videoFrameBuffer?.tick(_, metadata);
+          this.plannedFn?.();
+          this.plannedFn = null;
+          this.raf(() => {
+            this.initFrameCounter();
+            this.updateActiveTimeFrame(metadata.mediaTime);
+            this.playAnnotationsAsVideo();
+          });
+        });
+      });
+    }
+    init(videoElement) {
+      this.videoElement = videoElement;
+      this.setVideoStyles();
+      this.initFrameCounter();
+      this.bindContext();
+      this.initCanvas();
+      this.initUI();
+      this.initProperties();
+      this.setCanvasSize();
+    }
+    onKeyDown(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        this.handleUndo();
+      }
+    }
+    handleUndo() {
+      if (this.undoStack.length > 0) {
+        this.shapes = this.undoStack.pop();
+        this.redrawFullCanvas();
+      }
+    }
+    destroy() {
+      if (this.isDestroyed) return;
+      super.destroy();
+      this.stopAnnotationsAsVideo();
+      if (this.frameCounterTimeoutId) {
+        clearTimeout(this.frameCounterTimeoutId);
+        this.frameCounterTimeoutId = null;
+      }
+      if (this.videoBlobUrl) {
+        URL.revokeObjectURL(this.videoBlobUrl);
+        this.videoBlobUrl = null;
+      }
+      if (this.referenceVideoBlobUrl) {
+        URL.revokeObjectURL(this.referenceVideoBlobUrl);
+        this.referenceVideoBlobUrl = null;
+      }
+      this.currentTool = null;
+      this.plugins.forEach((plugin) => plugin.reset());
+      this.annotatedFrameCoordinates = [];
+      this.setFrameRate(DEFAULT_FPS);
+      const wrapper = this.strokeSizePicker.parentElement;
+      wrapper?.parentNode?.removeChild(wrapper);
+      if (this.referenceVideoElement) {
+        const referenceVideoWrapper = this.referenceVideoElement.parentElement;
+        referenceVideoWrapper?.parentNode?.removeChild(referenceVideoWrapper);
+        this.referenceVideoElement = null;
+      }
+      const colorPickerWrapper = this.colorPicker.parentElement;
+      colorPickerWrapper?.parentNode?.removeChild(colorPickerWrapper);
+      this.buttons.forEach((button) => {
+        button.parentNode?.removeChild(button);
+      });
+      this.buttons = [];
+      this.uiContainer.parentNode?.removeChild(this.uiContainer);
+      this.canvas.parentNode?.removeChild(this.canvas);
+      this.playerControlsContainer.parentElement?.removeChild(
+        this.playerControlsContainer
+      );
+      const keysToDelete = [
+        "strokeSizePicker",
+        "colorPicker",
+        "uiContainer",
+        "playerControlsContainer",
+        "canvas",
+        "ctx",
+        "videoElement"
+      ];
+      keysToDelete.forEach((key) => {
+        delete this[key];
+      });
+      this.activeTimeFrame = 0;
+      this.isDestroyed = true;
+      this.referenceVideoFrameBuffer?.destroy();
+      this.referenceVideoFrameBuffer = null;
+      this.videoFrameBuffer?.destroy();
+      this.videoFrameBuffer = null;
+      this.layoutManager?.destroy();
+      this.layoutManager = null;
+      this.collapseController?.destroy();
+      this.collapseController = null;
+      this.gestureHandler?.destroy();
+      this.gestureHandler = null;
+      this.gestureState = { scale: 1, panX: 0, panY: 0 };
+    }
+    _setCanvasSize() {
+      const style = getComputedStyle(this.videoElement);
+      const rawWidth = parseInt(style.width, 10);
+      const video2 = this.videoElement;
+      const trueAspectRatio = video2.videoWidth / video2.videoHeight;
+      if (isNaN(rawWidth) || !video2.videoWidth || !video2.videoHeight) {
+        this.isCanvasInitialized = false;
+        this.setCanvasSettings();
+        return false;
+      }
+      const container = video2.parentElement;
+      const isFullscreen = !!(document.fullscreenElement ?? document.webkitFullscreenElement);
+      let width = Math.min(rawWidth, video2.videoWidth);
+      let height = Math.floor(width / trueAspectRatio);
+      if (isFullscreen && container) {
+        const CONTROLS_HEIGHT = 50;
+        const TOOLS_HEIGHT = 40;
+        const containerWidth = window.innerWidth;
+        const containerHeight = window.innerHeight - (CONTROLS_HEIGHT + TOOLS_HEIGHT);
+        const containerRatio = containerWidth / containerHeight;
+        if (containerRatio > trueAspectRatio) {
+          height = containerHeight;
+          width = height * trueAspectRatio;
+        } else {
+          width = containerWidth;
+          height = width / trueAspectRatio;
+        }
+        video2.style.width = `${width}px`;
+        video2.style.height = `${height}px`;
+        video2.style.marginTop = `${TOOLS_HEIGHT}px`;
+        video2.style.marginBottom = `${CONTROLS_HEIGHT}px`;
+      } else {
+        video2.style.width = `${width}px`;
+        video2.style.height = `${height}px`;
+        video2.style.marginTop = "";
+        video2.style.marginBottom = "";
+      }
+      this.isCanvasInitialized = video2.videoWidth > 0 && video2.videoHeight > 0;
+      this.canvas.width = width * this.pixelRatio;
+      this.canvas.height = height * this.pixelRatio;
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
+      this.canvas.style.position = "absolute";
+      const videoTop = video2.offsetTop;
+      const videoLeft = video2.offsetLeft;
+      this.canvas.style.top = `${videoTop}px`;
+      this.canvas.style.left = `${videoLeft}px`;
+      this.enforcedCanvasSize = { width, height };
+      this.ctx.scale(this.pixelRatio, this.pixelRatio);
+      this.setCanvasSettings();
+      return true;
+    }
+    setCanvasSize() {
+      if (this._setCanvasSize()) {
+        this.syncVideoSizes();
+        this.redrawFullCanvas();
+      }
+    }
+    replaceShape(shape, index) {
+      const serializedShape = this.serialize([shape])[0];
+      this.undoStack.push([...this.shapes]);
+      this.shapes[index] = serializedShape;
+    }
+    addShape(shape) {
+      const serializedShape = this.serialize([shape])[0];
+      this.undoStack.push([...this.shapes]);
+      this.shapes.push(serializedShape);
+    }
+    get msPerFrame() {
+      return 1e3 / this.fps;
+    }
+    syncVideoSizes() {
+      this.withRefVideo((refVideo) => {
+        const video2 = this.videoElement;
+        const videoPosition = video2.getBoundingClientRect();
+        refVideo.style.position = "fixed";
+        refVideo.style.top = `${videoPosition.top}px`;
+        refVideo.style.left = `${videoPosition.left}px`;
+      });
+    }
+    async addReferenceVideoByURL(url, fps = this.fps, type = "video/mp4") {
+      const blob = await fetch(url).then((r) => r.blob());
+      const blobs = new Blob([blob], { type });
+      if (this.referenceVideoBlobUrl) {
+        URL.revokeObjectURL(this.referenceVideoBlobUrl);
+      }
+      const mediaUrl = window.URL.createObjectURL(blobs);
+      this.referenceVideoBlobUrl = mediaUrl;
+      if (!this.referenceVideoElement) {
+        this.referenceVideoElement = document.createElement("video");
+        this.withRefVideo((refVideo) => {
+          if (this.isMobile) {
+            refVideo.style.zIndex = "2";
+            refVideo.style.display = "block";
+            refVideo.style.top = "0";
+            refVideo.style.left = "0";
+            refVideo.style.opacity = "0.25";
+            refVideo.style.width = "20px";
+            refVideo.style.height = "15px";
+          } else {
+            refVideo.style.zIndex = "-1";
+            refVideo.style.display = "none";
+            refVideo.style.width = "100px";
+            refVideo.style.height = "70px";
+          }
+          refVideo.style.objectFit = "cover";
+          refVideo.style.objectPosition = "left top";
+          refVideo.muted = true;
+          refVideo.volume = 0;
+          refVideo.playsInline = true;
+          refVideo.autoplay = false;
+          refVideo.controls = false;
+          refVideo.loop = true;
+          this.videoElement.after(refVideo);
+          this.referenceVideoFrameBuffer = new VideoFrameBuffer(refVideo, fps);
+          this.referenceVideoFrameBuffer.isMobile = this.isMobile;
+          this.referenceVideoFrameBuffer.start();
+        });
+        this.syncVideoSizes();
+      } else {
+        this.referenceVideoFrameBuffer?.destroy();
+        this.referenceVideoFrameBuffer = new VideoFrameBuffer(
+          this.referenceVideoElement,
+          fps
+        );
+        this.referenceVideoFrameBuffer.isMobile = this.isMobile;
+        this.referenceVideoFrameBuffer.start();
+      }
+      this.referenceVideoElement.src = mediaUrl;
+      this.referenceVideoElement.play().then(() => {
+        this.showButton("compare");
+      }).catch(() => {
+        this.hideButton("compare");
+      });
+    }
+    hideButton(tool) {
+      const button = this.getButtonForTool(tool);
+      button.style.display = "none";
+    }
+    showButton(tool) {
+      const button = this.getButtonForTool(tool);
+      button.style.display = "";
+    }
+    addSingletonShape(shape) {
+      const serializedShape = this.serialize([shape])[0];
+      const filteredShapes = this.shapes.filter((s) => s.type !== shape.type);
+      this.replaceFrame(this.playbackFrame, [...filteredShapes, serializedShape]);
+    }
+    serialize(shapes = this.shapes) {
+      const canvasWidth = this.canvasWidth;
+      const canvasHeight = this.canvasHeight;
+      return shapes.map((shape) => {
+        const pluginForShape = this.pluginForTool(shape.type);
+        return pluginForShape.normalize(shape, canvasWidth, canvasHeight);
+      });
+    }
+    deserialize(shapes) {
+      const canvasWidth = 1 / this.canvasWidth;
+      const canvasHeight = 1 / this.canvasHeight;
+      return shapes.map((shape) => {
+        const pluginForShape = this.pluginForTool(shape.type);
+        return pluginForShape.normalize(shape, canvasWidth, canvasHeight);
+      });
+    }
+    getRelativeCoords(event) {
+      const rect = this.canvas.getBoundingClientRect();
+      return {
+        x: this.getEventX(event) - rect.left,
+        y: this.getEventY(event) - rect.top
+      };
+    }
+    handleMouseDown(event) {
+      event.preventDefault();
+      this.isMouseDown = true;
+      if (isMultiTouch(event)) return;
+      if (this.gestureHandler?.hasTwoFingers()) return;
+      const genericFrame = this.frameFromProgressBar(event, true);
+      if (genericFrame) {
+        this.isProgressBarNavigation = true;
+        const frame = this.getAnnotationFrame(event);
+        if (this.isVideoPaused) {
+          if (frame !== null) {
+            this.playbackFrame = frame;
+          } else {
+            this.playbackFrame = genericFrame;
+          }
+        }
+        return;
+      }
+      if (this.currentTool && this.collapseController?.autoCollapseEnabled) {
+        this.collapseController.collapse();
+      }
+      if (this.currentTool) {
+        this.pluginForTool(this.currentTool).onPointerDown(event);
+      }
+    }
+    get isDrawing() {
+      if (!this.currentTool) {
+        return false;
+      }
+      const activePlugin = this.pluginForTool(this.currentTool);
+      return activePlugin.isDrawing;
+    }
+    get isVideoPaused() {
+      if (this.videoElement.tagName === "VIDEO") {
+        return this.videoElement.paused;
+      }
+      return true;
+    }
+    get hasGlobalOverlays() {
+      return this.globalShapes.length > 0;
+    }
+    handleMouseMove(event) {
+      event.preventDefault();
+      if (isMultiTouch(event)) return;
+      if (this.isMouseDown) {
+        const maybeFrame = this.isProgressBarNavigation ? this.frameFromProgressBar(event, false) : null;
+        if (maybeFrame !== null && !this.isDrawing) {
+          if (maybeFrame === this.lastNavigatedFrame) {
+            return;
+          }
+          this.lastNavigatedFrame = maybeFrame;
+          this.activeTimeFrame = maybeFrame;
+          if (this.isVideoPaused) {
+            this.playbackFrame = maybeFrame;
+          }
+          this.clearCanvas();
+          if (!this.hasGlobalOverlays) {
+            this.addVideoOverlay();
+          }
+          this.drawShapesOverlay();
+          this.addProgressBarOverlay();
+          return;
+        } else {
+          this.hideControls();
+          this.clearCanvas();
+          if (!this.hasGlobalOverlays) {
+            this.addVideoOverlay();
+          }
+          this.drawShapesOverlay();
+        }
+      } else {
+        this.redrawFullCanvas();
+      }
+      if (this.currentTool) {
+        this.pluginForTool(this.currentTool).onPointerMove(event);
+      }
+    }
+    getEventX(event) {
+      return event.clientX;
+    }
+    getEventY(event) {
+      return event.clientY;
+    }
+    handleMouseUp(event) {
+      this.isMouseDown = false;
+      this.isProgressBarNavigation = false;
+      this.showControls();
+      if (isMultiTouch(event)) return;
+      if (this.currentTool) {
+        this.pluginForTool(this.currentTool).onPointerUp(event);
+      }
+      if (this.collapseController?.autoCollapseEnabled) {
+        this.collapseController.expand();
+      }
+      this.redrawFullCanvas();
+    }
+    focusOnMediaNode() {
+      this.videoElement.focus();
+    }
+    drawShapesOverlay() {
+      const prevSettings = {
+        strokeStyle: this.ctx.strokeStyle,
+        fillStyle: this.ctx.fillStyle,
+        lineWidth: this.ctx.lineWidth,
+        globalAlpha: this.ctx.globalAlpha
+      };
+      const hasTransform = this.gestureState.scale !== 1 || this.gestureState.panX !== 0 || this.gestureState.panY !== 0;
+      if (hasTransform) {
+        this.ctx.save();
+        this.ctx.translate(this.gestureState.panX, this.gestureState.panY);
+        const cx = this.canvasWidth / 2;
+        const cy = this.canvasHeight / 2;
+        this.ctx.translate(cx, cy);
+        this.ctx.scale(this.gestureState.scale, this.gestureState.scale);
+        this.ctx.translate(-cx, -cy);
+      }
+      for (let shape of this.deserialize(this.globalShapes)) {
+        this.ctx.strokeStyle = shape.strokeStyle;
+        this.ctx.fillStyle = shape.fillStyle;
+        this.ctx.lineWidth = shape.lineWidth;
+        this.ctx.globalAlpha = shape.opacity ?? 1;
+        try {
+          this.pluginForTool(shape.type).draw(shape);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      for (let shape of this.deserialize(this.shapes)) {
+        this.ctx.strokeStyle = shape.strokeStyle;
+        this.ctx.fillStyle = shape.fillStyle;
+        this.ctx.lineWidth = shape.lineWidth;
+        this.ctx.globalAlpha = shape.opacity ?? 1;
+        try {
+          this.pluginForTool(shape.type).draw(shape);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (hasTransform) {
+        this.ctx.restore();
+      }
+      this.ctx.strokeStyle = prevSettings.strokeStyle;
+      this.ctx.fillStyle = prevSettings.fillStyle;
+      this.ctx.lineWidth = prevSettings.lineWidth;
+      this.ctx.globalAlpha = prevSettings.globalAlpha;
+    }
+    clearCanvas() {
+      this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    }
+    frameToDataUrl() {
+      try {
+        this.clearCanvas();
+        this.addVideoOverlay();
+        this.addFrameSquareOverlay();
+        this.drawShapesOverlay();
+        const data = this.canvas.toDataURL("image/png");
+        this.redrawFullCanvas();
+        return data;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+    redrawFullCanvas() {
+      this.clearCanvas();
+      this.addVideoOverlay();
+      this.drawShapesOverlay();
+      this.drawSelectionHandles();
+      this.addFrameSquareOverlay();
+      this.addProgressBarOverlay();
+    }
+    drawSelectionHandles() {
+      if (this.currentTool !== "move") return;
+      try {
+        const movePlugin = this.pluginForTool("move");
+        movePlugin.drawResizeHandles();
+      } catch {
+      }
+    }
+    replaceFrame(frame, shapes) {
+      this.timeStack.set(frame, this.parseShapes(this.stringifyShapes(shapes)));
+    }
+    addShapesToFrame(frame, shapes) {
+      const existingShapes = this.timeStack.get(frame) || [];
+      this.timeStack.set(frame, [
+        ...existingShapes,
+        ...this.parseShapes(this.stringifyShapes(shapes))
+      ]);
+    }
+    setFrameRate(fps) {
+      this.destructors.find((d) => d.name === "frameRateDetector")?.();
+      this.fps = fps;
+    }
+    stringifyShapes(shapes) {
+      return JSON.stringify(shapes, (key, value) => {
+        if (key === "image") {
+          return value.src;
+        }
+        return value;
+      });
+    }
+    parseShapes(shapes) {
+      return JSON.parse(shapes, (key, value) => {
+        if (key === "image") {
+          const img = new Image();
+          img.src = value;
+          return img;
+        }
+        return value;
+      });
+    }
+    filterNonSerializableShapes(shapes) {
+      return shapes.filter((shape) => {
+        if (shape.type === "image") {
+          return false;
+        } else {
+          return true;
+        }
+      });
+    }
+    saveCurrentFrame() {
+      return {
+        frame: this.playbackFrame,
+        version: 1,
+        fps: this.fps,
+        shapes: this.parseShapes(
+          this.stringifyShapes(this.filterNonSerializableShapes(this.shapes))
+        )
+      };
+    }
+    loadAllFrames(frames) {
+      this.cleanFrameStacks();
+      frames.forEach((frame) => {
+        const shapes = frame.shapes || [];
+        this.timeStack.set(frame.frame, this.parseShapes(this.stringifyShapes(shapes)));
+      });
+    }
+    appendFrames(frames) {
+      frames.forEach((frame) => {
+        this.addShapesToFrame(frame.frame, frame.shapes);
+      });
+    }
+    saveAllFrames() {
+      const allFrames = Array.from(this.timeStack.keys());
+      const annotatedFrames = allFrames.filter((frame) => {
+        return this.timeStack.get(frame)?.length;
+      });
+      const result = annotatedFrames.map((frame) => {
+        return {
+          frame,
+          fps: this.fps,
+          version: 1,
+          shapes: this.filterNonSerializableShapes(
+            this.timeStack.get(frame) ?? []
+          )
+        };
+      });
+      return result;
+    }
+    getAnnotationFrame(event) {
+      const x = event.offsetX;
+      const y = event.offsetY;
+      const tolerance = this.isMobile ? 20 : 12;
+      const frame = this.annotatedFrameCoordinates.find((coordinate) => {
+        return x >= coordinate.x - tolerance && x <= coordinate.x + tolerance && y >= coordinate.y - tolerance && y <= coordinate.y + tolerance;
+      })?.frame ?? null;
+      return frame;
+    }
+    get totalFrames() {
+      if (this._enforcedTotalFrames !== null) {
+        return this._enforcedTotalFrames;
+      }
+      const node = this.videoElement;
+      if (node.tagName !== "VIDEO") {
+        return 1;
+      }
+      return Math.round(node.duration * this.fps);
+    }
+    /**
+     * Set a fixed total frames count, overriding the calculated value from video duration.
+     * Pass null to clear the enforcement and use the calculated value.
+     */
+    setTotalFrames(frames) {
+      this._enforcedTotalFrames = frames !== null ? Math.max(1, Math.round(frames)) : null;
+    }
+    /**
+     * Get the enforced total frames value, or null if using calculated value.
+     */
+    getEnforcedTotalFrames() {
+      return this._enforcedTotalFrames;
+    }
+    frameFromProgressBar(event, countY = true) {
+      const node = this.videoElement;
+      if (node.tagName !== "VIDEO") {
+        return null;
+      }
+      const { x, width, height, y } = this.progressBarCoordinates;
+      const x1 = event.offsetX;
+      const y1 = event.offsetY;
+      const calculateFrame = () => {
+        const rawFrame = Math.round((x1 - x) / width * this.totalFrames);
+        return Math.max(1, Math.min(rawFrame, this.totalFrames));
+      };
+      if (countY) {
+        if (x1 >= x && x1 <= x + width && y1 >= y && y1 <= y + height) {
+          return calculateFrame();
+        }
+        return null;
+      } else {
+        if (x1 >= x && x1 <= x + width) {
+          return calculateFrame();
+        }
+        return null;
+      }
+    }
+    hasAnnotationsForFrame(frame) {
+      if (this.globalShapes.length > 0) {
+        return true;
+      }
+      if (this.timeStack.has(frame)) {
+        const shapes = this.timeStack.get(frame);
+        return shapes && shapes.length > 0;
+      }
+      return false;
+    }
+    stopAnnotationsAsVideo() {
+      this.isAnnotationsAsVideoActive = false;
+    }
+    startAnnotationsAsVideo() {
+      this.isAnnotationsAsVideoActive = true;
+      this.playAnnotationsAsVideo();
+    }
+    playAnnotationsAsVideo() {
+      if (!this.isAnnotationsAsVideoActive) {
+        return;
+      }
+      this.clearCanvas();
+      this.addVideoOverlay();
+      this.drawShapesOverlay();
+      if (this.isCursorOverCanvas || this.isMobile) {
+        this.addFrameSquareOverlay();
+        this.addProgressBarOverlay();
+      }
+    }
+  };
+
+  // src/overlays/frame-number.ts
+  function addFrameSquareOverlay(frame = this.activeTimeFrame) {
+    this.ctx.save();
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    const width = 50;
+    const height = 30;
+    const fontSize = 20;
+    this.ctx.fillRect(
+      this.canvasWidth - width,
+      this.canvasHeight - height,
+      width,
+      height
+    );
+    this.ctx.fillStyle = "white";
+    this.ctx.font = `${fontSize}px sans-serif`;
+    this.ctx.fillText(
+      `${frame}`.padStart(3, "0"),
+      this.canvasWidth - 40,
+      this.canvasHeight - 7
+    );
+    this.ctx.restore();
+  }
+
+  // src/overlays/video.ts
+  function addVideoOverlay() {
+    const node = this.videoElement;
+    if (node.tagName !== "VIDEO") {
+      return;
+    }
+    const videoRect = node.getBoundingClientRect();
+    const canvasRect = this.canvas.getBoundingClientRect();
+    const offsetX = videoRect.left - canvasRect.left;
+    const offsetY = videoRect.top - canvasRect.top;
+    const frameNumber = this.activeTimeFrame;
+    let videoFrame = null;
+    let vw;
+    let vh;
+    const ffmpegFrame = this.ffmpegFrameExtractor?.getFrame(frameNumber || 1);
+    if (ffmpegFrame) {
+      videoFrame = ffmpegFrame;
+      vw = ffmpegFrame.width;
+      vh = ffmpegFrame.height;
+    } else {
+      const bufferFrame = this.videoFrameBuffer?.getFrame(frameNumber || 0);
+      if (bufferFrame) {
+        videoFrame = bufferFrame;
+        vw = bufferFrame.width;
+        vh = bufferFrame.height;
+      } else {
+        videoFrame = node;
+        vw = node.videoWidth;
+        vh = node.videoHeight;
+      }
+    }
+    this.ctx.drawImage(
+      videoFrame,
+      0,
+      0,
+      vw,
+      vh,
+      offsetX,
+      offsetY,
+      this.canvasWidth,
+      this.canvasHeight
+    );
+  }
+
+  // src/overlays/progress-bar.ts
+  function addProgressBarOverlay() {
+    const node = this.videoElement;
+    if (node.tagName !== "VIDEO") {
+      return;
+    }
+    this.annotatedFrameCoordinates = [];
+    const allFrames = Array.from(this.timeStack.keys());
+    const annotatedFrames = allFrames.filter((frame) => {
+      return this.timeStack.get(frame)?.length;
+    });
+    const totalFrames = this.totalFrames;
+    const { x, width, height, y } = this.progressBarCoordinates;
+    const coordinatesOnProgressBar = annotatedFrames.map((frame) => {
+      return Math.round(frame / totalFrames * width);
+    });
+    this.ctx.save();
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    this.ctx.fillRect(x, y, width, height);
+    this.ctx.fillStyle = colorMap.y;
+    const recSize = this.isMobile ? 16 : 8;
+    coordinatesOnProgressBar.forEach((coordinate, index) => {
+      this.ctx.beginPath();
+      const rx = x + coordinate;
+      const ry = this.canvasHeight - height / 2;
+      this.ctx.fillRect(rx - recSize / 2, ry - recSize / 2, recSize, recSize);
+      this.annotatedFrameCoordinates.push({
+        x: rx,
+        y: ry,
+        frame: annotatedFrames[index]
+      });
+    });
+    const currentFrame = this.isProgressBarNavigation && this.lastNavigatedFrame > 0 ? this.lastNavigatedFrame : this.playbackFrame;
+    const currentFrameCoordinate = Math.round(currentFrame / totalFrames * width) + x;
+    this.ctx.fillStyle = "white";
+    this.ctx.beginPath();
+    const ax = currentFrameCoordinate;
+    const ay = this.canvasHeight - height / 2;
+    this.ctx.beginPath();
+    this.ctx.fillRect(ax - recSize / 2, ay - recSize / 2, recSize, recSize);
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  // ../gto-js/dist/gto.js
+  var v = /* @__PURE__ */ ((i) => (i[i.BinaryGTO = 0] = "BinaryGTO", i[i.CompressedGTO = 1] = "CompressedGTO", i[i.TextGTO = 2] = "TextGTO", i))(v || {});
+  var p = /* @__PURE__ */ ((i) => (i[i.Int = 0] = "Int", i[i.Float = 1] = "Float", i[i.Double = 2] = "Double", i[i.Half = 3] = "Half", i[i.String = 4] = "String", i[i.Boolean = 5] = "Boolean", i[i.Short = 6] = "Short", i[i.Byte = 7] = "Byte", i[i.Int64 = 8] = "Int64", i))(p || {});
+  var N = {
+    0: "int",
+    1: "float",
+    2: "double",
+    3: "half",
+    4: "string",
+    5: "bool",
+    6: "short",
+    7: "byte",
+    8: "int64"
+  };
+  var z = {
+    int: 0,
+    float: 1,
+    double: 2,
+    half: 3,
+    string: 4,
+    bool: 5,
+    short: 6,
+    byte: 7,
+    int64: 8
+    /* Int64 */
+  };
+  var B = {
+    0: 4,
+    1: 4,
+    2: 8,
+    3: 2,
+    4: 4,
+    // String type stores indices (32-bit)
+    5: 1,
+    6: 2,
+    7: 1,
+    8: 8
+  };
+  var R = /* @__PURE__ */ ((i) => (i[i.None = 0] = "None", i[i.HeaderOnly = 1] = "HeaderOnly", i[i.RandomAccess = 2] = "RandomAccess", i[i.BinaryOnly = 4] = "BinaryOnly", i[i.TextOnly = 8] = "TextOnly", i))(R || {});
+  var b = /* @__PURE__ */ ((i) => (i[i.Skip = 0] = "Skip", i[i.Read = 1] = "Read", i))(b || {});
+  var Y = class {
+    magic = 671;
+    numStrings = 0;
+    numObjects = 0;
+    version = 4;
+    flags = 0;
+  };
+  var F = class {
+    name = "";
+    protocol = "";
+    protocolVersion = 0;
+    numComponents = 0;
+    pad = 0;
+    // Internal tracking
+    _nameId = 0;
+    _protocolId = 0;
+    _componentOffset = 0;
+  };
+  var L = class {
+    name = "";
+    interpretation = "";
+    numProperties = 0;
+    flags = 0;
+    childLevel = 0;
+    // Nesting depth for nested components (v4+)
+    // Internal tracking
+    _nameId = 0;
+    _interpretationId = 0;
+    _propertyOffset = 0;
+    _object = null;
+  };
+  var M = class {
+    name = "";
+    interpretation = "";
+    type = 1;
+    size = 0;
+    // Number of elements
+    width = 1;
+    // Parts per element (e.g., 3 for xyz)
+    dims = [1, 1, 1, 1];
+    // Up to 4 dimensional shape
+    // Internal tracking
+    _nameId = 0;
+    _interpretationId = 0;
+    _component = null;
+    _dataOffset = 0;
+    /**
+     * Get total number of values (size * width * all dims)
+     */
+    get totalCount() {
+      return this.size * this.width * this.dims.reduce((t, e) => t * e, 1);
+    }
+    /**
+     * Get byte size of the property data
+     */
+    get byteSize() {
+      return this.totalCount * B[this.type];
+    }
+  };
+  var H = class {
+    _strings = [];
+    // Array of strings (index -> string)
+    _lookup = /* @__PURE__ */ new Map();
+    // Reverse lookup (string -> index)
+    /**
+     * Clear the string table
+     */
+    clear() {
+      this._strings = [], this._lookup.clear();
+    }
+    /**
+     * Get number of strings in the table
+     */
+    get size() {
+      return this._strings.length;
+    }
+    /**
+     * Get all strings as an array
+     */
+    get strings() {
+      return [...this._strings];
+    }
+    /**
+     * Add a string to the table (for reading)
+     * @param str - String to add
+     * @returns Index of the string
+     */
+    add(t) {
+      const e = this._strings.length;
+      return this._strings.push(t), this._lookup.set(t, e), e;
+    }
+    /**
+     * Intern a string - add if not present, return index
+     * @param str - String to intern
+     * @returns Index of the string
+     */
+    intern(t) {
+      const e = this._lookup.get(t);
+      return e !== void 0 ? e : this.add(t);
+    }
+    /**
+     * Lookup a string by index
+     * @param index - Index of the string
+     * @returns The string at the index
+     */
+    stringFromId(t) {
+      if (t < 0 || t >= this._strings.length)
+        throw new Error(`String index ${t} out of range (0-${this._strings.length - 1})`);
+      return this._strings[t];
+    }
+    /**
+     * Lookup an index by string
+     * @param str - String to lookup
+     * @returns Index of the string, or undefined if not found
+     */
+    lookup(t) {
+      return this._lookup.get(t);
+    }
+    /**
+     * Check if a string exists in the table
+     * @param str - String to check
+     */
+    has(t) {
+      return this._lookup.has(t);
+    }
+    /**
+     * Read string table from a DataView (binary format)
+     * @param view - DataView containing the string data
+     * @param offset - Starting offset in the view
+     * @param numStrings - Number of strings to read
+     * @param _littleEndian - Byte order (unused, strings are byte-aligned)
+     * @returns Number of bytes consumed
+     */
+    readFromBinary(t, e, n, r = true) {
+      this.clear();
+      let s = e;
+      const o = new TextDecoder("utf-8");
+      for (let l = 0; l < n; l++) {
+        let _ = s;
+        for (; _ < t.byteLength && t.getUint8(_) !== 0; )
+          _++;
+        const h = new Uint8Array(t.buffer, t.byteOffset + s, _ - s), d = o.decode(h);
+        this.add(d), s = _ + 1;
+      }
+      return s - e;
+    }
+    /**
+     * Write string table to binary format
+     * @returns Binary representation of the string table
+     */
+    writeToBinary() {
+      const t = new TextEncoder();
+      let e = 0;
+      for (const s of this._strings)
+        e += t.encode(s).length + 1;
+      const n = new Uint8Array(e);
+      let r = 0;
+      for (const s of this._strings) {
+        const o = t.encode(s);
+        n.set(o, r), r += o.length, n[r++] = 0;
+      }
+      return n;
+    }
+  };
+  function tt(i) {
+    const t = i >> 15 & 1, e = i >> 10 & 31, n = i & 1023;
+    if (e === 0) {
+      if (n === 0)
+        return t ? -0 : 0;
+      const s = n / 1024;
+      return (t ? -1 : 1) * s * Math.pow(2, -14);
+    } else if (e === 31)
+      return n === 0 ? t ? -1 / 0 : 1 / 0 : NaN;
+    const r = 1 + n / 1024;
+    return (t ? -1 : 1) * r * Math.pow(2, e - 15);
+  }
+  function et(i) {
+    const t = new ArrayBuffer(4), e = new DataView(t);
+    e.setFloat32(0, i, true);
+    const n = e.getUint32(0, true), r = n >> 31 & 1, s = n >> 23 & 255, o = n & 8388607;
+    if (s === 0)
+      return r << 15;
+    if (s === 255)
+      return o === 0 ? r << 15 | 31744 : r << 15 | 31744 | o >> 13;
+    const l = s - 127 + 15;
+    if (l >= 31)
+      return r << 15 | 31744;
+    if (l <= 0) {
+      if (l < -10)
+        return r << 15;
+      const _ = (o | 8388608) >> 1 - l + 13;
+      return r << 15 | _;
+    }
+    return r << 15 | l << 10 | o >> 13;
+  }
+  function V(i) {
+    return i.length >= 2 && i[0] === 31 && i[1] === 139;
+  }
+  async function nt(i) {
+    if (typeof DecompressionStream < "u") {
+      const t = new DecompressionStream("gzip"), e = t.writable.getWriter(), n = new Uint8Array(i.length);
+      n.set(i), e.write(n), e.close();
+      const r = [], s = t.readable.getReader();
+      for (; ; ) {
+        const { done: h, value: d } = await s.read();
+        if (h) break;
+        r.push(d);
+      }
+      const o = r.reduce((h, d) => h + d.length, 0), l = new Uint8Array(o);
+      let _ = 0;
+      for (const h of r)
+        l.set(h, _), _ += h.length;
+      return l;
+    }
+    throw new Error("Gzip decompression not available. DecompressionStream API required.");
+  }
+  var rt = class {
+    input;
+    pos = 0;
+    line = 1;
+    column = 1;
+    constructor(t) {
+      this.input = t;
+    }
+    peek() {
+      return this.input[this.pos] || "";
+    }
+    advance() {
+      const t = this.input[this.pos++] || "";
+      return t === `
+` ? (this.line++, this.column = 1) : this.column++, t;
+    }
+    skipWhitespace() {
+      for (; this.pos < this.input.length; ) {
+        const t = this.peek();
+        if (t === " " || t === "	" || t === `
+` || t === "\r")
+          this.advance();
+        else if (t === "#")
+          for (; this.pos < this.input.length && this.peek() !== `
+`; )
+            this.advance();
+        else
+          break;
+      }
+    }
+    readString() {
+      const t = this.advance();
+      let e = "";
+      for (; this.pos < this.input.length; ) {
+        const n = this.advance();
+        if (n === t)
+          break;
+        if (n === "\\") {
+          const r = this.advance();
+          switch (r) {
+            case "n":
+              e += `
+`;
+              break;
+            case "t":
+              e += "	";
+              break;
+            case "r":
+              e += "\r";
+              break;
+            case "\\":
+              e += "\\";
+              break;
+            case '"':
+              e += '"';
+              break;
+            case "'":
+              e += "'";
+              break;
+            default:
+              e += r;
+          }
+        } else
+          e += n;
+      }
+      return { type: "STRING", value: e };
+    }
+    readNumber() {
+      let t = "", e = false, n = false;
+      for (this.peek() === "-" && (t += this.advance()); this.pos < this.input.length; ) {
+        const s = this.peek();
+        if (s >= "0" && s <= "9")
+          t += this.advance();
+        else if (s === "." && !e && !n)
+          e = true, t += this.advance();
+        else if ((s === "e" || s === "E") && !n)
+          n = true, t += this.advance(), (this.peek() === "+" || this.peek() === "-") && (t += this.advance());
+        else
+          break;
+      }
+      return { type: "NUMBER", value: e || n ? parseFloat(t) : parseInt(t, 10) };
+    }
+    readIdentifier() {
+      let t = "";
+      for (; this.pos < this.input.length; ) {
+        const e = this.peek();
+        if (e >= "a" && e <= "z" || e >= "A" && e <= "Z" || e >= "0" && e <= "9" || e === "_" || e === "-" || e === ".")
+          t += this.advance();
+        else
+          break;
+      }
+      return t === "as" ? { type: "AS", value: t } : { type: "IDENTIFIER", value: t };
+    }
+    nextToken() {
+      if (this.skipWhitespace(), this.pos >= this.input.length)
+        return { type: "EOF", value: null };
+      const t = this.peek();
+      if (t === '"' || t === "'")
+        return this.readString();
+      if (t >= "0" && t <= "9" || t === "-" && this.input[this.pos + 1] >= "0" && this.input[this.pos + 1] <= "9")
+        return this.readNumber();
+      if (t >= "a" && t <= "z" || t >= "A" && t <= "Z" || t === "_")
+        return this.readIdentifier();
+      switch (this.advance(), t) {
+        case "{":
+          return { type: "LBRACE", value: t };
+        case "}":
+          return { type: "RBRACE", value: t };
+        case "[":
+          return { type: "LBRACKET", value: t };
+        case "]":
+          return { type: "RBRACKET", value: t };
+        case "(":
+          return { type: "LPAREN", value: t };
+        case ")":
+          return { type: "RPAREN", value: t };
+        case ":":
+          return { type: "COLON", value: t };
+        case "=":
+          return { type: "EQUALS", value: t };
+        case ",":
+          return { type: "COMMA", value: t };
+        default:
+          throw new Error(`Unexpected character '${t}' at line ${this.line}, column ${this.column}`);
+      }
+    }
+  };
+  var st = class {
+    _mode;
+    _stringTable = new H();
+    _header = new Y();
+    _objects = [];
+    _components = [];
+    _properties = [];
+    _filename = "<string>";
+    _lexer;
+    _currentToken;
+    /**
+     * Create a new Reader
+     * @param mode - Reader mode flags (ReaderMode.*)
+     */
+    constructor(t = R.None) {
+      this._mode = t;
+    }
+    /**
+     * Get string from string table by ID
+     */
+    stringFromId(t) {
+      return this._stringTable.stringFromId(t);
+    }
+    /**
+     * Get the full string table
+     */
+    stringTable() {
+      return this._stringTable.strings;
+    }
+    /**
+     * Get all objects (for RandomAccess mode)
+     */
+    objects() {
+      return this._objects;
+    }
+    /**
+     * Get all components (for RandomAccess mode)
+     */
+    components() {
+      return this._components;
+    }
+    /**
+     * Get all properties (for RandomAccess mode)
+     */
+    properties() {
+      return this._properties;
+    }
+    /**
+     * Open and parse a GTO file (text or binary)
+     * Note: For gzip-compressed files, use openAsync() instead
+     * @param content - File content
+     * @param name - Optional filename for error messages
+     * @returns True if successful
+     */
+    open(t, e = "<string>") {
+      this._filename = e, this._stringTable.clear(), this._objects = [], this._components = [], this._properties = [];
+      try {
+        if (t instanceof ArrayBuffer || t instanceof Uint8Array) {
+          const n = t instanceof ArrayBuffer ? new Uint8Array(t) : t;
+          if (V(n))
+            throw new Error(
+              "Gzip-compressed GTO file detected. Use openAsync() for compressed files."
+            );
+          this._parseBinary(t);
+        } else if (typeof t == "string")
+          if (t.trimStart().startsWith("GTOa"))
+            this._parse(t);
+          else
+            throw new Error('Unknown GTO format - text files must start with "GTOa"');
+        else
+          throw new Error("Content must be string, ArrayBuffer, or Uint8Array");
+        return true;
+      } catch (n) {
+        return console.error(`Error parsing GTO file ${e}: ${n.message}`), false;
+      }
+    }
+    /**
+     * Open and parse a GTO file asynchronously (supports gzip-compressed files)
+     * @param content - File content
+     * @param name - Optional filename for error messages
+     * @returns Promise resolving to true if successful
+     */
+    async openAsync(t, e = "<string>") {
+      this._filename = e, this._stringTable.clear(), this._objects = [], this._components = [], this._properties = [];
+      try {
+        if (t instanceof ArrayBuffer || t instanceof Uint8Array) {
+          let n = t instanceof ArrayBuffer ? new Uint8Array(t) : t;
+          V(n) && (n = await nt(n)), this._parseBinary(n);
+        } else if (typeof t == "string")
+          if (t.trimStart().startsWith("GTOa"))
+            this._parse(t);
+          else
+            throw new Error('Unknown GTO format - text files must start with "GTOa"');
+        else
+          throw new Error("Content must be string, ArrayBuffer, or Uint8Array");
+        return true;
+      } catch (n) {
+        return console.error(`Error parsing GTO file ${e}: ${n.message}`), false;
+      }
+    }
+    /**
+     * Parse the GTO text content
+     */
+    _parse(t) {
+      const e = new rt(t);
+      if (this._lexer = e, this._currentToken = e.nextToken(), this._parseHeader(), this.header(this._header), !(this._mode & R.HeaderOnly))
+        for (; this._currentToken.type !== "EOF"; )
+          this._parseObject();
+    }
+    /**
+     * Get current token and advance
+     */
+    _advance() {
+      const t = this._currentToken;
+      return this._currentToken = this._lexer.nextToken(), t;
+    }
+    /**
+     * Expect a specific token type
+     */
+    _expect(t) {
+      const e = this._currentToken;
+      if (e.type !== t)
+        throw new Error(`Expected ${t} but got ${e.type} (${e.value}) at line ${this._lexer.line}`);
+      return this._advance();
+    }
+    /**
+     * Parse the file header
+     */
+    _parseHeader() {
+      const t = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      );
+      if (t.value !== "GTOa")
+        throw new Error(`Expected 'GTOa' but got '${t.value}'`);
+      this._expect(
+        "LPAREN"
+        /* LPAREN */
+      );
+      const e = this._expect(
+        "NUMBER"
+        /* NUMBER */
+      );
+      this._expect(
+        "RPAREN"
+        /* RPAREN */
+      ), this._header.version = e.value;
+    }
+    /**
+     * Parse an object declaration
+     */
+    _parseObject() {
+      const t = new F(), e = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      );
+      t.name = e.value, t._nameId = this._stringTable.intern(t.name), this._expect(
+        "COLON"
+        /* COLON */
+      );
+      const n = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      );
+      if (t.protocol = n.value, t._protocolId = this._stringTable.intern(t.protocol), this._currentToken.type === "LPAREN") {
+        this._advance();
+        const s = this._expect(
+          "NUMBER"
+          /* NUMBER */
+        );
+        t.protocolVersion = s.value, this._expect(
+          "RPAREN"
+          /* RPAREN */
+        );
+      }
+      const r = this.object(
+        t.name,
+        t.protocol,
+        t.protocolVersion,
+        t
+      );
+      for (t._componentOffset = this._components.length, this._objects.push(t), this._expect(
+        "LBRACE"
+        /* LBRACE */
+      ); this._currentToken.type !== "RBRACE"; )
+        this._parseComponent(t, r);
+      this._expect(
+        "RBRACE"
+        /* RBRACE */
+      ), t.numComponents = this._components.length - t._componentOffset;
+    }
+    /**
+     * Parse a component declaration
+     */
+    _parseComponent(t, e) {
+      const n = new L();
+      n._object = t;
+      let r;
+      if (this._currentToken.type === "STRING" ? r = this._advance() : r = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      ), n.name = r.value, n._nameId = this._stringTable.intern(n.name), this._currentToken.type === "AS") {
+        this._advance();
+        const o = this._expect(
+          "IDENTIFIER"
+          /* IDENTIFIER */
+        );
+        n.interpretation = o.value, n._interpretationId = this._stringTable.intern(n.interpretation);
+      }
+      let s = b.Skip;
+      for (e === b.Read && (s = this.component(n.name, n)), n._propertyOffset = this._properties.length, this._components.push(n), this._expect(
+        "LBRACE"
+        /* LBRACE */
+      ); this._currentToken.type !== "RBRACE"; )
+        this._parseProperty(n, s);
+      this._expect(
+        "RBRACE"
+        /* RBRACE */
+      ), n.numProperties = this._properties.length - n._propertyOffset;
+    }
+    /**
+     * Parse a property declaration
+     */
+    _parseProperty(t, e) {
+      const n = new M();
+      n._component = t;
+      const s = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      ).value;
+      if (!(s in z))
+        throw new Error(`Unknown type '${s}' at line ${this._lexer.line}`);
+      if (n.type = z[s], this._currentToken.type === "LBRACKET") {
+        this._advance();
+        const h = [];
+        for (h.push(this._expect(
+          "NUMBER"
+          /* NUMBER */
+        ).value); this._currentToken.type === "COMMA"; )
+          this._advance(), h.push(this._expect(
+            "NUMBER"
+            /* NUMBER */
+          ).value);
+        this._expect(
+          "RBRACKET"
+          /* RBRACKET */
+        ), n.width = h.length === 1 ? h[0] : 1, h.length > 1 ? n.dims = h : n.width = h[0];
+      }
+      this._currentToken.type === "LBRACKET" && (this._advance(), n.size = this._expect(
+        "NUMBER"
+        /* NUMBER */
+      ).value, this._expect(
+        "RBRACKET"
+        /* RBRACKET */
+      ));
+      const o = this._expect(
+        "IDENTIFIER"
+        /* IDENTIFIER */
+      );
+      if (n.name = o.value, n._nameId = this._stringTable.intern(n.name), this._currentToken.type === "AS") {
+        this._advance();
+        const h = this._expect(
+          "IDENTIFIER"
+          /* IDENTIFIER */
+        );
+        n.interpretation = h.value, n._interpretationId = this._stringTable.intern(n.interpretation);
+      }
+      let l = b.Skip;
+      e === b.Read && (l = this.property(
+        n.name,
+        n.interpretation,
+        n
+      )), this._properties.push(n), this._expect(
+        "EQUALS"
+        /* EQUALS */
+      );
+      let _;
+      this._currentToken.type === "LBRACKET" ? _ = this._parseData(n) : _ = this._parseSingleValue(n), n.size === 0 && _.length > 0 && (n.size = Math.floor(_.length / (n.width || 1))), l === b.Read && this.data(n, _.length) !== null && this.dataRead(n, _);
+    }
+    /**
+     * Parse property data values
+     */
+    _parseData(t) {
+      const e = [];
+      for (this._expect(
+        "LBRACKET"
+        /* LBRACKET */
+      ); this._currentToken.type !== "RBRACKET"; ) {
+        if (this._currentToken.type === "LBRACKET") {
+          const n = this._parseNestedData(t);
+          e.push(...n);
+        } else if (this._currentToken.type === "NUMBER")
+          e.push(this._advance().value);
+        else if (this._currentToken.type === "STRING") {
+          const n = this._advance().value;
+          t.type === p.String ? e.push(this._stringTable.intern(n)) : e.push(n);
+        } else if (this._currentToken.type === "IDENTIFIER") {
+          const n = this._advance().value;
+          n === "true" ? e.push(1) : n === "false" ? e.push(0) : e.push(this._stringTable.intern(n));
+        } else
+          throw new Error(`Unexpected token ${this._currentToken.type} in data at line ${this._lexer.line}`);
+        this._currentToken.type === "COMMA" && this._advance();
+      }
+      return this._expect(
+        "RBRACKET"
+        /* RBRACKET */
+      ), e;
+    }
+    /**
+     * Parse nested array data
+     */
+    _parseNestedData(t) {
+      const e = [];
+      for (this._expect(
+        "LBRACKET"
+        /* LBRACKET */
+      ); this._currentToken.type !== "RBRACKET"; ) {
+        if (this._currentToken.type === "LBRACKET") {
+          const n = this._parseNestedData(t);
+          e.push(...n);
+        } else if (this._currentToken.type === "NUMBER")
+          e.push(this._advance().value);
+        else if (this._currentToken.type === "STRING") {
+          const n = this._advance().value;
+          t.type === p.String ? e.push(this._stringTable.intern(n)) : e.push(n);
+        } else if (this._currentToken.type === "IDENTIFIER") {
+          const n = this._advance().value;
+          n === "true" ? e.push(1) : n === "false" ? e.push(0) : e.push(this._stringTable.intern(n));
+        } else
+          throw new Error(`Unexpected token ${this._currentToken.type} in nested data at line ${this._lexer.line}`);
+        this._currentToken.type === "COMMA" && this._advance();
+      }
+      return this._expect(
+        "RBRACKET"
+        /* RBRACKET */
+      ), e;
+    }
+    /**
+     * Parse a single value (not in array brackets)
+     */
+    _parseSingleValue(t) {
+      if (this._currentToken.type === "NUMBER")
+        return [this._advance().value];
+      if (this._currentToken.type === "STRING") {
+        const e = this._advance().value;
+        return t.type === p.String ? [this._stringTable.intern(e)] : [e];
+      } else if (this._currentToken.type === "IDENTIFIER") {
+        const e = this._advance().value;
+        return e === "true" ? [1] : e === "false" ? [0] : [this._stringTable.intern(e)];
+      }
+      throw new Error(`Unexpected token ${this._currentToken.type} for single value at line ${this._lexer.line}`);
+    }
+    // ============================================
+    // Binary format parsing
+    // ============================================
+    /**
+     * Parse binary GTO content
+     */
+    _parseBinary(t) {
+      const e = t instanceof ArrayBuffer ? t : t.buffer.slice(t.byteOffset, t.byteOffset + t.byteLength), n = new DataView(e), r = n.getUint32(0, true);
+      let s;
+      if (r === 671)
+        s = true;
+      else if (n.getUint32(0, false) === 671)
+        s = false;
+      else
+        throw new Error(`Invalid GTO magic number: 0x${r.toString(16)}`);
+      let o = 0;
+      o += 4;
+      const l = n.getUint32(o, s);
+      o += 4;
+      const _ = n.getUint32(o, s);
+      o += 4;
+      const h = n.getUint32(o, s);
+      o += 4;
+      const d = n.getUint32(o, s);
+      if (o += 4, this._header.magic = 671, this._header.numStrings = l, this._header.numObjects = _, this._header.version = h, this._header.flags = d, this.header(this._header), this._mode & R.HeaderOnly)
+        return;
+      const c = this._stringTable.readFromBinary(n, o, l, s);
+      o += c;
+      const T = [];
+      for (let f = 0; f < _; f++) {
+        const g = n.getUint32(o, s);
+        o += 4;
+        const x = n.getUint32(o, s);
+        o += 4;
+        const j = n.getUint32(o, s);
+        o += 4;
+        const I = n.getUint32(o, s);
+        o += 4, o += 4, T.push({ nameId: g, protocolId: x, protocolVersion: j, numComponents: I });
+      }
+      let a = 0;
+      for (const f of T)
+        a += f.numComponents;
+      const u = [];
+      for (let f = 0; f < a; f++) {
+        const g = n.getUint32(o, s);
+        o += 4;
+        const x = n.getUint32(o, s);
+        o += 4;
+        const j = n.getUint32(o, s);
+        o += 4;
+        const I = n.getUint32(o, s);
+        o += 4;
+        let y = 0;
+        h >= 4 && (y = n.getUint32(o, s), o += 4), u.push({ nameId: g, interpretationId: x, numProperties: j, flags: I, childLevel: y });
+      }
+      let E = 0;
+      for (const f of u)
+        E += f.numProperties;
+      const O = [];
+      for (let f = 0; f < E; f++) {
+        const g = n.getUint32(o, s);
+        o += 4;
+        const x = n.getUint32(o, s);
+        o += 4;
+        const j = n.getUint8(o);
+        o += 1, o += 3;
+        const I = n.getUint32(o, s);
+        o += 4;
+        const y = n.getUint32(o, s);
+        o += 4;
+        const C = [1, 1, 1, 1];
+        h >= 4 && (C[0] = n.getUint32(o, s), o += 4, C[1] = n.getUint32(o, s), o += 4, C[2] = n.getUint32(o, s), o += 4, C[3] = n.getUint32(o, s), o += 4), O.push({ nameId: g, interpretationId: x, type: j, size: I, width: y, dims: C });
+      }
+      let A = 0, J = 0;
+      for (const f of T) {
+        const g = new F();
+        g.name = this._stringTable.stringFromId(f.nameId), g.protocol = this._stringTable.stringFromId(f.protocolId), g.protocolVersion = f.protocolVersion, g.numComponents = f.numComponents, g._nameId = f.nameId, g._protocolId = f.protocolId, g._componentOffset = this._components.length;
+        const x = this.object(
+          g.name,
+          g.protocol,
+          g.protocolVersion,
+          g
+        );
+        this._objects.push(g);
+        for (let j = 0; j < f.numComponents; j++) {
+          const I = u[A++], y = new L();
+          y.name = this._stringTable.stringFromId(I.nameId), y.interpretation = I.interpretationId > 0 ? this._stringTable.stringFromId(I.interpretationId) : "", y.numProperties = I.numProperties, y.flags = I.flags, y.childLevel = I.childLevel, y._nameId = I.nameId, y._interpretationId = I.interpretationId, y._object = g, y._propertyOffset = this._properties.length;
+          let C = b.Skip;
+          x === b.Read && (C = this.component(y.name, y)), this._components.push(y);
+          for (let G = 0; G < I.numProperties; G++) {
+            const w = O[J++], m = new M();
+            m.name = this._stringTable.stringFromId(w.nameId), m.interpretation = w.interpretationId > 0 ? this._stringTable.stringFromId(w.interpretationId) : "", m.type = w.type, m.size = w.size, m.width = w.width, m.dims = w.dims, m._nameId = w.nameId, m._interpretationId = w.interpretationId, m._component = y, m._dataOffset = o;
+            let D = b.Skip;
+            C === b.Read && (D = this.property(
+              m.name,
+              m.interpretation,
+              m
+            )), this._properties.push(m);
+            const S = m.size * m.width, Q = B[m.type] || 4, $ = S * Q;
+            if (D === b.Read && S > 0) {
+              const Z = this._readBinaryData(n, o, m, S, s);
+              this.data(m, $) !== null && this.dataRead(m, Z);
+            }
+            o += $;
+          }
+        }
+      }
+    }
+    /**
+     * Read binary property data
+     */
+    _readBinaryData(t, e, n, r, s) {
+      const o = [], l = n.type, _ = B[l] || 4;
+      for (let h = 0; h < r; h++) {
+        const d = this._readBinaryValue(t, e + h * _, l, s);
+        o.push(d);
+      }
+      return o;
+    }
+    /**
+     * Read a single binary value
+     */
+    _readBinaryValue(t, e, n, r) {
+      switch (n) {
+        case p.Int:
+          return t.getInt32(e, r);
+        case p.Float:
+          return t.getFloat32(e, r);
+        case p.Double:
+          return t.getFloat64(e, r);
+        case p.Half:
+          return tt(t.getUint16(e, r));
+        case p.String:
+          return t.getUint32(e, r);
+        case p.Boolean:
+          return t.getUint8(e) !== 0 ? 1 : 0;
+        case p.Short:
+          return t.getUint16(e, r);
+        case p.Byte:
+          return t.getUint8(e);
+        case p.Int64:
+          return Number(t.getBigInt64(e, r));
+        default:
+          throw new Error(`Unknown data type: ${n}`);
+      }
+    }
+    // ============================================
+    // Callback methods - override these in subclass
+    // ============================================
+    /**
+     * Called after the file header is read
+     */
+    header(t) {
+    }
+    /**
+     * Called for each object in the file
+     * @returns Request.Read to read object data, Request.Skip to skip
+     */
+    object(t, e, n, r) {
+      return b.Read;
+    }
+    /**
+     * Called for each component in an object
+     * @returns Request.Read to read component data, Request.Skip to skip
+     */
+    component(t, e) {
+      return b.Read;
+    }
+    /**
+     * Called for each property in a component
+     * @returns Request.Read to read property data, Request.Skip to skip
+     */
+    property(t, e, n) {
+      return b.Read;
+    }
+    /**
+     * Called to allocate memory for property data
+     * @returns Buffer to store data, or null to skip
+     */
+    data(t, e) {
+      return true;
+    }
+    /**
+     * Called after property data is read
+     */
+    dataRead(t, e) {
+    }
+  };
+  var bt = class extends st {
+    result = {
+      version: 0,
+      objects: []
+    };
+    _currentObject = null;
+    _currentComponent = null;
+    constructor() {
+      super(R.None);
+    }
+    header(t) {
+      this.result.version = t.version;
+    }
+    object(t, e, n, r) {
+      return this._currentObject = {
+        name: t,
+        protocol: e,
+        protocolVersion: n,
+        components: {}
+      }, this.result.objects.push(this._currentObject), b.Read;
+    }
+    component(t, e) {
+      return this._currentComponent = {
+        interpretation: e.interpretation,
+        properties: {}
+      }, this._currentObject.components[t] = this._currentComponent, b.Read;
+    }
+    property(t, e, n) {
+      return b.Read;
+    }
+    dataRead(t, e) {
+      const n = {
+        type: N[t.type],
+        size: t.size,
+        width: t.width,
+        interpretation: t.interpretation,
+        data: this._formatData(t, e)
+      };
+      this._currentComponent.properties[t.name] = n;
+    }
+    _formatData(t, e) {
+      if (t.type === p.String)
+        return e.map((n) => this.stringFromId(n));
+      if (t.width > 1) {
+        const n = [];
+        for (let r = 0; r < e.length; r += t.width)
+          n.push(e.slice(r, r + t.width));
+        return n;
+      }
+      return e;
+    }
+  };
+  var it = class {
+    _stringTable = new H();
+    _state = 0;
+    _output = "";
+    _indent = 0;
+    _version = 4;
+    _binaryMode = false;
+    _fileType = v.TextGTO;
+    // Binary mode storage
+    _objectInfos = [];
+    _componentInfos = [];
+    _propertyInfos = [];
+    _propertyData = [];
+    _currentObjectIdx = -1;
+    _currentComponentIdx = -1;
+    // Two-phase API storage
+    _pendingProperties = [];
+    _propertyIndex = 0;
+    intern(t) {
+      return Array.isArray(t) ? t.map((e) => this._stringTable.intern(e)) : this._stringTable.intern(t);
+    }
+    /**
+     * Lookup a string ID
+     * @param str - String to lookup
+     * @returns String ID or undefined
+     */
+    lookup(t) {
+      return this._stringTable.lookup(t);
+    }
+    /**
+     * Get string from ID
+     */
+    stringFromId(t) {
+      return this._stringTable.stringFromId(t);
+    }
+    /**
+     * Open/initialize the writer
+     * @param type - File type (TextGTO or BinaryGTO)
+     */
+    open(t = v.TextGTO) {
+      return this._fileType = t, this._state = 0, t === v.BinaryGTO ? (this._binaryMode = true, this._objectInfos = [], this._componentInfos = [], this._propertyInfos = [], this._propertyData = [], this._currentObjectIdx = -1, this._currentComponentIdx = -1) : (this._binaryMode = false, this._output = "", this._indent = 0), true;
+    }
+    /**
+     * Close the writer and finalize output
+     * @returns GTO text content or binary ArrayBuffer
+     */
+    close() {
+      return this._state = 3, this._binaryMode ? this._buildBinary() : this.toString();
+    }
+    /**
+     * Get the current output as string
+     */
+    toString() {
+      return `GTOa (${this._version})
+
+${this._output}`;
+    }
+    /**
+     * Add indentation to output
+     */
+    _writeIndent() {
+      this._output += "    ".repeat(this._indent);
+    }
+    /**
+     * Write a line with proper indentation
+     */
+    _writeLine(t = "") {
+      t && (this._writeIndent(), this._output += t), this._output += `
+`;
+    }
+    /**
+     * Begin a new object
+     * @param name - Object name
+     * @param protocol - Protocol name
+     * @param protocolVersion - Protocol version
+     */
+    beginObject(t, e, n = 1) {
+      if (this._state === 1 || this._state === 2)
+        throw new Error("Cannot begin object while inside another object");
+      this._state = 1;
+      const r = this.intern(t), s = this.intern(e);
+      if (this._binaryMode)
+        this._currentObjectIdx = this._objectInfos.length, this._objectInfos.push({
+          nameId: r,
+          protocolId: s,
+          protocolVersion: n,
+          numComponents: 0,
+          componentStartIdx: this._componentInfos.length
+        });
+      else {
+        let o = `${t} : ${e}`;
+        n > 0 && (o += ` (${n})`), this._writeLine(o), this._writeLine("{"), this._indent++;
+      }
+    }
+    /**
+     * End the current object
+     */
+    endObject() {
+      if (this._state !== 1)
+        throw new Error("No object to end");
+      if (this._binaryMode) {
+        const t = this._objectInfos[this._currentObjectIdx];
+        t.numComponents = this._componentInfos.length - t.componentStartIdx, this._currentObjectIdx = -1;
+      } else
+        this._indent--, this._writeLine("}"), this._writeLine();
+      this._state = 0;
+    }
+    /**
+     * Begin a new component within the current object
+     * @param name - Component name
+     * @param interpretation - Optional interpretation string
+     * @param transposed - Whether data is transposed
+     */
+    beginComponent(t, e = "", n = false) {
+      if (this._state !== 1)
+        throw new Error("Must be inside an object to begin component");
+      this._state = 2;
+      const r = this.intern(t), s = e ? this.intern(e) : 0;
+      if (this._binaryMode)
+        this._currentComponentIdx = this._componentInfos.length, this._componentInfos.push({
+          nameId: r,
+          interpretationId: s,
+          numProperties: 0,
+          flags: n ? 1 : 0,
+          childLevel: 0,
+          // Nested components not yet supported in builder
+          propertyStartIdx: this._propertyInfos.length
+        });
+      else {
+        let o = this._quoteName(t);
+        e && (o += ` as ${e}`), this._writeLine(o), this._writeLine("{"), this._indent++;
+      }
+    }
+    /**
+     * End the current component
+     */
+    endComponent() {
+      if (this._state !== 2)
+        throw new Error("No component to end");
+      if (this._binaryMode) {
+        const t = this._componentInfos[this._currentComponentIdx];
+        t.numProperties = this._propertyInfos.length - t.propertyStartIdx, this._currentComponentIdx = -1;
+      } else
+        this._indent--, this._writeLine("}"), this._writeLine();
+      this._state = 1;
+    }
+    /**
+     * Declare a property and write its data inline (recommended for text format)
+     * @param name - Property name
+     * @param type - Data type (DataType.*)
+     * @param size - Number of elements
+     * @param width - Parts per element (e.g., 3 for xyz)
+     * @param interpretation - Optional interpretation string
+     * @param data - The property data
+     */
+    propertyWithData(t, e, n, r, s, o) {
+      if (this._state !== 2)
+        throw new Error("Must be inside a component to declare property");
+      const l = this.intern(t), _ = s ? this.intern(s) : 0;
+      let h = Array.from(o);
+      if (Array.isArray(o) && o.length > 0 && Array.isArray(o[0]) && (h = o.flat()), this._binaryMode)
+        this._propertyInfos.push({
+          nameId: l,
+          interpretationId: _,
+          type: e,
+          size: n,
+          width: r,
+          dims: [1, 1, 1, 1]
+        }), this._propertyData.push(h);
+      else {
+        let c = N[e];
+        r > 1 && (c += `[${r}]`), c += ` ${t}`, s && (c += ` as ${s}`);
+        const T = this._formatData(e, r, n, h);
+        c += ` = ${T}`, this._writeLine(c);
+      }
+    }
+    /**
+     * Declare a property (for two-phase API compatibility)
+     * Note: For text format, prefer propertyWithData instead
+     * @param name - Property name
+     * @param type - Data type (DataType.*)
+     * @param size - Number of elements
+     * @param width - Parts per element (e.g., 3 for xyz)
+     * @param interpretation - Optional interpretation string
+     */
+    property(t, e, n, r = 1, s = "") {
+      this._pendingProperties.push({ name: t, type: e, size: n, width: r, interpretation: s }), this.intern(t), s && this.intern(s);
+    }
+    /**
+     * Begin the data section (for two-phase API)
+     */
+    beginData() {
+      this._propertyIndex = 0;
+    }
+    /**
+     * Write data for the next property (for two-phase API)
+     * @param data - The property data
+     */
+    propertyData(t) {
+      if (!this._pendingProperties || this._propertyIndex >= this._pendingProperties.length)
+        throw new Error("No more properties to write data for");
+      const e = this._pendingProperties[this._propertyIndex++];
+      let r = N[e.type];
+      e.width > 1 && (r += `[${e.width}]`), r += ` ${e.name}`, e.interpretation && (r += ` as ${e.interpretation}`);
+      const s = Array.from(t), o = this._formatData(e.type, e.width, e.size, s);
+      r += ` = ${o}`, this._writeLine(r);
+    }
+    /**
+     * End the data section (for two-phase API)
+     */
+    endData() {
+      this._pendingProperties = [], this._propertyIndex = 0;
+    }
+    /**
+     * Format property data for text output
+     */
+    _formatData(t, e, n, r) {
+      if (!r || r.length === 0)
+        return "[ ]";
+      if (t === p.String) {
+        const o = r.map((l) => typeof l == "string" ? `"${this._escapeString(l)}"` : `"${this._escapeString(this.stringFromId(l))}"`);
+        return n === 1 && e === 1 ? o[0] : this._formatArray(o, e);
+      }
+      const s = r.map((o) => this._formatNumber(o, t));
+      return n === 1 && e === 1 ? s[0] : this._formatArray(s, e);
+    }
+    /**
+     * Format an array with grouping by width
+     */
+    _formatArray(t, e) {
+      if (e <= 1 || t.length <= e)
+        return `[ ${t.join(" ")} ]`;
+      const n = [];
+      for (let r = 0; r < t.length; r += e) {
+        const s = t.slice(r, r + e);
+        n.push(`[ ${s.join(" ")} ]`);
+      }
+      if (n.length > 4) {
+        const r = "    ".repeat(this._indent + 1);
+        return `[
+${r}${n.join(`
+${r}`)}
+${"    ".repeat(this._indent)}]`;
+      }
+      return `[ ${n.join(" ")} ]`;
+    }
+    /**
+     * Format a number for text output
+     */
+    _formatNumber(t, e) {
+      return (e === p.Float || e === p.Double || e === p.Half) && Number.isInteger(t) ? t.toFixed(1) : String(t);
+    }
+    /**
+     * Escape a string for text output
+     */
+    _escapeString(t) {
+      return t.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
+    }
+    /**
+     * Quote a name if it contains special characters
+     */
+    _quoteName(t) {
+      return /[^a-zA-Z0-9_\-.]/.test(t) || /^[0-9]/.test(t) ? `"${this._escapeString(t)}"` : t;
+    }
+    // ============================================
+    // Binary format writing
+    // ============================================
+    /**
+     * Build complete binary GTO file
+     */
+    _buildBinary() {
+      const e = this._stringTable.writeToBinary(), n = 20, r = e.byteLength, s = this._objectInfos.length * 20, o = this._componentInfos.length * 20, l = this._propertyInfos.length * 36;
+      let _ = 0;
+      for (let u = 0; u < this._propertyInfos.length; u++) {
+        const E = this._propertyInfos[u], O = this._propertyData[u], A = B[E.type] || 4;
+        _ += O.length * A;
+      }
+      const h = n + r + s + o + l + _, d = new ArrayBuffer(h), c = new DataView(d), T = new Uint8Array(d);
+      let a = 0;
+      c.setUint32(a, 671, true), a += 4, c.setUint32(a, this._stringTable.size, true), a += 4, c.setUint32(a, this._objectInfos.length, true), a += 4, c.setUint32(a, this._version, true), a += 4, c.setUint32(a, 0, true), a += 4, T.set(e, a), a += r;
+      for (const u of this._objectInfos)
+        c.setUint32(a, u.nameId, true), a += 4, c.setUint32(a, u.protocolId, true), a += 4, c.setUint32(a, u.protocolVersion, true), a += 4, c.setUint32(a, u.numComponents, true), a += 4, c.setUint32(a, 0, true), a += 4;
+      for (const u of this._componentInfos)
+        c.setUint32(a, u.nameId, true), a += 4, c.setUint32(a, u.interpretationId, true), a += 4, c.setUint32(a, u.numProperties, true), a += 4, c.setUint32(a, u.flags, true), a += 4, c.setUint32(a, u.childLevel, true), a += 4;
+      for (const u of this._propertyInfos)
+        c.setUint32(a, u.nameId, true), a += 4, c.setUint32(a, u.interpretationId, true), a += 4, c.setUint8(a, u.type), a += 1, a += 3, c.setUint32(a, u.size, true), a += 4, c.setUint32(a, u.width, true), a += 4, c.setUint32(a, u.dims[0], true), a += 4, c.setUint32(a, u.dims[1], true), a += 4, c.setUint32(a, u.dims[2], true), a += 4, c.setUint32(a, u.dims[3], true), a += 4;
+      for (let u = 0; u < this._propertyInfos.length; u++) {
+        const E = this._propertyInfos[u], O = this._propertyData[u];
+        for (const A of O)
+          this._writeBinaryValue(c, a, E.type, A, true), a += B[E.type] || 4;
+      }
+      return d;
+    }
+    /**
+     * Write a single binary value
+     */
+    _writeBinaryValue(t, e, n, r, s) {
+      switch (n) {
+        case p.Int:
+          t.setInt32(e, r, s);
+          break;
+        case p.Float:
+          t.setFloat32(e, r, s);
+          break;
+        case p.Double:
+          t.setFloat64(e, r, s);
+          break;
+        case p.Half:
+          t.setUint16(e, et(r), s);
+          break;
+        case p.String:
+          t.setUint32(e, r, s);
+          break;
+        case p.Boolean:
+          t.setUint8(e, r ? 1 : 0);
+          break;
+        case p.Short:
+          t.setUint16(e, r, s);
+          break;
+        case p.Byte:
+          t.setUint8(e, r);
+          break;
+        case p.Int64:
+          t.setBigInt64(e, BigInt(r), s);
+          break;
+        default:
+          throw new Error(`Unknown data type: ${n}`);
+      }
+    }
+  };
+  var It = class {
+    /**
+     * Write structured data to GTO format
+     * @param data - Structured data object
+     * @param options - Options object
+     * @returns GTO text content or binary ArrayBuffer
+     */
+    static write(t, e = {}) {
+      const n = new it(), r = e.binary ? v.BinaryGTO : v.TextGTO;
+      n.open(r);
+      for (const s of t.objects) {
+        n.beginObject(s.name, s.protocol, s.protocolVersion || 1);
+        for (const [o, l] of Object.entries(s.components)) {
+          n.beginComponent(o, l.interpretation || "");
+          for (const [_, h] of Object.entries(l.properties)) {
+            let d;
+            if (typeof h.type == "string") {
+              const a = h.type.charAt(0).toUpperCase() + h.type.slice(1);
+              d = p[a], d === void 0 && (d = h.type === "bool" ? p.Boolean : p.Float);
+            } else
+              d = h.type;
+            let c = h.data;
+            Array.isArray(h.data) && Array.isArray(h.data[0]) && (c = h.data.flat()), d === p.String && c.length > 0 && typeof c[0] == "string" && (c = c.map((a) => n.intern(a)));
+            const T = h.size || Math.floor(c.length / (h.width || 1));
+            n.propertyWithData(_, d, T, h.width || 1, h.interpretation || "", c);
+          }
+          n.endComponent();
+        }
+        n.endObject();
+      }
+      return n.close();
+    }
+  };
+  var ot = class {
+    _name;
+    _parent;
+    _properties = {};
+    _interpretation = "";
+    constructor(t, e) {
+      this._name = t, this._parent = e;
+    }
+    /**
+     * Set component interpretation
+     */
+    as(t) {
+      return this._interpretation = t, this;
+    }
+    // ============================================
+    // Integer properties
+    // ============================================
+    /**
+     * Add an int property (width=1)
+     */
+    int(t, e) {
+      return this._addProperty(t, p.Int, 1, e);
+    }
+    /**
+     * Add an int[2] property
+     */
+    int2(t, e) {
+      return this._addProperty(t, p.Int, 2, e);
+    }
+    /**
+     * Add an int[3] property
+     */
+    int3(t, e) {
+      return this._addProperty(t, p.Int, 3, e);
+    }
+    /**
+     * Add an int[4] property
+     */
+    int4(t, e) {
+      return this._addProperty(t, p.Int, 4, e);
+    }
+    // ============================================
+    // Float properties
+    // ============================================
+    /**
+     * Add a float property (width=1)
+     */
+    float(t, e) {
+      return this._addProperty(t, p.Float, 1, e);
+    }
+    /**
+     * Add a float[2] property
+     */
+    float2(t, e) {
+      return this._addProperty(t, p.Float, 2, e);
+    }
+    /**
+     * Add a float[3] property
+     */
+    float3(t, e) {
+      return this._addProperty(t, p.Float, 3, e);
+    }
+    /**
+     * Add a float[4] property
+     */
+    float4(t, e) {
+      return this._addProperty(t, p.Float, 4, e);
+    }
+    /**
+     * Add a float[16] property (4x4 matrix)
+     */
+    matrix4(t, e) {
+      return this._addProperty(t, p.Float, 16, e);
+    }
+    /**
+     * Add a float[9] property (3x3 matrix)
+     */
+    matrix3(t, e) {
+      return this._addProperty(t, p.Float, 9, e);
+    }
+    // ============================================
+    // Double properties
+    // ============================================
+    /**
+     * Add a double property (width=1)
+     */
+    double(t, e) {
+      return this._addProperty(t, p.Double, 1, e);
+    }
+    /**
+     * Add a double[2] property
+     */
+    double2(t, e) {
+      return this._addProperty(t, p.Double, 2, e);
+    }
+    /**
+     * Add a double[3] property
+     */
+    double3(t, e) {
+      return this._addProperty(t, p.Double, 3, e);
+    }
+    // ============================================
+    // String properties
+    // ============================================
+    /**
+     * Add a string property (width=1)
+     */
+    string(t, e) {
+      const n = typeof e == "string" ? [e] : e;
+      return this._addProperty(t, p.String, 1, n);
+    }
+    /**
+     * Add a string[N] property
+     */
+    stringN(t, e, n) {
+      return this._addProperty(t, p.String, e, n);
+    }
+    // ============================================
+    // Other types
+    // ============================================
+    /**
+     * Add a byte property
+     */
+    byte(t, e) {
+      return this._addProperty(t, p.Byte, 1, e);
+    }
+    /**
+     * Add a short property
+     */
+    short(t, e) {
+      return this._addProperty(t, p.Short, 1, e);
+    }
+    /**
+     * Add a boolean property
+     */
+    bool(t, e) {
+      return this._addProperty(t, p.Boolean, 1, e);
+    }
+    // ============================================
+    // Generic property
+    // ============================================
+    /**
+     * Add a generic property with custom type and width
+     */
+    property(t, e, n, r, s = "") {
+      return this._addProperty(t, e, n, r), s && (this._properties[t].interpretation = s), this;
+    }
+    // ============================================
+    // Builder methods
+    // ============================================
+    /**
+     * End component and return to parent object builder
+     */
+    end() {
+      return this._parent;
+    }
+    /**
+     * Build the component object
+     */
+    build() {
+      const t = {};
+      for (const [e, n] of Object.entries(this._properties))
+        t[e] = n;
+      return {
+        interpretation: this._interpretation,
+        properties: t
+      };
+    }
+    // ============================================
+    // Internal
+    // ============================================
+    _addProperty(t, e, n, r) {
+      let s, o;
+      if (Array.isArray(r) && r.length > 0 && Array.isArray(r[0]))
+        o = r.length, s = r;
+      else if (Array.isArray(r))
+        if (n > 1) {
+          o = Math.floor(r.length / n), s = [];
+          for (let l = 0; l < r.length; l += n)
+            s.push(r.slice(l, l + n));
+        } else
+          o = r.length, s = r;
+      else
+        o = 1, s = [r];
+      return this._properties[t] = {
+        type: this._typeName(e),
+        size: o,
+        width: n,
+        interpretation: "",
+        data: s
+      }, this;
+    }
+    _typeName(t) {
+      return {
+        [p.Int]: "int",
+        [p.Float]: "float",
+        [p.Double]: "double",
+        [p.Half]: "half",
+        [p.String]: "string",
+        [p.Boolean]: "bool",
+        [p.Short]: "short",
+        [p.Byte]: "byte",
+        [p.Int64]: "int64"
+      }[t] || "float";
+    }
+  };
+  var at = class {
+    _name;
+    _protocol;
+    _version;
+    _parent;
+    _components = {};
+    constructor(t, e, n, r) {
+      this._name = t, this._protocol = e, this._version = n, this._parent = r;
+    }
+    /**
+     * Start a new component
+     */
+    component(t, e = "") {
+      const n = new ot(t, this);
+      return e && n.as(e), this._components[t] = n, n;
+    }
+    /**
+     * End object and return to parent GTO builder
+     */
+    end() {
+      return this._parent;
+    }
+    /**
+     * Build the object
+     */
+    build() {
+      const t = {};
+      for (const [e, n] of Object.entries(this._components))
+        t[e] = n.build();
+      return {
+        name: this._name,
+        protocol: this._protocol,
+        protocolVersion: this._version,
+        components: t
+      };
+    }
+  };
+  var K = class {
+    _objects = [];
+    _version = 4;
+    /**
+     * Set GTO version
+     */
+    version(t) {
+      return this._version = t, this;
+    }
+    /**
+     * Start a new object
+     * @param name - Object name
+     * @param protocol - Protocol name
+     * @param version - Protocol version
+     */
+    object(t, e, n = 1) {
+      const r = new at(t, e, n, this);
+      return this._objects.push(r), r;
+    }
+    /**
+     * Build the final GTO data structure
+     */
+    build() {
+      return {
+        version: this._version,
+        objects: this._objects.map((t) => t.build())
+      };
+    }
+    /**
+     * Build and convert to JSON string
+     */
+    toJSON(t = 2) {
+      return JSON.stringify(this.build(), null, t);
+    }
+  };
+  var W = class {
+    _name;
+    _data;
+    _parent;
+    constructor(t, e, n) {
+      this._name = t, this._data = e, this._parent = n;
+    }
+    /** Property name */
+    get name() {
+      return this._name;
+    }
+    /** Data type (int, float, string, etc.) */
+    get type() {
+      return this._data.type;
+    }
+    /** Number of elements */
+    get size() {
+      return this._data.size;
+    }
+    /** Parts per element (e.g., 3 for float3) */
+    get width() {
+      return this._data.width;
+    }
+    /** Interpretation string */
+    get interpretation() {
+      return this._data.interpretation;
+    }
+    /** Raw data array */
+    get data() {
+      return this._data.data;
+    }
+    /** Parent component */
+    get parent() {
+      return this._parent;
+    }
+    /**
+     * Get the value (unwraps single values from arrays)
+     * @returns Single value or array
+     */
+    value() {
+      const t = this._data.data;
+      return !t || t.length === 0 ? null : t.length === 1 && !Array.isArray(t[0]) || t.length === 1 && Array.isArray(t[0]) ? t[0] : t;
+    }
+    /**
+     * Get value at specific index
+     */
+    at(t) {
+      return this._data.data?.[t] ?? null;
+    }
+    /**
+     * Get first value
+     */
+    first() {
+      return this.at(0);
+    }
+    /**
+     * Get last value
+     */
+    last() {
+      const t = this._data.data;
+      return t?.[t.length - 1] ?? null;
+    }
+    /**
+     * Get all values as flat array
+     */
+    flat() {
+      const t = this._data.data;
+      return t ? t.flat(1 / 0) : [];
+    }
+    /**
+     * Check if property exists and has data
+     */
+    exists() {
+      return this._data && this._data.data && this._data.data.length > 0;
+    }
+    /**
+     * Get value or default if not exists
+     */
+    valueOr(t) {
+      const e = this.value();
+      return e !== null ? e : t;
+    }
+    /**
+     * Map over values
+     */
+    map(t) {
+      return (this._data.data || []).map(t);
+    }
+    /**
+     * Filter values
+     */
+    filter(t) {
+      return (this._data.data || []).filter(t);
+    }
+    /**
+     * Convert to plain object
+     */
+    toObject() {
+      return { ...this._data };
+    }
+  };
+  var ct = class extends W {
+    constructor(t) {
+      super(t, { type: "", size: 0, width: 0, data: [], interpretation: "" }, null);
+    }
+    value() {
+      return null;
+    }
+    exists() {
+      return false;
+    }
+  };
+  var q = class {
+    _name;
+    _data;
+    _parent;
+    _propertyCache = /* @__PURE__ */ new Map();
+    constructor(t, e, n) {
+      this._name = t, this._data = e, this._parent = n;
+    }
+    /** Component name */
+    get name() {
+      return this._name;
+    }
+    /** Interpretation string */
+    get interpretation() {
+      return this._data.interpretation;
+    }
+    /** Parent object */
+    get parent() {
+      return this._parent;
+    }
+    /**
+     * Get property by name
+     */
+    property(t) {
+      if (!this._propertyCache.has(t)) {
+        const e = this._data.properties?.[t];
+        this._propertyCache.set(t, e ? new W(t, e, this) : new ct(t));
+      }
+      return this._propertyCache.get(t);
+    }
+    /**
+     * Shorthand for property().value()
+     */
+    prop(t) {
+      return this.property(t).value();
+    }
+    /**
+     * Check if property exists
+     */
+    hasProperty(t) {
+      return t in (this._data.properties || {});
+    }
+    /**
+     * Get all property names
+     */
+    propertyNames() {
+      return Object.keys(this._data.properties || {});
+    }
+    /**
+     * Get all properties as PropertyDTO array
+     */
+    properties() {
+      return this.propertyNames().map((t) => this.property(t));
+    }
+    /**
+     * Filter properties by type
+     * @param type - 'int', 'float', 'string', etc.
+     */
+    propertiesByType(t) {
+      return this.properties().filter((e) => e.type === t);
+    }
+    /**
+     * Find property matching predicate
+     */
+    findProperty(t) {
+      return this.properties().find(t) || null;
+    }
+    /**
+     * Check if component exists
+     */
+    exists() {
+      return this._data !== null && this._data !== void 0;
+    }
+    /**
+     * Convert to plain object
+     */
+    toObject() {
+      return {
+        name: this._name,
+        interpretation: this.interpretation,
+        properties: { ...this._data.properties }
+      };
+    }
+  };
+  var lt = class extends q {
+    constructor(t) {
+      super(t, { interpretation: "", properties: {} }, null);
+    }
+    exists() {
+      return false;
+    }
+  };
+  var U = class {
+    _data;
+    _componentCache = /* @__PURE__ */ new Map();
+    constructor(t) {
+      this._data = t;
+    }
+    /** Object name */
+    get name() {
+      return this._data.name;
+    }
+    /** Protocol name */
+    get protocol() {
+      return this._data.protocol;
+    }
+    /** Protocol version */
+    get protocolVersion() {
+      return this._data.protocolVersion;
+    }
+    /**
+     * Get component by name
+     */
+    component(t) {
+      if (!this._componentCache.has(t)) {
+        const e = this._data.components?.[t];
+        this._componentCache.set(t, e ? new q(t, e, this) : new lt(t));
+      }
+      return this._componentCache.get(t);
+    }
+    /**
+     * Shorthand: get property value from component
+     */
+    prop(t, e) {
+      return this.component(t).property(e).value();
+    }
+    /**
+     * Check if component exists
+     */
+    hasComponent(t) {
+      return t in (this._data.components || {});
+    }
+    /**
+     * Get all component names
+     */
+    componentNames() {
+      return Object.keys(this._data.components || {});
+    }
+    /**
+     * Get all components as ComponentDTO array
+     */
+    components() {
+      return this.componentNames().map((t) => this.component(t));
+    }
+    /**
+     * Find component matching predicate
+     */
+    findComponent(t) {
+      return this.components().find(t) || null;
+    }
+    /**
+     * Find component by name pattern (regex)
+     */
+    componentsByPattern(t) {
+      const e = typeof t == "string" ? new RegExp(t) : t;
+      return this.components().filter((n) => e.test(n.name));
+    }
+    /**
+     * Check if object matches protocol
+     */
+    isProtocol(t) {
+      return this._data.protocol === t;
+    }
+    /**
+     * Check if object exists
+     */
+    exists() {
+      return this._data !== null && this._data !== void 0;
+    }
+    /**
+     * Convert to plain object
+     */
+    toObject() {
+      return { ...this._data };
+    }
+  };
+  var P = class extends U {
+    constructor() {
+      super({ name: "", protocol: "", protocolVersion: 0, components: {} });
+    }
+    exists() {
+      return false;
+    }
+  };
+  var k = class _k {
+    _objects;
+    constructor(t) {
+      this._objects = t.map((e) => e instanceof U ? e : new U(e));
+    }
+    /** Number of objects */
+    get length() {
+      return this._objects.length;
+    }
+    /**
+     * Get object by index
+     */
+    at(t) {
+      return this._objects[t] || new P();
+    }
+    /**
+     * Get first object
+     */
+    first() {
+      return this.at(0);
+    }
+    /**
+     * Get last object
+     */
+    last() {
+      return this.at(this._objects.length - 1);
+    }
+    /**
+     * Filter by protocol
+     */
+    byProtocol(t) {
+      return new _k(this._objects.filter((e) => e.protocol === t));
+    }
+    /**
+     * Filter by name pattern
+     */
+    byName(t) {
+      const e = typeof t == "string" ? new RegExp(t) : t;
+      return new _k(this._objects.filter((n) => e.test(n.name)));
+    }
+    /**
+     * Filter by predicate
+     */
+    filter(t) {
+      return new _k(this._objects.filter(t));
+    }
+    /**
+     * Find single object
+     */
+    find(t) {
+      return this._objects.find(t) || new P();
+    }
+    /**
+     * Map over objects
+     */
+    map(t) {
+      return this._objects.map(t);
+    }
+    /**
+     * ForEach over objects
+     */
+    forEach(t) {
+      this._objects.forEach(t);
+    }
+    /**
+     * Check if any object matches predicate
+     */
+    some(t) {
+      return this._objects.some(t);
+    }
+    /**
+     * Check if all objects match predicate
+     */
+    every(t) {
+      return this._objects.every(t);
+    }
+    /**
+     * Get all objects as array
+     */
+    toArray() {
+      return [...this._objects];
+    }
+    /**
+     * Get unique protocols
+     */
+    protocols() {
+      return [...new Set(this._objects.map((t) => t.protocol))];
+    }
+    /**
+     * Group by protocol
+     */
+    groupByProtocol() {
+      const t = /* @__PURE__ */ new Map();
+      for (const e of this._objects)
+        t.has(e.protocol) || t.set(e.protocol, []), t.get(e.protocol).push(e);
+      return new Map([...t].map(([e, n]) => [e, new _k(n)]));
+    }
+    /**
+     * Iterate over objects
+     */
+    [Symbol.iterator]() {
+      return this._objects[Symbol.iterator]();
+    }
+  };
+  var jt = class {
+    _data;
+    _objects;
+    _objectCache = /* @__PURE__ */ new Map();
+    /**
+     * Create DTO from parsed GTO data
+     * @param data - Parsed GTO data (from SimpleReader.result)
+     */
+    constructor(t) {
+      this._data = t, this._objects = new k(t.objects || []);
+    }
+    /** GTO version */
+    get version() {
+      return this._data.version;
+    }
+    /** Number of objects */
+    get objectCount() {
+      return this._objects.length;
+    }
+    /**
+     * Get all objects
+     */
+    objects() {
+      return this._objects;
+    }
+    /**
+     * Get object by exact name
+     */
+    object(t) {
+      if (!this._objectCache.has(t)) {
+        const e = this._data.objects?.find((n) => n.name === t);
+        this._objectCache.set(t, e ? new U(e) : new P());
+      }
+      return this._objectCache.get(t);
+    }
+    /**
+     * Filter objects by protocol
+     */
+    byProtocol(t) {
+      return this._objects.byProtocol(t);
+    }
+    /**
+     * Filter objects by name pattern
+     */
+    byName(t) {
+      return this._objects.byName(t);
+    }
+    /**
+     * Get unique protocols in the file
+     */
+    protocols() {
+      return this._objects.protocols();
+    }
+    /**
+     * Group objects by protocol
+     */
+    groupByProtocol() {
+      return this._objects.groupByProtocol();
+    }
+    /**
+     * Find first object matching predicate
+     */
+    find(t) {
+      return this._objects.find(t);
+    }
+    /**
+     * Filter objects by predicate
+     */
+    filter(t) {
+      return this._objects.filter(t);
+    }
+    // ============================================
+    // RV Session specific helpers
+    // ============================================
+    /**
+     * Get session object (RVSession)
+     */
+    session() {
+      return this.byProtocol("RVSession").first();
+    }
+    /**
+     * Get all source groups
+     */
+    sourceGroups() {
+      return this.byProtocol("RVSourceGroup");
+    }
+    /**
+     * Get all file sources
+     */
+    fileSources() {
+      return this.byProtocol("RVFileSource");
+    }
+    /**
+     * Get connection graph object
+     */
+    connections() {
+      return this.byProtocol("connection").first();
+    }
+    /**
+     * Get all paint/annotation objects
+     */
+    paints() {
+      return this.byProtocol("RVPaint");
+    }
+    /**
+     * Extract media file paths
+     */
+    mediaPaths() {
+      return this.fileSources().map((t) => t.component("media").property("movie").value()).filter(Boolean);
+    }
+    /**
+     * Get timeline info
+     */
+    timeline() {
+      const t = this.session().component("session");
+      return {
+        range: t.prop("range") || [1, 100],
+        region: t.prop("region") || [1, 100],
+        fps: t.prop("fps") || 24,
+        currentFrame: t.prop("currentFrame") || 1,
+        marks: t.prop("marks") || []
+      };
+    }
+    /**
+     * Get node connections as array of [from, to] pairs
+     */
+    connectionEdges() {
+      return this.connections().component("evaluation").property("connections").value() || [];
+    }
+    /**
+     * Extract all annotations (pen strokes, text)
+     */
+    annotations() {
+      const t = [];
+      for (const e of this.paints())
+        for (const n of e.components())
+          if (n.name.startsWith("pen:") || n.name.startsWith("text:")) {
+            const r = n.name.split(":");
+            t.push({
+              type: r[0],
+              id: r[1],
+              frame: parseInt(r[2]) || 0,
+              user: r[3] || "",
+              node: e.name,
+              color: n.prop("color"),
+              points: n.prop("points"),
+              text: n.prop("text"),
+              brush: n.prop("brush")
+            });
+          }
+      return t;
+    }
+    /**
+     * Convert to plain object
+     */
+    toObject() {
+      return { ...this._data };
+    }
+    /**
+     * Convert to JSON string
+     */
+    toJSON(t = 2) {
+      return JSON.stringify(this._data, null, t);
+    }
+  };
+
+  // src/exporters/openrv.ts
+  function hexToRGBA(hex, opacity = 1) {
+    const cleanHex = hex.replace(/^#/, "");
+    let r = 0, g = 0, b2 = 0;
+    if (cleanHex.length === 3) {
+      r = parseInt(cleanHex[0] + cleanHex[0], 16) / 255;
+      g = parseInt(cleanHex[1] + cleanHex[1], 16) / 255;
+      b2 = parseInt(cleanHex[2] + cleanHex[2], 16) / 255;
+    } else if (cleanHex.length === 6) {
+      r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+      g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+      b2 = parseInt(cleanHex.substring(4, 6), 16) / 255;
+    } else if (cleanHex.length === 8) {
+      r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+      g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+      b2 = parseInt(cleanHex.substring(4, 6), 16) / 255;
+      opacity = parseInt(cleanHex.substring(6, 8), 16) / 255;
+    }
+    return [r, g, b2, opacity];
+  }
+  function extractColor(style, opacity = 1) {
+    if (typeof style === "string") {
+      if (style.startsWith("rgb")) {
+        const match = style.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (match) {
+          return [
+            parseInt(match[1]) / 255,
+            parseInt(match[2]) / 255,
+            parseInt(match[3]) / 255,
+            match[4] ? parseFloat(match[4]) : opacity
+          ];
+        }
+      }
+      return hexToRGBA(style, opacity);
+    }
+    return [1, 0, 0, opacity];
+  }
+  function rotatePoint(point, centerX, centerY, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const dx = point.x - centerX;
+    const dy = point.y - centerY;
+    return {
+      x: centerX + dx * cos - dy * sin,
+      y: centerY + dx * sin + dy * cos
+    };
+  }
+  function applyRotationToPoints(points, shape, defaultCenterX, defaultCenterY) {
+    if (!shape.rotation) {
+      return points;
+    }
+    const centerX = shape.rotationCenterX !== void 0 ? shape.rotationCenterX : defaultCenterX;
+    const centerY = shape.rotationCenterY !== void 0 ? shape.rotationCenterY : defaultCenterY;
+    return points.map((p2) => rotatePoint(p2, centerX, centerY, shape.rotation));
+  }
+  function convertSmAnnotateToOpenRV(smX, smY, aspectRatio) {
+    return {
+      x: smX * 2 - 1,
+      y: (1 - smY * 2) / aspectRatio
+    };
+  }
+  function curveToPenData(shape, id, frame, width, height) {
+    const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    let centerX = 0, centerY = 0;
+    for (const p2 of shape.points) {
+      centerX += p2.x;
+      centerY += p2.y;
+    }
+    centerX /= shape.points.length;
+    centerY /= shape.points.length;
+    const points = applyRotationToPoints(shape.points, shape, centerX, centerY);
+    const normalizedWidth = shape.lineWidth / height;
+    const widthArray = new Array(points.length).fill(normalizedWidth);
+    const convertedPoints = points.map((p2) => {
+      const converted = convertSmAnnotateToOpenRV(p2.x, p2.y, aspectRatio);
+      return [converted.x, converted.y];
+    });
+    return {
+      name: `pen:${id}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray,
+      points: convertedPoints,
+      brush: "circle"
+    };
+  }
+  function lineToPenData(shape, id, frame, width, height) {
+    const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    const centerX = (shape.x1 + shape.x2) / 2;
+    const centerY = (shape.y1 + shape.y2) / 2;
+    let points = [
+      { x: shape.x1, y: shape.y1 },
+      { x: shape.x2, y: shape.y2 }
+    ];
+    points = applyRotationToPoints(points, shape, centerX, centerY);
+    const normalizedWidth = shape.lineWidth / height;
+    const widthArray = new Array(points.length).fill(normalizedWidth);
+    const convertedPoints = points.map((p2) => {
+      const converted = convertSmAnnotateToOpenRV(p2.x, p2.y, aspectRatio);
+      return [converted.x, converted.y];
+    });
+    return {
+      name: `pen:${id}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray,
+      points: convertedPoints,
+      brush: "circle"
+    };
+  }
+  function arrowToPenDataArray(shape, id, frame, width, height) {
+    const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    const centerX = (shape.x1 + shape.x2) / 2;
+    const centerY = (shape.y1 + shape.y2) / 2;
+    let linePoints = [
+      { x: shape.x1, y: shape.y1 },
+      { x: shape.x2, y: shape.y2 }
+    ];
+    const headLengthPx = 10 + 2.5 * shape.lineWidth;
+    const headLength = headLengthPx / ((width + height) / 2);
+    const headAngle = Math.PI / 6;
+    const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
+    let arrowHead1 = [
+      { x: shape.x2, y: shape.y2 },
+      {
+        x: shape.x2 - headLength * Math.cos(angle + headAngle),
+        y: shape.y2 - headLength * Math.sin(angle + headAngle)
+      }
+    ];
+    let arrowHead2 = [
+      { x: shape.x2, y: shape.y2 },
+      {
+        x: shape.x2 - headLength * Math.cos(angle - headAngle),
+        y: shape.y2 - headLength * Math.sin(angle - headAngle)
+      }
+    ];
+    linePoints = applyRotationToPoints(linePoints, shape, centerX, centerY);
+    arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY);
+    arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY);
+    const normalizedWidth = shape.lineWidth / height;
+    const widthArray2 = new Array(2).fill(normalizedWidth);
+    const convertPoints = (pts) => pts.map((p2) => {
+      const converted = convertSmAnnotateToOpenRV(p2.x, p2.y, aspectRatio);
+      return [converted.x, converted.y];
+    });
+    return [
+      {
+        name: `pen:${id}:${frame}:User`,
+        frame,
+        color,
+        width: widthArray2,
+        points: convertPoints(linePoints),
+        brush: "circle"
+      },
+      {
+        name: `pen:${id + 1}:${frame}:User`,
+        frame,
+        color,
+        width: widthArray2,
+        points: convertPoints(arrowHead1),
+        brush: "circle"
+      },
+      {
+        name: `pen:${id + 2}:${frame}:User`,
+        frame,
+        color,
+        width: widthArray2,
+        points: convertPoints(arrowHead2),
+        brush: "circle"
+      }
+    ];
+  }
+  function rectangleToPenData(shape, id, frame, width, height) {
+    const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    const centerX = shape.x + shape.width / 2;
+    const centerY = shape.y + shape.height / 2;
+    let points = [
+      { x: shape.x, y: shape.y },
+      { x: shape.x + shape.width, y: shape.y },
+      { x: shape.x + shape.width, y: shape.y + shape.height },
+      { x: shape.x, y: shape.y + shape.height },
+      { x: shape.x, y: shape.y }
+      // Close the path
+    ];
+    points = applyRotationToPoints(points, shape, centerX, centerY);
+    const normalizedWidth = shape.lineWidth / height;
+    const widthArray = new Array(points.length).fill(normalizedWidth);
+    const convertedPoints = points.map((p2) => {
+      const converted = convertSmAnnotateToOpenRV(p2.x, p2.y, aspectRatio);
+      return [converted.x, converted.y];
+    });
+    return {
+      name: `pen:${id}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray,
+      points: convertedPoints,
+      brush: "circle"
+    };
+  }
+  function circleToPenData(shape, id, frame, width, height, segments = 32) {
+    const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    const centerX = shape.x;
+    const centerY = shape.y;
+    let points = [];
+    for (let i = 0; i <= segments; i++) {
+      const angle = i / segments * Math.PI * 2;
+      points.push({
+        x: shape.x + Math.cos(angle) * shape.radius,
+        y: shape.y + Math.sin(angle) * shape.radius
+      });
+    }
+    points = applyRotationToPoints(points, shape, centerX, centerY);
+    const normalizedWidth = shape.lineWidth / height;
+    const widthArray = new Array(points.length).fill(normalizedWidth);
+    const convertedPoints = points.map((p2) => {
+      const converted = convertSmAnnotateToOpenRV(p2.x, p2.y, aspectRatio);
+      return [converted.x, converted.y];
+    });
+    return {
+      name: `pen:${id}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray,
+      points: convertedPoints,
+      brush: "circle"
+    };
+  }
+  function textToTextData(shape, id, frame, width, height) {
+    const color = extractColor(shape.fillStyle, shape.opacity ?? 1);
+    const aspectRatio = width / height;
+    let posX = shape.x;
+    let posY = shape.y;
+    let textRotation = 0;
+    if (shape.rotation) {
+      const centerX = shape.rotationCenterX ?? shape.x;
+      const centerY = shape.rotationCenterY ?? shape.y;
+      const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation);
+      posX = rotated.x;
+      posY = rotated.y;
+      textRotation = shape.rotation * 180 / Math.PI;
+    }
+    const openrvPos = convertSmAnnotateToOpenRV(posX, posY, aspectRatio);
+    const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
+    const normalizedSize = fontSize / height;
+    return {
+      name: `text:${id}:${frame}:User`,
+      frame,
+      position: [openrvPos.x, openrvPos.y],
+      color,
+      text: shape.text,
+      size: normalizedSize,
+      rotation: textRotation
+    };
+  }
+  function shapeToComponentData(shape, id, frame, width, height) {
+    const penData = [];
+    const textData = [];
+    let nextId = id;
+    switch (shape.type) {
+      case "curve":
+        penData.push(curveToPenData(shape, nextId, frame, width, height));
+        nextId++;
+        break;
+      case "line":
+        penData.push(lineToPenData(shape, nextId, frame, width, height));
+        nextId++;
+        break;
+      case "arrow":
+        const arrowData = arrowToPenDataArray(shape, nextId, frame, width, height);
+        penData.push(...arrowData);
+        nextId += arrowData.length;
+        break;
+      case "rectangle":
+        penData.push(rectangleToPenData(shape, nextId, frame, width, height));
+        nextId++;
+        break;
+      case "circle":
+        penData.push(circleToPenData(shape, nextId, frame, width, height));
+        nextId++;
+        break;
+      case "text":
+        textData.push(textToTextData(shape, nextId, frame, width, height));
+        nextId++;
+        break;
+      // Skip non-visual shapes
+      case "eraser":
+      case "move":
+      case "image":
+      case "compare":
+      case "audio-peaks":
+      case "selection":
+        break;
+    }
+    return { penData, textData, nextId };
+  }
+  function exportToOpenRV(frames, options) {
+    const { mediaPath, width, height, sessionName = "sm-annotate-session" } = options;
+    const allPenData = [];
+    const allTextData = [];
+    let nextId = 0;
+    for (const frameData of frames) {
+      for (const shape of frameData.shapes) {
+        const result = shapeToComponentData(shape, nextId, frameData.frame, width, height);
+        allPenData.push(...result.penData);
+        allTextData.push(...result.textData);
+        nextId = result.nextId;
+      }
+    }
+    const frameOrders = /* @__PURE__ */ new Map();
+    for (const pen of allPenData) {
+      if (!frameOrders.has(pen.frame)) {
+        frameOrders.set(pen.frame, []);
+      }
+      frameOrders.get(pen.frame).push(pen.name);
+    }
+    for (const text of allTextData) {
+      if (!frameOrders.has(text.frame)) {
+        frameOrders.set(text.frame, []);
+      }
+      frameOrders.get(text.frame).push(text.name);
+    }
+    const builder = new K();
+    builder.object("RVSession", "RVSession", 4).component("session").string("name", sessionName).int("version", 4).end().end();
+    builder.object("sourceGroup000000_source", "RVFileSource", 1).component("media").string("movie", mediaPath).end().component("request").int("width", width).int("height", height).end().end();
+    if (allPenData.length > 0 || allTextData.length > 0) {
+      const paintObj = builder.object("sourceGroup000000_paint", "RVPaint", 3);
+      paintObj.component("paint").int("nextId", nextId).int("nextAnnotationId", 0).int("show", 1).string("exclude", []).string("include", []).end();
+      for (const pen of allPenData) {
+        paintObj.component(pen.name).float4("color", [pen.color]).float("width", pen.width).string("brush", pen.brush).float2("points", pen.points).int("debug", 0).int("join", 3).int("cap", 1).int("splat", 0).end();
+      }
+      for (const text of allTextData) {
+        paintObj.component(text.name).float2("position", [text.position]).float4("color", [text.color]).float("spacing", 0.8).float("size", text.size).float("scale", 1).float("rotation", text.rotation).string("font", "").string("text", text.text).string("origin", "").int("debug", 0).end();
+      }
+      for (const [frame, order] of frameOrders) {
+        paintObj.component(`frame:${frame}`).string("order", order).end();
+      }
+      paintObj.end();
+    }
+    const gtoData = builder.build();
+    const output = It.write(gtoData);
+    const header = [
+      "GTOa (4)",
+      "",
+      "# Generated by sm-annotate OpenRV exporter",
+      `# Media: ${mediaPath}`,
+      `# Resolution: ${width}x${height}`,
+      ""
+    ].join("\n");
+    const outputStr = output;
+    const outputWithoutHeader = outputStr.replace(/^GTOa \(\d+\)\s*\n?/, "");
+    return header + outputWithoutHeader;
+  }
+  function downloadAsOpenRV(frames, options, filename = "annotations.rv") {
+    const content = exportToOpenRV(frames, options);
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // src/exporters/openrv-parser.ts
+  function rgbaToHex(rgba) {
+    if (rgba.length < 3) return "#000000";
+    const r = Math.round(rgba[0] * 255);
+    const g = Math.round(rgba[1] * 255);
+    const b2 = Math.round(rgba[2] * 255);
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b2.toString(16).padStart(2, "0")}`;
+  }
+  function convertOpenRVToSmAnnotate(openrvX, openrvY, aspectRatio) {
+    return {
+      x: (openrvX + 1) / 2,
+      y: (1 - openrvY * aspectRatio) / 2
+    };
+  }
+  function applyCoordinateTransform(x, y, scale, offset) {
+    let newX = x;
+    let newY = y;
+    if (scale !== void 0 && scale !== 1) {
+      newX = 0.5 + (x - 0.5) * scale;
+      newY = 0.5 + (y - 0.5) * scale;
+    }
+    if (offset) {
+      newX -= offset.x;
+      newY -= offset.y;
+    }
+    return { x: newX, y: newY };
+  }
+  function penComponentToCurve(comp, width, height, targetHeight, scale, offset) {
+    const pointsData = comp.prop("points");
+    const colorData = comp.prop("color");
+    const widthData = comp.prop("width");
+    if (!pointsData) {
+      return null;
+    }
+    const flatPoints = Array.isArray(pointsData[0]) ? pointsData.flat() : pointsData;
+    if (flatPoints.length < 4) {
+      return null;
+    }
+    const aspectRatio = width / height;
+    const points = [];
+    for (let i = 0; i < flatPoints.length; i += 2) {
+      let converted = convertOpenRVToSmAnnotate(
+        flatPoints[i],
+        flatPoints[i + 1],
+        aspectRatio
+      );
+      converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
+      points.push(converted);
+    }
+    const flatColor = colorData ? Array.isArray(colorData[0]) ? colorData[0] : colorData : [0, 0, 0, 1];
+    const color = rgbaToHex(flatColor);
+    const opacity = flatColor.length >= 4 ? flatColor[3] : 1;
+    let lineWidth = 2;
+    if (typeof widthData === "number") {
+      lineWidth = widthData * targetHeight;
+    } else if (Array.isArray(widthData) && widthData.length > 0) {
+      const firstWidth = widthData[0];
+      if (typeof firstWidth === "number") {
+        lineWidth = firstWidth * targetHeight;
+      }
+    }
+    if (scale !== void 0 && scale !== 1) {
+      lineWidth *= scale;
+    }
+    lineWidth = Math.max(1, Math.min(lineWidth, 50));
+    return {
+      type: "curve",
+      points,
+      strokeStyle: color,
+      fillStyle: color,
+      lineWidth,
+      opacity
+    };
+  }
+  function textComponentToText(comp, width, height, targetHeight, scale, offset) {
+    const positionData = comp.prop("position");
+    const colorData = comp.prop("color");
+    const textContent = comp.prop("text");
+    const size = comp.prop("size");
+    if (!textContent) {
+      return null;
+    }
+    if (!positionData) {
+      return null;
+    }
+    const flatPosition = Array.isArray(positionData[0]) ? positionData[0] : positionData;
+    if (flatPosition.length < 2) {
+      return null;
+    }
+    const aspectRatio = width / height;
+    let converted = convertOpenRVToSmAnnotate(
+      flatPosition[0],
+      flatPosition[1],
+      aspectRatio
+    );
+    converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
+    const flatColor = colorData ? Array.isArray(colorData[0]) ? colorData[0] : colorData : [0, 0, 0, 1];
+    const color = rgbaToHex(flatColor);
+    const opacity = flatColor.length >= 4 ? flatColor[3] : 1;
+    const normalizedSize = size ?? 0.01;
+    let fontSize = normalizedSize * targetHeight;
+    if (scale !== void 0 && scale !== 1) {
+      fontSize *= scale;
+    }
+    const lineWidth = Math.max(1, (fontSize - 16) / 0.5);
+    return {
+      type: "text",
+      x: converted.x,
+      y: converted.y,
+      text: textContent,
+      strokeStyle: color,
+      fillStyle: color,
+      lineWidth,
+      opacity
+    };
+  }
+  function extractDimensions(dto) {
+    const fileSource = dto.fileSources().first();
+    if (fileSource.exists()) {
+      const proxySize = fileSource.prop("proxy", "size");
+      if (proxySize && proxySize.length >= 2) {
+        return { width: proxySize[0], height: proxySize[1] };
+      }
+      const reqWidth = fileSource.prop("request", "width");
+      const reqHeight = fileSource.prop("request", "height");
+      if (reqWidth && reqHeight) {
+        return { width: reqWidth, height: reqHeight };
+      }
+    }
+    const stack = dto.byProtocol("RVStack").first();
+    if (stack.exists()) {
+      const outputSize = stack.prop("output", "size");
+      if (outputSize && outputSize.length >= 2) {
+        return { width: outputSize[0], height: outputSize[1] };
+      }
+    }
+    const seq = dto.byProtocol("RVSequence").first();
+    if (seq.exists()) {
+      const outputSize = seq.prop("output", "size");
+      if (outputSize && outputSize.length >= 2) {
+        return { width: outputSize[0], height: outputSize[1] };
+      }
+    }
+    return void 0;
+  }
+  function parseOpenRV(content, options = {}) {
+    const result = {
+      frames: []
+    };
+    const reader = new bt();
+    const success = reader.open(content);
+    if (!success) {
+      if (options.debug) {
+        console.log("[OpenRV Parser] Failed to parse GTO content");
+      }
+      return result;
+    }
+    const dto = new jt(reader.result);
+    const session = dto.session();
+    if (session.exists()) {
+      const name = session.prop("session", "name");
+      if (name) {
+        result.sessionName = name;
+      }
+    }
+    const fileSource = dto.fileSources().first();
+    if (fileSource.exists()) {
+      const movie = fileSource.prop("media", "movie");
+      if (movie) {
+        result.mediaPath = movie;
+      }
+    }
+    result.dimensions = extractDimensions(dto);
+    const width = result.dimensions?.width ?? options.width ?? 1920;
+    const height = result.dimensions?.height ?? options.height ?? 1080;
+    const targetHeight = options.targetHeight ?? height;
+    const fps = options.fps ?? 25;
+    const scale = options.coordinateScale;
+    const offset = options.coordinateOffset;
+    const debug = options.debug ?? false;
+    result.fps = fps;
+    if (debug) {
+      console.log("[OpenRV Parser] Source dimensions:", width, "x", height);
+      console.log("[OpenRV Parser] Target height:", targetHeight);
+      console.log("[OpenRV Parser] Coordinate scale:", scale);
+      console.log("[OpenRV Parser] Coordinate offset:", offset);
+    }
+    const paints = dto.paints();
+    if (paints.length === 0) {
+      if (debug) console.log("[OpenRV Parser] No RVPaint objects found");
+      return result;
+    }
+    if (debug) console.log("[OpenRV Parser] Found", paints.length, "RVPaint objects");
+    const frameShapes = /* @__PURE__ */ new Map();
+    for (const paint of paints) {
+      for (const comp of paint.components()) {
+        const compName = comp.name;
+        const penMatch = compName.match(/^pen:\d+:(\d+):/i);
+        if (penMatch) {
+          const frame = parseInt(penMatch[1]);
+          const shape = penComponentToCurve(comp, width, height, targetHeight, scale, offset);
+          if (shape) {
+            if (!frameShapes.has(frame)) {
+              frameShapes.set(frame, []);
+            }
+            frameShapes.get(frame).push(shape);
+          }
+          continue;
+        }
+        const textMatch = compName.match(/^text:\d+:(\d+):/i);
+        if (textMatch) {
+          const frame = parseInt(textMatch[1]);
+          const shape = textComponentToText(comp, width, height, targetHeight, scale, offset);
+          if (shape) {
+            if (!frameShapes.has(frame)) {
+              frameShapes.set(frame, []);
+            }
+            frameShapes.get(frame).push(shape);
+          }
+        }
+      }
+    }
+    for (const [frame, shapes] of frameShapes) {
+      result.frames.push({
+        frame,
+        fps,
+        version: 1,
+        shapes
+      });
+    }
+    result.frames.sort((a, b2) => a.frame - b2.frame);
+    return result;
+  }
+
+  // node_modules/@ffmpeg/ffmpeg/dist/esm/const.js
+  var CORE_VERSION = "0.12.9";
+  var CORE_URL = `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/umd/ffmpeg-core.js`;
+  var FFMessageType;
+  (function(FFMessageType2) {
+    FFMessageType2["LOAD"] = "LOAD";
+    FFMessageType2["EXEC"] = "EXEC";
+    FFMessageType2["FFPROBE"] = "FFPROBE";
+    FFMessageType2["WRITE_FILE"] = "WRITE_FILE";
+    FFMessageType2["READ_FILE"] = "READ_FILE";
+    FFMessageType2["DELETE_FILE"] = "DELETE_FILE";
+    FFMessageType2["RENAME"] = "RENAME";
+    FFMessageType2["CREATE_DIR"] = "CREATE_DIR";
+    FFMessageType2["LIST_DIR"] = "LIST_DIR";
+    FFMessageType2["DELETE_DIR"] = "DELETE_DIR";
+    FFMessageType2["ERROR"] = "ERROR";
+    FFMessageType2["DOWNLOAD"] = "DOWNLOAD";
+    FFMessageType2["PROGRESS"] = "PROGRESS";
+    FFMessageType2["LOG"] = "LOG";
+    FFMessageType2["MOUNT"] = "MOUNT";
+    FFMessageType2["UNMOUNT"] = "UNMOUNT";
+  })(FFMessageType || (FFMessageType = {}));
+
+  // node_modules/@ffmpeg/ffmpeg/dist/esm/utils.js
+  var getMessageID = /* @__PURE__ */ (() => {
+    let messageID = 0;
+    return () => messageID++;
+  })();
+
+  // node_modules/@ffmpeg/ffmpeg/dist/esm/errors.js
+  var ERROR_UNKNOWN_MESSAGE_TYPE = new Error("unknown message type");
+  var ERROR_NOT_LOADED = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first");
+  var ERROR_TERMINATED = new Error("called FFmpeg.terminate()");
+  var ERROR_IMPORT_FAILURE = new Error("failed to import ffmpeg-core.js");
+
+  // node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js
+  var import_meta = {};
+  var FFmpeg = class {
+    #worker = null;
+    /**
+     * #resolves and #rejects tracks Promise resolves and rejects to
+     * be called when we receive message from web worker.
+     */
+    #resolves = {};
+    #rejects = {};
+    #logEventCallbacks = [];
+    #progressEventCallbacks = [];
+    loaded = false;
+    /**
+     * register worker message event handlers.
+     */
+    #registerHandlers = () => {
+      if (this.#worker) {
+        this.#worker.onmessage = ({ data: { id, type, data } }) => {
+          switch (type) {
+            case FFMessageType.LOAD:
+              this.loaded = true;
+              this.#resolves[id](data);
+              break;
+            case FFMessageType.MOUNT:
+            case FFMessageType.UNMOUNT:
+            case FFMessageType.EXEC:
+            case FFMessageType.FFPROBE:
+            case FFMessageType.WRITE_FILE:
+            case FFMessageType.READ_FILE:
+            case FFMessageType.DELETE_FILE:
+            case FFMessageType.RENAME:
+            case FFMessageType.CREATE_DIR:
+            case FFMessageType.LIST_DIR:
+            case FFMessageType.DELETE_DIR:
+              this.#resolves[id](data);
+              break;
+            case FFMessageType.LOG:
+              this.#logEventCallbacks.forEach((f) => f(data));
+              break;
+            case FFMessageType.PROGRESS:
+              this.#progressEventCallbacks.forEach((f) => f(data));
+              break;
+            case FFMessageType.ERROR:
+              this.#rejects[id](data);
+              break;
+          }
+          delete this.#resolves[id];
+          delete this.#rejects[id];
+        };
+      }
+    };
+    /**
+     * Generic function to send messages to web worker.
+     */
+    #send = ({ type, data }, trans = [], signal) => {
+      if (!this.#worker) {
+        return Promise.reject(ERROR_NOT_LOADED);
+      }
+      return new Promise((resolve, reject) => {
+        const id = getMessageID();
+        this.#worker && this.#worker.postMessage({ id, type, data }, trans);
+        this.#resolves[id] = resolve;
+        this.#rejects[id] = reject;
+        signal?.addEventListener("abort", () => {
+          reject(new DOMException(`Message # ${id} was aborted`, "AbortError"));
+        }, { once: true });
+      });
+    };
+    on(event, callback) {
+      if (event === "log") {
+        this.#logEventCallbacks.push(callback);
+      } else if (event === "progress") {
+        this.#progressEventCallbacks.push(callback);
+      }
+    }
+    off(event, callback) {
+      if (event === "log") {
+        this.#logEventCallbacks = this.#logEventCallbacks.filter((f) => f !== callback);
+      } else if (event === "progress") {
+        this.#progressEventCallbacks = this.#progressEventCallbacks.filter((f) => f !== callback);
+      }
+    }
+    /**
+     * Loads ffmpeg-core inside web worker. It is required to call this method first
+     * as it initializes WebAssembly and other essential variables.
+     *
+     * @category FFmpeg
+     * @returns `true` if ffmpeg core is loaded for the first time.
+     */
+    load = ({ classWorkerURL, ...config } = {}, { signal } = {}) => {
+      if (!this.#worker) {
+        this.#worker = classWorkerURL ? new Worker(new URL(classWorkerURL, import_meta.url), {
+          type: "module"
+        }) : (
+          // We need to duplicated the code here to enable webpack
+          // to bundle worekr.js here.
+          new Worker(new URL("./worker.js", import_meta.url), {
+            type: "module"
+          })
+        );
+        this.#registerHandlers();
+      }
+      return this.#send({
+        type: FFMessageType.LOAD,
+        data: config
+      }, void 0, signal);
+    };
+    /**
+     * Execute ffmpeg command.
+     *
+     * @remarks
+     * To avoid common I/O issues, ["-nostdin", "-y"] are prepended to the args
+     * by default.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", ...);
+     * // ffmpeg -i video.avi video.mp4
+     * await ffmpeg.exec(["-i", "video.avi", "video.mp4"]);
+     * const data = ffmpeg.readFile("video.mp4");
+     * ```
+     *
+     * @returns `0` if no error, `!= 0` if timeout (1) or error.
+     * @category FFmpeg
+     */
+    exec = (args, timeout = -1, { signal } = {}) => this.#send({
+      type: FFMessageType.EXEC,
+      data: { args, timeout }
+    }, void 0, signal);
+    /**
+     * Execute ffprobe command.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", ...);
+     * // Getting duration of a video in seconds: ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 video.avi -o output.txt
+     * await ffmpeg.ffprobe(["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "video.avi", "-o", "output.txt"]);
+     * const data = ffmpeg.readFile("output.txt");
+     * ```
+     *
+     * @returns `0` if no error, `!= 0` if timeout (1) or error.
+     * @category FFmpeg
+     */
+    ffprobe = (args, timeout = -1, { signal } = {}) => this.#send({
+      type: FFMessageType.FFPROBE,
+      data: { args, timeout }
+    }, void 0, signal);
+    /**
+     * Terminate all ongoing API calls and terminate web worker.
+     * `FFmpeg.load()` must be called again before calling any other APIs.
+     *
+     * @category FFmpeg
+     */
+    terminate = () => {
+      const ids = Object.keys(this.#rejects);
+      for (const id of ids) {
+        this.#rejects[id](ERROR_TERMINATED);
+        delete this.#rejects[id];
+        delete this.#resolves[id];
+      }
+      if (this.#worker) {
+        this.#worker.terminate();
+        this.#worker = null;
+        this.loaded = false;
+      }
+    };
+    /**
+     * Write data to ffmpeg.wasm.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", await fetchFile("../video.avi"));
+     * await ffmpeg.writeFile("text.txt", "hello world");
+     * ```
+     *
+     * @category File System
+     */
+    writeFile = (path, data, { signal } = {}) => {
+      const trans = [];
+      if (data instanceof Uint8Array) {
+        trans.push(data.buffer);
+      }
+      return this.#send({
+        type: FFMessageType.WRITE_FILE,
+        data: { path, data }
+      }, trans, signal);
+    };
+    mount = (fsType, options, mountPoint) => {
+      const trans = [];
+      return this.#send({
+        type: FFMessageType.MOUNT,
+        data: { fsType, options, mountPoint }
+      }, trans);
+    };
+    unmount = (mountPoint) => {
+      const trans = [];
+      return this.#send({
+        type: FFMessageType.UNMOUNT,
+        data: { mountPoint }
+      }, trans);
+    };
+    /**
+     * Read data from ffmpeg.wasm.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * const data = await ffmpeg.readFile("video.mp4");
+     * ```
+     *
+     * @category File System
+     */
+    readFile = (path, encoding = "binary", { signal } = {}) => this.#send({
+      type: FFMessageType.READ_FILE,
+      data: { path, encoding }
+    }, void 0, signal);
+    /**
+     * Delete a file.
+     *
+     * @category File System
+     */
+    deleteFile = (path, { signal } = {}) => this.#send({
+      type: FFMessageType.DELETE_FILE,
+      data: { path }
+    }, void 0, signal);
+    /**
+     * Rename a file or directory.
+     *
+     * @category File System
+     */
+    rename = (oldPath, newPath, { signal } = {}) => this.#send({
+      type: FFMessageType.RENAME,
+      data: { oldPath, newPath }
+    }, void 0, signal);
+    /**
+     * Create a directory.
+     *
+     * @category File System
+     */
+    createDir = (path, { signal } = {}) => this.#send({
+      type: FFMessageType.CREATE_DIR,
+      data: { path }
+    }, void 0, signal);
+    /**
+     * List directory contents.
+     *
+     * @category File System
+     */
+    listDir = (path, { signal } = {}) => this.#send({
+      type: FFMessageType.LIST_DIR,
+      data: { path }
+    }, void 0, signal);
+    /**
+     * Delete an empty directory.
+     *
+     * @category File System
+     */
+    deleteDir = (path, { signal } = {}) => this.#send({
+      type: FFMessageType.DELETE_DIR,
+      data: { path }
+    }, void 0, signal);
+  };
+
+  // node_modules/@ffmpeg/ffmpeg/dist/esm/types.js
+  var FFFSType;
+  (function(FFFSType2) {
+    FFFSType2["MEMFS"] = "MEMFS";
+    FFFSType2["NODEFS"] = "NODEFS";
+    FFFSType2["NODERAWFS"] = "NODERAWFS";
+    FFFSType2["IDBFS"] = "IDBFS";
+    FFFSType2["WORKERFS"] = "WORKERFS";
+    FFFSType2["PROXYFS"] = "PROXYFS";
+  })(FFFSType || (FFFSType = {}));
+
+  // node_modules/@ffmpeg/util/dist/esm/errors.js
+  var ERROR_RESPONSE_BODY_READER = new Error("failed to get response body reader");
+  var ERROR_INCOMPLETED_DOWNLOAD = new Error("failed to complete download");
+
+  // node_modules/@ffmpeg/util/dist/esm/const.js
+  var HeaderContentLength = "Content-Length";
+
+  // node_modules/@ffmpeg/util/dist/esm/index.js
+  var readFromBlobOrFile = (blob) => new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      const { result } = fileReader;
+      if (result instanceof ArrayBuffer) {
+        resolve(new Uint8Array(result));
+      } else {
+        resolve(new Uint8Array());
+      }
+    };
+    fileReader.onerror = (event) => {
+      reject(Error(`File could not be read! Code=${event?.target?.error?.code || -1}`));
+    };
+    fileReader.readAsArrayBuffer(blob);
+  });
+  var fetchFile = async (file) => {
+    let data;
+    if (typeof file === "string") {
+      if (/data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(file)) {
+        data = atob(file.split(",")[1]).split("").map((c) => c.charCodeAt(0));
+      } else {
+        data = await (await fetch(file)).arrayBuffer();
+      }
+    } else if (file instanceof URL) {
+      data = await (await fetch(file)).arrayBuffer();
+    } else if (file instanceof File || file instanceof Blob) {
+      data = await readFromBlobOrFile(file);
+    } else {
+      return new Uint8Array();
+    }
+    return new Uint8Array(data);
+  };
+  var downloadWithProgress = async (url, cb) => {
+    const resp = await fetch(url);
+    let buf;
+    try {
+      const total = parseInt(resp.headers.get(HeaderContentLength) || "-1");
+      const reader = resp.body?.getReader();
+      if (!reader)
+        throw ERROR_RESPONSE_BODY_READER;
+      const chunks = [];
+      let received = 0;
+      for (; ; ) {
+        const { done, value } = await reader.read();
+        const delta = value ? value.length : 0;
+        if (done) {
+          if (total != -1 && total !== received)
+            throw ERROR_INCOMPLETED_DOWNLOAD;
+          cb && cb({ url, total, received, delta, done });
+          break;
+        }
+        chunks.push(value);
+        received += delta;
+        cb && cb({ url, total, received, delta, done });
+      }
+      const data = new Uint8Array(received);
+      let position = 0;
+      for (const chunk of chunks) {
+        data.set(chunk, position);
+        position += chunk.length;
+      }
+      buf = data.buffer;
+    } catch (e) {
+      console.log(`failed to send download progress event: `, e);
+      buf = await resp.arrayBuffer();
+      cb && cb({
+        url,
+        total: buf.byteLength,
+        received: buf.byteLength,
+        delta: 0,
+        done: true
+      });
+    }
+    return buf;
+  };
+  var toBlobURL = async (url, mimeType, progress = false, cb) => {
+    const buf = progress ? await downloadWithProgress(url, cb) : await (await fetch(url)).arrayBuffer();
+    const blob = new Blob([buf], { type: mimeType });
+    return URL.createObjectURL(blob);
+  };
+
+  // src/plugins/utils/ffmpeg-frame-extractor.ts
+  var FFmpegFrameExtractor = class {
+    constructor() {
+      this.ffmpeg = null;
+      this.loadPromise = null;
+      this.frames = /* @__PURE__ */ new Map();
+      this.videoInfo = null;
+      this.isDestroyed = false;
+      this.extractionAbortController = null;
+    }
+    /**
+     * Load FFmpeg WASM asynchronously.
+     * Call this before any other operations.
+     */
+    async load(onProgress) {
+      if (this.ffmpeg) {
+        return;
+      }
+      if (this.loadPromise) {
+        return this.loadPromise;
+      }
+      this.loadPromise = this._load(onProgress);
+      return this.loadPromise;
+    }
+    async _load(onProgress) {
+      const hasSharedArrayBuffer = typeof SharedArrayBuffer !== "undefined";
+      console.log(`SharedArrayBuffer available: ${hasSharedArrayBuffer}`);
+      if (!hasSharedArrayBuffer) {
+        console.warn(
+          "SharedArrayBuffer not available. FFmpeg may not work correctly.\nTo enable, add these headers to your server:\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Opener-Policy: same-origin"
+        );
+      }
+      this.ffmpeg = new FFmpeg();
+      this.ffmpeg.on("log", ({ message }) => {
+        console.log("FFmpeg:", message);
+        this.parseFFmpegLog(message);
+      });
+      this.ffmpeg.on("progress", ({ progress }) => {
+        console.log("FFmpeg progress:", progress);
+        onProgress?.({
+          loaded: progress,
+          total: 1,
+          phase: "extracting"
+        });
+      });
+      onProgress?.({
+        loaded: 0,
+        total: 1,
+        phase: "loading"
+      });
+      const coreBaseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
+      const ffmpegBaseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm";
+      const workerResponse = await fetch(`${ffmpegBaseURL}/worker.js`);
+      let workerCode = await workerResponse.text();
+      workerCode = workerCode.replace(
+        /from\s*["']\.\/([^"']+)["']/g,
+        `from "${ffmpegBaseURL}/$1"`
+      );
+      workerCode = workerCode.replace(
+        /import\s*["']\.\/([^"']+)["']/g,
+        `import "${ffmpegBaseURL}/$1"`
+      );
+      const workerBlob = new Blob([workerCode], { type: "text/javascript" });
+      const classWorkerURL = URL.createObjectURL(workerBlob);
+      onProgress?.({
+        loaded: 0.25,
+        total: 1,
+        phase: "loading"
+      });
+      const coreURL = await toBlobURL(
+        `${coreBaseURL}/ffmpeg-core.js`,
+        "text/javascript"
+      );
+      onProgress?.({
+        loaded: 0.5,
+        total: 1,
+        phase: "loading"
+      });
+      const wasmURL = await toBlobURL(
+        `${coreBaseURL}/ffmpeg-core.wasm`,
+        "application/wasm"
+      );
+      onProgress?.({
+        loaded: 0.75,
+        total: 1,
+        phase: "loading"
+      });
+      await this.ffmpeg.load({
+        coreURL,
+        wasmURL,
+        classWorkerURL
+      });
+      onProgress?.({
+        loaded: 1,
+        total: 1,
+        phase: "loading"
+      });
+    }
+    /**
+     * Check if FFmpeg is loaded and ready.
+     */
+    isLoaded() {
+      return this.ffmpeg !== null;
+    }
+    parseFFmpegLog(message) {
+      const fpsMatch = message.match(/(\d+(?:\.\d+)?)\s*fps/);
+      if (fpsMatch && this.videoInfo) {
+        const fps = parseFloat(fpsMatch[1]);
+        if (fps > 0 && fps < 1e3) {
+          this.videoInfo.fps = fps;
+        }
+      }
+      if (this.videoInfo && this.videoInfo.fps === 25) {
+        const tbrMatch = message.match(/(\d+(?:\.\d+)?)\s*tbr/);
+        if (tbrMatch) {
+          const tbr = parseFloat(tbrMatch[1]);
+          if (tbr > 0 && tbr < 1e3) {
+            this.videoInfo.fps = tbr;
+          }
+        }
+      }
+      const durationMatch = message.match(
+        /Duration:\s*(\d{2}):(\d{2}):(\d{2})\.(\d+)/
+      );
+      if (durationMatch && this.videoInfo) {
+        const hours = parseInt(durationMatch[1], 10);
+        const minutes = parseInt(durationMatch[2], 10);
+        const seconds = parseInt(durationMatch[3], 10);
+        const centiseconds = parseInt(durationMatch[4], 10);
+        this.videoInfo.duration = hours * 3600 + minutes * 60 + seconds + centiseconds / 100;
+      }
+      const dimensionMatch = message.match(/(\d{2,5})x(\d{2,5})/);
+      if (dimensionMatch && this.videoInfo) {
+        const width = parseInt(dimensionMatch[1], 10);
+        const height = parseInt(dimensionMatch[2], 10);
+        if (width > 0 && height > 0) {
+          this.videoInfo.width = width;
+          this.videoInfo.height = height;
+        }
+      }
+    }
+    /**
+     * Probe video file to get metadata (FPS, duration, dimensions).
+     * This is similar to running ffprobe.
+     */
+    async probe(videoSource) {
+      await this.load();
+      if (!this.ffmpeg) {
+        throw new Error("FFmpeg not loaded");
+      }
+      this.videoInfo = {
+        fps: 25,
+        duration: 0,
+        width: 0,
+        height: 0,
+        totalFrames: 0
+      };
+      let extension = "mp4";
+      if (typeof videoSource !== "string" && videoSource.type) {
+        const typeMap = {
+          "video/mp4": "mp4",
+          "video/webm": "webm",
+          "video/quicktime": "mov",
+          "video/x-msvideo": "avi",
+          "video/x-matroska": "mkv",
+          "video/ogg": "ogv"
+        };
+        extension = typeMap[videoSource.type] || "mp4";
+      }
+      const inputFileName = `input_probe.${extension}`;
+      const fileData = typeof videoSource === "string" ? await fetchFile(videoSource) : await fetchFile(videoSource);
+      await this.ffmpeg.writeFile(inputFileName, fileData);
+      try {
+        await this.ffmpeg.exec(["-i", inputFileName]);
+      } catch {
+      }
+      try {
+        await this.ffmpeg.deleteFile(inputFileName);
+      } catch {
+      }
+      if (this.videoInfo.duration > 0 && this.videoInfo.fps > 0) {
+        this.videoInfo.totalFrames = Math.round(
+          this.videoInfo.duration * this.videoInfo.fps
+        );
+      }
+      console.log("Probed video info:", this.videoInfo);
+      return this.videoInfo;
+    }
+    /**
+     * Extract all frames from video as ImageBitmap objects.
+     * Uses chunked extraction to avoid WASM memory limits.
+     *
+     * @param videoSource - Video file as Blob or URL
+     * @param options - Extraction options
+     */
+    async extractFrames(videoSource, options = {}) {
+      await this.load(options.onProgress);
+      if (!this.ffmpeg) {
+        throw new Error("FFmpeg not loaded");
+      }
+      if (this.isDestroyed) {
+        throw new Error("Extractor has been destroyed");
+      }
+      this.extractionAbortController = new AbortController();
+      this.clearFrames();
+      if (!this.videoInfo) {
+        await this.probe(videoSource);
+      }
+      const fps = options.fps ?? this.videoInfo?.fps ?? 25;
+      const format = options.format ?? "png";
+      const totalFrames = options.endFrame ?? this.videoInfo?.totalFrames ?? 0;
+      const startFrame = options.startFrame ?? 1;
+      let extension = "mp4";
+      if (typeof videoSource !== "string" && videoSource.type) {
+        const typeMap = {
+          "video/mp4": "mp4",
+          "video/webm": "webm",
+          "video/quicktime": "mov",
+          "video/x-msvideo": "avi",
+          "video/x-matroska": "mkv",
+          "video/ogg": "ogv"
+        };
+        extension = typeMap[videoSource.type] || "mp4";
+      }
+      const inputFileName = `input.${extension}`;
+      options.onProgress?.({
+        loaded: 0,
+        total: totalFrames,
+        phase: "extracting"
+      });
+      const fileData = typeof videoSource === "string" ? await fetchFile(videoSource) : await fetchFile(videoSource);
+      const fileSizeMB = fileData.byteLength / (1024 * 1024);
+      console.log(`Video file size: ${fileSizeMB.toFixed(2)} MB`);
+      if (fileSizeMB > 100) {
+        throw new Error(
+          `Video file too large (${fileSizeMB.toFixed(0)}MB). FFmpeg WASM has memory limits. Please use a smaller video file (<100MB).`
+        );
+      }
+      await this.ffmpeg.writeFile(inputFileName, fileData);
+      try {
+        const writtenFile = await this.ffmpeg.readFile(inputFileName);
+        const size = writtenFile instanceof Uint8Array ? writtenFile.byteLength : writtenFile.length;
+        console.log(`Input file written: ${size} bytes`);
+      } catch (e) {
+        console.error("Failed to verify input file:", e);
+      }
+      const execWithTimeout = async (args, timeoutMs = 3e4) => {
+        console.log("FFmpeg command:", args.join(" "));
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(`FFmpeg timeout after ${timeoutMs}ms`)), timeoutMs);
+        });
+        await Promise.race([
+          this.ffmpeg.exec(args),
+          timeoutPromise
+        ]);
+      };
+      console.log("Testing FFmpeg with single frame extraction (this may take a while for h264)...");
+      const testFormat = format === "png" ? "png" : "jpg";
+      try {
+        const testArgs = [
+          "-y",
+          "-nostdin",
+          "-i",
+          inputFileName,
+          "-frames:v",
+          "1"
+        ];
+        if (testFormat === "jpg") {
+          testArgs.push("-q:v", "8");
+        }
+        testArgs.push(`test_frame.${testFormat}`);
+        await execWithTimeout(testArgs, 6e4);
+        const testFrame = await this.ffmpeg.readFile(`test_frame.${testFormat}`);
+        const testSize = testFrame instanceof Uint8Array ? testFrame.byteLength : testFrame.length;
+        console.log(`Test frame extracted: ${testSize} bytes`);
+        await this.ffmpeg.deleteFile(`test_frame.${testFormat}`);
+      } catch (e) {
+        console.error("Single frame test failed:", e);
+        try {
+          await this.ffmpeg.deleteFile(inputFileName);
+        } catch {
+        }
+        throw new Error(`FFmpeg cannot process this video (h264 decoding may be too slow in WASM). Error: ${e}`);
+      }
+      const estimatedTime = Math.max(3e5, totalFrames * 2e3);
+      console.log(`Extracting ${totalFrames} frames as ${format.toUpperCase()} at fps=${fps} (estimated timeout: ${(estimatedTime / 1e3).toFixed(0)}s)...`);
+      const ffmpegArgs = [
+        "-y",
+        "-nostdin",
+        "-i",
+        inputFileName,
+        "-vf",
+        `fps=${fps}`
+      ];
+      if (format === "jpg") {
+        ffmpegArgs.push("-q:v", "8");
+      }
+      ffmpegArgs.push(`frame_%06d.${format}`);
+      try {
+        await execWithTimeout(ffmpegArgs, estimatedTime);
+      } catch (e) {
+        console.error("Frame extraction failed:", e);
+        try {
+          await this.ffmpeg.deleteFile(inputFileName);
+        } catch {
+        }
+        throw new Error(`Failed to extract frames: ${e}`);
+      }
+      let frameIndex = 1;
+      while (!this.isDestroyed) {
+        const frameFileName = `frame_${String(frameIndex).padStart(6, "0")}.${format}`;
+        try {
+          const frameData = await this.ffmpeg.readFile(frameFileName);
+          if (frameData instanceof Uint8Array) {
+            const blob = new Blob([frameData], {
+              type: format === "png" ? "image/png" : "image/jpeg"
+            });
+            const imageBitmap = await createImageBitmap(blob);
+            this.frames.set(frameIndex, imageBitmap);
+            await this.ffmpeg.deleteFile(frameFileName);
+            options.onProgress?.({
+              loaded: frameIndex,
+              total: totalFrames || frameIndex,
+              phase: "processing"
+            });
+          }
+          frameIndex++;
+        } catch {
+          break;
+        }
+      }
+      console.log(`Extraction complete: ${this.frames.size} frames`);
+      try {
+        await this.ffmpeg.deleteFile(inputFileName);
+      } catch {
+      }
+      this.extractionAbortController = null;
+      return this.frames;
+    }
+    /**
+     * Extract frames in chunks for memory efficiency.
+     * Useful for long videos where loading all frames at once is not feasible.
+     *
+     * @param videoSource - Video file as Blob or URL
+     * @param chunkSize - Number of frames per chunk
+     * @param onChunk - Callback when a chunk is ready
+     */
+    async extractFramesInChunks(videoSource, chunkSize, onChunk, options = {}) {
+      const info = await this.probe(videoSource);
+      const totalFrames = info.totalFrames;
+      const fps = options.fps ?? info.fps;
+      for (let start = 1; start <= totalFrames; start += chunkSize) {
+        if (this.isDestroyed) break;
+        const end = Math.min(start + chunkSize - 1, totalFrames);
+        this.clearFrames();
+        await this.extractFrames(videoSource, {
+          fps,
+          startFrame: start,
+          endFrame: end,
+          onProgress: options.onProgress
+        });
+        onChunk(this.frames, start, end);
+      }
+    }
+    /**
+     * Get a specific frame by number.
+     */
+    getFrame(frameNumber) {
+      return this.frames.get(frameNumber) ?? null;
+    }
+    /**
+     * Check if a frame is available.
+     */
+    hasFrame(frameNumber) {
+      return this.frames.has(frameNumber);
+    }
+    /**
+     * Get all available frames.
+     */
+    getAllFrames() {
+      return this.frames;
+    }
+    /**
+     * Get video information (available after probe or extractFrames).
+     */
+    getVideoInfo() {
+      return this.videoInfo;
+    }
+    /**
+     * Get total number of extracted frames.
+     */
+    get frameCount() {
+      return this.frames.size;
+    }
+    /**
+     * Clear all extracted frames from memory.
+     */
+    clearFrames() {
+      this.frames.forEach((frame) => frame.close());
+      this.frames.clear();
+    }
+    /**
+     * Abort any ongoing extraction.
+     */
+    abort() {
+      this.extractionAbortController?.abort();
+    }
+    /**
+     * Clean up all resources.
+     */
+    destroy() {
+      this.isDestroyed = true;
+      this.abort();
+      this.clearFrames();
+      this.ffmpeg?.terminate();
+      this.ffmpeg = null;
+      this.loadPromise = null;
+      this.videoInfo = null;
+    }
+  };
+
+  // src/index.ts
+  AnnotationTool.prototype.initUI = initUI;
+  AnnotationTool.prototype.initCanvas = initCanvas;
+  AnnotationTool.prototype.addFrameSquareOverlay = addFrameSquareOverlay;
+  AnnotationTool.prototype.addVideoOverlay = addVideoOverlay;
+  AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
+
+  // demo/index.ts
+  new EventSource("/esbuild").addEventListener("change", () => location.reload());
+  var ffmpegExtractor = null;
+  var currentVideoBlob = null;
+  var ffmpegLoading = false;
+  var pendingVideoProcess = null;
+  var video = document.querySelector("video");
+  async function initAnnotator() {
+    const blob = await fetch(video.currentSrc).then((r) => r.blob());
+    const loadPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 250);
+      video.addEventListener(
+        "loadeddata",
+        () => {
+          resolve(true);
+        },
+        {
+          once: true
+        }
+      );
+    });
+    const imageFrame = await fetch("./frame_29.png").then(async (r) => {
+      const blob2 = await r.blob();
+      const blobs = new Blob([blob2], { type: "image/png" });
+      const img = new Image();
+      const imageLoadPromise = new Promise((resolve) => {
+        img.addEventListener(
+          "load",
+          () => {
+            resolve(true);
+          },
+          {
+            once: true
+          }
+        );
+      });
+      img.src = window.URL.createObjectURL(blobs);
+      await imageLoadPromise;
+      return img;
+    });
+    if (!video.paused) {
+      video.pause();
+    }
+    const bl = new Blob([blob], { type: "video/mp4" });
+    const tool = new AnnotationTool(video, {
+      toolbar: { defaultTool: null }
+    });
+    await tool.setVideoBlob(bl, 30);
+    await loadPromise;
+    await tool.addReferenceVideoByURL("./mov_bbb_g.mp4");
+    requestAnimationFrame(() => {
+      tool.setCanvasSize();
+    });
+    tool.enableVideoFrameBuffer();
+    console.log({ tool });
+    tool.addShapesToFrame(29, [
+      {
+        type: "image",
+        image: imageFrame,
+        x: 0,
+        y: 0,
+        width: 1,
+        height: 1,
+        strokeStyle: "red",
+        lineWidth: 2,
+        fillStyle: "red"
+      }
+    ]);
+    if (!video.paused) {
+      video.pause();
+    }
+    setInterval(() => {
+      tool.destroy();
+      tool.init(video);
+    }, 1e8);
+    setInterval(() => {
+      console.log(tool.saveAllFrames());
+    }, 1e5);
+    const fileInput = document.getElementById("file");
+    const downloadButton = document.getElementById(
+      "download"
+    );
+    const sampleButton = document.getElementById("sample");
+    const videoInput = document.getElementById("video");
+    const refVideoInput = document.getElementById(
+      "ref-video"
+    );
+    videoInput.addEventListener("change", async (e) => {
+      if (!videoInput.files || videoInput.files.length === 0) {
+        return;
+      }
+      const file = videoInput.files[0];
+      const blobs = new Blob([file], { type: file.type });
+      currentVideoBlob = blobs;
+      async function processVideo() {
+        const ffmpegExtractBtnEl = document.getElementById("ffmpeg-extract");
+        const ffmpegInfoEl = document.getElementById("ffmpeg-info");
+        const ffmpegFpsEl = document.getElementById("ffmpeg-fps");
+        const ffmpegFramesEl = document.getElementById("ffmpeg-frames");
+        const ffmpegStatusEl = document.getElementById("ffmpeg-status");
+        ffmpegExtractBtnEl.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="2" width="20" height="20" rx="2"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
         Extract Frames
-      `,V!=null&&V.isLoaded()&&V.clearFrames(),n.setFFmpegFrameExtractor(null);let Ce=0,Fe=!1;if(V!=null&&V.isLoaded())try{et.className="ffmpeg-status loading",et.querySelector(".status-text").textContent="Probing video...";let J=yield V.probe(P);Ce=J.fps,Fe=J.fps>0,X.style.display="flex",ce.textContent=`FPS: ${J.fps.toFixed(2)}`,he.textContent=`Frames: ${J.totalFrames}`,et.className="ffmpeg-status ready",et.querySelector(".status-text").textContent="FFmpeg ready",console.log("Detected video info:",J)}catch(J){console.error("Failed to probe video:",J),et.className="ffmpeg-status error",et.querySelector(".status-text").textContent="Probe failed"}let $t;if(Fe)$t=Ce,console.log("Using detected FPS:",$t);else{let J=prompt("Enter FPS","30");if(!J)return;$t=parseInt(J,10)}yield n.setVideoBlob(P,$t),V!=null&&V.isLoaded()&&Ct()})}if(Dt){console.log("FFmpeg is loading, video will be processed when ready...");let N=document.getElementById("ffmpeg-status");N.querySelector(".status-text").textContent="Loading FFmpeg... (video queued)",yt=z;return}yield z()})),s.addEventListener("change",b=>k(this,null,function*(){if(!s.files||s.files.length===0)return;let F=prompt("Enter FPS","30");if(!F)return;let P=s.files[0],z=new Blob([P],{type:P.type}),N=window.URL.createObjectURL(z);yield n.addReferenceVideoByURL(N,parseInt(F,10),P.type)})),c.addEventListener("click",b=>{b.stopPropagation(),b.preventDefault(),fetch("./annotations-sample.json").then(F=>F.json()).then(F=>{n.loadAllFrames(F),n.updateActiveTimeFrame(),n.redrawFullCanvas()})}),a.addEventListener("change",b=>{if(!a.files||a.files.length===0)return;let F=a.files[0],P=new FileReader;P.onload=z=>{if(!z.target)return;let N=z.target.result,X=JSON.parse(N);confirm("Append to existing annotations?")?n.appendFrames(X):n.loadAllFrames(X),n.updateActiveTimeFrame(),n.redrawFullCanvas()},P.readAsText(F)}),r.addEventListener("click",b=>{b.stopPropagation(),b.preventDefault();let F=n.saveAllFrames(),P=document.createElement("a");P.href=URL.createObjectURL(new Blob([JSON.stringify(F)],{type:"application/json"}));let z=new Date().toISOString().replace(/:/g,"-");P.download=`annotations-${z}.json`,P.click()});let h=document.getElementById("rv-file"),m=document.getElementById("download-rv"),u=document.getElementById("rv-scale"),p=document.getElementById("rv-scale-value"),f=document.getElementById("rv-offset-x"),v=document.getElementById("rv-offset-x-value"),y=document.getElementById("rv-offset-y"),g=document.getElementById("rv-offset-y-value"),x=document.getElementById("rv-reset-transform"),E=null;function R(){if(!E)return;let b=parseFloat(u.value),F=parseFloat(f.value),P=parseFloat(y.value),z=Rt(E,{fps:n.fps,targetHeight:n.canvasHeight,coordinateScale:b,coordinateOffset:{x:-F,y:-P}});n.loadAllFrames(z.frames),n.updateActiveTimeFrame(),n.redrawFullCanvas()}u.addEventListener("input",()=>{p.textContent=u.value,R()}),f.addEventListener("input",()=>{v.textContent=f.value,R()}),y.addEventListener("input",()=>{g.textContent=y.value,R()}),x.addEventListener("click",()=>{u.value="0.85",p.textContent="0.85",f.value="0",v.textContent="0",y.value="0",g.textContent="0",R()}),h.addEventListener("change",b=>k(this,null,function*(){if(!h.files||h.files.length===0)return;let F=h.files[0];try{E=yield F.text();let P=parseFloat(u.value),z=parseFloat(f.value),N=parseFloat(y.value),X=Rt(E,{fps:n.fps,targetHeight:n.canvasHeight,coordinateScale:P,coordinateOffset:{x:-z,y:-N},debug:!0});console.log("RV file dimensions:",X.dimensions),console.log("Demo video dimensions:",G.videoWidth,"x",G.videoHeight),console.log("Canvas dimensions:",n.canvasWidth,"x",n.canvasHeight),confirm("Append to existing annotations?")?n.appendFrames(X.frames):n.loadAllFrames(X.frames),n.updateActiveTimeFrame(),n.redrawFullCanvas();let he=X.frames.map(et=>et.frame);console.log(`Loaded ${X.frames.length} annotated frames:`,he),X.frames.length>0&&console.log("First frame shapes:",X.frames[0].shapes),X.mediaPath&&console.log("OpenRV media path:",X.mediaPath)}catch(P){console.error("Failed to parse OpenRV file:",P),alert("Failed to parse OpenRV file. Check console for details.")}})),m.addEventListener("click",b=>{b.stopPropagation(),b.preventDefault();let F=n.saveAllFrames();if(F.length===0){alert("No annotations to export.");return}let P=new Date().toISOString().replace(/:/g,"-");ae(F,{mediaPath:G.currentSrc||"video.mp4",width:n.canvasWidth||1920,height:n.canvasHeight||1080,sessionName:`sm-annotate-${P}`},`annotations-${P}.rv`)});let O=document.querySelectorAll(".layout-btn"),L=document.getElementById("layout-label"),D={horizontal:"Horizontal (default)",vertical:"Vertical Sidebar",minimal:"Minimal / Floating","bottom-dock":"Bottom Dock"};O.forEach(b=>{b.addEventListener("click",F=>{let P=F.currentTarget,z=P.dataset.layout;O.forEach(N=>N.classList.remove("active")),P.classList.add("active"),L&&(L.textContent=D[z]),n.setLayout(z),requestAnimationFrame(()=>{n.setCanvasSize()})})});let w=document.getElementById("ffmpeg-load"),T=document.getElementById("ffmpeg-extract"),C=document.getElementById("ffmpeg-status"),S=document.getElementById("ffmpeg-progress"),$=document.getElementById("ffmpeg-progress-fill"),W=document.getElementById("ffmpeg-progress-text"),q=document.getElementById("ffmpeg-info"),at=document.getElementById("ffmpeg-fps"),St=document.getElementById("ffmpeg-frames");function K(b,F){C.className=`ffmpeg-status ${b}`,C.querySelector(".status-text").textContent=F}function rt(b){S.style.display="flex",$.style.width=`${b}%`,W.textContent=`${Math.round(b)}%`}function st(){S.style.display="none"}Tt=e;function Et(){return k(this,null,function*(){if(!(V!=null&&V.isLoaded()||Dt)){Dt=!0,w.disabled=!0,K("loading","Loading FFmpeg..."),rt(0);try{if(V=new At,yield V.load(b=>{b.phase==="loading"&&rt(b.loaded*100)}),Dt=!1,K("ready","FFmpeg ready"),st(),T.disabled=!1,w.innerHTML=`
+      `;
+        if (ffmpegExtractor?.isLoaded()) {
+          ffmpegExtractor.clearFrames();
+        }
+        tool.setFFmpegFrameExtractor(null);
+        let detectedFps = 0;
+        let fpsDetected = false;
+        if (ffmpegExtractor?.isLoaded()) {
+          try {
+            ffmpegStatusEl.className = "ffmpeg-status loading";
+            ffmpegStatusEl.querySelector(".status-text").textContent = "Probing video...";
+            const info = await ffmpegExtractor.probe(blobs);
+            detectedFps = info.fps;
+            fpsDetected = info.fps > 0;
+            ffmpegInfoEl.style.display = "flex";
+            ffmpegFpsEl.textContent = `FPS: ${info.fps.toFixed(2)}`;
+            ffmpegFramesEl.textContent = `Frames: ${info.totalFrames}`;
+            ffmpegStatusEl.className = "ffmpeg-status ready";
+            ffmpegStatusEl.querySelector(".status-text").textContent = "FFmpeg ready";
+            console.log("Detected video info:", info);
+          } catch (err) {
+            console.error("Failed to probe video:", err);
+            ffmpegStatusEl.className = "ffmpeg-status error";
+            ffmpegStatusEl.querySelector(".status-text").textContent = "Probe failed";
+          }
+        }
+        let fps;
+        if (fpsDetected) {
+          fps = detectedFps;
+          console.log("Using detected FPS:", fps);
+        } else {
+          const fpsInput = prompt("Enter FPS", "30");
+          if (!fpsInput) {
+            return;
+          }
+          fps = parseInt(fpsInput, 10);
+        }
+        await tool.setVideoBlob(blobs, fps);
+        if (ffmpegExtractor?.isLoaded()) {
+          extractFrames();
+        }
+      }
+      if (ffmpegLoading) {
+        console.log("FFmpeg is loading, video will be processed when ready...");
+        const ffmpegStatusEl = document.getElementById("ffmpeg-status");
+        ffmpegStatusEl.querySelector(".status-text").textContent = "Loading FFmpeg... (video queued)";
+        pendingVideoProcess = processVideo;
+        return;
+      }
+      await processVideo();
+    });
+    refVideoInput.addEventListener("change", async (e) => {
+      if (!refVideoInput.files || refVideoInput.files.length === 0) {
+        return;
+      }
+      const fps = prompt("Enter FPS", "30");
+      if (!fps) {
+        return;
+      }
+      const file = refVideoInput.files[0];
+      const blobs = new Blob([file], { type: file.type });
+      const url = window.URL.createObjectURL(blobs);
+      await tool.addReferenceVideoByURL(url, parseInt(fps, 10), file.type);
+    });
+    sampleButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      fetch("./annotations-sample.json").then((response) => response.json()).then((data) => {
+        tool.loadAllFrames(data);
+        tool.updateActiveTimeFrame();
+        tool.redrawFullCanvas();
+      });
+    });
+    fileInput.addEventListener("change", (e) => {
+      if (!fileInput.files || fileInput.files.length === 0) {
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = (e2) => {
+        if (!e2.target) {
+          return;
+        }
+        const data = e2.target.result;
+        const dataObj = JSON.parse(data);
+        const append = confirm("Append to existing annotations?");
+        if (!append) {
+          tool.loadAllFrames(dataObj);
+        } else {
+          tool.appendFrames(dataObj);
+        }
+        tool.updateActiveTimeFrame();
+        tool.redrawFullCanvas();
+      };
+      reader.readAsText(file);
+    });
+    downloadButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const data = tool.saveAllFrames();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(
+        new Blob([JSON.stringify(data)], { type: "application/json" })
+      );
+      const prettyDate = (/* @__PURE__ */ new Date()).toISOString().replace(/:/g, "-");
+      a.download = `annotations-${prettyDate}.json`;
+      a.click();
+    });
+    const rvFileInput = document.getElementById("rv-file");
+    const downloadRvButton = document.getElementById("download-rv");
+    const rvScaleInput = document.getElementById("rv-scale");
+    const rvScaleValue = document.getElementById("rv-scale-value");
+    const rvOffsetXInput = document.getElementById("rv-offset-x");
+    const rvOffsetXValue = document.getElementById("rv-offset-x-value");
+    const rvOffsetYInput = document.getElementById("rv-offset-y");
+    const rvOffsetYValue = document.getElementById("rv-offset-y-value");
+    const rvResetButton = document.getElementById("rv-reset-transform");
+    let lastRvFileContent = null;
+    function reloadRvAnnotations() {
+      if (!lastRvFileContent) return;
+      const scale = parseFloat(rvScaleInput.value);
+      const offsetX = parseFloat(rvOffsetXInput.value);
+      const offsetY = parseFloat(rvOffsetYInput.value);
+      const result = parseOpenRV(lastRvFileContent, {
+        fps: tool.fps,
+        targetHeight: tool.canvasHeight,
+        coordinateScale: scale,
+        // Invert offset so positive slider values move shapes right/down
+        coordinateOffset: { x: -offsetX, y: -offsetY }
+      });
+      tool.loadAllFrames(result.frames);
+      tool.updateActiveTimeFrame();
+      tool.redrawFullCanvas();
+    }
+    rvScaleInput.addEventListener("input", () => {
+      rvScaleValue.textContent = rvScaleInput.value;
+      reloadRvAnnotations();
+    });
+    rvOffsetXInput.addEventListener("input", () => {
+      rvOffsetXValue.textContent = rvOffsetXInput.value;
+      reloadRvAnnotations();
+    });
+    rvOffsetYInput.addEventListener("input", () => {
+      rvOffsetYValue.textContent = rvOffsetYInput.value;
+      reloadRvAnnotations();
+    });
+    rvResetButton.addEventListener("click", () => {
+      rvScaleInput.value = "0.85";
+      rvScaleValue.textContent = "0.85";
+      rvOffsetXInput.value = "0";
+      rvOffsetXValue.textContent = "0";
+      rvOffsetYInput.value = "0";
+      rvOffsetYValue.textContent = "0";
+      reloadRvAnnotations();
+    });
+    rvFileInput.addEventListener("change", async (e) => {
+      if (!rvFileInput.files || rvFileInput.files.length === 0) {
+        return;
+      }
+      const file = rvFileInput.files[0];
+      try {
+        lastRvFileContent = await file.text();
+        const scale = parseFloat(rvScaleInput.value);
+        const offsetX = parseFloat(rvOffsetXInput.value);
+        const offsetY = parseFloat(rvOffsetYInput.value);
+        const result = parseOpenRV(lastRvFileContent, {
+          fps: tool.fps,
+          targetHeight: tool.canvasHeight,
+          coordinateScale: scale,
+          // Invert offset so positive slider values move shapes right/down
+          coordinateOffset: { x: -offsetX, y: -offsetY },
+          debug: true
+        });
+        console.log("RV file dimensions:", result.dimensions);
+        console.log("Demo video dimensions:", video.videoWidth, "x", video.videoHeight);
+        console.log("Canvas dimensions:", tool.canvasWidth, "x", tool.canvasHeight);
+        const append = confirm("Append to existing annotations?");
+        if (!append) {
+          tool.loadAllFrames(result.frames);
+        } else {
+          tool.appendFrames(result.frames);
+        }
+        tool.updateActiveTimeFrame();
+        tool.redrawFullCanvas();
+        const annotatedFrames = result.frames.map((f) => f.frame);
+        console.log(`Loaded ${result.frames.length} annotated frames:`, annotatedFrames);
+        if (result.frames.length > 0) {
+          console.log("First frame shapes:", result.frames[0].shapes);
+        }
+        if (result.mediaPath) {
+          console.log("OpenRV media path:", result.mediaPath);
+        }
+      } catch (err) {
+        console.error("Failed to parse OpenRV file:", err);
+        alert("Failed to parse OpenRV file. Check console for details.");
+      }
+    });
+    downloadRvButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const frames = tool.saveAllFrames();
+      if (frames.length === 0) {
+        alert("No annotations to export.");
+        return;
+      }
+      const prettyDate = (/* @__PURE__ */ new Date()).toISOString().replace(/:/g, "-");
+      downloadAsOpenRV(
+        frames,
+        {
+          mediaPath: video.currentSrc || "video.mp4",
+          width: tool.canvasWidth || 1920,
+          height: tool.canvasHeight || 1080,
+          sessionName: `sm-annotate-${prettyDate}`
+        },
+        `annotations-${prettyDate}.rv`
+      );
+    });
+    const layoutButtons = document.querySelectorAll(".layout-btn");
+    const layoutLabel = document.getElementById("layout-label");
+    const layoutLabels = {
+      horizontal: "Horizontal (default)",
+      vertical: "Vertical Sidebar",
+      minimal: "Minimal / Floating",
+      "bottom-dock": "Bottom Dock"
+    };
+    layoutButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const button = e.currentTarget;
+        const layout = button.dataset.layout;
+        layoutButtons.forEach((b2) => b2.classList.remove("active"));
+        button.classList.add("active");
+        if (layoutLabel) {
+          layoutLabel.textContent = layoutLabels[layout];
+        }
+        tool.setLayout(layout);
+        requestAnimationFrame(() => {
+          tool.setCanvasSize();
+        });
+      });
+    });
+    const ffmpegLoadBtn = document.getElementById("ffmpeg-load");
+    const ffmpegExtractBtn = document.getElementById("ffmpeg-extract");
+    const ffmpegStatus = document.getElementById("ffmpeg-status");
+    const ffmpegProgress = document.getElementById("ffmpeg-progress");
+    const ffmpegProgressFill = document.getElementById("ffmpeg-progress-fill");
+    const ffmpegProgressText = document.getElementById("ffmpeg-progress-text");
+    const ffmpegInfo = document.getElementById("ffmpeg-info");
+    const ffmpegFps = document.getElementById("ffmpeg-fps");
+    const ffmpegFrames = document.getElementById("ffmpeg-frames");
+    function updateFFmpegStatus(status, text) {
+      ffmpegStatus.className = `ffmpeg-status ${status}`;
+      ffmpegStatus.querySelector(".status-text").textContent = text;
+    }
+    function updateProgress(percent) {
+      ffmpegProgress.style.display = "flex";
+      ffmpegProgressFill.style.width = `${percent}%`;
+      ffmpegProgressText.textContent = `${Math.round(percent)}%`;
+    }
+    function hideProgress() {
+      ffmpegProgress.style.display = "none";
+    }
+    currentVideoBlob = bl;
+    async function loadFFmpeg() {
+      if (ffmpegExtractor?.isLoaded() || ffmpegLoading) {
+        return;
+      }
+      ffmpegLoading = true;
+      ffmpegLoadBtn.disabled = true;
+      updateFFmpegStatus("loading", "Loading FFmpeg...");
+      updateProgress(0);
+      try {
+        ffmpegExtractor = new FFmpegFrameExtractor();
+        await ffmpegExtractor.load((progress) => {
+          if (progress.phase === "loading") {
+            updateProgress(progress.loaded * 100);
+          }
+        });
+        ffmpegLoading = false;
+        updateFFmpegStatus("ready", "FFmpeg ready");
+        hideProgress();
+        ffmpegExtractBtn.disabled = false;
+        ffmpegLoadBtn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         FFmpeg Loaded
-      `,Tt){let b=yield V.probe(Tt);q.style.display="flex",at.textContent=`FPS: ${b.fps.toFixed(2)}`,St.textContent=`Frames: ${b.totalFrames}`,console.log("Video info from FFmpeg:",b)}if(yt){let b=yt;yt=null,yield b()}}catch(b){if(console.error("Failed to load FFmpeg:",b),Dt=!1,b instanceof TypeError||b instanceof Error&&(b.message.includes("fetch")||b.message.includes("network")||b.message.includes("Failed to load"))?(K("error","Network error - click to retry"),w.disabled=!1):K("error","Failed to load"),st(),yt){let P=yt;yt=null,yield P()}}}})}Et(),w.addEventListener("click",Et);function Ct(){return k(this,null,function*(){if(!(V!=null&&V.isLoaded())||!Tt){console.warn("Cannot extract frames: FFmpeg not loaded or no video.");return}T.disabled=!0,K("extracting","Extracting frames..."),rt(0);try{let b=performance.now(),F=yield V.extractFrames(Tt,{format:"png",onProgress:N=>{let X=N.total>0?N.loaded/N.total*100:0;rt(X),K("extracting",`Extracting frame ${N.loaded}...`)}}),P=((performance.now()-b)/1e3).toFixed(2);console.log(`Extracted ${F.size} frames in ${P}s`),K("ready",`${F.size} frames extracted`),st(),T.disabled=!1,T.innerHTML=`
+      `;
+        if (currentVideoBlob) {
+          const info = await ffmpegExtractor.probe(currentVideoBlob);
+          ffmpegInfo.style.display = "flex";
+          ffmpegFps.textContent = `FPS: ${info.fps.toFixed(2)}`;
+          ffmpegFrames.textContent = `Frames: ${info.totalFrames}`;
+          console.log("Video info from FFmpeg:", info);
+        }
+        if (pendingVideoProcess) {
+          const process = pendingVideoProcess;
+          pendingVideoProcess = null;
+          await process();
+        }
+      } catch (error) {
+        console.error("Failed to load FFmpeg:", error);
+        ffmpegLoading = false;
+        const isNetworkError = error instanceof TypeError || error instanceof Error && (error.message.includes("fetch") || error.message.includes("network") || error.message.includes("Failed to load"));
+        if (isNetworkError) {
+          updateFFmpegStatus("error", "Network error - click to retry");
+          ffmpegLoadBtn.disabled = false;
+        } else {
+          updateFFmpegStatus("error", "Failed to load");
+        }
+        hideProgress();
+        if (pendingVideoProcess) {
+          const process = pendingVideoProcess;
+          pendingVideoProcess = null;
+          await process();
+        }
+      }
+    }
+    loadFFmpeg();
+    ffmpegLoadBtn.addEventListener("click", loadFFmpeg);
+    async function extractFrames() {
+      if (!ffmpegExtractor?.isLoaded() || !currentVideoBlob) {
+        console.warn("Cannot extract frames: FFmpeg not loaded or no video.");
+        return;
+      }
+      ffmpegExtractBtn.disabled = true;
+      updateFFmpegStatus("extracting", "Extracting frames...");
+      updateProgress(0);
+      try {
+        const startTime = performance.now();
+        const frames = await ffmpegExtractor.extractFrames(currentVideoBlob, {
+          format: "png",
+          onProgress: (progress) => {
+            const percent = progress.total > 0 ? progress.loaded / progress.total * 100 : 0;
+            updateProgress(percent);
+            updateFFmpegStatus("extracting", `Extracting frame ${progress.loaded}...`);
+          }
+        });
+        const elapsed = ((performance.now() - startTime) / 1e3).toFixed(2);
+        console.log(`Extracted ${frames.size} frames in ${elapsed}s`);
+        updateFFmpegStatus("ready", `${frames.size} frames extracted`);
+        hideProgress();
+        ffmpegExtractBtn.disabled = false;
+        ffmpegExtractBtn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="2" width="20" height="20" rx="2"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
-        Re-extract (${F.size} frames)
-      `;let z=V.getVideoInfo();z&&(at.textContent=`FPS: ${z.fps.toFixed(2)}`,St.textContent=`Frames: ${F.size}`),n.setFFmpegFrameExtractor(V),console.log("FFmpeg frames connected to annotation tool"),console.log("FFmpeg extracted frames:",F),console.log("Frame 1:",F.get(1))}catch(b){console.error("Failed to extract frames:",b),K("error","Extraction failed"),st(),T.disabled=!1}})}T.addEventListener("click",Ct);let xt;window.addEventListener("resize",()=>{xt&&clearTimeout(xt),xt=window.setTimeout(()=>{n.setCanvasSize()},100)})})}G.readyState===0?G.addEventListener("loadedmetadata",()=>{requestAnimationFrame(()=>{An()})},{once:!0}):An();})();
+        Re-extract (${frames.size} frames)
+      `;
+        const info = ffmpegExtractor.getVideoInfo();
+        if (info) {
+          ffmpegFps.textContent = `FPS: ${info.fps.toFixed(2)}`;
+          ffmpegFrames.textContent = `Frames: ${frames.size}`;
+        }
+        tool.setFFmpegFrameExtractor(ffmpegExtractor);
+        console.log("FFmpeg frames connected to annotation tool");
+        console.log("FFmpeg extracted frames:", frames);
+        console.log("Frame 1:", frames.get(1));
+      } catch (error) {
+        console.error("Failed to extract frames:", error);
+        updateFFmpegStatus("error", "Extraction failed");
+        hideProgress();
+        ffmpegExtractBtn.disabled = false;
+      }
+    }
+    ffmpegExtractBtn.addEventListener("click", extractFrames);
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = window.setTimeout(() => {
+        tool.setCanvasSize();
+      }, 100);
+    });
+  }
+  if (video.readyState === 0) {
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        requestAnimationFrame(() => {
+          initAnnotator();
+        });
+      },
+      { once: true }
+    );
+  } else {
+    initAnnotator();
+  }
+})();

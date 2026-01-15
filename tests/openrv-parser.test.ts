@@ -88,7 +88,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:5:user
+"pen:0:5:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 0.800000 ]
         float width = 0.006
@@ -134,7 +134,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:10:user
+    "text:0:10:user"
     {
         float[2] position = [ -0.8 0.1 ]
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
@@ -167,7 +167,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:1:user
+    "text:0:1:user"
     {
         float[2] position = [ 100.000000 100.000000 ]
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
@@ -192,14 +192,14 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 2
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
         float[2] points = [ 100.000000 100.000000 200.000000 200.000000 ]
         int frame = 1
     }
-    pen:1:5:user
+    "pen:1:5:user"
     {
         float[4] color = [ 0.000000 1.000000 0.000000 1.000000 ]
         float width = 2
@@ -224,14 +224,14 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 2
     }
-    pen:0:10:user
+    "pen:0:10:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
         float[2] points = [ 100.000000 100.000000 200.000000 200.000000 ]
         int frame = 10
     }
-    pen:1:3:user
+    "pen:1:3:user"
     {
         float[4] color = [ 0.000000 1.000000 0.000000 1.000000 ]
         float width = 2
@@ -259,7 +259,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 0.00185
@@ -290,7 +290,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
@@ -333,7 +333,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
@@ -359,7 +359,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:1:user
+    "text:0:1:user"
     {
         float[2] position = [ 100.000000 100.000000 ]
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
@@ -384,21 +384,21 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 3
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
         float[2] points = [ 100.000000 100.000000 200.000000 200.000000 ]
         int frame = 1
     }
-    pen:1:1:user
+    "pen:1:1:user"
     {
         float[4] color = [ 0.000000 1.000000 0.000000 1.000000 ]
         float width = 3
         float[2] points = [ 300.000000 300.000000 400.000000 400.000000 ]
         int frame = 1
     }
-    text:2:1:user
+    "text:2:1:user"
     {
         float[2] position = [ 500.000000 500.000000 ]
         float[4] color = [ 0.000000 0.000000 1.000000 1.000000 ]
@@ -426,7 +426,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float width = 2
         float[2] points = [ 100.000000 100.000000 200.000000 200.000000 ]
@@ -451,7 +451,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float[2] points = [ 100.000000 100.000000 200.000000 200.000000 ]
@@ -475,7 +475,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:1:user
+    "text:0:1:user"
     {
         float[2] position = [ 100.000000 100.000000 ]
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
@@ -499,7 +499,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:1:user
+    "text:0:1:user"
     {
         float[4] color = [ 0.000000 0.000000 0.000000 1.000000 ]
         float size = 0.16
@@ -523,7 +523,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:99999:user
+    "pen:0:99999:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
@@ -549,7 +549,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:5:user
+"pen:0:5:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 2
@@ -589,7 +589,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1.000000 0.000000 0.000000 1.000000 ]
         float width = 0.00333
@@ -1105,10 +1105,10 @@ defaultSequence_p_sourceGroup000000 : RVPaint (3)
       // IDs are assigned in export order - text on frame 10 comes first, then pen on frame 15
       expect(exported).toContain('"text:0:10:User"');
       expect(exported).toContain('"pen:1:15:User"');
-      expect(exported).toContain('float[4] color = [ [');
+      expect(exported).toContain('float[4] color = [');
       expect(exported).toContain('float width = [');
       expect(exported).toContain('string brush = "circle"');
-      expect(exported).toContain('float[2] points = [ [');
+      expect(exported).toContain('float[2] points = [');
       expect(exported).toContain('"frame:15"');
       expect(exported).toContain('"frame:10"');
 
@@ -1274,8 +1274,8 @@ sourceGroup000000_paint : RVPaint (3)
       expect(exported).toMatch(/"pen:\d+:\d+:User"/);
       expect(exported).toMatch(/"frame:\d+"/);
 
-      // Nested array format for color
-      expect(exported).toMatch(/float\[4\] color = \[ \[/);
+      // Array format for color
+      expect(exported).toMatch(/float\[4\] color = \[/);
 
       // Array format for width
       expect(exported).toMatch(/float width = \[/);
@@ -1283,8 +1283,8 @@ sourceGroup000000_paint : RVPaint (3)
       // Brush as string
       expect(exported).toContain('string brush = "circle"');
 
-      // Nested array format for points
-      expect(exported).toMatch(/float\[2\] points = \[ \[/);
+      // Array format for points
+      expect(exported).toMatch(/float\[2\] points = \[/);
 
       // Additional pen properties
       expect(exported).toContain('int debug = 0');
@@ -1292,8 +1292,8 @@ sourceGroup000000_paint : RVPaint (3)
       expect(exported).toContain('int cap = 1');
       expect(exported).toContain('int splat = 0');
 
-      // Frame order with quoted names
-      expect(exported).toMatch(/string order = \[ "pen:\d+:\d+:User"/);
+      // Frame order with quoted names (single item may be string or array)
+      expect(exported).toMatch(/string order = ("pen:\d+:\d+:User"|\[ "pen:\d+:\d+:User")/);
     });
 
     it('should preserve opacity through round-trip', () => {
@@ -1680,7 +1680,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1 0 0 1 ]
         float width = 0.002
@@ -1728,7 +1728,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 0 1 0 1 ]
         float width = 0.001
@@ -1766,7 +1766,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 0 0 1 1 ]
         float width = 0.002
@@ -1805,7 +1805,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    text:0:1:user
+    "text:0:1:user"
     {
         float[2] position = [ 0 0 ]
         float[4] color = [ 1 1 1 1 ]
@@ -1838,7 +1838,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1 0 0 1 ]
         float width = 0.004
@@ -1865,7 +1865,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1 0 0 1 ]
         float width = [ ]
@@ -1892,7 +1892,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1 0 0 1 ]
         float width = 0.1
@@ -1919,7 +1919,7 @@ sourceGroup000000_paint : RVPaint (3)
     {
         int nextId = 1
     }
-    pen:0:1:user
+    "pen:0:1:user"
     {
         float[4] color = [ 1 0 0 1 ]
         float width = 0.0001

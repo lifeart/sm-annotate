@@ -4,11 +4,17 @@
  * Parses OpenRV .rv (GTO text format) files and converts annotations
  * to sm-annotate FrameAnnotationV1 format.
  *
+ * Uses gto-js library for robust GTO parsing with support for:
+ * - Text (.rv) and binary (.gto) formats
+ * - Gzip compression (async only)
+ * - Proper lexer/tokenizer with error handling
+ *
  * Supported component types:
  * - pen:N:F:user - Freehand strokes (curves) and shapes
  * - text:N:F:user - Text annotations
  */
 
+import { SimpleReader, GTODTO, type ComponentDTO } from 'gto-js';
 import type { FrameAnnotationV1 } from "../core";
 import type { IShape } from "../plugins";
 import type { ICurve, IPoint } from "../plugins/curve";
@@ -27,15 +33,6 @@ export interface ParsedOpenRVResult {
   fps?: number;
 }
 
-interface GTOObject {
-  name: string;
-  protocol: string;
-  version: number;
-  components: Map<string, Map<string, GTOPropertyValue>>;
-}
-
-type GTOPropertyValue = string | number | number[] | string[];
-
 /**
  * Convert RGBA float array [r, g, b, a] to hex color string
  */
@@ -47,157 +44,6 @@ export function rgbaToHex(rgba: number[]): string {
   const b = Math.round(rgba[2] * 255);
 
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-}
-
-/**
- * Parse a GTO property value from string
- * Handles both flat arrays and nested arrays like [ [ x y ] [ x y ] ]
- */
-function parsePropertyValue(valueStr: string, type: string): GTOPropertyValue {
-  valueStr = valueStr.trim();
-
-  // Handle array values [ ... ]
-  if (valueStr.startsWith('[') && valueStr.endsWith(']')) {
-    const inner = valueStr.slice(1, -1).trim();
-
-    // Empty array
-    if (inner === '') {
-      return type === 'string' ? [] : [];
-    }
-
-    // Handle string arrays - can be single string or array of strings
-    if (type === 'string') {
-      const matches = inner.match(/"([^"\\]|\\.)*"/g);
-      if (matches) {
-        return matches.map(s => s.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n'));
-      }
-      // Single unquoted string in array
-      return [];
-    }
-
-    // Check for nested arrays format: [ [ x y ] [ x y ] ]
-    // OpenRV uses this for points, colors, etc.
-    if (inner.includes('[')) {
-      // Extract all numbers from nested structure
-      const numbers: number[] = [];
-      // Match all numbers (including negative and scientific notation)
-      const numMatches = inner.match(/-?\d+\.?\d*(?:e[+-]?\d+)?/gi);
-      if (numMatches) {
-        for (const num of numMatches) {
-          numbers.push(Number(num));
-        }
-      }
-      return numbers;
-    }
-
-    // Handle flat numeric arrays
-    const numbers = inner.split(/\s+/).filter(s => s.length > 0 && !isNaN(Number(s))).map(Number);
-    return numbers;
-  }
-
-  // Handle string values "..."
-  if (valueStr.startsWith('"') && valueStr.endsWith('"')) {
-    return valueStr.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n');
-  }
-
-  // Handle numeric values
-  return Number(valueStr);
-}
-
-/**
- * Parse GTO text content into objects
- */
-function parseGTOText(content: string): GTOObject[] {
-  const objects: GTOObject[] = [];
-  const lines = content.split('\n');
-  let currentObject: GTOObject | null = null;
-  let currentComponent: string | null = null;
-  let braceDepth = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Skip empty lines and comments
-    if (line === '' || line.startsWith('#') || line === 'GTOa (4)') {
-      continue;
-    }
-
-    // Object declaration: ObjectName : Protocol (Version)
-    const objectMatch = line.match(/^(\S+)\s*:\s*(\S+)\s*\((\d+)\)\s*$/);
-    if (objectMatch && braceDepth === 0) {
-      currentObject = {
-        name: objectMatch[1],
-        protocol: objectMatch[2],
-        version: parseInt(objectMatch[3]),
-        components: new Map(),
-      };
-      objects.push(currentObject);
-      continue;
-    }
-
-    // Opening brace (standalone)
-    if (line === '{') {
-      braceDepth++;
-      continue;
-    }
-
-    // Closing brace
-    if (line === '}') {
-      braceDepth--;
-      if (braceDepth === 1) {
-        currentComponent = null;
-      }
-      if (braceDepth === 0) {
-        currentObject = null;
-      }
-      continue;
-    }
-
-    // Inside an object
-    if (currentObject && braceDepth >= 1) {
-      // Component name - can be quoted (OpenRV format) or unquoted
-      // Quoted: "pen:1:15:User" or "frame:15" or "pen:1:15:User" {
-      // Unquoted: pen:0:1:user or paint
-      if (braceDepth === 1) {
-        // Check for quoted component name with optional inline opening brace: "something" or "something" {
-        const quotedMatch = line.match(/^"([^"]+)"(\s*\{)?$/);
-        if (quotedMatch) {
-          currentComponent = quotedMatch[1];
-          if (!currentObject.components.has(currentComponent)) {
-            currentObject.components.set(currentComponent, new Map());
-          }
-          // If there's an inline brace, increment depth
-          if (quotedMatch[2]) {
-            braceDepth++;
-          }
-          continue;
-        }
-        // Unquoted component name with optional inline brace (no assignment)
-        const unquotedMatch = line.match(/^([^\s=\[]+)(\s*\{)?$/);
-        if (unquotedMatch && !line.includes('=')) {
-          currentComponent = unquotedMatch[1];
-          if (!currentObject.components.has(currentComponent)) {
-            currentObject.components.set(currentComponent, new Map());
-          }
-          // If there's an inline brace, increment depth
-          if (unquotedMatch[2]) {
-            braceDepth++;
-          }
-          continue;
-        }
-      }
-
-      // Property assignment: type[dims] name = value
-      const propMatch = line.match(/^(\w+)(?:\[([^\]]*)\])?\s+(\w+)\s*=\s*(.+)$/);
-      if (propMatch && currentComponent) {
-        const [, type, , propName, valueStr] = propMatch;
-        const value = parsePropertyValue(valueStr, type);
-        currentObject.components.get(currentComponent)?.set(propName, value);
-      }
-    }
-  }
-
-  return objects;
 }
 
 /**
@@ -228,50 +74,95 @@ function convertOpenRVToSmAnnotate(
 }
 
 /**
- * Convert pen component to curve shape
+ * Apply scale and offset transformations to a coordinate.
+ * Scale is applied toward center (0.5, 0.5), then offset is added.
+ */
+function applyCoordinateTransform(
+  x: number,
+  y: number,
+  scale?: number,
+  offset?: { x: number; y: number }
+): { x: number; y: number } {
+  let newX = x;
+  let newY = y;
+
+  // Scale toward center (0.5, 0.5)
+  if (scale !== undefined && scale !== 1) {
+    newX = 0.5 + (x - 0.5) * scale;
+    newY = 0.5 + (y - 0.5) * scale;
+  }
+
+  // Apply offset (inverted: positive values move shapes left/up)
+  if (offset) {
+    newX -= offset.x;
+    newY -= offset.y;
+  }
+
+  return { x: newX, y: newY };
+}
+
+/**
+ * Convert pen component to curve shape using gto-js ComponentDTO
  */
 function penComponentToCurve(
-  props: Map<string, GTOPropertyValue>,
+  comp: ComponentDTO,
   width: number,
   height: number,
   targetHeight: number,
   scale?: number,
   offset?: { x: number; y: number }
 ): ICurve | null {
-  const pointsData = props.get('points') as number[] | undefined;
-  const colorData = props.get('color') as number[] | undefined;
-  const widthData = props.get('width');
+  const pointsData = comp.prop('points') as number[][] | number[] | null;
+  const colorData = comp.prop('color') as number[][] | number[] | null;
+  const widthData = comp.prop('width') as number[] | number | null;
 
-  if (!pointsData || pointsData.length < 4) {
+  if (!pointsData) {
+    return null;
+  }
+
+  // Flatten points if needed (gto-js returns [[x1,y1], [x2,y2], ...] format)
+  let flatPoints: number[];
+  if (Array.isArray(pointsData[0])) {
+    // Flatten nested array [[x1, y1], [x2, y2], ...] -> [x1, y1, x2, y2, ...]
+    flatPoints = [];
+    for (const point of pointsData as number[][]) {
+      flatPoints.push(...point);
+    }
+  } else {
+    flatPoints = pointsData as number[];
+  }
+
+  if (flatPoints.length < 4) {
     return null;
   }
 
   const aspectRatio = width / height;
 
   // Convert flat points array to IPoint array
-  // OpenRV uses NDC (-1 to 1 centered), convert to sm-annotate (0 to 1 top-left)
   const points: IPoint[] = [];
-  for (let i = 0; i < pointsData.length; i += 2) {
+  for (let i = 0; i < flatPoints.length; i += 2) {
     let converted = convertOpenRVToSmAnnotate(
-      pointsData[i],
-      pointsData[i + 1],
+      flatPoints[i],
+      flatPoints[i + 1],
       aspectRatio
     );
-    // Apply scale and offset transformation
     converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
     points.push(converted);
   }
 
-  const color = colorData ? rgbaToHex(colorData) : '#000000';
-  const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
+  // Handle color - gto-js returns [[r,g,b,a]] format
+  const flatColor: number[] = colorData
+    ? (Array.isArray(colorData[0]) ? (colorData as number[][])[0] : colorData as number[])
+    : [0, 0, 0, 1];
+
+  const color = rgbaToHex(flatColor);
+  const opacity = flatColor.length >= 4 ? flatColor[3] : 1;
 
   // Handle width - can be a single number or an array (one per point)
-  // OpenRV width is normalized (relative to image height), convert to reasonable pixel value
   let lineWidth = 2;
   if (typeof widthData === 'number') {
     lineWidth = widthData * targetHeight;
   } else if (Array.isArray(widthData) && widthData.length > 0) {
-    // Use first value, multiply by height to denormalize
     const firstWidth = widthData[0];
     if (typeof firstWidth === 'number') {
       lineWidth = firstWidth * targetHeight;
@@ -297,22 +188,36 @@ function penComponentToCurve(
 }
 
 /**
- * Convert text component to text shape
+ * Convert text component to text shape using gto-js ComponentDTO
  */
 function textComponentToText(
-  props: Map<string, GTOPropertyValue>,
+  comp: ComponentDTO,
   width: number,
   height: number,
   targetHeight: number,
   scale?: number,
   offset?: { x: number; y: number }
 ): IText | null {
-  const positionData = props.get('position') as number[] | undefined;
-  const colorData = props.get('color') as number[] | undefined;
-  const textContent = props.get('text') as string | undefined;
-  const size = props.get('size') as number | undefined;
+  const positionData = comp.prop('position') as number[][] | number[] | null;
+  const colorData = comp.prop('color') as number[][] | number[] | null;
+  const textContent = comp.prop('text') as string | null;
+  const size = comp.prop('size') as number | null;
 
-  if (!positionData || positionData.length < 2 || !textContent) {
+  if (!textContent) {
+    return null;
+  }
+
+  // Position is required - skip text without position
+  if (!positionData) {
+    return null;
+  }
+
+  // Handle position - gto-js returns [[x,y]] format
+  const flatPosition: number[] = Array.isArray(positionData[0])
+    ? (positionData as number[][])[0]
+    : positionData as number[];
+
+  if (flatPosition.length < 2) {
     return null;
   }
 
@@ -320,23 +225,22 @@ function textComponentToText(
 
   // Convert OpenRV NDC to sm-annotate coordinates
   let converted = convertOpenRVToSmAnnotate(
-    positionData[0],
-    positionData[1],
+    flatPosition[0],
+    flatPosition[1],
     aspectRatio
   );
-
-  // Apply scale and offset transformation
   converted = applyCoordinateTransform(converted.x, converted.y, scale, offset);
 
-  const color = colorData ? rgbaToHex(colorData) : '#000000';
-  const opacity = colorData && colorData.length >= 4 ? colorData[3] : 1;
+  // Handle color
+  const flatColor: number[] = colorData
+    ? (Array.isArray(colorData[0]) ? (colorData as number[][])[0] : colorData as number[])
+    : [0, 0, 0, 1];
+
+  const color = rgbaToHex(flatColor);
+  const opacity = flatColor.length >= 4 ? flatColor[3] : 1;
 
   // Convert size (normalized to height) back to lineWidth
-  // OpenRV size is relative to image height
-  // Original export: size = fontSize / 100, fontSize = 16 + lineWidth * 0.5
-  // We'll convert normalized size to a reasonable font size
   const normalizedSize = size ?? 0.01;
-  // Denormalize: multiply by targetHeight to get pixel size, then convert to lineWidth
   let fontSize = normalizedSize * targetHeight;
 
   // Apply scale to font size
@@ -383,119 +287,79 @@ export interface OpenRVParseOptions {
 }
 
 /**
- * Apply scale and offset transformations to a coordinate.
- * Scale is applied toward center (0.5, 0.5), then offset is added.
+ * Extract dimensions from GTO DTO
  */
-function applyCoordinateTransform(
-  x: number,
-  y: number,
-  scale?: number,
-  offset?: { x: number; y: number }
-): { x: number; y: number } {
-  let newX = x;
-  let newY = y;
+function extractDimensions(dto: GTODTO): { width: number; height: number } | undefined {
+  // Try RVFileSource -> proxy.size first
+  const fileSource = dto.fileSources().first();
+  if (fileSource.exists()) {
+    const proxySize = fileSource.prop('proxy', 'size') as number[] | null;
+    if (proxySize && proxySize.length >= 2) {
+      return { width: proxySize[0], height: proxySize[1] };
+    }
 
-  // Scale toward center (0.5, 0.5)
-  if (scale !== undefined && scale !== 1) {
-    newX = 0.5 + (x - 0.5) * scale;
-    newY = 0.5 + (y - 0.5) * scale;
+    // Fallback: request.width/height
+    const reqWidth = fileSource.prop('request', 'width') as number | null;
+    const reqHeight = fileSource.prop('request', 'height') as number | null;
+    if (reqWidth && reqHeight) {
+      return { width: reqWidth, height: reqHeight };
+    }
   }
 
-  // Apply offset (inverted: positive values move shapes left/up)
-  if (offset) {
-    newX -= offset.x;
-    newY -= offset.y;
+  // Try RVStack -> output.size
+  const stack = dto.byProtocol('RVStack').first();
+  if (stack.exists()) {
+    const outputSize = stack.prop('output', 'size') as number[] | null;
+    if (outputSize && outputSize.length >= 2) {
+      return { width: outputSize[0], height: outputSize[1] };
+    }
   }
 
-  return { x: newX, y: newY };
+  // Try RVSequence -> output.size
+  const seq = dto.byProtocol('RVSequence').first();
+  if (seq.exists()) {
+    const outputSize = seq.prop('output', 'size') as number[] | null;
+    if (outputSize && outputSize.length >= 2) {
+      return { width: outputSize[0], height: outputSize[1] };
+    }
+  }
+
+  return undefined;
 }
 
 /**
- * Parse OpenRV GTO file content and convert to sm-annotate format
+ * Process parsed GTO DTO and extract annotations
  */
-export function parseOpenRV(
-  content: string,
-  options: OpenRVParseOptions = {}
+function processGTODto(
+  dto: GTODTO,
+  options: OpenRVParseOptions
 ): ParsedOpenRVResult {
   const result: ParsedOpenRVResult = {
     frames: [],
   };
 
-  const objects = parseGTOText(content);
-
   // Extract session info
-  const sessionObj = objects.find(o => o.protocol === 'RVSession');
-  if (sessionObj) {
-    const sessionComp = sessionObj.components.get('session');
-    if (sessionComp) {
-      const name = sessionComp.get('name');
-      if (typeof name === 'string') {
-        result.sessionName = name;
-      }
+  const session = dto.session();
+  if (session.exists()) {
+    const name = session.prop('session', 'name') as string | null;
+    if (name) {
+      result.sessionName = name;
     }
   }
 
   // Extract media info
-  const fileSourceObj = objects.find(o => o.protocol === 'RVFileSource');
-  if (fileSourceObj) {
-    const mediaComp = fileSourceObj.components.get('media');
-    if (mediaComp) {
-      const movie = mediaComp.get('movie');
-      if (typeof movie === 'string') {
-        result.mediaPath = movie;
-      }
-    }
-
-    // Try to get dimensions from proxy component (contains source media size)
-    const proxyComp = fileSourceObj.components.get('proxy');
-    if (proxyComp) {
-      const size = proxyComp.get('size') as number[] | undefined;
-      if (size && size.length >= 2) {
-        result.dimensions = { width: size[0], height: size[1] };
-      }
-    }
-
-    // Fallback: try request component (used in some .rv files and tests)
-    if (!result.dimensions) {
-      const requestComp = fileSourceObj.components.get('request');
-      if (requestComp) {
-        const w = requestComp.get('width');
-        const h = requestComp.get('height');
-        if (typeof w === 'number' && typeof h === 'number') {
-          result.dimensions = { width: w, height: h };
-        }
-      }
+  const fileSource = dto.fileSources().first();
+  if (fileSource.exists()) {
+    const movie = fileSource.prop('media', 'movie') as string | null;
+    if (movie) {
+      result.mediaPath = movie;
     }
   }
 
-  // Fallback: try to get dimensions from RVStack or RVSequence output
-  if (!result.dimensions) {
-    const stackObj = objects.find(o => o.protocol === 'RVStack');
-    if (stackObj) {
-      const outputComp = stackObj.components.get('output');
-      if (outputComp) {
-        const size = outputComp.get('size') as number[] | undefined;
-        if (size && size.length >= 2) {
-          result.dimensions = { width: size[0], height: size[1] };
-        }
-      }
-    }
-  }
+  // Extract dimensions
+  result.dimensions = extractDimensions(dto);
 
-  if (!result.dimensions) {
-    const seqObj = objects.find(o => o.protocol === 'RVSequence');
-    if (seqObj) {
-      const outputComp = seqObj.components.get('output');
-      if (outputComp) {
-        const size = outputComp.get('size') as number[] | undefined;
-        if (size && size.length >= 2) {
-          result.dimensions = { width: size[0], height: size[1] };
-        }
-      }
-    }
-  }
-
-  // Use dimensions from file first (needed for line width denormalization and aspect ratio), then fallback to options
+  // Use dimensions from file first, then fallback to options
   const width = result.dimensions?.width ?? options.width ?? 1920;
   const height = result.dimensions?.height ?? options.height ?? 1080;
   const targetHeight = options.targetHeight ?? height;
@@ -513,27 +377,29 @@ export function parseOpenRV(
     console.log('[OpenRV Parser] Coordinate offset:', offset);
   }
 
-  // Extract paint annotations from ALL RVPaint blocks
-  // Multiple RVPaint blocks can exist (e.g., defaultLayout_paint, defaultSequence_p_sourceGroup000000)
-  const paintObjects = objects.filter(o => o.protocol === 'RVPaint');
-  if (paintObjects.length === 0) {
+  // Extract paint annotations using gto-js paints() method
+  const paints = dto.paints();
+
+  if (paints.length === 0) {
     if (debug) console.log('[OpenRV Parser] No RVPaint objects found');
     return result;
   }
 
-  if (debug) console.log('[OpenRV Parser] Found', paintObjects.length, 'RVPaint objects');
+  if (debug) console.log('[OpenRV Parser] Found', paints.length, 'RVPaint objects');
 
   // Group shapes by frame
   const frameShapes = new Map<number, IShape[]>();
 
-  // Iterate through all RVPaint blocks
-  for (const paintObj of paintObjects) {
-    for (const [compName, props] of paintObj.components) {
-      // Parse pen components: pen:ID:FRAME:user or pen:ID:FRAME:User (case-insensitive)
+  // Iterate through all RVPaint objects
+  for (const paint of paints) {
+    for (const comp of paint.components()) {
+      const compName = comp.name;
+
+      // Parse pen components: pen:ID:FRAME:user
       const penMatch = compName.match(/^pen:\d+:(\d+):/i);
       if (penMatch) {
         const frame = parseInt(penMatch[1]);
-        const shape = penComponentToCurve(props, width, height, targetHeight, scale, offset);
+        const shape = penComponentToCurve(comp, width, height, targetHeight, scale, offset);
         if (shape) {
           if (!frameShapes.has(frame)) {
             frameShapes.set(frame, []);
@@ -543,11 +409,11 @@ export function parseOpenRV(
         continue;
       }
 
-      // Parse text components: text:ID:FRAME:user or text:ID:FRAME:User (case-insensitive)
+      // Parse text components: text:ID:FRAME:user
       const textMatch = compName.match(/^text:\d+:(\d+):/i);
       if (textMatch) {
         const frame = parseInt(textMatch[1]);
-        const shape = textComponentToText(props, width, height, targetHeight, scale, offset);
+        const shape = textComponentToText(comp, width, height, targetHeight, scale, offset);
         if (shape) {
           if (!frameShapes.has(frame)) {
             frameShapes.set(frame, []);
@@ -575,6 +441,27 @@ export function parseOpenRV(
 }
 
 /**
+ * Parse OpenRV GTO file content and convert to sm-annotate format
+ */
+export function parseOpenRV(
+  content: string,
+  options: OpenRVParseOptions = {}
+): ParsedOpenRVResult {
+  // Parse using gto-js SimpleReader
+  const reader = new SimpleReader();
+  const success = reader.open(content);
+
+  if (!success) {
+    if (options.debug) {
+      console.log('[OpenRV Parser] Failed to parse GTO content');
+    }
+    return { frames: [] };
+  }
+
+  return processGTODto(new GTODTO(reader.result), options);
+}
+
+/**
  * Parse OpenRV file from File object
  */
 export async function parseOpenRVFile(
@@ -583,4 +470,25 @@ export async function parseOpenRVFile(
 ): Promise<ParsedOpenRVResult> {
   const content = await file.text();
   return parseOpenRV(content, options);
+}
+
+/**
+ * Parse OpenRV GTO file content asynchronously (supports gzip-compressed binary files)
+ */
+export async function parseOpenRVAsync(
+  content: string | ArrayBuffer | Uint8Array,
+  options: OpenRVParseOptions = {}
+): Promise<ParsedOpenRVResult> {
+  // Parse using gto-js SimpleReader with async support for gzip
+  const reader = new SimpleReader();
+  const success = await reader.openAsync(content);
+
+  if (!success) {
+    if (options.debug) {
+      console.log('[OpenRV Parser] Failed to parse GTO content');
+    }
+    return { frames: [] };
+  }
+
+  return processGTODto(new GTODTO(reader.result), options);
 }

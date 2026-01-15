@@ -3,6 +3,11 @@
  *
  * Exports sm-annotate annotations to OpenRV .rv (GTO text format) files.
  *
+ * Uses gto-js library for robust GTO generation with support for:
+ * - Text (.rv) and binary (.gto) formats
+ * - Proper string table management
+ * - Clean builder API
+ *
  * OpenRV uses RVPaint nodes to store annotations with components like:
  * - pen:N:frame:F - Freehand strokes (curves)
  * - text:N:frame:F - Text annotations
@@ -11,6 +16,7 @@
  * GTO Format Reference: https://aswf-openrv.readthedocs.io/en/latest/rv-manuals/rv-gto.html
  */
 
+import { GTOBuilder, SimpleWriter } from 'gto-js';
 import type { FrameAnnotationV1 } from "../core";
 import type { IShape } from "../plugins";
 import type { ICurve, IPoint } from "../plugins/curve";
@@ -29,18 +35,6 @@ export interface OpenRVExportOptions {
   height: number;
   /** Session name for the RV file */
   sessionName?: string;
-}
-
-interface GTOComponent {
-  name: string;
-  properties: GTOProperty[];
-}
-
-interface GTOProperty {
-  type: string;
-  dimensions?: number;
-  name: string;
-  value: string | number | number[] | string[];
 }
 
 /**
@@ -160,48 +154,34 @@ function convertSmAnnotateToOpenRV(
 }
 
 /**
- * Format a float array for GTO output (nested format)
- * Outputs: [ [ v1 v2 v3 ... ] ] for single vectors
+ * Pen component data structure for building GTO
  */
-function formatFloatArray(arr: number[]): string {
-  return `[ [ ${arr.map(n => formatNumber(n)).join(' ')} ] ]`;
+interface PenComponentData {
+  name: string;
+  frame: number;
+  color: [number, number, number, number];
+  width: number[];
+  points: number[][];
+  brush: string;
 }
 
 /**
- * Format a simple flat array for GTO output
+ * Text component data structure for building GTO
  */
-function formatFlatArray(arr: number[]): string {
-  return `[ ${arr.map(n => formatNumber(n)).join(' ')} ]`;
+interface TextComponentData {
+  name: string;
+  frame: number;
+  position: [number, number];
+  color: [number, number, number, number];
+  text: string;
+  size: number;
+  rotation: number;
 }
 
 /**
- * Format a number for GTO output
+ * Convert curve shape to pen component data
  */
-function formatNumber(n: number): string {
-  // Use fixed point for most numbers, but keep reasonable precision
-  if (Number.isInteger(n)) {
-    return String(n);
-  }
-  return n.toFixed(9).replace(/\.?0+$/, '') || '0';
-}
-
-/**
- * Format points array for GTO (nested array of x y pairs)
- * Outputs: [ [ x1 y1 ] [ x2 y2 ] ... ]
- * Converts from sm-annotate coordinates to OpenRV NDC
- */
-function formatPoints(points: IPoint[], aspectRatio: number): string {
-  const pairs = points.map(p => {
-    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
-    return `[ ${formatNumber(converted.x)} ${formatNumber(converted.y)} ]`;
-  });
-  return `[ ${pairs.join(' ')} ]`;
-}
-
-/**
- * Convert curve shape to OpenRV pen component
- */
-function curveToGTOComponent(shape: ICurve, id: number, frame: number, width: number, height: number): GTOComponent {
+function curveToPenData(shape: ICurve, id: number, frame: number, width: number, height: number): PenComponentData {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
   const aspectRatio = width / height;
 
@@ -220,25 +200,26 @@ function curveToGTOComponent(shape: ICurve, id: number, frame: number, width: nu
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
 
+  // Convert points to OpenRV NDC
+  const convertedPoints = points.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return [converted.x, converted.y];
+  });
+
   return {
-    name: `"pen:${id}:${frame}:User"`,
-    properties: [
-      { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
-      { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
-      { type: 'int', name: 'debug', value: 0 },
-      { type: 'int', name: 'join', value: 3 },
-      { type: 'int', name: 'cap', value: 1 },
-      { type: 'int', name: 'splat', value: 0 },
-    ]
+    name: `pen:${id}:${frame}:User`,
+    frame,
+    color,
+    width: widthArray,
+    points: convertedPoints,
+    brush: 'circle'
   };
 }
 
 /**
- * Convert line shape to OpenRV pen component (2-point curve)
+ * Convert line shape to pen component data (2-point curve)
  */
-function lineToGTOComponent(shape: ILine, id: number, frame: number, width: number, height: number): GTOComponent {
+function lineToPenData(shape: ILine, id: number, frame: number, width: number, height: number): PenComponentData {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
   const aspectRatio = width / height;
 
@@ -255,27 +236,26 @@ function lineToGTOComponent(shape: ILine, id: number, frame: number, width: numb
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
 
+  const convertedPoints = points.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return [converted.x, converted.y];
+  });
+
   return {
-    name: `"pen:${id}:${frame}:User"`,
-    properties: [
-      { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
-      { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
-      { type: 'int', name: 'debug', value: 0 },
-      { type: 'int', name: 'join', value: 3 },
-      { type: 'int', name: 'cap', value: 1 },
-      { type: 'int', name: 'splat', value: 0 },
-    ]
+    name: `pen:${id}:${frame}:User`,
+    frame,
+    color,
+    width: widthArray,
+    points: convertedPoints,
+    brush: 'circle'
   };
 }
 
 /**
- * Convert arrow shape to OpenRV pen component (line + arrowhead strokes)
+ * Convert arrow shape to pen component data (line + arrowhead strokes)
  */
-function arrowToGTOComponents(shape: IArrow, id: number, frame: number, width: number, height: number): GTOComponent[] {
+function arrowToPenDataArray(shape: IArrow, id: number, frame: number, width: number, height: number): PenComponentData[] {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
-  const colorStr = formatFloatArray(color);
   const aspectRatio = width / height;
 
   // Center is midpoint of arrow line
@@ -289,7 +269,6 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number, width: n
   ];
 
   // Arrowhead calculation - normalize to coordinate system (0-1)
-  // head_length in pixels, normalize by average of width/height
   const headLengthPx = 10 + 2.5 * shape.lineWidth;
   const headLength = headLengthPx / ((width + height) / 2);
   const headAngle = Math.PI / 6;
@@ -319,53 +298,43 @@ function arrowToGTOComponents(shape: IArrow, id: number, frame: number, width: n
   const normalizedWidth = shape.lineWidth / height;
   const widthArray2 = new Array(2).fill(normalizedWidth);
 
+  const convertPoints = (pts: IPoint[]) => pts.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return [converted.x, converted.y];
+  });
+
   return [
     {
-      name: `"pen:${id}:${frame}:User"`,
-      properties: [
-        { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
-        { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(linePoints, aspectRatio) },
-        { type: 'int', name: 'debug', value: 0 },
-        { type: 'int', name: 'join', value: 3 },
-        { type: 'int', name: 'cap', value: 1 },
-        { type: 'int', name: 'splat', value: 0 },
-      ]
+      name: `pen:${id}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray2,
+      points: convertPoints(linePoints),
+      brush: 'circle'
     },
     {
-      name: `"pen:${id + 1}:${frame}:User"`,
-      properties: [
-        { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
-        { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead1, aspectRatio) },
-        { type: 'int', name: 'debug', value: 0 },
-        { type: 'int', name: 'join', value: 3 },
-        { type: 'int', name: 'cap', value: 1 },
-        { type: 'int', name: 'splat', value: 0 },
-      ]
+      name: `pen:${id + 1}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray2,
+      points: convertPoints(arrowHead1),
+      brush: 'circle'
     },
     {
-      name: `"pen:${id + 2}:${frame}:User"`,
-      properties: [
-        { type: 'float', dimensions: 4, name: 'color', value: colorStr },
-        { type: 'float', name: 'width', value: formatFlatArray(widthArray2) },
-        { type: 'string', name: 'brush', value: '"circle"' },
-        { type: 'float', dimensions: 2, name: 'points', value: formatPoints(arrowHead2, aspectRatio) },
-        { type: 'int', name: 'debug', value: 0 },
-        { type: 'int', name: 'join', value: 3 },
-        { type: 'int', name: 'cap', value: 1 },
-        { type: 'int', name: 'splat', value: 0 },
-      ]
+      name: `pen:${id + 2}:${frame}:User`,
+      frame,
+      color,
+      width: widthArray2,
+      points: convertPoints(arrowHead2),
+      brush: 'circle'
     }
   ];
 }
 
 /**
- * Convert rectangle shape to OpenRV pen component (4-point closed path)
+ * Convert rectangle shape to pen component data (5-point closed path)
  */
-function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number, width: number, height: number): GTOComponent {
+function rectangleToPenData(shape: IRectangle, id: number, frame: number, width: number, height: number): PenComponentData {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
   const aspectRatio = width / height;
 
@@ -387,25 +356,25 @@ function rectangleToGTOComponent(shape: IRectangle, id: number, frame: number, w
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
 
+  const convertedPoints = points.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return [converted.x, converted.y];
+  });
+
   return {
-    name: `"pen:${id}:${frame}:User"`,
-    properties: [
-      { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
-      { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
-      { type: 'int', name: 'debug', value: 0 },
-      { type: 'int', name: 'join', value: 3 },
-      { type: 'int', name: 'cap', value: 1 },
-      { type: 'int', name: 'splat', value: 0 },
-    ]
+    name: `pen:${id}:${frame}:User`,
+    frame,
+    color,
+    width: widthArray,
+    points: convertedPoints,
+    brush: 'circle'
   };
 }
 
 /**
- * Convert circle shape to OpenRV pen component (approximated as polygon)
+ * Convert circle shape to pen component data (approximated as polygon)
  */
-function circleToGTOComponent(shape: ICircle, id: number, frame: number, width: number, height: number, segments: number = 32): GTOComponent {
+function circleToPenData(shape: ICircle, id: number, frame: number, width: number, height: number, segments: number = 32): PenComponentData {
   const color = extractColor(shape.strokeStyle, shape.opacity ?? 1);
   const aspectRatio = width / height;
 
@@ -428,26 +397,25 @@ function circleToGTOComponent(shape: ICircle, id: number, frame: number, width: 
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
 
+  const convertedPoints = points.map(p => {
+    const converted = convertSmAnnotateToOpenRV(p.x, p.y, aspectRatio);
+    return [converted.x, converted.y];
+  });
+
   return {
-    name: `"pen:${id}:${frame}:User"`,
-    properties: [
-      { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'width', value: formatFlatArray(widthArray) },
-      { type: 'string', name: 'brush', value: '"circle"' },
-      { type: 'float', dimensions: 2, name: 'points', value: formatPoints(points, aspectRatio) },
-      { type: 'int', name: 'debug', value: 0 },
-      { type: 'int', name: 'join', value: 3 },
-      { type: 'int', name: 'cap', value: 1 },
-      { type: 'int', name: 'splat', value: 0 },
-    ]
+    name: `pen:${id}:${frame}:User`,
+    frame,
+    color,
+    width: widthArray,
+    points: convertedPoints,
+    brush: 'circle'
   };
 }
 
 /**
- * Convert text shape to OpenRV text component
- * Note: OpenRV text doesn't support rotation natively, so rotation is applied to the position only
+ * Convert text shape to text component data
  */
-function textToGTOComponent(shape: IText, id: number, frame: number, width: number, height: number): GTOComponent {
+function textToTextData(shape: IText, id: number, frame: number, width: number, height: number): TextComponentData {
   const color = extractColor(shape.fillStyle, shape.opacity ?? 1);
   const aspectRatio = width / height;
 
@@ -469,54 +437,60 @@ function textToGTOComponent(shape: IText, id: number, frame: number, width: numb
   const openrvPos = convertSmAnnotateToOpenRV(posX, posY, aspectRatio);
 
   // Font size: OpenRV uses normalized size (relative to height)
-  // sm-annotate lineWidth is in pixels, convert to normalized
   const fontSize = 16 + (shape.lineWidth ?? 1) * 0.5;
   const normalizedSize = fontSize / height;
 
   return {
-    name: `"text:${id}:${frame}:User"`,
-    properties: [
-      { type: 'float', dimensions: 2, name: 'position', value: formatFloatArray([openrvPos.x, openrvPos.y]) },
-      { type: 'float', dimensions: 4, name: 'color', value: formatFloatArray(color) },
-      { type: 'float', name: 'spacing', value: 0.8 },
-      { type: 'float', name: 'size', value: normalizedSize },
-      { type: 'float', name: 'scale', value: 1 },
-      { type: 'float', name: 'rotation', value: textRotation },
-      { type: 'string', name: 'font', value: '""' },
-      { type: 'string', name: 'text', value: `"${shape.text.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"` },
-      { type: 'string', name: 'origin', value: '""' },
-      { type: 'int', name: 'debug', value: 0 },
-    ]
+    name: `text:${id}:${frame}:User`,
+    frame,
+    position: [openrvPos.x, openrvPos.y],
+    color,
+    text: shape.text,
+    size: normalizedSize,
+    rotation: textRotation
   };
 }
 
 /**
- * Convert a shape to GTO components
- * Shapes are stored with 0-1 normalized coordinates in sm-annotate.
- * The component functions handle conversion to OpenRV's NDC coordinate system.
+ * Convert a shape to component data
  */
-function shapeToGTOComponents(
+function shapeToComponentData(
   shape: IShape,
   id: number,
   frame: number,
   width: number,
   height: number
-): GTOComponent[] {
-  // Note: Shapes use 0-1 normalized coordinates. The component functions
-  // convert to OpenRV's NDC format (centered at 0, -1 to 1 range).
+): { penData: PenComponentData[]; textData: TextComponentData[]; nextId: number } {
+  const penData: PenComponentData[] = [];
+  const textData: TextComponentData[] = [];
+  let nextId = id;
+
   switch (shape.type) {
     case 'curve':
-      return [curveToGTOComponent(shape as ICurve, id, frame, width, height)];
+      penData.push(curveToPenData(shape as ICurve, nextId, frame, width, height));
+      nextId++;
+      break;
     case 'line':
-      return [lineToGTOComponent(shape as ILine, id, frame, width, height)];
+      penData.push(lineToPenData(shape as ILine, nextId, frame, width, height));
+      nextId++;
+      break;
     case 'arrow':
-      return arrowToGTOComponents(shape as IArrow, id, frame, width, height);
+      const arrowData = arrowToPenDataArray(shape as IArrow, nextId, frame, width, height);
+      penData.push(...arrowData);
+      nextId += arrowData.length;
+      break;
     case 'rectangle':
-      return [rectangleToGTOComponent(shape as IRectangle, id, frame, width, height)];
+      penData.push(rectangleToPenData(shape as IRectangle, nextId, frame, width, height));
+      nextId++;
+      break;
     case 'circle':
-      return [circleToGTOComponent(shape as ICircle, id, frame, width, height)];
+      penData.push(circleToPenData(shape as ICircle, nextId, frame, width, height));
+      nextId++;
+      break;
     case 'text':
-      return [textToGTOComponent(shape as IText, id, frame, width, height)];
+      textData.push(textToTextData(shape as IText, nextId, frame, width, height));
+      nextId++;
+      break;
     // Skip non-visual shapes
     case 'eraser':
     case 'move':
@@ -524,28 +498,132 @@ function shapeToGTOComponents(
     case 'compare':
     case 'audio-peaks':
     case 'selection':
-      return [];
-    default:
-      return [];
+      break;
   }
+
+  return { penData, textData, nextId };
 }
 
 /**
- * Format a GTO component to string
+ * Build GTO data structure from frames
  */
-function formatGTOComponent(component: GTOComponent): string {
-  const lines: string[] = [];
-  lines.push(`    ${component.name}`);
-  lines.push(`    {`);
+function buildGTOData(
+  frames: FrameAnnotationV1[],
+  options: OpenRVExportOptions
+): ReturnType<GTOBuilder['build']> {
+  const { mediaPath, width, height, sessionName = 'sm-annotate-session' } = options;
 
-  for (const prop of component.properties) {
-    const typeStr = prop.dimensions ? `${prop.type}[${prop.dimensions}]` : prop.type;
-    const valueStr = typeof prop.value === 'string' ? prop.value : String(prop.value);
-    lines.push(`        ${typeStr} ${prop.name} = ${valueStr}`);
+  // Collect all component data
+  const allPenData: PenComponentData[] = [];
+  const allTextData: TextComponentData[] = [];
+  let nextId = 0;
+
+  for (const frameData of frames) {
+    for (const shape of frameData.shapes) {
+      const result = shapeToComponentData(shape, nextId, frameData.frame, width, height);
+      allPenData.push(...result.penData);
+      allTextData.push(...result.textData);
+      nextId = result.nextId;
+    }
   }
 
-  lines.push(`    }`);
-  return lines.join('\n');
+  // Build frame order map
+  const frameOrders = new Map<number, string[]>();
+  for (const pen of allPenData) {
+    if (!frameOrders.has(pen.frame)) {
+      frameOrders.set(pen.frame, []);
+    }
+    frameOrders.get(pen.frame)!.push(pen.name);
+  }
+  for (const text of allTextData) {
+    if (!frameOrders.has(text.frame)) {
+      frameOrders.set(text.frame, []);
+    }
+    frameOrders.get(text.frame)!.push(text.name);
+  }
+
+  // Build GTO structure using GTOBuilder
+  const builder = new GTOBuilder();
+
+  // RVSession object
+  builder
+    .object('RVSession', 'RVSession', 4)
+    .component('session')
+    .string('name', sessionName)
+    .int('version', 4)
+    .end()
+    .end();
+
+  // RVFileSource object
+  builder
+    .object('sourceGroup000000_source', 'RVFileSource', 1)
+    .component('media')
+    .string('movie', mediaPath)
+    .end()
+    .component('request')
+    .int('width', width)
+    .int('height', height)
+    .end()
+    .end();
+
+  // RVPaint object with all annotations
+  if (allPenData.length > 0 || allTextData.length > 0) {
+    const paintObj = builder.object('sourceGroup000000_paint', 'RVPaint', 3);
+
+    // Paint metadata component
+    paintObj
+      .component('paint')
+      .int('nextId', nextId)
+      .int('nextAnnotationId', 0)
+      .int('show', 1)
+      .string('exclude', [])
+      .string('include', [])
+      .end();
+
+    // Add pen components
+    for (const pen of allPenData) {
+      paintObj
+        .component(pen.name)
+        .float4('color', [pen.color])
+        .float('width', pen.width)
+        .string('brush', pen.brush)
+        .float2('points', pen.points)
+        .int('debug', 0)
+        .int('join', 3)
+        .int('cap', 1)
+        .int('splat', 0)
+        .end();
+    }
+
+    // Add text components
+    for (const text of allTextData) {
+      paintObj
+        .component(text.name)
+        .float2('position', [text.position])
+        .float4('color', [text.color])
+        .float('spacing', 0.8)
+        .float('size', text.size)
+        .float('scale', 1)
+        .float('rotation', text.rotation)
+        .string('font', '')
+        .string('text', text.text)
+        .string('origin', '')
+        .int('debug', 0)
+        .end();
+    }
+
+    // Add frame order components
+    for (const [frame, order] of frameOrders) {
+      paintObj
+        .component(`frame:${frame}`)
+        .string('order', order)
+        .end();
+    }
+
+    paintObj.end();
+  }
+
+  return builder.build();
 }
 
 /**
@@ -555,111 +633,35 @@ export function exportToOpenRV(
   frames: FrameAnnotationV1[],
   options: OpenRVExportOptions
 ): string {
-  const { mediaPath, width, height, sessionName = 'sm-annotate-session' } = options;
+  const { mediaPath, width, height } = options;
+  const gtoData = buildGTOData(frames, options);
+  const output = SimpleWriter.write(gtoData) as string;
 
-  const lines: string[] = [];
+  // Add header comments
+  const header = [
+    'GTOa (4)',
+    '',
+    '# Generated by sm-annotate OpenRV exporter',
+    `# Media: ${mediaPath}`,
+    `# Resolution: ${width}x${height}`,
+    ''
+  ].join('\n');
 
-  // GTO Header
-  lines.push('GTOa (4)');
-  lines.push('');
-  lines.push('# Generated by sm-annotate OpenRV exporter');
-  lines.push(`# Media: ${mediaPath}`);
-  lines.push(`# Resolution: ${width}x${height}`);
-  lines.push('');
+  // Remove the GTOa (4) line from the output since we're adding our own header
+  const outputWithoutHeader = output.replace(/^GTOa \(\d+\)\s*\n?/, '');
 
-  // RVSession object
-  lines.push(`RVSession : RVSession (4)`);
-  lines.push(`{`);
-  lines.push(`    session`);
-  lines.push(`    {`);
-  lines.push(`        string name = "${sessionName}"`);
-  lines.push(`        int version = 4`);
-  lines.push(`    }`);
-  lines.push(`}`);
-  lines.push('');
+  return header + outputWithoutHeader;
+}
 
-  // RVSourceGroup for media
-  lines.push(`sourceGroup000000_source : RVFileSource (1)`);
-  lines.push(`{`);
-  lines.push(`    media`);
-  lines.push(`    {`);
-  lines.push(`        string movie = "${mediaPath}"`);
-  lines.push(`    }`);
-  lines.push(`    request`);
-  lines.push(`    {`);
-  lines.push(`        int width = ${width}`);
-  lines.push(`        int height = ${height}`);
-  lines.push(`    }`);
-  lines.push(`}`);
-  lines.push('');
-
-  // Collect all paint components
-  const components: GTOComponent[] = [];
-  let nextId = 0;
-
-  for (const frameData of frames) {
-    for (const shape of frameData.shapes) {
-      const shapeComponents = shapeToGTOComponents(
-        shape,
-        nextId,
-        frameData.frame,
-        width,
-        height
-      );
-      components.push(...shapeComponents);
-      nextId += shapeComponents.length;
-    }
-  }
-
-  if (components.length > 0) {
-    // Build frame order map
-    const frameOrders = new Map<number, string[]>();
-    for (const comp of components) {
-      // Component name format: "type:ID:FRAME:User" - extract the frame number
-      // Name is quoted now, e.g., "pen:0:5:User"
-      const frameMatch = comp.name.match(/:\d+:(\d+):/);
-      if (frameMatch) {
-        const frame = parseInt(frameMatch[1]);
-        if (!frameOrders.has(frame)) {
-          frameOrders.set(frame, []);
-        }
-        // Store the inner name without outer quotes for the order list
-        const innerName = comp.name.startsWith('"') && comp.name.endsWith('"')
-          ? comp.name.slice(1, -1)
-          : comp.name;
-        frameOrders.get(frame)!.push(innerName);
-      }
-    }
-
-    // RVPaint node
-    lines.push(`sourceGroup000000_paint : RVPaint (3)`);
-    lines.push(`{`);
-    lines.push(`    paint`);
-    lines.push(`    {`);
-    lines.push(`        int nextId = ${nextId}`);
-    lines.push(`        int nextAnnotationId = 0`);
-    lines.push(`        int show = 1`);
-    lines.push(`        string exclude = [ ]`);
-    lines.push(`        string include = [ ]`);
-    lines.push(`    }`);
-
-    // Add all shape components first
-    for (const component of components) {
-      lines.push(formatGTOComponent(component));
-    }
-
-    // Add frame order components
-    for (const [frame, order] of frameOrders) {
-      lines.push(`    "frame:${frame}"`);
-      lines.push(`    {`);
-      lines.push(`        string order = [ ${order.map(o => `"${o}"`).join(' ')} ]`);
-      lines.push(`    }`);
-    }
-
-    lines.push(`}`);
-  }
-
-  return lines.join('\n');
+/**
+ * Export annotations to OpenRV GTO binary format
+ */
+export function exportToOpenRVBinary(
+  frames: FrameAnnotationV1[],
+  options: OpenRVExportOptions
+): ArrayBuffer {
+  const gtoData = buildGTOData(frames, options);
+  return SimpleWriter.write(gtoData, { binary: true }) as ArrayBuffer;
 }
 
 /**
@@ -672,6 +674,27 @@ export function downloadAsOpenRV(
 ): void {
   const content = exportToOpenRV(frames, options);
   const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Download annotations as OpenRV .gto binary file
+ */
+export function downloadAsOpenRVBinary(
+  frames: FrameAnnotationV1[],
+  options: OpenRVExportOptions,
+  filename: string = 'annotations.gto'
+): void {
+  const content = exportToOpenRVBinary(frames, options);
+  const blob = new Blob([content], { type: 'application/octet-stream' });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement('a');
