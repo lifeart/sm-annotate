@@ -20,6 +20,18 @@ import type { IShape } from "../plugins";
 import type { ICurve, IPoint } from "../plugins/curve";
 import type { IText } from "../plugins/text";
 
+/**
+ * Ghost mode (onion skinning) settings from parsed file
+ */
+export interface ParsedGhostSettings {
+  enabled: boolean;
+  framesBefore: number;
+  framesAfter: number;
+  opacity: number;
+  tintBefore: string | null;
+  tintAfter: string | null;
+}
+
 export interface ParsedOpenRVResult {
   /** Parsed frame annotations */
   frames: FrameAnnotationV1[];
@@ -31,6 +43,8 @@ export interface ParsedOpenRVResult {
   sessionName?: string;
   /** FPS from file (if determinable) */
   fps?: number;
+  /** Ghost mode settings (if found) */
+  ghost?: ParsedGhostSettings;
 }
 
 /**
@@ -328,6 +342,44 @@ function extractDimensions(dto: GTODTO): { width: number; height: number } | und
 }
 
 /**
+ * Extract ghost settings from RVPaint paint component
+ */
+function extractGhostSettings(dto: GTODTO): ParsedGhostSettings | undefined {
+  // Look for ghost settings in RVPaint paint component
+  const paints = dto.paints();
+  if (paints.length === 0) {
+    return undefined;
+  }
+
+  // Check first RVPaint for ghost settings in paint component
+  const paint = paints.first();
+  if (!paint.exists()) {
+    return undefined;
+  }
+  const enabled = paint.prop('paint', 'ghost') as number | null;
+
+  // If ghost property doesn't exist, no ghost settings saved
+  if (enabled === null) {
+    return undefined;
+  }
+
+  const framesBefore = paint.prop('paint', 'ghostFramesBefore') as number | null;
+  const framesAfter = paint.prop('paint', 'ghostFramesAfter') as number | null;
+  const opacity = paint.prop('paint', 'ghostOpacity') as number | null;
+  const tintBefore = paint.prop('paint', 'ghostTintBefore') as string | null;
+  const tintAfter = paint.prop('paint', 'ghostTintAfter') as string | null;
+
+  return {
+    enabled: enabled === 1,
+    framesBefore: framesBefore ?? 2,
+    framesAfter: framesAfter ?? 1,
+    opacity: opacity ?? 0.3,
+    tintBefore: tintBefore === '' ? null : (tintBefore ?? 'rgba(255, 0, 0, 0.3)'),
+    tintAfter: tintAfter === '' ? null : (tintAfter ?? 'rgba(0, 128, 0, 0.3)'),
+  };
+}
+
+/**
  * Process parsed GTO DTO and extract annotations
  */
 function processGTODto(
@@ -346,6 +398,9 @@ function processGTODto(
       result.sessionName = name;
     }
   }
+
+  // Extract ghost settings
+  result.ghost = extractGhostSettings(dto);
 
   // Extract media info
   const fileSource = dto.fileSources().first();

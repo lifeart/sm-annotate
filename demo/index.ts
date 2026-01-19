@@ -1,6 +1,6 @@
 new EventSource("/esbuild").addEventListener("change", () => location.reload());
 
-import { SmAnnotate, downloadAsOpenRV, parseOpenRV, parseOpenRVFile, LayoutMode, FFmpegFrameExtractor } from "../src";
+import { SmAnnotate, downloadAsOpenRV, parseOpenRV, parseOpenRVFile, LayoutMode, FFmpegFrameExtractor, type AnnotationSessionV1 } from "../src";
 
 // Global FFmpeg extractor instance
 let ffmpegExtractor: FFmpegFrameExtractor | null = null;
@@ -262,10 +262,23 @@ async function initAnnotator() {
       const data = e.target.result as string;
       const dataObj = JSON.parse(data);
       const append = confirm("Append to existing annotations?");
-      if (!append) {
-        tool.loadAllFrames(dataObj);
+
+      // Check if it's session format (has version and frames) or old frame array format
+      if (dataObj.version && dataObj.frames) {
+        // Session format - use loadSession to restore ghost settings
+        if (!append) {
+          tool.loadSession(dataObj as AnnotationSessionV1);
+          syncGhostUIFromTool();
+        } else {
+          tool.appendFrames(dataObj.frames);
+        }
       } else {
-        tool.appendFrames(dataObj);
+        // Old frame array format
+        if (!append) {
+          tool.loadAllFrames(dataObj);
+        } else {
+          tool.appendFrames(dataObj);
+        }
       }
 
       tool.updateActiveTimeFrame();
@@ -277,10 +290,11 @@ async function initAnnotator() {
   downloadButton.addEventListener("click", (e) => {
     e.stopPropagation();
     e.preventDefault();
-    const data = tool.saveAllFrames();
+    // Use saveSession() to include ghost settings
+    const data = tool.saveSession();
     const a = document.createElement("a");
     a.href = URL.createObjectURL(
-      new Blob([JSON.stringify(data)], { type: "application/json" })
+      new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
     );
     const prettyDate = new Date().toISOString().replace(/:/g, "-");
     a.download = `annotations-${prettyDate}.json`;
@@ -381,6 +395,20 @@ async function initAnnotator() {
       const append = confirm("Append to existing annotations?");
       if (!append) {
         tool.loadAllFrames(result.frames);
+
+        // Restore ghost settings if present in the file
+        if (result.ghost) {
+          tool.setGhostEnabled(result.ghost.enabled);
+          tool.setGhostConfig({
+            framesBefore: result.ghost.framesBefore,
+            framesAfter: result.ghost.framesAfter,
+            opacity: result.ghost.opacity,
+            tintBefore: result.ghost.tintBefore,
+            tintAfter: result.ghost.tintAfter,
+          });
+          syncGhostUIFromTool();
+          console.log("Restored ghost settings:", result.ghost);
+        }
       } else {
         tool.appendFrames(result.frames);
       }
@@ -410,10 +438,13 @@ async function initAnnotator() {
     e.preventDefault();
 
     const frames = tool.saveAllFrames();
-    if (frames.length === 0) {
+    if (frames.length === 0 && !tool.ghostEnabled) {
       alert("No annotations to export.");
       return;
     }
+
+    // Get current ghost settings for export
+    const ghostConfig = tool.getGhostConfig();
 
     const prettyDate = new Date().toISOString().replace(/:/g, "-");
     downloadAsOpenRV(
@@ -423,6 +454,15 @@ async function initAnnotator() {
         width: tool.canvasWidth || 1920,
         height: tool.canvasHeight || 1080,
         sessionName: `sm-annotate-${prettyDate}`,
+        // Include ghost settings in export
+        ghost: {
+          enabled: tool.ghostEnabled,
+          framesBefore: ghostConfig.framesBefore,
+          framesAfter: ghostConfig.framesAfter,
+          opacity: ghostConfig.opacity,
+          tintBefore: ghostConfig.tintBefore,
+          tintAfter: ghostConfig.tintAfter,
+        },
       },
       `annotations-${prettyDate}.rv`
     );
@@ -461,6 +501,96 @@ async function initAnnotator() {
         tool.setCanvasSize();
       });
     });
+  });
+
+  // Ghost Mode Controls
+  const ghostEnabledCheckbox = document.getElementById("ghost-enabled") as HTMLInputElement;
+  const ghostControlsDiv = document.getElementById("ghost-controls") as HTMLDivElement;
+  const ghostBeforeInput = document.getElementById("ghost-before") as HTMLInputElement;
+  const ghostBeforeValue = document.getElementById("ghost-before-value") as HTMLSpanElement;
+  const ghostAfterInput = document.getElementById("ghost-after") as HTMLInputElement;
+  const ghostAfterValue = document.getElementById("ghost-after-value") as HTMLSpanElement;
+  const ghostOpacityInput = document.getElementById("ghost-opacity") as HTMLInputElement;
+  const ghostOpacityValue = document.getElementById("ghost-opacity-value") as HTMLSpanElement;
+  const ghostTintBeforeInput = document.getElementById("ghost-tint-before") as HTMLInputElement;
+  const ghostTintAfterInput = document.getElementById("ghost-tint-after") as HTMLInputElement;
+
+  // Helper to convert hex to rgba with opacity
+  function hexToRgba(hex: string, opacity: number): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+
+  // Helper to extract hex from rgba
+  function rgbaToHex(rgba: string | null): string {
+    if (!rgba) return '#ff0000';
+    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      const r = parseInt(match[1]).toString(16).padStart(2, '0');
+      const g = parseInt(match[2]).toString(16).padStart(2, '0');
+      const b = parseInt(match[3]).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+    }
+    return rgba.startsWith('#') ? rgba : '#ff0000';
+  }
+
+  // Update ghost config from UI
+  function updateGhostConfig() {
+    tool.setGhostConfig({
+      framesBefore: parseInt(ghostBeforeInput.value),
+      framesAfter: parseInt(ghostAfterInput.value),
+      opacity: parseFloat(ghostOpacityInput.value),
+      tintBefore: hexToRgba(ghostTintBeforeInput.value, 0.3),
+      tintAfter: hexToRgba(ghostTintAfterInput.value, 0.3),
+    });
+  }
+
+  // Sync UI from tool's ghost config
+  function syncGhostUIFromTool() {
+    const config = tool.getGhostConfig();
+    ghostEnabledCheckbox.checked = tool.ghostEnabled;
+    ghostControlsDiv.classList.toggle('active', tool.ghostEnabled);
+    ghostBeforeInput.value = String(config.framesBefore);
+    ghostBeforeValue.textContent = String(config.framesBefore);
+    ghostAfterInput.value = String(config.framesAfter);
+    ghostAfterValue.textContent = String(config.framesAfter);
+    ghostOpacityInput.value = String(config.opacity);
+    ghostOpacityValue.textContent = String(config.opacity);
+    ghostTintBeforeInput.value = rgbaToHex(config.tintBefore);
+    ghostTintAfterInput.value = rgbaToHex(config.tintAfter);
+  }
+
+  // Toggle ghost mode
+  ghostEnabledCheckbox.addEventListener("change", () => {
+    tool.setGhostEnabled(ghostEnabledCheckbox.checked);
+    ghostControlsDiv.classList.toggle('active', ghostEnabledCheckbox.checked);
+  });
+
+  // Update ghost config on slider changes
+  ghostBeforeInput.addEventListener("input", () => {
+    ghostBeforeValue.textContent = ghostBeforeInput.value;
+    updateGhostConfig();
+  });
+
+  ghostAfterInput.addEventListener("input", () => {
+    ghostAfterValue.textContent = ghostAfterInput.value;
+    updateGhostConfig();
+  });
+
+  ghostOpacityInput.addEventListener("input", () => {
+    ghostOpacityValue.textContent = ghostOpacityInput.value;
+    updateGhostConfig();
+  });
+
+  ghostTintBeforeInput.addEventListener("input", updateGhostConfig);
+  ghostTintAfterInput.addEventListener("input", updateGhostConfig);
+
+  // Register callback to sync sidebar controls when ghost mode changes from toolbar button
+  tool.onGhostChange((enabled) => {
+    ghostEnabledCheckbox.checked = enabled;
+    ghostControlsDiv.classList.toggle('active', enabled);
   });
 
   // FFmpeg Frame Extraction

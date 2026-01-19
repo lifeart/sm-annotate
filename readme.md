@@ -34,6 +34,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 🔍 Pinch-to-zoom and pan gestures
 * 🎨 CSS custom properties for easy theming
 * 🎬 FFmpeg-based frame extraction for frame-accurate playback
+* 👻 Ghost mode (onion skinning) for viewing adjacent frame annotations
 
 ## Additional Benefits
 
@@ -41,7 +42,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📱 Support for mobile devices
 * 🔌 Powerful plugin system
 * 📘 Written in TypeScript
-* 🧪 Comprehensive test coverage (658 tests with Vitest)
+* 🧪 Comprehensive test coverage (723 tests with Vitest)
 
 ## Getting Started
 
@@ -247,6 +248,7 @@ const rvContent = exportToOpenRV(annotationTool.saveAllFrames(), {
   width: 1920,
   height: 1080,
   sessionName: 'my-session', // optional
+  ghost: annotationTool.getGhostConfig(), // optional, include ghost settings
 });
 
 // Download as .rv file
@@ -266,10 +268,17 @@ const result = parseOpenRV(rvFileContent, {
 // Load parsed annotations
 annotationTool.loadAllFrames(result.frames);
 
+// Restore ghost settings if present
+if (result.ghost) {
+  annotationTool.setGhostEnabled(result.ghost.enabled);
+  annotationTool.setGhostConfig(result.ghost);
+}
+
 // Access parsed metadata
 console.log(result.mediaPath);    // original media path
 console.log(result.dimensions);   // { width, height }
 console.log(result.sessionName);  // session name
+console.log(result.ghost);        // ghost settings (if present)
 
 // Parse from File object (e.g., from file input)
 const fileInput = document.getElementById('fileInput');
@@ -291,6 +300,8 @@ fileInput.addEventListener('change', async (e) => {
 **Rotation support:** Shapes with rotation are fully supported. The rotation is "baked in" to the exported coordinates, including support for custom rotation centers. Text rotation only affects the anchor position since OpenRV text doesn't natively support rotation.
 
 **Coordinate system:** OpenRV uses Normalized Device Coordinates (NDC) centered at the image center (-1 to +1 range, Y+ is up), while sm-annotate uses 0-1 normalized coordinates with origin at top-left (Y+ is down). The converter handles this transformation automatically.
+
+**Ghost mode settings:** Ghost mode configuration (enabled state, frames before/after, opacity, tint colors) is preserved in OpenRV exports and restored on import. Settings are stored in the RVPaint `paint` component.
 
 **Note:** When importing from OpenRV, all pen strokes are converted to curves since OpenRV doesn't distinguish between shape types. Non-visual shapes (eraser, selection, compare, audio-peaks, image) are not exported. Files with multiple RVPaint blocks (common in real OpenRV sessions) are fully supported.
 
@@ -384,6 +395,50 @@ annotationTool.prevAnnotatedFrame();
 const annotatedFrames = annotationTool.getAnnotatedFrames();
 ```
 
+### Ghost Mode (Onion Skinning)
+
+Ghost mode displays annotations from adjacent frames as semi-transparent overlays, helping animators see the context of surrounding frames. This technique is also known as "onion skinning" in animation software.
+
+```javascript
+// Enable/disable ghost mode
+annotationTool.setGhostEnabled(true);
+annotationTool.setGhostEnabled(false);
+
+// Toggle ghost mode
+const isEnabled = annotationTool.toggleGhost();
+
+// Check if ghost mode is enabled
+if (annotationTool.ghostEnabled) {
+  console.log('Ghost mode is on');
+}
+
+// Configure ghost mode settings
+annotationTool.setGhostConfig({
+  framesBefore: 2,    // Show 1-5 previous frames (default: 2)
+  framesAfter: 1,     // Show 1-5 next frames (default: 1)
+  opacity: 0.3,       // Base opacity 0.1-0.5 (default: 0.3)
+  tintBefore: 'rgba(255, 0, 0, 0.3)',  // Tint for previous frames (red)
+  tintAfter: 'rgba(0, 128, 0, 0.3)',   // Tint for next frames (green)
+});
+
+// Get current ghost configuration
+const config = annotationTool.getGhostConfig();
+
+// Listen for ghost mode changes (returns unsubscribe function)
+const unsubscribe = annotationTool.onGhostChange((enabled) => {
+  console.log('Ghost mode:', enabled ? 'on' : 'off');
+});
+// Later: unsubscribe();
+```
+
+**Ghost mode features:**
+- Previous frames shown with customizable red tint (default)
+- Next frames shown with customizable green tint (default)
+- Opacity decreases with distance from current frame
+- Settings are saved/restored with session data
+- Settings are preserved in OpenRV .rv file exports
+- Toolbar toggle button syncs with programmatic changes
+
 ## Hotkeys
 
 ### General
@@ -444,6 +499,7 @@ const annotatedFrames = annotationTool.getAnnotatedFrames();
 | Selection | Crop and capture video frame area |
 | Compare | Split-view video comparison |
 | Opacity | Adjust overlay or selected shape opacity (off/25%/50%/70%/100%) |
+| Ghost | Toggle ghost mode (onion skinning) to see adjacent frame annotations |
 | Theme | Toggle between dark and light mode |
 
 ## Development

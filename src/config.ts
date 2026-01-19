@@ -83,6 +83,26 @@ export interface FeatureFlags {
 }
 
 /**
+ * Ghost mode (onion skinning) configuration.
+ * Shows annotations from adjacent frames as semi-transparent overlays
+ * to help with animation continuity and review.
+ */
+export interface GhostConfig {
+  /** Enable ghost mode on startup */
+  enabled: boolean;
+  /** Number of previous frames to show as ghosts (1-5) */
+  framesBefore: number;
+  /** Number of next frames to show as ghosts (1-5) */
+  framesAfter: number;
+  /** Base opacity for ghost frames (0.1-0.5), decreases with distance */
+  opacity: number;
+  /** Tint color for previous frames (CSS color string, or null for original) */
+  tintBefore: string | null;
+  /** Tint color for next frames (CSS color string, or null for original) */
+  tintAfter: string | null;
+}
+
+/**
  * Main configuration interface for SmAnnotate
  */
 export interface SmAnnotateConfig {
@@ -96,6 +116,8 @@ export interface SmAnnotateConfig {
   toolbar: ToolbarConfig;
   /** Feature visibility flags */
   features: FeatureFlags;
+  /** Ghost mode (onion skinning) settings */
+  ghost: GhostConfig;
 }
 
 /**
@@ -121,6 +143,14 @@ export const defaultConfig: SmAnnotateConfig = {
     showProgressBar: true,
     showFrameCounter: true,
   },
+  ghost: {
+    enabled: false,
+    framesBefore: 2,
+    framesAfter: 1,
+    opacity: 0.3,
+    tintBefore: 'rgba(255, 0, 0, 0.3)',
+    tintAfter: 'rgba(0, 128, 0, 0.3)',
+  },
 };
 
 /**
@@ -145,6 +175,10 @@ export function mergeConfig(partial?: Partial<SmAnnotateConfig>): SmAnnotateConf
     features: {
       ...defaultConfig.features,
       ...partial.features,
+    },
+    ghost: {
+      ...defaultConfig.ghost,
+      ...partial.ghost,
     },
   };
 }

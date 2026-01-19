@@ -26,6 +26,18 @@ import type { IRectangle } from "../plugins/rectangle";
 import type { ICircle } from "../plugins/circle";
 import type { IText } from "../plugins/text";
 
+/**
+ * Ghost mode settings for export
+ */
+export interface GhostExportSettings {
+  enabled: boolean;
+  framesBefore: number;
+  framesAfter: number;
+  opacity: number;
+  tintBefore: string | null;
+  tintAfter: string | null;
+}
+
 export interface OpenRVExportOptions {
   /** Source media path (required by OpenRV) */
   mediaPath: string;
@@ -35,6 +47,8 @@ export interface OpenRVExportOptions {
   height: number;
   /** Session name for the RV file */
   sessionName?: string;
+  /** Ghost mode (onion skinning) settings */
+  ghost?: GhostExportSettings;
 }
 
 /**
@@ -567,18 +581,30 @@ function buildGTOData(
     .end();
 
   // RVPaint object with all annotations
-  if (allPenData.length > 0 || allTextData.length > 0) {
+  if (allPenData.length > 0 || allTextData.length > 0 || options.ghost) {
     const paintObj = builder.object('sourceGroup000000_paint', 'RVPaint', 3);
 
-    // Paint metadata component
-    paintObj
+    // Paint metadata component with ghost settings
+    const paintComp = paintObj
       .component('paint')
       .int('nextId', nextId)
       .int('nextAnnotationId', 0)
       .int('show', 1)
       .string('exclude', [])
-      .string('include', [])
-      .end();
+      .string('include', []);
+
+    // Add ghost (onion skinning) settings to paint component
+    if (options.ghost) {
+      paintComp
+        .int('ghost', options.ghost.enabled ? 1 : 0)
+        .int('ghostFramesBefore', options.ghost.framesBefore)
+        .int('ghostFramesAfter', options.ghost.framesAfter)
+        .float('ghostOpacity', options.ghost.opacity)
+        .string('ghostTintBefore', options.ghost.tintBefore ?? '')
+        .string('ghostTintAfter', options.ghost.tintAfter ?? '');
+    }
+
+    paintComp.end();
 
     // Add pen components
     for (const pen of allPenData) {

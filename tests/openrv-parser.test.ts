@@ -1937,4 +1937,193 @@ sourceGroup000000_paint : RVPaint (3)
       expect(shape.lineWidth).toBe(1);
     });
   });
+
+  describe('ghost mode parsing', () => {
+    it('should parse ghost settings from paint component', () => {
+      const content = `GTOa (4)
+
+sourceGroup000000_paint : RVPaint (3)
+{
+    paint
+    {
+        int nextId = 0
+        int ghost = 1
+        int ghostFramesBefore = 3
+        int ghostFramesAfter = 2
+        float ghostOpacity = 0.4
+        string ghostTintBefore = "rgba(255, 0, 0, 0.3)"
+        string ghostTintAfter = "rgba(0, 128, 0, 0.3)"
+    }
+}
+`;
+
+      const result = parseOpenRV(content);
+
+      expect(result.ghost).toBeDefined();
+      expect(result.ghost!.enabled).toBe(true);
+      expect(result.ghost!.framesBefore).toBe(3);
+      expect(result.ghost!.framesAfter).toBe(2);
+      expect(result.ghost!.opacity).toBe(0.4);
+      expect(result.ghost!.tintBefore).toBe('rgba(255, 0, 0, 0.3)');
+      expect(result.ghost!.tintAfter).toBe('rgba(0, 128, 0, 0.3)');
+    });
+
+    it('should parse ghost disabled state', () => {
+      const content = `GTOa (4)
+
+sourceGroup000000_paint : RVPaint (3)
+{
+    paint
+    {
+        int nextId = 0
+        int ghost = 0
+        int ghostFramesBefore = 2
+        int ghostFramesAfter = 1
+        float ghostOpacity = 0.3
+        string ghostTintBefore = ""
+        string ghostTintAfter = ""
+    }
+}
+`;
+
+      const result = parseOpenRV(content);
+
+      expect(result.ghost).toBeDefined();
+      expect(result.ghost!.enabled).toBe(false);
+      expect(result.ghost!.tintBefore).toBeNull();
+      expect(result.ghost!.tintAfter).toBeNull();
+    });
+
+    it('should return undefined ghost when not present in file', () => {
+      const content = `GTOa (4)
+
+RVSession : RVSession (4)
+{
+    session
+    {
+        string name = "test-session"
+        int version = 4
+    }
+}
+`;
+
+      const result = parseOpenRV(content);
+
+      expect(result.ghost).toBeUndefined();
+    });
+
+    it('should parse ghost settings alongside annotations', () => {
+      const content = `GTOa (4)
+
+sourceGroup000000_paint : RVPaint (3)
+{
+    paint
+    {
+        int nextId = 1
+        int ghost = 1
+        int ghostFramesBefore = 2
+        int ghostFramesAfter = 1
+        float ghostOpacity = 0.3
+        string ghostTintBefore = "#ff0000"
+        string ghostTintAfter = "#00ff00"
+    }
+    "pen:0:5:user"
+    {
+        float[4] color = [ 1.0 0.0 0.0 1.0 ]
+        float width = 0.006
+        float[2] points = [ -0.8 0.4 0 0 ]
+        int frame = 5
+    }
+}
+`;
+
+      const result = parseOpenRV(content, { width: 1000, height: 500 });
+
+      // Should have both ghost settings and annotations
+      expect(result.ghost).toBeDefined();
+      expect(result.ghost!.enabled).toBe(true);
+      expect(result.frames.length).toBe(1);
+      expect(result.frames[0].frame).toBe(5);
+    });
+
+    it('should use defaults for missing ghost properties', () => {
+      const content = `GTOa (4)
+
+sourceGroup000000_paint : RVPaint (3)
+{
+    paint
+    {
+        int nextId = 0
+        int ghost = 1
+    }
+}
+`;
+
+      const result = parseOpenRV(content);
+
+      expect(result.ghost).toBeDefined();
+      expect(result.ghost!.enabled).toBe(true);
+      expect(result.ghost!.framesBefore).toBe(2); // default
+      expect(result.ghost!.framesAfter).toBe(1); // default
+      expect(result.ghost!.opacity).toBe(0.3); // default
+      expect(result.ghost!.tintBefore).toBe('rgba(255, 0, 0, 0.3)'); // default
+      expect(result.ghost!.tintAfter).toBe('rgba(0, 128, 0, 0.3)'); // default
+    });
+  });
+
+  describe('ghost mode roundtrip', () => {
+    it('should preserve ghost settings through export and import', () => {
+      const ghostSettings = {
+        enabled: true,
+        framesBefore: 4,
+        framesAfter: 2,
+        opacity: 0.5,
+        tintBefore: 'rgba(255, 128, 0, 0.4)',
+        tintAfter: 'rgba(0, 255, 128, 0.4)',
+      };
+
+      // Export with ghost settings
+      const exported = exportToOpenRV([], {
+        mediaPath: '/test.mp4',
+        width: 1920,
+        height: 1080,
+        ghost: ghostSettings,
+      });
+
+      // Parse back
+      const parsed = parseOpenRV(exported);
+
+      expect(parsed.ghost).toBeDefined();
+      expect(parsed.ghost!.enabled).toBe(ghostSettings.enabled);
+      expect(parsed.ghost!.framesBefore).toBe(ghostSettings.framesBefore);
+      expect(parsed.ghost!.framesAfter).toBe(ghostSettings.framesAfter);
+      expect(parsed.ghost!.opacity).toBe(ghostSettings.opacity);
+      expect(parsed.ghost!.tintBefore).toBe(ghostSettings.tintBefore);
+      expect(parsed.ghost!.tintAfter).toBe(ghostSettings.tintAfter);
+    });
+
+    it('should preserve null tint colors through export and import', () => {
+      const ghostSettings = {
+        enabled: true,
+        framesBefore: 2,
+        framesAfter: 1,
+        opacity: 0.3,
+        tintBefore: null,
+        tintAfter: null,
+      };
+
+      const exported = exportToOpenRV([], {
+        mediaPath: '/test.mp4',
+        width: 1920,
+        height: 1080,
+        ghost: ghostSettings,
+      });
+
+      const parsed = parseOpenRV(exported);
+
+      expect(parsed.ghost).toBeDefined();
+      expect(parsed.ghost!.tintBefore).toBeNull();
+      expect(parsed.ghost!.tintAfter).toBeNull();
+    });
+  });
 });

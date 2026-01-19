@@ -2,7 +2,12 @@
  * Exporters and Parsers for sm-annotate annotations
  *
  * Available formats:
- * - OpenRV: Export/Import .rv (GTO text format) for use with OpenRV media player
+ * - OpenRV: Export/Import .rv (GTO text format) and .gto (binary format) for use with OpenRV media player
+ *
+ * Powered by gto-js library for robust GTO parsing with support for:
+ * - Text (.rv) and binary (.gto) formats
+ * - Gzip compression (async only)
+ * - Proper lexer/tokenizer with error handling
  */
-export { exportToOpenRV, downloadAsOpenRV, hexToRGBA, type OpenRVExportOptions, } from './openrv';
-export { parseOpenRV, parseOpenRVFile, rgbaToHex, type ParsedOpenRVResult, type OpenRVParseOptions, } from './openrv-parser';
+export { exportToOpenRV, exportToOpenRVBinary, downloadAsOpenRV, downloadAsOpenRVBinary, hexToRGBA, type OpenRVExportOptions, type GhostExportSettings, } from './openrv';
+export { parseOpenRV, parseOpenRVAsync, parseOpenRVFile, rgbaToHex, type ParsedOpenRVResult, type ParsedGhostSettings, type OpenRVParseOptions, } from './openrv-parser';

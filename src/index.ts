@@ -1,6 +1,6 @@
 import { initUI } from "./ui";
 import { initCanvas } from "./canvas";
-import { AnnotationTool, FrameAnnotationV1 } from "./core";
+import { AnnotationTool, FrameAnnotationV1, AnnotationSessionV1 } from "./core";
 import { addFrameSquareOverlay } from "./overlays/frame-number";
 import { addVideoOverlay } from "./overlays/video";
 import { addProgressBarOverlay } from "./overlays/progress-bar";
@@ -11,7 +11,7 @@ AnnotationTool.prototype.addFrameSquareOverlay = addFrameSquareOverlay;
 AnnotationTool.prototype.addVideoOverlay = addVideoOverlay;
 AnnotationTool.prototype.addProgressBarOverlay = addProgressBarOverlay;
 
-export { AnnotationTool as SmAnnotate, FrameAnnotationV1 };
+export { AnnotationTool as SmAnnotate, FrameAnnotationV1, AnnotationSessionV1 };
 
 // Configuration types
 export type {
@@ -21,6 +21,7 @@ export type {
   ToolbarConfig,
   FeatureFlags,
   ToolbarPosition,
+  GhostConfig,
 } from './config';
 export { defaultConfig } from './config';
 

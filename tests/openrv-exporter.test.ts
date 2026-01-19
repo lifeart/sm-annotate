@@ -1065,4 +1065,101 @@ describe('OpenRV Exporter', () => {
       expect(result).toContain('0.005');
     });
   });
+
+  describe('ghost mode export', () => {
+    const defaultOptions: OpenRVExportOptions = {
+      mediaPath: '/path/to/video.mp4',
+      width: 1920,
+      height: 1080,
+    };
+
+    it('should export ghost settings when provided', () => {
+      const optionsWithGhost: OpenRVExportOptions = {
+        ...defaultOptions,
+        ghost: {
+          enabled: true,
+          framesBefore: 3,
+          framesAfter: 2,
+          opacity: 0.4,
+          tintBefore: 'rgba(255, 0, 0, 0.3)',
+          tintAfter: 'rgba(0, 128, 0, 0.3)',
+        },
+      };
+
+      const result = exportToOpenRV([], optionsWithGhost);
+
+      // Ghost settings should be in the paint component
+      expect(result).toContain('int ghost = 1');
+      expect(result).toContain('int ghostFramesBefore = 3');
+      expect(result).toContain('int ghostFramesAfter = 2');
+      expect(result).toContain('float ghostOpacity = 0.4');
+      expect(result).toContain('string ghostTintBefore = "rgba(255, 0, 0, 0.3)"');
+      expect(result).toContain('string ghostTintAfter = "rgba(0, 128, 0, 0.3)"');
+    });
+
+    it('should export ghost disabled state', () => {
+      const optionsWithGhost: OpenRVExportOptions = {
+        ...defaultOptions,
+        ghost: {
+          enabled: false,
+          framesBefore: 2,
+          framesAfter: 1,
+          opacity: 0.3,
+          tintBefore: null,
+          tintAfter: null,
+        },
+      };
+
+      const result = exportToOpenRV([], optionsWithGhost);
+
+      expect(result).toContain('int ghost = 0');
+      expect(result).toContain('string ghostTintBefore = ""');
+      expect(result).toContain('string ghostTintAfter = ""');
+    });
+
+    it('should not export ghost settings when not provided', () => {
+      const result = exportToOpenRV([], defaultOptions);
+
+      // Ghost settings should not be present
+      expect(result).not.toContain('int ghost');
+      expect(result).not.toContain('ghostFramesBefore');
+      expect(result).not.toContain('ghostOpacity');
+    });
+
+    it('should export ghost settings alongside annotations', () => {
+      const curveShape: ICurve = {
+        type: 'curve',
+        points: [
+          { x: 0.1, y: 0.2 },
+          { x: 0.3, y: 0.4 },
+        ],
+        strokeStyle: '#ff0000',
+        fillStyle: '#ffffff',
+        lineWidth: 3,
+      };
+
+      const frames: FrameAnnotationV1[] = [
+        { frame: 5, fps: 24, version: 1, shapes: [curveShape] },
+      ];
+
+      const optionsWithGhost: OpenRVExportOptions = {
+        ...defaultOptions,
+        ghost: {
+          enabled: true,
+          framesBefore: 2,
+          framesAfter: 1,
+          opacity: 0.3,
+          tintBefore: '#ff0000',
+          tintAfter: '#00ff00',
+        },
+      };
+
+      const result = exportToOpenRV(frames, optionsWithGhost);
+
+      // Should have both ghost settings and annotations
+      expect(result).toContain('int ghost = 1');
+      expect(result).toContain('pen:0:5:User');
+      expect(result).toContain('RVPaint');
+    });
+  });
 });

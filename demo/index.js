@@ -870,6 +870,9 @@
   function applyButtonStyle(button) {
     button.classList.add(`${PREFIX}-btn`);
   }
+  function setButtonActive(button, active) {
+    button.classList.toggle("active", active);
+  }
   function applyContainerStyle(container) {
     container.classList.add(`${PREFIX}-container`);
   }
@@ -941,6 +944,44 @@
     });
     tool.buttons.push(button);
     tool.playerControlsContainer.appendChild(button);
+  }
+
+  // src/ui/ghost-toggle-button.ts
+  function ghostIcon(enabled) {
+    const opacity = enabled ? 1 : 0.4;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}">
+    <!-- Back layer (previous frame) -->
+    <rect x="2" y="4" width="12" height="12" rx="1" opacity="0.3" fill="currentColor"/>
+    <!-- Middle layer (current frame) -->
+    <rect x="6" y="6" width="12" height="12" rx="1" opacity="0.6" fill="currentColor"/>
+    <!-- Front layer indicator -->
+    <rect x="10" y="8" width="12" height="12" rx="1" fill="none"/>
+  </svg>`;
+  }
+  function createGhostToggleButton(tool) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.tooltip = "Ghost mode (onion skinning)";
+    button.dataset.tool = "ghost";
+    const updateButton = () => {
+      button.innerHTML = ghostIcon(tool.ghostEnabled);
+      if (tool.ghostEnabled) {
+        setButtonActive(button, true);
+      } else {
+        setButtonActive(button, false);
+      }
+    };
+    updateButton();
+    applyButtonStyle(button);
+    tool.addEvent(button, "click", () => {
+      tool.toggleGhost();
+    });
+    tool.onGhostChange(() => {
+      updateButton();
+    });
+    tool.buttons.push(button);
+    tool.uiContainer.appendChild(button);
+    return button;
   }
 
   // src/ui/mute-unmute-button.ts
@@ -1284,6 +1325,7 @@
       "Compare videos"
     );
     createOverlayOpacityButton(tool);
+    createGhostToggleButton(tool);
     Button.create(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>',
       () => {
@@ -5012,6 +5054,14 @@
       showFullscreen: true,
       showProgressBar: true,
       showFrameCounter: true
+    },
+    ghost: {
+      enabled: false,
+      framesBefore: 2,
+      framesAfter: 1,
+      opacity: 0.3,
+      tintBefore: "rgba(255, 0, 0, 0.3)",
+      tintAfter: "rgba(0, 128, 0, 0.3)"
     }
   };
   function mergeConfig(partial) {
@@ -5032,6 +5082,10 @@
       features: {
         ...defaultConfig.features,
         ...partial.features
+      },
+      ghost: {
+        ...defaultConfig.ghost,
+        ...partial.ghost
       }
     };
   }
@@ -5537,6 +5591,10 @@
       this.gestureHandler = null;
       // Current gesture transform state
       this.gestureState = { scale: 1, panX: 0, panY: 0 };
+      // Ghost mode (onion skinning) state
+      this._ghostEnabled = false;
+      // Ghost mode change callbacks for UI sync
+      this._ghostChangeCallbacks = [];
       this.fps = DEFAULT_FPS;
       this.plannedFn = null;
       this.ct = 0;
@@ -5712,6 +5770,83 @@
     applyGestureTransform(state) {
       this.gestureState = state;
       this.redrawFullCanvas();
+    }
+    // ==================== GHOST MODE API ====================
+    /**
+     * Check if ghost mode (onion skinning) is enabled
+     */
+    get ghostEnabled() {
+      return this._ghostEnabled;
+    }
+    /**
+     * Enable or disable ghost mode (onion skinning)
+     */
+    setGhostEnabled(enabled) {
+      this._ghostEnabled = enabled;
+      this.redrawFullCanvas();
+      this._notifyGhostChange();
+    }
+    /**
+     * Toggle ghost mode on/off
+     */
+    toggleGhost() {
+      this._ghostEnabled = !this._ghostEnabled;
+      this.redrawFullCanvas();
+      this._notifyGhostChange();
+      return this._ghostEnabled;
+    }
+    /**
+     * Get ghost mode configuration
+     */
+    getGhostConfig() {
+      return { ...this.config.ghost };
+    }
+    /**
+     * Update ghost mode configuration
+     * Values are clamped to valid ranges: framesBefore/framesAfter (1-5), opacity (0.1-0.5)
+     */
+    setGhostConfig(config) {
+      const validated = { ...config };
+      if (validated.framesBefore !== void 0) {
+        validated.framesBefore = Math.max(1, Math.min(5, validated.framesBefore));
+      }
+      if (validated.framesAfter !== void 0) {
+        validated.framesAfter = Math.max(1, Math.min(5, validated.framesAfter));
+      }
+      if (validated.opacity !== void 0) {
+        validated.opacity = Math.max(0.1, Math.min(0.5, validated.opacity));
+      }
+      this.config.ghost = { ...this.config.ghost, ...validated };
+      if (this._ghostEnabled) {
+        this.redrawFullCanvas();
+      }
+    }
+    /**
+     * Register a callback for ghost mode changes
+     * Returns an unsubscribe function
+     */
+    onGhostChange(callback) {
+      this._ghostChangeCallbacks.push(callback);
+      return () => {
+        const index = this._ghostChangeCallbacks.indexOf(callback);
+        if (index !== -1) {
+          this._ghostChangeCallbacks.splice(index, 1);
+        }
+      };
+    }
+    /**
+     * Notify all registered callbacks about ghost mode change
+     */
+    _notifyGhostChange() {
+      for (const callback of this._ghostChangeCallbacks) {
+        callback(this._ghostEnabled);
+      }
+    }
+    /**
+     * Get shapes for a specific frame (without deserializing)
+     */
+    getShapesForFrame(frame) {
+      return this.timeStack.get(frame) ?? [];
     }
     removeGlobalShape(shapeType) {
       this.globalShapes = this.globalShapes.filter((s) => s.type !== shapeType);
@@ -5924,6 +6059,7 @@
       this.globalShapes = [];
       this.currentTool = this.isMobile ? null : this.config.toolbar.defaultTool ?? null;
       injectThemeStyles(this._theme);
+      this._ghostEnabled = this.config.ghost.enabled;
       this.layoutManager = new LayoutManager(this);
       this.layoutManager.setLayout(this.config.layout, {
         sidebarPosition: this.config.toolbar.sidebarPosition
@@ -6360,6 +6496,9 @@
           console.error(e);
         }
       }
+      if (this._ghostEnabled) {
+        this.drawGhostFrames();
+      }
       for (let shape of this.deserialize(this.shapes)) {
         this.ctx.strokeStyle = shape.strokeStyle;
         this.ctx.fillStyle = shape.fillStyle;
@@ -6378,6 +6517,55 @@
       this.ctx.fillStyle = prevSettings.fillStyle;
       this.ctx.lineWidth = prevSettings.lineWidth;
       this.ctx.globalAlpha = prevSettings.globalAlpha;
+    }
+    /**
+     * Draw ghost frames (onion skinning) for previous and next frames
+     * Shows annotations from adjacent frames with reduced opacity
+     */
+    drawGhostFrames() {
+      const currentFrame = this.activeTimeFrame;
+      if (currentFrame < 1 || currentFrame > this.totalFrames) {
+        return;
+      }
+      const { framesBefore, framesAfter, opacity, tintBefore, tintAfter } = this.config.ghost;
+      for (let i = framesBefore; i >= 1; i--) {
+        const frame = currentFrame - i;
+        if (frame < 1) continue;
+        const shapes = this.getShapesForFrame(frame);
+        if (shapes.length === 0) continue;
+        const frameOpacity = opacity * (1 - (i - 1) / framesBefore);
+        this.drawGhostShapes(shapes, frameOpacity, tintBefore);
+      }
+      for (let i = 1; i <= framesAfter; i++) {
+        const frame = currentFrame + i;
+        if (frame > this.totalFrames) continue;
+        const shapes = this.getShapesForFrame(frame);
+        if (shapes.length === 0) continue;
+        const frameOpacity = opacity * (1 - (i - 1) / framesAfter);
+        this.drawGhostShapes(shapes, frameOpacity, tintAfter);
+      }
+    }
+    /**
+     * Draw shapes with ghost styling (reduced opacity and optional tint)
+     */
+    drawGhostShapes(shapes, baseOpacity, tint) {
+      for (const shape of this.deserialize(shapes)) {
+        const shapeOpacity = shape.opacity ?? 1;
+        this.ctx.globalAlpha = shapeOpacity * baseOpacity;
+        if (tint) {
+          this.ctx.strokeStyle = tint;
+          this.ctx.fillStyle = tint;
+        } else {
+          this.ctx.strokeStyle = shape.strokeStyle;
+          this.ctx.fillStyle = shape.fillStyle;
+        }
+        this.ctx.lineWidth = shape.lineWidth;
+        try {
+          this.pluginForTool(shape.type).draw(shape);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
     clearCanvas() {
       this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -6491,6 +6679,46 @@
         };
       });
       return result;
+    }
+    /**
+     * Save complete annotation session including frames and ghost settings.
+     * Use this for full save/load operations that preserve all settings.
+     */
+    saveSession() {
+      return {
+        version: 1,
+        fps: this.fps,
+        frames: this.saveAllFrames(),
+        ghost: {
+          enabled: this._ghostEnabled,
+          framesBefore: this.config.ghost.framesBefore,
+          framesAfter: this.config.ghost.framesAfter,
+          opacity: this.config.ghost.opacity,
+          tintBefore: this.config.ghost.tintBefore,
+          tintAfter: this.config.ghost.tintAfter
+        }
+      };
+    }
+    /**
+     * Load complete annotation session including frames and ghost settings.
+     */
+    loadSession(session) {
+      this.loadAllFrames(session.frames);
+      if (session.ghost) {
+        this._ghostEnabled = session.ghost.enabled;
+        this.config.ghost = {
+          enabled: session.ghost.enabled,
+          framesBefore: session.ghost.framesBefore,
+          framesAfter: session.ghost.framesAfter,
+          opacity: session.ghost.opacity,
+          tintBefore: session.ghost.tintBefore,
+          tintAfter: session.ghost.tintAfter
+        };
+      }
+      if (session.fps) {
+        this.setFrameRate(session.fps);
+      }
+      this.redrawFullCanvas();
     }
     getAnnotationFrame(event) {
       const x = event.offsetX;
@@ -6691,7 +6919,7 @@
   }
 
   // ../gto-js/dist/gto.js
-  var v = /* @__PURE__ */ ((i) => (i[i.BinaryGTO = 0] = "BinaryGTO", i[i.CompressedGTO = 1] = "CompressedGTO", i[i.TextGTO = 2] = "TextGTO", i))(v || {});
+  var k = /* @__PURE__ */ ((i) => (i[i.BinaryGTO = 0] = "BinaryGTO", i[i.CompressedGTO = 1] = "CompressedGTO", i[i.TextGTO = 2] = "TextGTO", i))(k || {});
   var p = /* @__PURE__ */ ((i) => (i[i.Int = 0] = "Int", i[i.Float = 1] = "Float", i[i.Double = 2] = "Double", i[i.Half = 3] = "Half", i[i.String = 4] = "String", i[i.Boolean = 5] = "Boolean", i[i.Short = 6] = "Short", i[i.Byte = 7] = "Byte", i[i.Int64 = 8] = "Int64", i))(p || {});
   var N = {
     0: "int",
@@ -6704,7 +6932,7 @@
     7: "byte",
     8: "int64"
   };
-  var z = {
+  var $ = {
     int: 0,
     float: 1,
     double: 2,
@@ -6716,7 +6944,7 @@
     int64: 8
     /* Int64 */
   };
-  var B = {
+  var R = {
     0: 4,
     1: 4,
     2: 8,
@@ -6728,7 +6956,7 @@
     7: 1,
     8: 8
   };
-  var R = /* @__PURE__ */ ((i) => (i[i.None = 0] = "None", i[i.HeaderOnly = 1] = "HeaderOnly", i[i.RandomAccess = 2] = "RandomAccess", i[i.BinaryOnly = 4] = "BinaryOnly", i[i.TextOnly = 8] = "TextOnly", i))(R || {});
+  var B = /* @__PURE__ */ ((i) => (i[i.None = 0] = "None", i[i.HeaderOnly = 1] = "HeaderOnly", i[i.RandomAccess = 2] = "RandomAccess", i[i.BinaryOnly = 4] = "BinaryOnly", i[i.TextOnly = 8] = "TextOnly", i))(B || {});
   var b = /* @__PURE__ */ ((i) => (i[i.Skip = 0] = "Skip", i[i.Read = 1] = "Read", i))(b || {});
   var Y = class {
     magic = 671;
@@ -6737,7 +6965,7 @@
     version = 4;
     flags = 0;
   };
-  var F = class {
+  var z = class {
     name = "";
     protocol = "";
     protocolVersion = 0;
@@ -6786,7 +7014,7 @@
      * Get byte size of the property data
      */
     get byteSize() {
-      return this.totalCount * B[this.type];
+      return this.totalCount * R[this.type];
     }
   };
   var H = class {
@@ -7087,7 +7315,7 @@
      * Create a new Reader
      * @param mode - Reader mode flags (ReaderMode.*)
      */
-    constructor(t = R.None) {
+    constructor(t = B.None) {
       this._mode = t;
     }
     /**
@@ -7178,7 +7406,7 @@
      */
     _parse(t) {
       const e = new rt(t);
-      if (this._lexer = e, this._currentToken = e.nextToken(), this._parseHeader(), this.header(this._header), !(this._mode & R.HeaderOnly))
+      if (this._lexer = e, this._currentToken = e.nextToken(), this._parseHeader(), this.header(this._header), !(this._mode & B.HeaderOnly))
         for (; this._currentToken.type !== "EOF"; )
           this._parseObject();
     }
@@ -7225,7 +7453,7 @@
      * Parse an object declaration
      */
     _parseObject() {
-      const t = new F(), e = this._expect(
+      const t = new z(), e = this._expect(
         "IDENTIFIER"
         /* IDENTIFIER */
       );
@@ -7303,9 +7531,9 @@
         "IDENTIFIER"
         /* IDENTIFIER */
       ).value;
-      if (!(s in z))
+      if (!(s in $))
         throw new Error(`Unknown type '${s}' at line ${this._lexer.line}`);
-      if (n.type = z[s], this._currentToken.type === "LBRACKET") {
+      if (n.type = $[s], this._currentToken.type === "LBRACKET") {
         this._advance();
         const h = [];
         for (h.push(this._expect(
@@ -7449,11 +7677,11 @@
       const h = n.getUint32(o, s);
       o += 4;
       const d = n.getUint32(o, s);
-      if (o += 4, this._header.magic = 671, this._header.numStrings = l, this._header.numObjects = _, this._header.version = h, this._header.flags = d, this.header(this._header), this._mode & R.HeaderOnly)
+      if (o += 4, this._header.magic = 671, this._header.numStrings = l, this._header.numObjects = _, this._header.version = h, this._header.flags = d, this.header(this._header), this._mode & B.HeaderOnly)
         return;
       const c = this._stringTable.readFromBinary(n, o, l, s);
       o += c;
-      const T = [];
+      const w = [];
       for (let f = 0; f < _; f++) {
         const g = n.getUint32(o, s);
         o += 4;
@@ -7462,10 +7690,10 @@
         const j = n.getUint32(o, s);
         o += 4;
         const I = n.getUint32(o, s);
-        o += 4, o += 4, T.push({ nameId: g, protocolId: x, protocolVersion: j, numComponents: I });
+        o += 4, o += 4, w.push({ nameId: g, protocolId: x, protocolVersion: j, numComponents: I });
       }
       let a = 0;
-      for (const f of T)
+      for (const f of w)
         a += f.numComponents;
       const u = [];
       for (let f = 0; f < a; f++) {
@@ -7480,11 +7708,11 @@
         let y = 0;
         h >= 4 && (y = n.getUint32(o, s), o += 4), u.push({ nameId: g, interpretationId: x, numProperties: j, flags: I, childLevel: y });
       }
-      let E = 0;
+      let C = 0;
       for (const f of u)
-        E += f.numProperties;
+        C += f.numProperties;
       const O = [];
-      for (let f = 0; f < E; f++) {
+      for (let f = 0; f < C; f++) {
         const g = n.getUint32(o, s);
         o += 4;
         const x = n.getUint32(o, s);
@@ -7495,12 +7723,12 @@
         o += 4;
         const y = n.getUint32(o, s);
         o += 4;
-        const C = [1, 1, 1, 1];
-        h >= 4 && (C[0] = n.getUint32(o, s), o += 4, C[1] = n.getUint32(o, s), o += 4, C[2] = n.getUint32(o, s), o += 4, C[3] = n.getUint32(o, s), o += 4), O.push({ nameId: g, interpretationId: x, type: j, size: I, width: y, dims: C });
+        const E = [1, 1, 1, 1];
+        h >= 4 && (E[0] = n.getUint32(o, s), o += 4, E[1] = n.getUint32(o, s), o += 4, E[2] = n.getUint32(o, s), o += 4, E[3] = n.getUint32(o, s), o += 4), O.push({ nameId: g, interpretationId: x, type: j, size: I, width: y, dims: E });
       }
       let A = 0, J = 0;
-      for (const f of T) {
-        const g = new F();
+      for (const f of w) {
+        const g = new z();
         g.name = this._stringTable.stringFromId(f.nameId), g.protocol = this._stringTable.stringFromId(f.protocolId), g.protocolVersion = f.protocolVersion, g.numComponents = f.numComponents, g._nameId = f.nameId, g._protocolId = f.protocolId, g._componentOffset = this._components.length;
         const x = this.object(
           g.name,
@@ -7512,23 +7740,23 @@
         for (let j = 0; j < f.numComponents; j++) {
           const I = u[A++], y = new L();
           y.name = this._stringTable.stringFromId(I.nameId), y.interpretation = I.interpretationId > 0 ? this._stringTable.stringFromId(I.interpretationId) : "", y.numProperties = I.numProperties, y.flags = I.flags, y.childLevel = I.childLevel, y._nameId = I.nameId, y._interpretationId = I.interpretationId, y._object = g, y._propertyOffset = this._properties.length;
-          let C = b.Skip;
-          x === b.Read && (C = this.component(y.name, y)), this._components.push(y);
+          let E = b.Skip;
+          x === b.Read && (E = this.component(y.name, y)), this._components.push(y);
           for (let G = 0; G < I.numProperties; G++) {
-            const w = O[J++], m = new M();
-            m.name = this._stringTable.stringFromId(w.nameId), m.interpretation = w.interpretationId > 0 ? this._stringTable.stringFromId(w.interpretationId) : "", m.type = w.type, m.size = w.size, m.width = w.width, m.dims = w.dims, m._nameId = w.nameId, m._interpretationId = w.interpretationId, m._component = y, m._dataOffset = o;
+            const T = O[J++], m = new M();
+            m.name = this._stringTable.stringFromId(T.nameId), m.interpretation = T.interpretationId > 0 ? this._stringTable.stringFromId(T.interpretationId) : "", m.type = T.type, m.size = T.size, m.width = T.width, m.dims = T.dims, m._nameId = T.nameId, m._interpretationId = T.interpretationId, m._component = y, m._dataOffset = o;
             let D = b.Skip;
-            C === b.Read && (D = this.property(
+            E === b.Read && (D = this.property(
               m.name,
               m.interpretation,
               m
             )), this._properties.push(m);
-            const S = m.size * m.width, Q = B[m.type] || 4, $ = S * Q;
+            const S = m.size * m.width, Q = R[m.type] || 4, F = S * Q;
             if (D === b.Read && S > 0) {
               const Z = this._readBinaryData(n, o, m, S, s);
-              this.data(m, $) !== null && this.dataRead(m, Z);
+              this.data(m, F) !== null && this.dataRead(m, Z);
             }
-            o += $;
+            o += F;
           }
         }
       }
@@ -7537,7 +7765,7 @@
      * Read binary property data
      */
     _readBinaryData(t, e, n, r, s) {
-      const o = [], l = n.type, _ = B[l] || 4;
+      const o = [], l = n.type, _ = R[l] || 4;
       for (let h = 0; h < r; h++) {
         const d = this._readBinaryValue(t, e + h * _, l, s);
         o.push(d);
@@ -7621,7 +7849,7 @@
     _currentObject = null;
     _currentComponent = null;
     constructor() {
-      super(R.None);
+      super(B.None);
     }
     header(t) {
       this.result.version = t.version;
@@ -7672,7 +7900,7 @@
     _indent = 0;
     _version = 4;
     _binaryMode = false;
-    _fileType = v.TextGTO;
+    _fileType = k.TextGTO;
     // Binary mode storage
     _objectInfos = [];
     _componentInfos = [];
@@ -7704,8 +7932,8 @@
      * Open/initialize the writer
      * @param type - File type (TextGTO or BinaryGTO)
      */
-    open(t = v.TextGTO) {
-      return this._fileType = t, this._state = 0, t === v.BinaryGTO ? (this._binaryMode = true, this._objectInfos = [], this._componentInfos = [], this._propertyInfos = [], this._propertyData = [], this._currentObjectIdx = -1, this._currentComponentIdx = -1) : (this._binaryMode = false, this._output = "", this._indent = 0), true;
+    open(t = k.TextGTO) {
+      return this._fileType = t, this._state = 0, t === k.BinaryGTO ? (this._binaryMode = true, this._objectInfos = [], this._componentInfos = [], this._propertyInfos = [], this._propertyData = [], this._currentObjectIdx = -1, this._currentComponentIdx = -1) : (this._binaryMode = false, this._output = "", this._indent = 0), true;
     }
     /**
      * Close the writer and finalize output
@@ -7837,8 +8065,8 @@ ${this._output}`;
       else {
         let c = N[e];
         r > 1 && (c += `[${r}]`), c += ` ${t}`, s && (c += ` as ${s}`);
-        const T = this._formatData(e, r, n, h);
-        c += ` = ${T}`, this._writeLine(c);
+        const w = this._formatData(e, r, n, h);
+        c += ` = ${w}`, this._writeLine(c);
       }
     }
     /**
@@ -7939,12 +8167,12 @@ ${"    ".repeat(this._indent)}]`;
       const e = this._stringTable.writeToBinary(), n = 20, r = e.byteLength, s = this._objectInfos.length * 20, o = this._componentInfos.length * 20, l = this._propertyInfos.length * 36;
       let _ = 0;
       for (let u = 0; u < this._propertyInfos.length; u++) {
-        const E = this._propertyInfos[u], O = this._propertyData[u], A = B[E.type] || 4;
+        const C = this._propertyInfos[u], O = this._propertyData[u], A = R[C.type] || 4;
         _ += O.length * A;
       }
-      const h = n + r + s + o + l + _, d = new ArrayBuffer(h), c = new DataView(d), T = new Uint8Array(d);
+      const h = n + r + s + o + l + _, d = new ArrayBuffer(h), c = new DataView(d), w = new Uint8Array(d);
       let a = 0;
-      c.setUint32(a, 671, true), a += 4, c.setUint32(a, this._stringTable.size, true), a += 4, c.setUint32(a, this._objectInfos.length, true), a += 4, c.setUint32(a, this._version, true), a += 4, c.setUint32(a, 0, true), a += 4, T.set(e, a), a += r;
+      c.setUint32(a, 671, true), a += 4, c.setUint32(a, this._stringTable.size, true), a += 4, c.setUint32(a, this._objectInfos.length, true), a += 4, c.setUint32(a, this._version, true), a += 4, c.setUint32(a, 0, true), a += 4, w.set(e, a), a += r;
       for (const u of this._objectInfos)
         c.setUint32(a, u.nameId, true), a += 4, c.setUint32(a, u.protocolId, true), a += 4, c.setUint32(a, u.protocolVersion, true), a += 4, c.setUint32(a, u.numComponents, true), a += 4, c.setUint32(a, 0, true), a += 4;
       for (const u of this._componentInfos)
@@ -7952,9 +8180,9 @@ ${"    ".repeat(this._indent)}]`;
       for (const u of this._propertyInfos)
         c.setUint32(a, u.nameId, true), a += 4, c.setUint32(a, u.interpretationId, true), a += 4, c.setUint8(a, u.type), a += 1, a += 3, c.setUint32(a, u.size, true), a += 4, c.setUint32(a, u.width, true), a += 4, c.setUint32(a, u.dims[0], true), a += 4, c.setUint32(a, u.dims[1], true), a += 4, c.setUint32(a, u.dims[2], true), a += 4, c.setUint32(a, u.dims[3], true), a += 4;
       for (let u = 0; u < this._propertyInfos.length; u++) {
-        const E = this._propertyInfos[u], O = this._propertyData[u];
+        const C = this._propertyInfos[u], O = this._propertyData[u];
         for (const A of O)
-          this._writeBinaryValue(c, a, E.type, A, true), a += B[E.type] || 4;
+          this._writeBinaryValue(c, a, C.type, A, true), a += R[C.type] || 4;
       }
       return d;
     }
@@ -8003,7 +8231,7 @@ ${"    ".repeat(this._indent)}]`;
      * @returns GTO text content or binary ArrayBuffer
      */
     static write(t, e = {}) {
-      const n = new it(), r = e.binary ? v.BinaryGTO : v.TextGTO;
+      const n = new it(), r = e.binary ? k.BinaryGTO : k.TextGTO;
       n.open(r);
       for (const s of t.objects) {
         n.beginObject(s.name, s.protocol, s.protocolVersion || 1);
@@ -8018,8 +8246,8 @@ ${"    ".repeat(this._indent)}]`;
               d = h.type;
             let c = h.data;
             Array.isArray(h.data) && Array.isArray(h.data[0]) && (c = h.data.flat()), d === p.String && c.length > 0 && typeof c[0] == "string" && (c = c.map((a) => n.intern(a)));
-            const T = h.size || Math.floor(c.length / (h.width || 1));
-            n.propertyWithData(_, d, T, h.width || 1, h.interpretation || "", c);
+            const w = h.size || Math.floor(c.length / (h.width || 1));
+            n.propertyWithData(_, d, w, h.width || 1, h.interpretation || "", c);
           }
           n.endComponent();
         }
@@ -8306,7 +8534,7 @@ ${"    ".repeat(this._indent)}]`;
       return JSON.stringify(this.build(), null, t);
     }
   };
-  var W = class {
+  var q = class {
     _name;
     _data;
     _parent;
@@ -8407,7 +8635,7 @@ ${"    ".repeat(this._indent)}]`;
       return { ...this._data };
     }
   };
-  var ct = class extends W {
+  var ct = class extends q {
     constructor(t) {
       super(t, { type: "", size: 0, width: 0, data: [], interpretation: "" }, null);
     }
@@ -8418,7 +8646,7 @@ ${"    ".repeat(this._indent)}]`;
       return false;
     }
   };
-  var q = class {
+  var W = class {
     _name;
     _data;
     _parent;
@@ -8444,7 +8672,7 @@ ${"    ".repeat(this._indent)}]`;
     property(t) {
       if (!this._propertyCache.has(t)) {
         const e = this._data.properties?.[t];
-        this._propertyCache.set(t, e ? new W(t, e, this) : new ct(t));
+        this._propertyCache.set(t, e ? new q(t, e, this) : new ct(t));
       }
       return this._propertyCache.get(t);
     }
@@ -8502,7 +8730,7 @@ ${"    ".repeat(this._indent)}]`;
       };
     }
   };
-  var lt = class extends q {
+  var lt = class extends W {
     constructor(t) {
       super(t, { interpretation: "", properties: {} }, null);
     }
@@ -8534,7 +8762,7 @@ ${"    ".repeat(this._indent)}]`;
     component(t) {
       if (!this._componentCache.has(t)) {
         const e = this._data.components?.[t];
-        this._componentCache.set(t, e ? new q(t, e, this) : new lt(t));
+        this._componentCache.set(t, e ? new W(t, e, this) : new lt(t));
       }
       return this._componentCache.get(t);
     }
@@ -8602,7 +8830,7 @@ ${"    ".repeat(this._indent)}]`;
       return false;
     }
   };
-  var k = class _k {
+  var v = class _v {
     _objects;
     constructor(t) {
       this._objects = t.map((e) => e instanceof U ? e : new U(e));
@@ -8633,20 +8861,20 @@ ${"    ".repeat(this._indent)}]`;
      * Filter by protocol
      */
     byProtocol(t) {
-      return new _k(this._objects.filter((e) => e.protocol === t));
+      return new _v(this._objects.filter((e) => e.protocol === t));
     }
     /**
      * Filter by name pattern
      */
     byName(t) {
       const e = typeof t == "string" ? new RegExp(t) : t;
-      return new _k(this._objects.filter((n) => e.test(n.name)));
+      return new _v(this._objects.filter((n) => e.test(n.name)));
     }
     /**
      * Filter by predicate
      */
     filter(t) {
-      return new _k(this._objects.filter(t));
+      return new _v(this._objects.filter(t));
     }
     /**
      * Find single object
@@ -8697,7 +8925,7 @@ ${"    ".repeat(this._indent)}]`;
       const t = /* @__PURE__ */ new Map();
       for (const e of this._objects)
         t.has(e.protocol) || t.set(e.protocol, []), t.get(e.protocol).push(e);
-      return new Map([...t].map(([e, n]) => [e, new _k(n)]));
+      return new Map([...t].map(([e, n]) => [e, new _v(n)]));
     }
     /**
      * Iterate over objects
@@ -8715,7 +8943,7 @@ ${"    ".repeat(this._indent)}]`;
      * @param data - Parsed GTO data (from SimpleReader.result)
      */
     constructor(t) {
-      this._data = t, this._objects = new k(t.objects || []);
+      this._data = t, this._objects = new v(t.objects || []);
     }
     /** GTO version */
     get version() {
@@ -8817,6 +9045,35 @@ ${"    ".repeat(this._indent)}]`;
       return this.fileSources().map((t) => t.component("media").property("movie").value()).filter(Boolean);
     }
     /**
+     * Extract comprehensive source information
+     */
+    sourcesInfo() {
+      return this.fileSources().map((t) => {
+        const e = t.component("media"), n = t.component("group"), r = t.component("cut"), s = t.component("proxy"), o = t.component("request");
+        return {
+          name: t.name,
+          movie: e.prop("movie") || "",
+          active: !!e.prop("active"),
+          repName: e.prop("repName") || "",
+          range: n.prop("range") || [1, 100],
+          fps: n.prop("fps") || 24,
+          volume: n.prop("volume") || 1,
+          audioOffset: n.prop("audioOffset") || 0,
+          rangeOffset: n.prop("rangeOffset") || 0,
+          cutIn: r.prop("in") || -2147483647,
+          cutOut: r.prop("out") || 2147483647,
+          proxy: {
+            range: s.prop("range") || [1, 100],
+            inc: s.prop("inc") || 1,
+            fps: s.prop("fps") || 24,
+            size: s.prop("size") || [1280, 720]
+          },
+          stereoViews: o.prop("stereoViews") || [],
+          readAllChannels: !!o.prop("readAllChannels")
+        };
+      });
+    }
+    /**
      * Get timeline info
      */
     timeline() {
@@ -8827,6 +9084,42 @@ ${"    ".repeat(this._indent)}]`;
         fps: t.prop("fps") || 24,
         currentFrame: t.prop("currentFrame") || 1,
         marks: t.prop("marks") || []
+      };
+    }
+    /**
+     * Extract comprehensive session information
+     */
+    sessionInfo() {
+      const t = this.session(), e = t.component("session"), n = t.component("matte");
+      return {
+        viewNode: e.prop("viewNode") || "defaultSequence",
+        range: e.prop("range") || [1, 100],
+        region: e.prop("region") || [1, 100],
+        fps: e.prop("fps") || 24,
+        realtime: !!e.prop("realtime"),
+        inc: e.prop("inc") || 1,
+        currentFrame: e.prop("currentFrame") || 1,
+        marks: e.prop("marks") || [],
+        version: e.prop("version") || 2,
+        matte: {
+          show: !!n.prop("show"),
+          aspect: n.prop("aspect") || 1.33,
+          opacity: n.prop("opacity") || 0.33,
+          heightVisible: n.prop("heightVisible") || -1,
+          centerPoint: n.prop("centerPoint") || [0, 0]
+        }
+      };
+    }
+    /**
+     * Get global paint effects settings
+     */
+    paintEffects() {
+      const t = this.session().component("paintEffects");
+      return {
+        ghost: t.prop("ghost") || 0,
+        ghostBefore: t.prop("ghostBefore") || 3,
+        ghostAfter: t.prop("ghostAfter") || 3,
+        hold: t.prop("hold") || 0
       };
     }
     /**
@@ -8853,10 +9146,30 @@ ${"    ".repeat(this._indent)}]`;
               color: n.prop("color"),
               points: n.prop("points"),
               text: n.prop("text"),
-              brush: n.prop("brush")
+              brush: n.prop("brush"),
+              startFrame: n.prop("startFrame"),
+              duration: n.prop("duration"),
+              ghost: n.prop("ghost"),
+              ghostBefore: n.prop("ghostBefore"),
+              ghostAfter: n.prop("ghostAfter"),
+              hold: n.prop("hold")
             });
           }
       return t;
+    }
+    /**
+     * Get a comprehensive preview/summary of the GTO session
+     */
+    preview() {
+      return {
+        session: this.sessionInfo(),
+        sources: this.sourcesInfo(),
+        timeline: this.timeline(),
+        paintEffects: this.paintEffects(),
+        annotations: this.annotations(),
+        connections: this.connectionEdges(),
+        mediaPaths: this.mediaPaths()
+      };
     }
     /**
      * Convert to plain object
@@ -9173,7 +9486,7 @@ ${"    ".repeat(this._indent)}]`;
     }
     return { penData, textData, nextId };
   }
-  function exportToOpenRV(frames, options) {
+  function buildGTOData(frames, options) {
     const { mediaPath, width, height, sessionName = "sm-annotate-session" } = options;
     const allPenData = [];
     const allTextData = [];
@@ -9202,9 +9515,13 @@ ${"    ".repeat(this._indent)}]`;
     const builder = new K();
     builder.object("RVSession", "RVSession", 4).component("session").string("name", sessionName).int("version", 4).end().end();
     builder.object("sourceGroup000000_source", "RVFileSource", 1).component("media").string("movie", mediaPath).end().component("request").int("width", width).int("height", height).end().end();
-    if (allPenData.length > 0 || allTextData.length > 0) {
+    if (allPenData.length > 0 || allTextData.length > 0 || options.ghost) {
       const paintObj = builder.object("sourceGroup000000_paint", "RVPaint", 3);
-      paintObj.component("paint").int("nextId", nextId).int("nextAnnotationId", 0).int("show", 1).string("exclude", []).string("include", []).end();
+      const paintComp = paintObj.component("paint").int("nextId", nextId).int("nextAnnotationId", 0).int("show", 1).string("exclude", []).string("include", []);
+      if (options.ghost) {
+        paintComp.int("ghost", options.ghost.enabled ? 1 : 0).int("ghostFramesBefore", options.ghost.framesBefore).int("ghostFramesAfter", options.ghost.framesAfter).float("ghostOpacity", options.ghost.opacity).string("ghostTintBefore", options.ghost.tintBefore ?? "").string("ghostTintAfter", options.ghost.tintAfter ?? "");
+      }
+      paintComp.end();
       for (const pen of allPenData) {
         paintObj.component(pen.name).float4("color", [pen.color]).float("width", pen.width).string("brush", pen.brush).float2("points", pen.points).int("debug", 0).int("join", 3).int("cap", 1).int("splat", 0).end();
       }
@@ -9216,7 +9533,11 @@ ${"    ".repeat(this._indent)}]`;
       }
       paintObj.end();
     }
-    const gtoData = builder.build();
+    return builder.build();
+  }
+  function exportToOpenRV(frames, options) {
+    const { mediaPath, width, height } = options;
+    const gtoData = buildGTOData(frames, options);
     const output = It.write(gtoData);
     const header = [
       "GTOa (4)",
@@ -9226,8 +9547,7 @@ ${"    ".repeat(this._indent)}]`;
       `# Resolution: ${width}x${height}`,
       ""
     ].join("\n");
-    const outputStr = output;
-    const outputWithoutHeader = outputStr.replace(/^GTOa \(\d+\)\s*\n?/, "");
+    const outputWithoutHeader = output.replace(/^GTOa \(\d+\)\s*\n?/, "");
     return header + outputWithoutHeader;
   }
   function downloadAsOpenRV(frames, options, filename = "annotations.rv") {
@@ -9277,7 +9597,15 @@ ${"    ".repeat(this._indent)}]`;
     if (!pointsData) {
       return null;
     }
-    const flatPoints = Array.isArray(pointsData[0]) ? pointsData.flat() : pointsData;
+    let flatPoints;
+    if (Array.isArray(pointsData[0])) {
+      flatPoints = [];
+      for (const point of pointsData) {
+        flatPoints.push(...point);
+      }
+    } else {
+      flatPoints = pointsData;
+    }
     if (flatPoints.length < 4) {
       return null;
     }
@@ -9388,19 +9716,37 @@ ${"    ".repeat(this._indent)}]`;
     }
     return void 0;
   }
-  function parseOpenRV(content, options = {}) {
+  function extractGhostSettings(dto) {
+    const paints = dto.paints();
+    if (paints.length === 0) {
+      return void 0;
+    }
+    const paint = paints.first();
+    if (!paint.exists()) {
+      return void 0;
+    }
+    const enabled = paint.prop("paint", "ghost");
+    if (enabled === null) {
+      return void 0;
+    }
+    const framesBefore = paint.prop("paint", "ghostFramesBefore");
+    const framesAfter = paint.prop("paint", "ghostFramesAfter");
+    const opacity = paint.prop("paint", "ghostOpacity");
+    const tintBefore = paint.prop("paint", "ghostTintBefore");
+    const tintAfter = paint.prop("paint", "ghostTintAfter");
+    return {
+      enabled: enabled === 1,
+      framesBefore: framesBefore ?? 2,
+      framesAfter: framesAfter ?? 1,
+      opacity: opacity ?? 0.3,
+      tintBefore: tintBefore === "" ? null : tintBefore ?? "rgba(255, 0, 0, 0.3)",
+      tintAfter: tintAfter === "" ? null : tintAfter ?? "rgba(0, 128, 0, 0.3)"
+    };
+  }
+  function processGTODto(dto, options) {
     const result = {
       frames: []
     };
-    const reader = new bt();
-    const success = reader.open(content);
-    if (!success) {
-      if (options.debug) {
-        console.log("[OpenRV Parser] Failed to parse GTO content");
-      }
-      return result;
-    }
-    const dto = new jt(reader.result);
     const session = dto.session();
     if (session.exists()) {
       const name = session.prop("session", "name");
@@ -9408,6 +9754,7 @@ ${"    ".repeat(this._indent)}]`;
         result.sessionName = name;
       }
     }
+    result.ghost = extractGhostSettings(dto);
     const fileSource = dto.fileSources().first();
     if (fileSource.exists()) {
       const movie = fileSource.prop("media", "movie");
@@ -9475,6 +9822,17 @@ ${"    ".repeat(this._indent)}]`;
     }
     result.frames.sort((a, b2) => a.frame - b2.frame);
     return result;
+  }
+  function parseOpenRV(content, options = {}) {
+    const reader = new bt();
+    const success = reader.open(content);
+    if (!success) {
+      if (options.debug) {
+        console.log("[OpenRV Parser] Failed to parse GTO content");
+      }
+      return { frames: [] };
+    }
+    return processGTODto(new jt(reader.result), options);
   }
 
   // node_modules/@ffmpeg/ffmpeg/dist/esm/const.js
@@ -10505,10 +10863,19 @@ ${"    ".repeat(this._indent)}]`;
         const data = e2.target.result;
         const dataObj = JSON.parse(data);
         const append = confirm("Append to existing annotations?");
-        if (!append) {
-          tool.loadAllFrames(dataObj);
+        if (dataObj.version && dataObj.frames) {
+          if (!append) {
+            tool.loadSession(dataObj);
+            syncGhostUIFromTool();
+          } else {
+            tool.appendFrames(dataObj.frames);
+          }
         } else {
-          tool.appendFrames(dataObj);
+          if (!append) {
+            tool.loadAllFrames(dataObj);
+          } else {
+            tool.appendFrames(dataObj);
+          }
         }
         tool.updateActiveTimeFrame();
         tool.redrawFullCanvas();
@@ -10518,10 +10885,10 @@ ${"    ".repeat(this._indent)}]`;
     downloadButton.addEventListener("click", (e) => {
       e.stopPropagation();
       e.preventDefault();
-      const data = tool.saveAllFrames();
+      const data = tool.saveSession();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(
-        new Blob([JSON.stringify(data)], { type: "application/json" })
+        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
       );
       const prettyDate = (/* @__PURE__ */ new Date()).toISOString().replace(/:/g, "-");
       a.download = `annotations-${prettyDate}.json`;
@@ -10598,6 +10965,18 @@ ${"    ".repeat(this._indent)}]`;
         const append = confirm("Append to existing annotations?");
         if (!append) {
           tool.loadAllFrames(result.frames);
+          if (result.ghost) {
+            tool.setGhostEnabled(result.ghost.enabled);
+            tool.setGhostConfig({
+              framesBefore: result.ghost.framesBefore,
+              framesAfter: result.ghost.framesAfter,
+              opacity: result.ghost.opacity,
+              tintBefore: result.ghost.tintBefore,
+              tintAfter: result.ghost.tintAfter
+            });
+            syncGhostUIFromTool();
+            console.log("Restored ghost settings:", result.ghost);
+          }
         } else {
           tool.appendFrames(result.frames);
         }
@@ -10620,10 +10999,11 @@ ${"    ".repeat(this._indent)}]`;
       e.stopPropagation();
       e.preventDefault();
       const frames = tool.saveAllFrames();
-      if (frames.length === 0) {
+      if (frames.length === 0 && !tool.ghostEnabled) {
         alert("No annotations to export.");
         return;
       }
+      const ghostConfig = tool.getGhostConfig();
       const prettyDate = (/* @__PURE__ */ new Date()).toISOString().replace(/:/g, "-");
       downloadAsOpenRV(
         frames,
@@ -10631,7 +11011,16 @@ ${"    ".repeat(this._indent)}]`;
           mediaPath: video.currentSrc || "video.mp4",
           width: tool.canvasWidth || 1920,
           height: tool.canvasHeight || 1080,
-          sessionName: `sm-annotate-${prettyDate}`
+          sessionName: `sm-annotate-${prettyDate}`,
+          // Include ghost settings in export
+          ghost: {
+            enabled: tool.ghostEnabled,
+            framesBefore: ghostConfig.framesBefore,
+            framesAfter: ghostConfig.framesAfter,
+            opacity: ghostConfig.opacity,
+            tintBefore: ghostConfig.tintBefore,
+            tintAfter: ghostConfig.tintAfter
+          }
         },
         `annotations-${prettyDate}.rv`
       );
@@ -10658,6 +11047,77 @@ ${"    ".repeat(this._indent)}]`;
           tool.setCanvasSize();
         });
       });
+    });
+    const ghostEnabledCheckbox = document.getElementById("ghost-enabled");
+    const ghostControlsDiv = document.getElementById("ghost-controls");
+    const ghostBeforeInput = document.getElementById("ghost-before");
+    const ghostBeforeValue = document.getElementById("ghost-before-value");
+    const ghostAfterInput = document.getElementById("ghost-after");
+    const ghostAfterValue = document.getElementById("ghost-after-value");
+    const ghostOpacityInput = document.getElementById("ghost-opacity");
+    const ghostOpacityValue = document.getElementById("ghost-opacity-value");
+    const ghostTintBeforeInput = document.getElementById("ghost-tint-before");
+    const ghostTintAfterInput = document.getElementById("ghost-tint-after");
+    function hexToRgba(hex, opacity) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b2 = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b2}, ${opacity})`;
+    }
+    function rgbaToHex2(rgba) {
+      if (!rgba) return "#ff0000";
+      const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) {
+        const r = parseInt(match[1]).toString(16).padStart(2, "0");
+        const g = parseInt(match[2]).toString(16).padStart(2, "0");
+        const b2 = parseInt(match[3]).toString(16).padStart(2, "0");
+        return `#${r}${g}${b2}`;
+      }
+      return rgba.startsWith("#") ? rgba : "#ff0000";
+    }
+    function updateGhostConfig() {
+      tool.setGhostConfig({
+        framesBefore: parseInt(ghostBeforeInput.value),
+        framesAfter: parseInt(ghostAfterInput.value),
+        opacity: parseFloat(ghostOpacityInput.value),
+        tintBefore: hexToRgba(ghostTintBeforeInput.value, 0.3),
+        tintAfter: hexToRgba(ghostTintAfterInput.value, 0.3)
+      });
+    }
+    function syncGhostUIFromTool() {
+      const config = tool.getGhostConfig();
+      ghostEnabledCheckbox.checked = tool.ghostEnabled;
+      ghostControlsDiv.classList.toggle("active", tool.ghostEnabled);
+      ghostBeforeInput.value = String(config.framesBefore);
+      ghostBeforeValue.textContent = String(config.framesBefore);
+      ghostAfterInput.value = String(config.framesAfter);
+      ghostAfterValue.textContent = String(config.framesAfter);
+      ghostOpacityInput.value = String(config.opacity);
+      ghostOpacityValue.textContent = String(config.opacity);
+      ghostTintBeforeInput.value = rgbaToHex2(config.tintBefore);
+      ghostTintAfterInput.value = rgbaToHex2(config.tintAfter);
+    }
+    ghostEnabledCheckbox.addEventListener("change", () => {
+      tool.setGhostEnabled(ghostEnabledCheckbox.checked);
+      ghostControlsDiv.classList.toggle("active", ghostEnabledCheckbox.checked);
+    });
+    ghostBeforeInput.addEventListener("input", () => {
+      ghostBeforeValue.textContent = ghostBeforeInput.value;
+      updateGhostConfig();
+    });
+    ghostAfterInput.addEventListener("input", () => {
+      ghostAfterValue.textContent = ghostAfterInput.value;
+      updateGhostConfig();
+    });
+    ghostOpacityInput.addEventListener("input", () => {
+      ghostOpacityValue.textContent = ghostOpacityInput.value;
+      updateGhostConfig();
+    });
+    ghostTintBeforeInput.addEventListener("input", updateGhostConfig);
+    ghostTintAfterInput.addEventListener("input", updateGhostConfig);
+    tool.onGhostChange((enabled) => {
+      ghostEnabledCheckbox.checked = enabled;
+      ghostControlsDiv.classList.toggle("active", enabled);
     });
     const ffmpegLoadBtn = document.getElementById("ffmpeg-load");
     const ffmpegExtractBtn = document.getElementById("ffmpeg-extract");
@@ -10811,3 +11271,4 @@ ${"    ".repeat(this._indent)}]`;
     initAnnotator();
   }
 })();
+//# sourceMappingURL=index.js.map

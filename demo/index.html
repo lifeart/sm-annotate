@@ -266,6 +266,54 @@
             </div>
           </div>
 
+          <div class="panel">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="12" height="12" rx="1" opacity="0.3"/>
+                <rect x="6" y="6" width="12" height="12" rx="1" opacity="0.6"/>
+                <rect x="10" y="8" width="12" height="12" rx="1" fill="none"/>
+              </svg>
+              Ghost Mode (Onion Skinning)
+            </h2>
+            <div class="panel-content">
+              <label class="checkbox-label">
+                <input type="checkbox" id="ghost-enabled" />
+                <span>Enable ghost mode</span>
+              </label>
+              <div class="ghost-controls" id="ghost-controls">
+                <div class="range-control">
+                  <label>
+                    <span class="range-label">Frames before: <span id="ghost-before-value">2</span></span>
+                    <input type="range" id="ghost-before" min="1" max="5" step="1" value="2" />
+                  </label>
+                </div>
+                <div class="range-control">
+                  <label>
+                    <span class="range-label">Frames after: <span id="ghost-after-value">1</span></span>
+                    <input type="range" id="ghost-after" min="1" max="5" step="1" value="1" />
+                  </label>
+                </div>
+                <div class="range-control">
+                  <label>
+                    <span class="range-label">Opacity: <span id="ghost-opacity-value">0.3</span></span>
+                    <input type="range" id="ghost-opacity" min="0.1" max="0.6" step="0.05" value="0.3" />
+                  </label>
+                </div>
+                <div class="color-controls">
+                  <label class="color-label">
+                    <span>Before tint:</span>
+                    <input type="color" id="ghost-tint-before" value="#ff0000" />
+                  </label>
+                  <label class="color-label">
+                    <span>After tint:</span>
+                    <input type="color" id="ghost-tint-after" value="#00ff00" />
+                  </label>
+                </div>
+              </div>
+              <span class="file-input-hint">Show annotations from adjacent frames</span>
+            </div>
+          </div>
+
           <div class="panel panel-info">
             <h2 class="panel-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

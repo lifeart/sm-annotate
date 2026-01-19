@@ -637,3 +637,72 @@ kbd {
   margin-top: 4px;
 }
 
+/* Ghost Mode Controls */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.ghost-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.ghost-controls.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.color-controls {
+  display: flex;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.color-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.color-label input[type="color"] {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-label input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.color-label input[type="color"]::-webkit-color-swatch {
+  border-radius: 3px;
+  border: none;
+}
+

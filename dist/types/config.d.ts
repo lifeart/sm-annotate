@@ -76,6 +76,25 @@ export interface FeatureFlags {
     showFrameCounter: boolean;
 }
 /**
+ * Ghost mode (onion skinning) configuration.
+ * Shows annotations from adjacent frames as semi-transparent overlays
+ * to help with animation continuity and review.
+ */
+export interface GhostConfig {
+    /** Enable ghost mode on startup */
+    enabled: boolean;
+    /** Number of previous frames to show as ghosts (1-5) */
+    framesBefore: number;
+    /** Number of next frames to show as ghosts (1-5) */
+    framesAfter: number;
+    /** Base opacity for ghost frames (0.1-0.5), decreases with distance */
+    opacity: number;
+    /** Tint color for previous frames (CSS color string, or null for original) */
+    tintBefore: string | null;
+    /** Tint color for next frames (CSS color string, or null for original) */
+    tintAfter: string | null;
+}
+/**
  * Main configuration interface for SmAnnotate
  */
 export interface SmAnnotateConfig {
@@ -89,6 +108,8 @@ export interface SmAnnotateConfig {
     toolbar: ToolbarConfig;
     /** Feature visibility flags */
     features: FeatureFlags;
+    /** Ghost mode (onion skinning) settings */
+    ghost: GhostConfig;
 }
 /**
  * Default configuration values

@@ -4,11 +4,27 @@
  * Parses OpenRV .rv (GTO text format) files and converts annotations
  * to sm-annotate FrameAnnotationV1 format.
  *
+ * Uses gto-js library for robust GTO parsing with support for:
+ * - Text (.rv) and binary (.gto) formats
+ * - Gzip compression (async only)
+ * - Proper lexer/tokenizer with error handling
+ *
  * Supported component types:
  * - pen:N:F:user - Freehand strokes (curves) and shapes
  * - text:N:F:user - Text annotations
  */
 import type { FrameAnnotationV1 } from "../core";
+/**
+ * Ghost mode (onion skinning) settings from parsed file
+ */
+export interface ParsedGhostSettings {
+    enabled: boolean;
+    framesBefore: number;
+    framesAfter: number;
+    opacity: number;
+    tintBefore: string | null;
+    tintAfter: string | null;
+}
 export interface ParsedOpenRVResult {
     /** Parsed frame annotations */
     frames: FrameAnnotationV1[];
@@ -23,6 +39,8 @@ export interface ParsedOpenRVResult {
     sessionName?: string;
     /** FPS from file (if determinable) */
     fps?: number;
+    /** Ghost mode settings (if found) */
+    ghost?: ParsedGhostSettings;
 }
 /**
  * Convert RGBA float array [r, g, b, a] to hex color string
@@ -62,3 +80,7 @@ export declare function parseOpenRV(content: string, options?: OpenRVParseOption
  * Parse OpenRV file from File object
  */
 export declare function parseOpenRVFile(file: File, options?: OpenRVParseOptions): Promise<ParsedOpenRVResult>;
+/**
+ * Parse OpenRV GTO file content asynchronously (supports gzip-compressed binary files)
+ */
+export declare function parseOpenRVAsync(content: string | ArrayBuffer | Uint8Array, options?: OpenRVParseOptions): Promise<ParsedOpenRVResult>;

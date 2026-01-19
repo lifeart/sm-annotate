@@ -8,7 +8,7 @@ import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
 import { Theme, injectThemeStyles } from "./ui/theme";
-import { SmAnnotateConfig, LayoutMode, mergeConfig } from "./config";
+import { SmAnnotateConfig, LayoutMode, mergeConfig, GhostConfig } from "./config";
 import { LayoutManager } from "./ui/layout";
 import { CollapseController } from "./ui/collapse-controller";
 import { GestureHandler, GestureState } from "./gestures/gesture-handler";
@@ -30,6 +30,25 @@ export type FrameAnnotationV1 = {
   fps: number;
   version: 1;
   shapes: IShape[];
+};
+
+/**
+ * Complete annotation session including frames and settings like ghost mode.
+ * Use this type for full save/load operations that preserve all settings.
+ */
+export type AnnotationSessionV1 = {
+  version: 1;
+  fps: number;
+  frames: FrameAnnotationV1[];
+  /** Ghost mode (onion skinning) settings */
+  ghost?: {
+    enabled: boolean;
+    framesBefore: number;
+    framesAfter: number;
+    opacity: number;
+    tintBefore: string | null;
+    tintAfter: string | null;
+  };
 };
 
 const DEFAULT_FPS = 25;
@@ -73,6 +92,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private gestureHandler: GestureHandler | null = null;
   // Current gesture transform state
   private gestureState: GestureState = { scale: 1, panX: 0, panY: 0 };
+  // Ghost mode (onion skinning) state
+  private _ghostEnabled: boolean = false;
+  // Ghost mode change callbacks for UI sync
+  private _ghostChangeCallbacks: Array<(enabled: boolean) => void> = [];
+
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
     // may float +-1 frame
@@ -266,6 +290,93 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private applyGestureTransform(state: GestureState): void {
     this.gestureState = state;
     this.redrawFullCanvas();
+  }
+
+  // ==================== GHOST MODE API ====================
+
+  /**
+   * Check if ghost mode (onion skinning) is enabled
+   */
+  get ghostEnabled(): boolean {
+    return this._ghostEnabled;
+  }
+
+  /**
+   * Enable or disable ghost mode (onion skinning)
+   */
+  setGhostEnabled(enabled: boolean): void {
+    this._ghostEnabled = enabled;
+    this.redrawFullCanvas();
+    this._notifyGhostChange();
+  }
+
+  /**
+   * Toggle ghost mode on/off
+   */
+  toggleGhost(): boolean {
+    this._ghostEnabled = !this._ghostEnabled;
+    this.redrawFullCanvas();
+    this._notifyGhostChange();
+    return this._ghostEnabled;
+  }
+
+  /**
+   * Get ghost mode configuration
+   */
+  getGhostConfig(): GhostConfig {
+    return { ...this.config.ghost };
+  }
+
+  /**
+   * Update ghost mode configuration
+   * Values are clamped to valid ranges: framesBefore/framesAfter (1-5), opacity (0.1-0.5)
+   */
+  setGhostConfig(config: Partial<GhostConfig>): void {
+    // Validate and clamp values to valid ranges
+    const validated: Partial<GhostConfig> = { ...config };
+    if (validated.framesBefore !== undefined) {
+      validated.framesBefore = Math.max(1, Math.min(5, validated.framesBefore));
+    }
+    if (validated.framesAfter !== undefined) {
+      validated.framesAfter = Math.max(1, Math.min(5, validated.framesAfter));
+    }
+    if (validated.opacity !== undefined) {
+      validated.opacity = Math.max(0.1, Math.min(0.5, validated.opacity));
+    }
+    this.config.ghost = { ...this.config.ghost, ...validated };
+    if (this._ghostEnabled) {
+      this.redrawFullCanvas();
+    }
+  }
+
+  /**
+   * Register a callback for ghost mode changes
+   * Returns an unsubscribe function
+   */
+  onGhostChange(callback: (enabled: boolean) => void): () => void {
+    this._ghostChangeCallbacks.push(callback);
+    return () => {
+      const index = this._ghostChangeCallbacks.indexOf(callback);
+      if (index !== -1) {
+        this._ghostChangeCallbacks.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * Notify all registered callbacks about ghost mode change
+   */
+  private _notifyGhostChange(): void {
+    for (const callback of this._ghostChangeCallbacks) {
+      callback(this._ghostEnabled);
+    }
+  }
+
+  /**
+   * Get shapes for a specific frame (without deserializing)
+   */
+  getShapesForFrame(frame: number): IShape[] {
+    return this.timeStack.get(frame) ?? [];
   }
 
   removeGlobalShape(shapeType: IShape['type']) {
@@ -519,6 +630,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.currentTool = this.isMobile ? null : (this.config.toolbar.defaultTool ?? null);
     // Initialize theme
     injectThemeStyles(this._theme);
+    // Initialize ghost mode from config
+    this._ghostEnabled = this.config.ghost.enabled;
 
     // Initialize layout manager and set configured layout
     this.layoutManager = new LayoutManager(this);
@@ -1075,6 +1188,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       }
     }
 
+    // Draw ghost frames (onion skinning) if enabled
+    if (this._ghostEnabled) {
+      this.drawGhostFrames();
+    }
+
     for (let shape of this.deserialize(this.shapes)) {
       this.ctx.strokeStyle = shape.strokeStyle;
       this.ctx.fillStyle = shape.fillStyle;
@@ -1097,6 +1215,74 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.ctx.fillStyle = prevSettings.fillStyle;
     this.ctx.lineWidth = prevSettings.lineWidth;
     this.ctx.globalAlpha = prevSettings.globalAlpha;
+  }
+
+  /**
+   * Draw ghost frames (onion skinning) for previous and next frames
+   * Shows annotations from adjacent frames with reduced opacity
+   */
+  private drawGhostFrames(): void {
+    const currentFrame = this.activeTimeFrame;
+
+    // Early return if current frame is out of bounds
+    if (currentFrame < 1 || currentFrame > this.totalFrames) {
+      return;
+    }
+
+    const { framesBefore, framesAfter, opacity, tintBefore, tintAfter } = this.config.ghost;
+
+    // Draw previous frames (furthest to closest)
+    for (let i = framesBefore; i >= 1; i--) {
+      const frame = currentFrame - i;
+      if (frame < 1) continue;
+
+      const shapes = this.getShapesForFrame(frame);
+      if (shapes.length === 0) continue;
+
+      // Opacity decreases with distance from current frame
+      const frameOpacity = opacity * (1 - (i - 1) / framesBefore);
+      this.drawGhostShapes(shapes, frameOpacity, tintBefore);
+    }
+
+    // Draw next frames (closest to furthest)
+    for (let i = 1; i <= framesAfter; i++) {
+      const frame = currentFrame + i;
+      if (frame > this.totalFrames) continue;
+
+      const shapes = this.getShapesForFrame(frame);
+      if (shapes.length === 0) continue;
+
+      // Opacity decreases with distance from current frame
+      const frameOpacity = opacity * (1 - (i - 1) / framesAfter);
+      this.drawGhostShapes(shapes, frameOpacity, tintAfter);
+    }
+  }
+
+  /**
+   * Draw shapes with ghost styling (reduced opacity and optional tint)
+   */
+  private drawGhostShapes(shapes: IShape[], baseOpacity: number, tint: string | null): void {
+    for (const shape of this.deserialize(shapes)) {
+      // Apply ghost opacity (multiply with shape's own opacity)
+      const shapeOpacity = shape.opacity ?? 1;
+      this.ctx.globalAlpha = shapeOpacity * baseOpacity;
+
+      // Apply tint if specified, otherwise use original color
+      if (tint) {
+        this.ctx.strokeStyle = tint;
+        this.ctx.fillStyle = tint;
+      } else {
+        this.ctx.strokeStyle = shape.strokeStyle;
+        this.ctx.fillStyle = shape.fillStyle;
+      }
+      this.ctx.lineWidth = shape.lineWidth;
+
+      try {
+        this.pluginForTool(shape.type).draw(shape);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 
   clearCanvas() {
@@ -1227,6 +1413,54 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       };
     });
     return result;
+  }
+
+  /**
+   * Save complete annotation session including frames and ghost settings.
+   * Use this for full save/load operations that preserve all settings.
+   */
+  saveSession(): AnnotationSessionV1 {
+    return {
+      version: 1,
+      fps: this.fps,
+      frames: this.saveAllFrames(),
+      ghost: {
+        enabled: this._ghostEnabled,
+        framesBefore: this.config.ghost.framesBefore,
+        framesAfter: this.config.ghost.framesAfter,
+        opacity: this.config.ghost.opacity,
+        tintBefore: this.config.ghost.tintBefore,
+        tintAfter: this.config.ghost.tintAfter,
+      },
+    };
+  }
+
+  /**
+   * Load complete annotation session including frames and ghost settings.
+   */
+  loadSession(session: AnnotationSessionV1): void {
+    // Load frames
+    this.loadAllFrames(session.frames);
+
+    // Load ghost settings if present
+    if (session.ghost) {
+      this._ghostEnabled = session.ghost.enabled;
+      this.config.ghost = {
+        enabled: session.ghost.enabled,
+        framesBefore: session.ghost.framesBefore,
+        framesAfter: session.ghost.framesAfter,
+        opacity: session.ghost.opacity,
+        tintBefore: session.ghost.tintBefore,
+        tintAfter: session.ghost.tintAfter,
+      };
+    }
+
+    // Set FPS if provided
+    if (session.fps) {
+      this.setFrameRate(session.fps);
+    }
+
+    this.redrawFullCanvas();
   }
 
   getAnnotationFrame(event: PointerEvent) {

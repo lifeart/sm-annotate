@@ -18,6 +18,7 @@ export {
   downloadAsOpenRVBinary,
   hexToRGBA,
   type OpenRVExportOptions,
+  type GhostExportSettings,
 } from './openrv';
 
 // OpenRV Parser/Importer
@@ -27,5 +28,6 @@ export {
   parseOpenRVFile,
   rgbaToHex,
   type ParsedOpenRVResult,
+  type ParsedGhostSettings,
   type OpenRVParseOptions,
 } from './openrv-parser';

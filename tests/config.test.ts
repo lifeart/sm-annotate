@@ -123,6 +123,14 @@ describe('config', () => {
           showProgressBar: false,
           showFrameCounter: false,
         },
+        ghost: {
+          enabled: true,
+          framesBefore: 3,
+          framesAfter: 2,
+          opacity: 0.4,
+          tintBefore: 'rgba(255, 128, 0, 0.3)',
+          tintAfter: 'rgba(0, 255, 128, 0.3)',
+        },
       };
 
       const result = mergeConfig(customConfig);
@@ -150,6 +158,49 @@ describe('config', () => {
       const originalLayout = defaultConfig.layout;
       mergeConfig({ layout: 'minimal' });
       expect(defaultConfig.layout).toBe(originalLayout);
+    });
+
+    it('should merge ghost settings partially', () => {
+      const result = mergeConfig({
+        ghost: { enabled: true, framesBefore: 5 },
+      } as Partial<SmAnnotateConfig>);
+
+      expect(result.ghost.enabled).toBe(true);
+      expect(result.ghost.framesBefore).toBe(5);
+      expect(result.ghost.framesAfter).toBe(1); // default preserved
+      expect(result.ghost.opacity).toBe(0.3); // default preserved
+      expect(result.ghost.tintBefore).toBe('rgba(255, 0, 0, 0.3)'); // default preserved
+      expect(result.ghost.tintAfter).toBe('rgba(0, 128, 0, 0.3)'); // default preserved
+    });
+
+    it('should allow null tint colors for ghost mode', () => {
+      const result = mergeConfig({
+        ghost: { tintBefore: null, tintAfter: null },
+      } as Partial<SmAnnotateConfig>);
+
+      expect(result.ghost.tintBefore).toBe(null);
+      expect(result.ghost.tintAfter).toBe(null);
+      expect(result.ghost.enabled).toBe(false); // default preserved
+    });
+  });
+
+  describe('defaultConfig ghost settings', () => {
+    it('should have ghost mode disabled by default', () => {
+      expect(defaultConfig.ghost.enabled).toBe(false);
+    });
+
+    it('should have sensible default ghost frame counts', () => {
+      expect(defaultConfig.ghost.framesBefore).toBe(2);
+      expect(defaultConfig.ghost.framesAfter).toBe(1);
+    });
+
+    it('should have sensible default ghost opacity', () => {
+      expect(defaultConfig.ghost.opacity).toBe(0.3);
+    });
+
+    it('should have tint colors for previous and next frames', () => {
+      expect(defaultConfig.ghost.tintBefore).toBeTruthy();
+      expect(defaultConfig.ghost.tintAfter).toBeTruthy();
     });
   });
 });

@@ -4,12 +4,30 @@ import { ToolPlugin } from "./plugins/base";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
 import { Theme } from "./ui/theme";
-import { SmAnnotateConfig, LayoutMode } from "./config";
+import { SmAnnotateConfig, LayoutMode, GhostConfig } from "./config";
 export type FrameAnnotationV1 = {
     frame: number;
     fps: number;
     version: 1;
     shapes: IShape[];
+};
+/**
+ * Complete annotation session including frames and settings like ghost mode.
+ * Use this type for full save/load operations that preserve all settings.
+ */
+export type AnnotationSessionV1 = {
+    version: 1;
+    fps: number;
+    frames: FrameAnnotationV1[];
+    /** Ghost mode (onion skinning) settings */
+    ghost?: {
+        enabled: boolean;
+        framesBefore: number;
+        framesAfter: number;
+        opacity: number;
+        tintBefore: string | null;
+        tintAfter: string | null;
+    };
 };
 export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     uiContainer: HTMLDivElement;
@@ -44,6 +62,7 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     private collapseController;
     private gestureHandler;
     private gestureState;
+    private _ghostEnabled;
     prevFrame(): void;
     nextFrame(): void;
     /**
@@ -105,6 +124,30 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
      * Apply gesture transform to canvas
      */
     private applyGestureTransform;
+    /**
+     * Check if ghost mode (onion skinning) is enabled
+     */
+    get ghostEnabled(): boolean;
+    /**
+     * Enable or disable ghost mode (onion skinning)
+     */
+    setGhostEnabled(enabled: boolean): void;
+    /**
+     * Toggle ghost mode on/off
+     */
+    toggleGhost(): boolean;
+    /**
+     * Get ghost mode configuration
+     */
+    getGhostConfig(): GhostConfig;
+    /**
+     * Update ghost mode configuration
+     */
+    setGhostConfig(config: Partial<GhostConfig>): void;
+    /**
+     * Get shapes for a specific frame (without deserializing)
+     */
+    getShapesForFrame(frame: number): IShape[];
     removeGlobalShape(shapeType: IShape['type']): void;
     addGlobalShape(shape: IShape): void;
     get selectedColor(): string;
@@ -199,6 +242,14 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     handleMouseUp(event: PointerEvent): void;
     focusOnMediaNode(): void;
     drawShapesOverlay(): void;
+    /**
+     * Draw ghost frames (onion skinning) for previous and next frames
+     */
+    private drawGhostFrames;
+    /**
+     * Draw shapes with ghost styling (reduced opacity and optional tint)
+     */
+    private drawGhostShapes;
     clearCanvas(): void;
     frameToDataUrl(): string | null;
     redrawFullCanvas(): void;
@@ -213,6 +264,15 @@ export declare class AnnotationTool extends AnnotationToolBase<IShape> {
     loadAllFrames(frames: FrameAnnotationV1[]): void;
     appendFrames(frames: FrameAnnotationV1[]): void;
     saveAllFrames(): FrameAnnotationV1[];
+    /**
+     * Save complete annotation session including frames and ghost settings.
+     * Use this for full save/load operations that preserve all settings.
+     */
+    saveSession(): AnnotationSessionV1;
+    /**
+     * Load complete annotation session including frames and ghost settings.
+     */
+    loadSession(session: AnnotationSessionV1): void;
     getAnnotationFrame(event: PointerEvent): number | null;
     get totalFrames(): number;
     /**
