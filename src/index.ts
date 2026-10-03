@@ -22,6 +22,8 @@ export type {
   FeatureFlags,
   ToolbarPosition,
   GhostConfig,
+  CompareConfig,
+  CompareMode,
 } from './config';
 export { defaultConfig } from './config';
 

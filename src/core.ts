@@ -8,7 +8,13 @@ import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
 import { Theme, injectThemeStyles } from "./ui/theme";
-import { SmAnnotateConfig, LayoutMode, mergeConfig, GhostConfig } from "./config";
+import {
+  SmAnnotateConfig,
+  LayoutMode,
+  mergeConfig,
+  GhostConfig,
+  CompareMode,
+} from "./config";
 import { LayoutManager } from "./ui/layout";
 import { CollapseController } from "./ui/collapse-controller";
 import { GestureHandler, GestureState } from "./gestures/gesture-handler";
@@ -52,6 +58,7 @@ export type AnnotationSessionV1 = {
 };
 
 const DEFAULT_FPS = 25;
+const COMPARE_MODES: CompareMode[] = ["wipe", "overlay", "difference"];
 export class AnnotationTool extends AnnotationToolBase<IShape> {
   uiContainer!: HTMLDivElement;
   playerControlsContainer!: HTMLDivElement;
@@ -96,6 +103,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private _ghostEnabled: boolean = false;
   // Ghost mode change callbacks for UI sync
   private _ghostChangeCallbacks: Array<(enabled: boolean) => void> = [];
+  // Compare mode change callbacks for UI sync
+  private _compareModeChangeCallbacks: Array<(mode: CompareMode) => void> = [];
 
   prevFrame() {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=66631
@@ -370,6 +379,81 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     for (const callback of this._ghostChangeCallbacks) {
       callback(this._ghostEnabled);
     }
+  }
+
+  // ==================== COMPARE MODE API ====================
+
+  /**
+   * How the reference video is layered over the main video in compare mode
+   */
+  get compareMode(): CompareMode {
+    return this.config.compare.mode;
+  }
+
+  /**
+   * Switch compare mode: "wipe" (split view), "overlay" (full-frame layer at
+   * overlayOpacity) or "difference" (colored pixel difference)
+   */
+  setCompareMode(mode: CompareMode): void {
+    if (!COMPARE_MODES.includes(mode) || mode === this.config.compare.mode) {
+      return;
+    }
+    this.config.compare = { ...this.config.compare, mode };
+    this.redrawFullCanvas();
+    for (const callback of this._compareModeChangeCallbacks) {
+      callback(mode);
+    }
+  }
+
+  /**
+   * Switch to the next compare mode (wipe -> overlay -> difference -> wipe)
+   */
+  cycleCompareMode(): CompareMode {
+    const index = COMPARE_MODES.indexOf(this.config.compare.mode);
+    this.setCompareMode(COMPARE_MODES[(index + 1) % COMPARE_MODES.length]);
+    return this.config.compare.mode;
+  }
+
+  /**
+   * Summed RGB difference (0-765) at or below which pixels count as equal
+   * in "difference" compare mode
+   */
+  get differenceThreshold(): number {
+    return this.config.compare.differenceThreshold;
+  }
+
+  setDifferenceThreshold(threshold: number): void {
+    const value = Math.max(0, Math.min(765, Math.round(threshold)));
+    if (Number.isNaN(value)) {
+      return;
+    }
+    this.config.compare = { ...this.config.compare, differenceThreshold: value };
+    if (this.config.compare.mode === "difference") {
+      this.redrawFullCanvas();
+    }
+  }
+
+  /**
+   * Whether a compare (video layering) view is currently shown
+   */
+  get isCompareActive(): boolean {
+    return this.globalShapes.some(
+      (s) => s.type === "compare" && !(s as { disabled?: boolean }).disabled
+    );
+  }
+
+  /**
+   * Register a callback for compare mode changes
+   * Returns an unsubscribe function
+   */
+  onCompareModeChange(callback: (mode: CompareMode) => void): () => void {
+    this._compareModeChangeCallbacks.push(callback);
+    return () => {
+      const index = this._compareModeChangeCallbacks.indexOf(callback);
+      if (index !== -1) {
+        this._compareModeChangeCallbacks.splice(index, 1);
+      }
+    };
   }
 
   /**
@@ -1013,12 +1097,22 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   hideButton(tool: Tool) {
-    const button = this.getButtonForTool(tool);
-    button.style.display = "none";
+    for (const button of this.getButtonsLinkedToTool(tool)) {
+      button.style.display = "none";
+    }
   }
   showButton(tool: Tool) {
-    const button = this.getButtonForTool(tool);
-    button.style.display = "";
+    for (const button of this.getButtonsLinkedToTool(tool)) {
+      button.style.display = "";
+    }
+  }
+  // The tool's own button plus controls that only make sense alongside it
+  // (marked with data-linked-tool)
+  private getButtonsLinkedToTool(tool: Tool): HTMLButtonElement[] {
+    return this.buttons.filter(
+      (button) =>
+        button.dataset.tool === tool || button.dataset.linkedTool === tool
+    );
   }
 
   addSingletonShape(shape: IShape) {

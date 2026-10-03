@@ -23,7 +23,7 @@ Demo: [lifeart.github.io/sm-annotate](https://lifeart.github.io/sm-annotate/)
 * 📊 Progress bar with annotation markers (visible on hover during playback)
 * ⏭️ Jump to next/previous annotated frame (long press on frame navigation buttons)
 * 💾 Saving the current frame or all frames with annotations
-* 🎬 Video overlay comparison mode (split view with adjustable opacity)
+* 🎬 Video comparison with layering modes: split view, full-frame overlay with adjustable opacity, and colored difference
 * 🔊 Audio waveform visualization
 * 🖼️ Paste images from clipboard
 * 🌓 Dark/Light theme toggle
@@ -439,6 +439,33 @@ const unsubscribe = annotationTool.onGhostChange((enabled) => {
 - Settings are preserved in OpenRV .rv file exports
 - Toolbar toggle button syncs with programmatic changes
 
+### Video Comparison Modes
+
+With a reference video loaded (`addReferenceVideoByURL`), the compare tool layers it over the main video in one of three modes:
+
+| Mode | What you see |
+| --- | --- |
+| `wipe` (default) | Split view: main video left of the divider, reference right of it. Drag on the canvas to move the divider. |
+| `overlay` | Reference drawn over the whole main frame at `overlayOpacity`, aspect-correct and centered. |
+| `difference` | Colored difference: grayscale where both videos match, red where the main video is brighter, blue where the reference is brighter. |
+
+```javascript
+annotationTool.setCompareMode('difference');
+const mode = annotationTool.cycleCompareMode(); // wipe -> overlay -> difference
+
+// Pixels whose summed RGB difference (0-765) is at or below the threshold count as equal.
+// Raise it to hide video compression noise (default: 30).
+annotationTool.setDifferenceThreshold(30);
+
+// Listen for mode changes (returns unsubscribe function)
+const unsubscribe = annotationTool.onCompareModeChange((mode) => console.log(mode));
+
+// Or set the initial mode through config
+new SmAnnotate(video, { compare: { mode: 'overlay', differenceThreshold: 30 } });
+```
+
+The difference is computed on a downscaled buffer (max 1280px wide, 640px on mobile) to keep playback smooth. For cross-origin videos served without CORS headers the browser blocks pixel reads, so the tool falls back to a plain `difference` blend.
+
 ## Hotkeys
 
 ### General
@@ -497,7 +524,8 @@ const unsubscribe = annotationTool.onGhostChange((enabled) => {
 | Eraser | Remove annotations |
 | Move | Reposition, resize, and rotate shapes; drag rotation handle to rotate, drag center point to change rotation pivot |
 | Selection | Crop and capture video frame area |
-| Compare | Split-view video comparison |
+| Compare | Video comparison against the reference video |
+| Compare mode | Cycle comparison mode: split view, overlay, difference |
 | Opacity | Adjust overlay or selected shape opacity (off/25%/50%/70%/100%) |
 | Ghost | Toggle ghost mode (onion skinning) to see adjacent frame annotations |
 | Theme | Toggle between dark and light mode |

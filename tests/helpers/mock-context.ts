@@ -102,6 +102,8 @@ export interface MockAnnotationTool {
   deserialize: Mock;
   pluginForTool: Mock;
   overlayOpacity: number;
+  compareMode: 'wipe' | 'overlay' | 'difference';
+  differenceThreshold: number;
   pixelRatio: number;
   isMobile: boolean;
   currentTool: string | null;
@@ -148,6 +150,8 @@ export function createMockAnnotationTool(ctx: MockCanvasContext): MockAnnotation
       save: vi.fn(),
     })),
     overlayOpacity: 1,
+    compareMode: 'wipe',
+    differenceThreshold: 30,
     pixelRatio: 1,
     isMobile: false,
     currentTool: null,
