@@ -406,7 +406,7 @@ describe('TextToolPlugin', () => {
         const input = popup.querySelector('input') as HTMLInputElement;
 
         input.value = 'Enter test';
-        const enterEvent = new KeyboardEvent('keyup', { key: 'Enter' });
+        const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
         input.dispatchEvent(enterEvent);
 
         expect(mockAnnotationTool.addShape).toHaveBeenCalled();
@@ -425,7 +425,7 @@ describe('TextToolPlugin', () => {
         expect(mockParent.children.length).toBe(1);
 
         const input = mockParent.querySelector('input') as HTMLInputElement;
-        const escEvent = new KeyboardEvent('keyup', { key: 'Escape' });
+        const escEvent = new KeyboardEvent('keydown', { key: 'Escape' });
         input.dispatchEvent(escEvent);
 
         expect(mockParent.children.length).toBe(0);

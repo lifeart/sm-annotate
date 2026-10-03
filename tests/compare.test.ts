@@ -269,7 +269,7 @@ describe('CompareToolPlugin', () => {
 
       expect(mockCtx.beginPath).toHaveBeenCalled();
       expect(mockCtx.moveTo).toHaveBeenCalledWith(400, 0);
-      expect(mockCtx.lineTo).toHaveBeenCalledWith(400, 800);
+      expect(mockCtx.lineTo).toHaveBeenCalledWith(400, 600); // full canvas height
       expect(mockCtx.stroke).toHaveBeenCalled();
     });
   });
@@ -376,6 +376,7 @@ describe('CompareToolPlugin', () => {
         getFrameNumberBySignature: vi.fn(),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
         getAudioFingerprint: vi.fn(),
       };
@@ -414,6 +415,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => null),
       };
       mockCtx.drawImage = vi.fn();
@@ -451,6 +453,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1280, height: 720 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockCtx.drawImage = vi.fn();
@@ -487,6 +490,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockCtx.drawImage = vi.fn();
@@ -527,6 +531,7 @@ describe('CompareToolPlugin', () => {
         getFrameNumberBySignature: vi.fn(() => 32), // Return frame 2 away
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 640, height: 480 })),
         getAudioFingerprint: vi.fn(() => [0.1, 0.2, 0.3]),
       };
@@ -566,6 +571,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1920, height: 1200 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockCtx.drawImage = vi.fn();
@@ -603,6 +609,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1200 })),
       };
       mockCtx.drawImage = vi.fn();
@@ -640,6 +647,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1280, height: 720 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockCtx.drawImage = vi.fn();
@@ -677,6 +685,7 @@ describe('CompareToolPlugin', () => {
         getFrame: vi.fn(() => ({ width: 1920, height: 1080 })),
       };
       mockAnnotationTool.videoFrameBuffer = {
+        frameNumberFromTime: vi.fn(() => 30),
         getFrame: vi.fn(() => ({ width: 1280, height: 720 })),
       };
       mockCtx.drawImage = vi.fn();

@@ -2,6 +2,7 @@ import { Point, douglasPeucker } from "./utils/douglas-peucker";
 import { BasePlugin, IShapeBase, ToolPlugin } from "./base";
 import type { ShapeMap } from ".";
 import { colorMap } from "./utils/color-map";
+import { isEditableTarget } from "../events/utils";
 
 export type IPoint = {
   x: number;
@@ -32,7 +33,7 @@ export class CurveToolPlugin
   }
   onKeyPress = (e: KeyboardEvent) => {
     const key = e.key;
-    if (key === null || key === " " || e.isComposing) {
+    if (key === null || key === " " || e.isComposing || isEditableTarget(e.target)) {
       return;
     }
     const maybeNumeric = Number(key);

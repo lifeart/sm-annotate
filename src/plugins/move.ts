@@ -8,6 +8,8 @@ import type { ILine } from "./line";
 import type { IArrow } from "./arrow";
 import type { ICurve } from "./curve";
 import type { IText } from "./text";
+import { copyShapeForUndo } from "./utils/copy-shape";
+import { isEditableTarget } from "../events/utils";
 import type { ISelection } from "./selection";
 
 export interface IMove extends IShapeBase {
@@ -61,6 +63,17 @@ export class MoveToolPlugin
   }
 
   /**
+   * Push a snapshot of the current frame's shapes onto the undo stack.
+   * Shapes are copied (not just the array) because rotate/resize/opacity
+   * edits mutate shape objects in place.
+   */
+  private pushUndoSnapshot(): void {
+    this.annotationTool.undoStack.push(
+      this.annotationTool.shapes.map((s) => copyShapeForUndo(s))
+    );
+  }
+
+  /**
    * Get the currently selected shape, if any
    */
   getSelectedShape(): IShape | null {
@@ -78,7 +91,7 @@ export class MoveToolPlugin
       return false;
     }
     // Save current state for undo
-    this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+    this.pushUndoSnapshot();
     // Update opacity
     this.annotationTool.shapes[this.selectedShapeIndex].opacity = opacity;
     // Redraw canvas
@@ -108,6 +121,9 @@ export class MoveToolPlugin
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
+    if (isEditableTarget(event.target)) {
+      return;
+    }
     // Delete selected shape with Backspace or Delete key
     if ((event.key === 'Backspace' || event.key === 'Delete') && this.selectedShapeIndex >= 0) {
       event.preventDefault();
@@ -155,11 +171,10 @@ export class MoveToolPlugin
     }
 
     // Save for undo
-    this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+    this.pushUndoSnapshot();
 
-    // Add the new shape
-    const serializedShape = this.annotationTool.serialize([clonedShape])[0];
-    this.annotationTool.shapes.push(serializedShape);
+    // Add the new shape (offsetShape already wrote normalized coords back)
+    this.annotationTool.shapes.push(clonedShape);
 
     // Select the new shape
     this.selectedShapeIndex = this.annotationTool.shapes.length - 1;
@@ -705,9 +720,23 @@ export class MoveToolPlugin
       }
       case 'circle': {
         const circleShape = shape as ICircle;
-        const radius = Math.min(newWidth, newHeight) / 2;
-        const centerX = newX + newWidth / 2;
-        const centerY = newY + newHeight / 2;
+        // Edge handles scale along their own axis, anchored on the opposite
+        // edge; corner handles use the smaller side so the circle fits the box.
+        let diameter: number;
+        if (handle === 'e' || handle === 'w') {
+          diameter = newWidth;
+        } else if (handle === 'n' || handle === 's') {
+          diameter = newHeight;
+        } else {
+          diameter = Math.min(newWidth, newHeight);
+        }
+        const radius = diameter / 2;
+        let centerX = newX + newWidth / 2;
+        let centerY = newY + newHeight / 2;
+        if (handle.includes('e')) centerX = newX + radius;
+        if (handle.includes('w')) centerX = newX + newWidth - radius;
+        if (handle.includes('s')) centerY = newY + radius;
+        if (handle.includes('n')) centerY = newY + newHeight - radius;
         circleShape.x = centerX / this.annotationTool.canvasWidth;
         circleShape.y = centerY / this.annotationTool.canvasHeight;
         circleShape.radius = radius / this.annotationTool.canvasWidth;
@@ -783,7 +812,7 @@ export class MoveToolPlugin
       return;
     }
     // Save current state for undo
-    this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+    this.pushUndoSnapshot();
     // Remove the selected shape
     this.annotationTool.shapes.splice(this.selectedShapeIndex, 1);
     // Reset selection
@@ -807,7 +836,7 @@ export class MoveToolPlugin
           this.rotationShapeStartAngle = shape.rotation ?? 0;
           this.isDrawing = true;
           // Save for undo
-          this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+          this.pushUndoSnapshot();
           this.annotationTool.canvas.style.cursor = 'grabbing';
           return;
         }
@@ -821,7 +850,7 @@ export class MoveToolPlugin
       this.startY = y;
       this.isDrawing = true;
       // Save for undo
-      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.pushUndoSnapshot();
       this.annotationTool.canvas.style.cursor = 'move';
       return;
     }
@@ -839,7 +868,7 @@ export class MoveToolPlugin
         // Store deep copy of original shape for resize calculations
         this.resizeOriginalShape = this.cloneShape(selectedShape);
         // Save for undo
-        this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+        this.pushUndoSnapshot();
       }
       this.annotationTool.canvas.style.cursor = this.getCursorForHandle(handle);
       return;
@@ -861,6 +890,8 @@ export class MoveToolPlugin
     if (!foundShape) {
       // Clicked on empty area - deselect
       this.selectedShapeIndex = -1;
+      this.shape = null;
+      this.shapeIndex = -1;
       this.annotationTool.redrawFullCanvas();
     }
     if (!this.shape) {
@@ -1061,6 +1092,13 @@ export class MoveToolPlugin
         .pluginForTool(shapeCopy.type)
         .move(shapeCopy as ShapeMap[typeof shapeCopy.type], dx, dy);
 
+      // A custom rotation pivot (normalized) must travel with the shape,
+      // otherwise a rotated shape moves along the rotated axis.
+      if (item.rotationCenterX !== undefined && item.rotationCenterY !== undefined) {
+        item.rotationCenterX += dx / this.annotationTool.canvasWidth;
+        item.rotationCenterY += dy / this.annotationTool.canvasHeight;
+      }
+
       this.lastDrawnShape = item;
 
       this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
@@ -1098,6 +1136,8 @@ export class MoveToolPlugin
 
     if (!this.isDrawing || !this.lastDrawnShape) {
       this.isDrawing = false;
+      this.isScale = false;
+      this.shape = null;
       this.annotationTool.redrawFullCanvas();
       return;
     }

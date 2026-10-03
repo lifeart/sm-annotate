@@ -124,7 +124,7 @@ export class CompareToolPlugin
   drawDelimiter(shape: ICompare) {
     this.ctx.beginPath();
     this.ctx.moveTo(shape.x, 0);
-    this.ctx.lineTo(shape.x, this.annotationTool.canvasWidth);
+    this.ctx.lineTo(shape.x, this.annotationTool.canvasHeight);
     this.ctx.stroke();
   }
 
@@ -149,12 +149,16 @@ export class CompareToolPlugin
     this.ctx.globalAlpha = this.leftOpacity;
     // const filter = this.ctx.filter;
 
+    // Each buffer maps time to frames with its own fps
     const frameNumber =
-      this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+      this.annotationTool.videoFrameBuffer?.frameNumberFromTime(
         video1.currentTime
       ) ?? 1;
 
-    let referenceVideoFrameNumber = frameNumber;
+    let referenceVideoFrameNumber =
+      this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+        video1.currentTime
+      ) ?? frameNumber;
 
     // Use audio-based sync when reference video is significantly larger
     const AUDIO_SYNC_ENABLED =
@@ -165,10 +169,10 @@ export class CompareToolPlugin
         this.annotationTool.referenceVideoFrameBuffer?.getFrameNumberBySignature(
           this.annotationTool.videoFrameBuffer?.getAudioFingerprint(frameNumber) ??
             null,
-          frameNumber
-        ) ?? frameNumber;
+          referenceVideoFrameNumber
+        ) ?? referenceVideoFrameNumber;
 
-      const fDiff = Math.abs(frameNumber - bestFrame);
+      const fDiff = Math.abs(referenceVideoFrameNumber - bestFrame);
 
       if (fDiff >= 1 && fDiff <= 3) {
         referenceVideoFrameNumber = bestFrame;

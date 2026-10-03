@@ -9,7 +9,12 @@ export class Point {
         dy * this.x - dx * this.y + p2.x * p1.y - p2.y * p1.x
       );
       const denominator = Math.sqrt(dy * dy + dx * dx);
-  
+
+      // Degenerate segment (closed stroke): fall back to point distance
+      if (denominator === 0) {
+        return Math.hypot(this.x - p1.x, this.y - p1.y);
+      }
+
       return numerator / denominator;
     }
   }
