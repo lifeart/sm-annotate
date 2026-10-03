@@ -1386,6 +1386,21 @@
     }
     return event.pointerType === "touch" && event.isPrimary === false;
   }
+  function isEditableTarget(target) {
+    if (!target || !target.tagName) {
+      return false;
+    }
+    const el = target;
+    const tag = el.tagName;
+    if (tag === "TEXTAREA" || tag === "SELECT") {
+      return true;
+    }
+    if (tag === "INPUT") {
+      const type = (el.type || "text").toLowerCase();
+      return !["button", "checkbox", "color", "radio", "range", "reset", "submit", "file", "image"].includes(type);
+    }
+    return el.isContentEditable === true;
+  }
 
   // src/events/document-click.ts
   function onDocumentClick(event, tool) {
@@ -1444,6 +1459,9 @@
     if (!isTargetBelongsToVideo(event, tool)) {
       return;
     }
+    if (isEditableTarget(event.target) || event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
     const video2 = tool.videoElement;
     if (video2.tagName !== "VIDEO") {
       return;
@@ -1464,6 +1482,7 @@
       if (video2.paused) {
         video2.play().then(() => {
           tool.redrawFullCanvas();
+        }).catch(() => {
         });
       } else {
         video2.pause();
@@ -1761,7 +1780,7 @@
       this.addEvent(video2, "pause", () => {
         this.show();
       });
-      this.addEvent(video2, "seek", () => {
+      this.addEvent(video2, "seeked", () => {
         if (video2.paused) {
           this.show();
         }
@@ -1795,10 +1814,6 @@
       });
       this.addEvent(document, "keydown", (event) => {
         onDocumentKeydown(event, this);
-      });
-      this.addEvent(document.body.querySelector("div"), "drop", (event) => {
-        if (event.dataTransfer?.types) {
-        }
       });
       const fullscreenButton = createFullscreenButton(this);
       playerControls.appendChild(fullscreenButton);
@@ -2163,6 +2178,9 @@
         dy * this.x - dx * this.y + p2.x * p1.y - p2.y * p1.x
       );
       const denominator = Math.sqrt(dy * dy + dx * dx);
+      if (denominator === 0) {
+        return Math.hypot(this.x - p1.x, this.y - p1.y);
+      }
       return numerator / denominator;
     }
   };
@@ -2203,7 +2221,7 @@
       this.zoomCanvas = null;
       this.onKeyPress = (e) => {
         const key = e.key;
-        if (key === null || key === " " || e.isComposing) {
+        if (key === null || key === " " || e.isComposing || isEditableTarget(e.target)) {
           return;
         }
         const maybeNumeric = Number(key);
@@ -2788,10 +2806,15 @@
       okButton.addEventListener("mouseout", () => {
         okButton.style.opacity = "1";
       });
+      let finished = false;
       const closePopup = () => {
+        finished = true;
         this.destroyPopup();
       };
       const handleSave = () => {
+        if (finished) {
+          return;
+        }
         const inputText = input.value.trim();
         if (inputText) {
           this.save({
@@ -2808,6 +2831,9 @@
         closePopup();
       };
       const handleKeyDown = (e) => {
+        if (e.isComposing) {
+          return;
+        }
         if (e.key === "Escape") {
           closePopup();
         } else if (e.key === "Enter") {
@@ -2817,7 +2843,7 @@
       this.handleKeyDown = handleKeyDown;
       okButton.onclick = handleSave;
       cancelButton.onclick = closePopup;
-      input.onkeyup = handleKeyDown;
+      input.onkeydown = handleKeyDown;
       document.addEventListener("keydown", handleKeyDown);
       buttonContainer.appendChild(cancelButton);
       buttonContainer.appendChild(okButton);
@@ -2928,6 +2954,16 @@
     }
   };
 
+  // src/plugins/utils/copy-shape.ts
+  function copyShapeForUndo(shape) {
+    const copy = { ...shape };
+    const points = shape.points;
+    if (Array.isArray(points)) {
+      copy.points = points.map((p2) => ({ ...p2 }));
+    }
+    return copy;
+  }
+
   // src/plugins/move.ts
   var MoveToolPlugin = class extends BasePlugin {
     constructor() {
@@ -2964,6 +3000,16 @@
       return JSON.parse(JSON.stringify(shape));
     }
     /**
+     * Push a snapshot of the current frame's shapes onto the undo stack.
+     * Shapes are copied (not just the array) because rotate/resize/opacity
+     * edits mutate shape objects in place.
+     */
+    pushUndoSnapshot() {
+      this.annotationTool.undoStack.push(
+        this.annotationTool.shapes.map((s) => copyShapeForUndo(s))
+      );
+    }
+    /**
      * Get the currently selected shape, if any
      */
     getSelectedShape() {
@@ -2979,7 +3025,7 @@
       if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
         return false;
       }
-      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.pushUndoSnapshot();
       this.annotationTool.shapes[this.selectedShapeIndex].opacity = opacity;
       this.annotationTool.redrawFullCanvas();
       return true;
@@ -3004,6 +3050,9 @@
       this.selectedShapeIndex = -1;
     }
     handleKeyDown(event) {
+      if (isEditableTarget(event.target)) {
+        return;
+      }
       if ((event.key === "Backspace" || event.key === "Delete") && this.selectedShapeIndex >= 0) {
         event.preventDefault();
         this.deleteSelectedShape();
@@ -3037,9 +3086,8 @@
       if (bounds) {
         this.offsetShape(clonedShape, offset, offset);
       }
-      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
-      const serializedShape = this.annotationTool.serialize([clonedShape])[0];
-      this.annotationTool.shapes.push(serializedShape);
+      this.pushUndoSnapshot();
+      this.annotationTool.shapes.push(clonedShape);
       this.selectedShapeIndex = this.annotationTool.shapes.length - 1;
       this.annotationTool.redrawFullCanvas();
     }
@@ -3478,9 +3526,21 @@
         }
         case "circle": {
           const circleShape = shape;
-          const radius = Math.min(newWidth, newHeight) / 2;
-          const centerX = newX + newWidth / 2;
-          const centerY = newY + newHeight / 2;
+          let diameter;
+          if (handle === "e" || handle === "w") {
+            diameter = newWidth;
+          } else if (handle === "n" || handle === "s") {
+            diameter = newHeight;
+          } else {
+            diameter = Math.min(newWidth, newHeight);
+          }
+          const radius = diameter / 2;
+          let centerX = newX + newWidth / 2;
+          let centerY = newY + newHeight / 2;
+          if (handle.includes("e")) centerX = newX + radius;
+          if (handle.includes("w")) centerX = newX + newWidth - radius;
+          if (handle.includes("s")) centerY = newY + radius;
+          if (handle.includes("n")) centerY = newY + newHeight - radius;
           circleShape.x = centerX / this.annotationTool.canvasWidth;
           circleShape.y = centerY / this.annotationTool.canvasHeight;
           circleShape.radius = radius / this.annotationTool.canvasWidth;
@@ -3550,7 +3610,7 @@
       if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
         return;
       }
-      this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+      this.pushUndoSnapshot();
       this.annotationTool.shapes.splice(this.selectedShapeIndex, 1);
       this.selectedShapeIndex = -1;
       this.shapeIndex = -1;
@@ -3568,7 +3628,7 @@
             this.rotationStartAngle = this.calculateAngle(center.x, center.y, x, y);
             this.rotationShapeStartAngle = shape.rotation ?? 0;
             this.isDrawing = true;
-            this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+            this.pushUndoSnapshot();
             this.annotationTool.canvas.style.cursor = "grabbing";
             return;
           }
@@ -3579,7 +3639,7 @@
         this.startX = x;
         this.startY = y;
         this.isDrawing = true;
-        this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+        this.pushUndoSnapshot();
         this.annotationTool.canvas.style.cursor = "move";
         return;
       }
@@ -3593,7 +3653,7 @@
         if (selectedShape) {
           this.resizeStartBounds = this.getShapeBounds(selectedShape);
           this.resizeOriginalShape = this.cloneShape(selectedShape);
-          this.annotationTool.undoStack.push([...this.annotationTool.shapes]);
+          this.pushUndoSnapshot();
         }
         this.annotationTool.canvas.style.cursor = this.getCursorForHandle(handle);
         return;
@@ -3612,6 +3672,8 @@
       }
       if (!foundShape) {
         this.selectedShapeIndex = -1;
+        this.shape = null;
+        this.shapeIndex = -1;
         this.annotationTool.redrawFullCanvas();
       }
       if (!this.shape) {
@@ -3750,6 +3812,10 @@
         }
       } else {
         const item = this.annotationTool.pluginForTool(shapeCopy.type).move(shapeCopy, dx, dy);
+        if (item.rotationCenterX !== void 0 && item.rotationCenterY !== void 0) {
+          item.rotationCenterX += dx / this.annotationTool.canvasWidth;
+          item.rotationCenterY += dy / this.annotationTool.canvasHeight;
+        }
         this.lastDrawnShape = item;
         this.annotationTool.pluginForTool(shapeCopy.type).draw(item);
       }
@@ -3780,6 +3846,8 @@
       }
       if (!this.isDrawing || !this.lastDrawnShape) {
         this.isDrawing = false;
+        this.isScale = false;
+        this.shape = null;
         this.annotationTool.redrawFullCanvas();
         return;
       }
@@ -3989,7 +4057,7 @@
     drawDelimiter(shape) {
       this.ctx.beginPath();
       this.ctx.moveTo(shape.x, 0);
-      this.ctx.lineTo(shape.x, this.annotationTool.canvasWidth);
+      this.ctx.lineTo(shape.x, this.annotationTool.canvasHeight);
       this.ctx.stroke();
     }
     drawShape(shape) {
@@ -4006,17 +4074,19 @@
       const widthDiff = video2.videoWidth - video1.videoWidth;
       const isMobile = this.annotationTool.isMobile;
       this.ctx.globalAlpha = this.leftOpacity;
-      const frameNumber = this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+      const frameNumber = this.annotationTool.videoFrameBuffer?.frameNumberFromTime(
         video1.currentTime
       ) ?? 1;
-      let referenceVideoFrameNumber = frameNumber;
+      let referenceVideoFrameNumber = this.annotationTool.referenceVideoFrameBuffer?.frameNumberFromTime(
+        video1.currentTime
+      ) ?? frameNumber;
       const AUDIO_SYNC_ENABLED = widthDiff > video1.videoWidth && heightDiff > video1.videoHeight && !this.annotationTool.isMobile;
       if (AUDIO_SYNC_ENABLED) {
         const bestFrame = this.annotationTool.referenceVideoFrameBuffer?.getFrameNumberBySignature(
           this.annotationTool.videoFrameBuffer?.getAudioFingerprint(frameNumber) ?? null,
-          frameNumber
-        ) ?? frameNumber;
-        const fDiff = Math.abs(frameNumber - bestFrame);
+          referenceVideoFrameNumber
+        ) ?? referenceVideoFrameNumber;
+        const fDiff = Math.abs(referenceVideoFrameNumber - bestFrame);
         if (fDiff >= 1 && fDiff <= 3) {
           referenceVideoFrameNumber = bestFrame;
         }
@@ -4365,6 +4435,8 @@
       const tempCtx = tempCanvas.getContext("2d");
       const video2 = this.annotationTool.videoElement;
       if (!(video2 instanceof HTMLVideoElement)) {
+        this.isDrawing = false;
+        this.annotationTool.redrawFullCanvas();
         return;
       }
       const videoAspectRatio = video2.videoWidth / video2.videoHeight;
@@ -5965,8 +6037,18 @@
     async setVideoUrl(url, fps = this.fps) {
       if (this.videoElement instanceof HTMLImageElement) return;
       const video2 = this.videoElement;
+      const metadataLoaded = new Promise((resolve) => {
+        const done = () => {
+          video2.removeEventListener("loadedmetadata", done);
+          video2.removeEventListener("error", done);
+          resolve();
+        };
+        video2.addEventListener("loadedmetadata", done);
+        video2.addEventListener("error", done);
+      });
       video2.src = url.toString();
-      await this.videoElement.load();
+      video2.load();
+      await metadataLoaded;
       this.setFrameRate(fps);
       if (this.videoFrameBuffer) {
         this.videoFrameBuffer.destroy();
@@ -6099,6 +6181,7 @@
       }
       this.withVideo((video2) => {
         video2.requestVideoFrameCallback((_, metadata) => {
+          if (this.isDestroyed) return;
           if (!this.isCanvasInitialized) {
             this._setCanvasSize();
           }
@@ -6114,6 +6197,7 @@
       });
     }
     init(videoElement) {
+      this.isDestroyed = false;
       this.videoElement = videoElement;
       this.setVideoStyles();
       this.initFrameCounter();
@@ -6124,7 +6208,11 @@
       this.setCanvasSize();
     }
     onKeyDown(event) {
+      if (isEditableTarget(event.target) || event.shiftKey || event.altKey) {
+        return;
+      }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
         this.handleUndo();
       }
     }
@@ -6150,6 +6238,7 @@
         URL.revokeObjectURL(this.referenceVideoBlobUrl);
         this.referenceVideoBlobUrl = null;
       }
+      this.plannedFn = null;
       this.currentTool = null;
       this.plugins.forEach((plugin) => plugin.reset());
       this.annotatedFrameCoordinates = [];
@@ -6157,8 +6246,8 @@
       const wrapper = this.strokeSizePicker.parentElement;
       wrapper?.parentNode?.removeChild(wrapper);
       if (this.referenceVideoElement) {
-        const referenceVideoWrapper = this.referenceVideoElement.parentElement;
-        referenceVideoWrapper?.parentNode?.removeChild(referenceVideoWrapper);
+        this.referenceVideoElement.pause();
+        this.referenceVideoElement.remove();
         this.referenceVideoElement = null;
       }
       const colorPickerWrapper = this.colorPicker.parentElement;
@@ -6199,11 +6288,17 @@
       this.gestureState = { scale: 1, panX: 0, panY: 0 };
     }
     _setCanvasSize() {
+      const prevInlineWidth = this.videoElement.style.width;
+      const prevInlineHeight = this.videoElement.style.height;
+      this.videoElement.style.width = "";
+      this.videoElement.style.height = "";
       const style = getComputedStyle(this.videoElement);
       const rawWidth = parseInt(style.width, 10);
       const video2 = this.videoElement;
       const trueAspectRatio = video2.videoWidth / video2.videoHeight;
       if (isNaN(rawWidth) || !video2.videoWidth || !video2.videoHeight) {
+        this.videoElement.style.width = prevInlineWidth;
+        this.videoElement.style.height = prevInlineHeight;
         this.isCanvasInitialized = false;
         this.setCanvasSettings();
         return false;
@@ -6372,6 +6467,12 @@
     handleMouseDown(event) {
       event.preventDefault();
       this.isMouseDown = true;
+      if (event.pointerId !== void 0) {
+        try {
+          this.canvas.setPointerCapture?.(event.pointerId);
+        } catch {
+        }
+      }
       if (isMultiTouch(event)) return;
       if (this.gestureHandler?.hasTwoFingers()) return;
       const genericFrame = this.frameFromProgressBar(event, true);
@@ -6600,10 +6701,21 @@
       } catch {
       }
     }
+    /**
+     * Record the current shapes of a frame so the next change can be undone.
+     */
+    pushUndoForFrame(frame) {
+      if (!this.undoTimeStack.has(frame)) {
+        this.undoTimeStack.set(frame, []);
+      }
+      this.undoTimeStack.get(frame).push([...this.timeStack.get(frame) || []]);
+    }
     replaceFrame(frame, shapes) {
+      this.pushUndoForFrame(frame);
       this.timeStack.set(frame, this.parseShapes(this.stringifyShapes(shapes)));
     }
     addShapesToFrame(frame, shapes) {
+      this.pushUndoForFrame(frame);
       const existingShapes = this.timeStack.get(frame) || [];
       this.timeStack.set(frame, [
         ...existingShapes,
@@ -6611,7 +6723,14 @@
       ]);
     }
     setFrameRate(fps) {
-      this.destructors.find((d) => d.name === "frameRateDetector")?.();
+      if (!Number.isFinite(fps) || fps <= 0) {
+        return;
+      }
+      const detectorIndex = this.destructors.findIndex((d) => d.name === "frameRateDetector");
+      if (detectorIndex !== -1) {
+        const [destructor] = this.destructors.splice(detectorIndex, 1);
+        destructor();
+      }
       this.fps = fps;
     }
     stringifyShapes(shapes) {
@@ -6705,15 +6824,14 @@
     loadSession(session) {
       this.loadAllFrames(session.frames);
       if (session.ghost) {
-        this._ghostEnabled = session.ghost.enabled;
-        this.config.ghost = {
-          enabled: session.ghost.enabled,
+        this.setGhostConfig({
           framesBefore: session.ghost.framesBefore,
           framesAfter: session.ghost.framesAfter,
           opacity: session.ghost.opacity,
           tintBefore: session.ghost.tintBefore,
           tintAfter: session.ghost.tintAfter
-        };
+        });
+        this.setGhostEnabled(session.ghost.enabled);
       }
       if (session.fps) {
         this.setFrameRate(session.fps);
@@ -6811,9 +6929,11 @@
   function addFrameSquareOverlay(frame = this.activeTimeFrame) {
     this.ctx.save();
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    const width = 50;
-    const height = 30;
     const fontSize = 20;
+    const label = `${frame}`.padStart(3, "0");
+    this.ctx.font = `${fontSize}px sans-serif`;
+    const width = Math.max(50, Math.ceil(this.ctx.measureText(label).width) + 20);
+    const height = 30;
     this.ctx.fillRect(
       this.canvasWidth - width,
       this.canvasHeight - height,
@@ -6821,10 +6941,9 @@
       height
     );
     this.ctx.fillStyle = "white";
-    this.ctx.font = `${fontSize}px sans-serif`;
     this.ctx.fillText(
-      `${frame}`.padStart(3, "0"),
-      this.canvasWidth - 40,
+      label,
+      this.canvasWidth - width + 10,
       this.canvasHeight - 7
     );
     this.ctx.restore();
@@ -6918,7 +7037,7 @@
     this.ctx.restore();
   }
 
-  // ../gto-js/dist/gto.js
+  // node_modules/gto-js/dist/gto.js
   var k = /* @__PURE__ */ ((i) => (i[i.BinaryGTO = 0] = "BinaryGTO", i[i.CompressedGTO = 1] = "CompressedGTO", i[i.TextGTO = 2] = "TextGTO", i))(k || {});
   var p = /* @__PURE__ */ ((i) => (i[i.Int = 0] = "Int", i[i.Float = 1] = "Float", i[i.Double = 2] = "Double", i[i.Half = 3] = "Half", i[i.String = 4] = "String", i[i.Boolean = 5] = "Boolean", i[i.Short = 6] = "Short", i[i.Byte = 7] = "Byte", i[i.Int64 = 8] = "Int64", i))(p || {});
   var N = {
@@ -9201,7 +9320,10 @@ ${"    ".repeat(this._indent)}]`;
       r = parseInt(cleanHex.substring(0, 2), 16) / 255;
       g = parseInt(cleanHex.substring(2, 4), 16) / 255;
       b2 = parseInt(cleanHex.substring(4, 6), 16) / 255;
-      opacity = parseInt(cleanHex.substring(6, 8), 16) / 255;
+      opacity *= parseInt(cleanHex.substring(6, 8), 16) / 255;
+    }
+    if (![r, g, b2].every(Number.isFinite)) {
+      return [1, 0, 0, opacity];
     }
     return [r, g, b2, opacity];
   }
@@ -9214,7 +9336,7 @@ ${"    ".repeat(this._indent)}]`;
             parseInt(match[1]) / 255,
             parseInt(match[2]) / 255,
             parseInt(match[3]) / 255,
-            match[4] ? parseFloat(match[4]) : opacity
+            match[4] ? parseFloat(match[4]) * opacity : opacity
           ];
         }
       }
@@ -9222,28 +9344,28 @@ ${"    ".repeat(this._indent)}]`;
     }
     return [1, 0, 0, opacity];
   }
-  function rotatePoint(point, centerX, centerY, angle) {
+  function rotatePoint(point, centerX, centerY, angle, width = 1, height = 1) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    const dx = point.x - centerX;
-    const dy = point.y - centerY;
+    const dx = (point.x - centerX) * width;
+    const dy = (point.y - centerY) * height;
     return {
-      x: centerX + dx * cos - dy * sin,
-      y: centerY + dx * sin + dy * cos
+      x: centerX + (dx * cos - dy * sin) / width,
+      y: centerY + (dx * sin + dy * cos) / height
     };
   }
-  function applyRotationToPoints(points, shape, defaultCenterX, defaultCenterY) {
+  function applyRotationToPoints(points, shape, defaultCenterX, defaultCenterY, width, height) {
     if (!shape.rotation) {
       return points;
     }
     const centerX = shape.rotationCenterX !== void 0 ? shape.rotationCenterX : defaultCenterX;
     const centerY = shape.rotationCenterY !== void 0 ? shape.rotationCenterY : defaultCenterY;
-    return points.map((p2) => rotatePoint(p2, centerX, centerY, shape.rotation));
+    return points.map((p2) => rotatePoint(p2, centerX, centerY, shape.rotation, width, height));
   }
   function convertSmAnnotateToOpenRV(smX, smY, aspectRatio) {
     return {
-      x: smX * 2 - 1,
-      y: (1 - smY * 2) / aspectRatio
+      x: (smX - 0.5) * aspectRatio,
+      y: 0.5 - smY
     };
   }
   function curveToPenData(shape, id, frame, width, height) {
@@ -9256,7 +9378,7 @@ ${"    ".repeat(this._indent)}]`;
     }
     centerX /= shape.points.length;
     centerY /= shape.points.length;
-    const points = applyRotationToPoints(shape.points, shape, centerX, centerY);
+    const points = applyRotationToPoints(shape.points, shape, centerX, centerY, width, height);
     const normalizedWidth = shape.lineWidth / height;
     const widthArray = new Array(points.length).fill(normalizedWidth);
     const convertedPoints = points.map((p2) => {
@@ -9281,7 +9403,7 @@ ${"    ".repeat(this._indent)}]`;
       { x: shape.x1, y: shape.y1 },
       { x: shape.x2, y: shape.y2 }
     ];
-    points = applyRotationToPoints(points, shape, centerX, centerY);
+    points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
     const normalizedWidth = shape.lineWidth / height;
     const widthArray = new Array(points.length).fill(normalizedWidth);
     const convertedPoints = points.map((p2) => {
@@ -9307,26 +9429,25 @@ ${"    ".repeat(this._indent)}]`;
       { x: shape.x2, y: shape.y2 }
     ];
     const headLengthPx = 10 + 2.5 * shape.lineWidth;
-    const headLength = headLengthPx / ((width + height) / 2);
     const headAngle = Math.PI / 6;
-    const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
+    const angle = Math.atan2((shape.y2 - shape.y1) * height, (shape.x2 - shape.x1) * width);
     let arrowHead1 = [
       { x: shape.x2, y: shape.y2 },
       {
-        x: shape.x2 - headLength * Math.cos(angle + headAngle),
-        y: shape.y2 - headLength * Math.sin(angle + headAngle)
+        x: shape.x2 - headLengthPx * Math.cos(angle + headAngle) / width,
+        y: shape.y2 - headLengthPx * Math.sin(angle + headAngle) / height
       }
     ];
     let arrowHead2 = [
       { x: shape.x2, y: shape.y2 },
       {
-        x: shape.x2 - headLength * Math.cos(angle - headAngle),
-        y: shape.y2 - headLength * Math.sin(angle - headAngle)
+        x: shape.x2 - headLengthPx * Math.cos(angle - headAngle) / width,
+        y: shape.y2 - headLengthPx * Math.sin(angle - headAngle) / height
       }
     ];
-    linePoints = applyRotationToPoints(linePoints, shape, centerX, centerY);
-    arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY);
-    arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY);
+    linePoints = applyRotationToPoints(linePoints, shape, centerX, centerY, width, height);
+    arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY, width, height);
+    arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY, width, height);
     const normalizedWidth = shape.lineWidth / height;
     const widthArray2 = new Array(2).fill(normalizedWidth);
     const convertPoints = (pts) => pts.map((p2) => {
@@ -9373,7 +9494,7 @@ ${"    ".repeat(this._indent)}]`;
       { x: shape.x, y: shape.y }
       // Close the path
     ];
-    points = applyRotationToPoints(points, shape, centerX, centerY);
+    points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
     const normalizedWidth = shape.lineWidth / height;
     const widthArray = new Array(points.length).fill(normalizedWidth);
     const convertedPoints = points.map((p2) => {
@@ -9398,11 +9519,12 @@ ${"    ".repeat(this._indent)}]`;
     for (let i = 0; i <= segments; i++) {
       const angle = i / segments * Math.PI * 2;
       points.push({
+        // radius is normalized by canvas width; scale Y so the circle stays round
         x: shape.x + Math.cos(angle) * shape.radius,
-        y: shape.y + Math.sin(angle) * shape.radius
+        y: shape.y + Math.sin(angle) * shape.radius * (width / height)
       });
     }
-    points = applyRotationToPoints(points, shape, centerX, centerY);
+    points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
     const normalizedWidth = shape.lineWidth / height;
     const widthArray = new Array(points.length).fill(normalizedWidth);
     const convertedPoints = points.map((p2) => {
@@ -9427,7 +9549,7 @@ ${"    ".repeat(this._indent)}]`;
     if (shape.rotation) {
       const centerX = shape.rotationCenterX ?? shape.x;
       const centerY = shape.rotationCenterY ?? shape.y;
-      const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation);
+      const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation, width, height);
       posX = rotated.x;
       posY = rotated.y;
       textRotation = shape.rotation * 180 / Math.PI;
@@ -9543,7 +9665,7 @@ ${"    ".repeat(this._indent)}]`;
       "GTOa (4)",
       "",
       "# Generated by sm-annotate OpenRV exporter",
-      `# Media: ${mediaPath}`,
+      `# Media: ${mediaPath.replace(/[\r\n]+/g, " ")}`,
       `# Resolution: ${width}x${height}`,
       ""
     ].join("\n");
@@ -9573,8 +9695,8 @@ ${"    ".repeat(this._indent)}]`;
   }
   function convertOpenRVToSmAnnotate(openrvX, openrvY, aspectRatio) {
     return {
-      x: (openrvX + 1) / 2,
-      y: (1 - openrvY * aspectRatio) / 2
+      x: openrvX / aspectRatio + 0.5,
+      y: 0.5 - openrvY
     };
   }
   function applyCoordinateTransform(x, y, scale, offset) {
@@ -10933,8 +11055,8 @@ ${"    ".repeat(this._indent)}]`;
       reloadRvAnnotations();
     });
     rvResetButton.addEventListener("click", () => {
-      rvScaleInput.value = "0.85";
-      rvScaleValue.textContent = "0.85";
+      rvScaleInput.value = "1";
+      rvScaleValue.textContent = "1";
       rvOffsetXInput.value = "0";
       rvOffsetXValue.textContent = "0";
       rvOffsetYInput.value = "0";

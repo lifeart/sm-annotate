@@ -1,7 +1,7 @@
 // https://codepen.io/lifeart/pen/xxyxKYr
 
 import { AnnotationToolBase } from "./base";
-import { isMultiTouch } from "./events/utils";
+import { isEditableTarget, isMultiTouch } from "./events/utils";
 import { IShape, ShapeMap, Tool, plugins, PluginInstances } from "./plugins";
 import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
@@ -521,8 +521,19 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   async setVideoUrl(url: string, fps = this.fps) {
     if (this.videoElement instanceof HTMLImageElement) return;
     const video = this.videoElement as HTMLVideoElement;
+    // load() returns nothing; wait for metadata so size/duration are known
+    const metadataLoaded = new Promise<void>((resolve) => {
+      const done = () => {
+        video.removeEventListener("loadedmetadata", done);
+        video.removeEventListener("error", done);
+        resolve();
+      };
+      video.addEventListener("loadedmetadata", done);
+      video.addEventListener("error", done);
+    });
     video.src = url.toString();
-    await this.videoElement.load();
+    video.load();
+    await metadataLoaded;
     this.setFrameRate(fps);
     if (this.videoFrameBuffer) {
       this.videoFrameBuffer.destroy();
@@ -683,6 +694,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     this.withVideo((video) => {
       video.requestVideoFrameCallback((_: number, metadata) => {
+        // A callback scheduled before destroy() can still fire afterwards
+        if (this.isDestroyed) return;
         if (!this.isCanvasInitialized) {
           this._setCanvasSize();
         }
@@ -699,6 +712,8 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   init(videoElement: HTMLVideoElement | HTMLImageElement) {
+    // Re-init after destroy(): the frame counter below bails while destroyed
+    this.isDestroyed = false;
     this.videoElement = videoElement;
     this.setVideoStyles();
     this.initFrameCounter();
@@ -710,7 +725,12 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   onKeyDown(event: KeyboardEvent) {
+    // Leave Ctrl+Z to text fields, and don't treat Ctrl+Shift+Z (redo) as undo
+    if (isEditableTarget(event.target) || event.shiftKey || event.altKey) {
+      return;
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+      event.preventDefault();
       this.handleUndo();
     }
   }
@@ -743,6 +763,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       this.referenceVideoBlobUrl = null;
     }
 
+    this.plannedFn = null;
     this.currentTool = null;
     this.plugins.forEach((plugin) => plugin.reset());
     this.annotatedFrameCoordinates = [];
@@ -752,10 +773,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const wrapper = this.strokeSizePicker.parentElement;
     wrapper?.parentNode?.removeChild(wrapper);
 
-    // remove reference video
+    // remove reference video (it is inserted as a sibling of the host video,
+    // so its parent is the host's container and must not be removed)
     if (this.referenceVideoElement) {
-      const referenceVideoWrapper = this.referenceVideoElement.parentElement;
-      referenceVideoWrapper?.parentNode?.removeChild(referenceVideoWrapper);
+      this.referenceVideoElement.pause();
+      this.referenceVideoElement.remove();
       this.referenceVideoElement = null;
     }
 
@@ -813,12 +835,20 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   enforcedCanvasSize: { width: number; height: number } | null = null;
 
   _setCanvasSize() {
+    // Measure the layout width without our own inline size from a previous
+    // call, otherwise the canvas could never follow container resizes.
+    const prevInlineWidth = this.videoElement.style.width;
+    const prevInlineHeight = this.videoElement.style.height;
+    this.videoElement.style.width = '';
+    this.videoElement.style.height = '';
     const style = getComputedStyle(this.videoElement);
     const rawWidth = parseInt(style.width, 10);
     const video = this.videoElement as HTMLVideoElement;
     const trueAspectRatio = video.videoWidth / video.videoHeight;
 
     if (isNaN(rawWidth) || !video.videoWidth || !video.videoHeight) {
+        this.videoElement.style.width = prevInlineWidth;
+        this.videoElement.style.height = prevInlineHeight;
         this.isCanvasInitialized = false;
         this.setCanvasSettings();
         return false;
@@ -1027,6 +1057,14 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   handleMouseDown(event: PointerEvent) {
     event.preventDefault();
     this.isMouseDown = true;
+    // Keep receiving pointerup when a drag is released outside the canvas
+    if (event.pointerId !== undefined) {
+      try {
+        this.canvas.setPointerCapture?.(event.pointerId);
+      } catch {
+        // Pointer may already be released
+      }
+    }
     if (isMultiTouch(event)) return;
 
     // Skip single-touch events when two-finger gesture is active
@@ -1325,11 +1363,23 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
   }
 
+  /**
+   * Record the current shapes of a frame so the next change can be undone.
+   */
+  pushUndoForFrame(frame: number) {
+    if (!this.undoTimeStack.has(frame)) {
+      this.undoTimeStack.set(frame, []);
+    }
+    this.undoTimeStack.get(frame)!.push([...(this.timeStack.get(frame) || [])]);
+  }
+
   replaceFrame(frame: number, shapes: IShape[]) {
+    this.pushUndoForFrame(frame);
     this.timeStack.set(frame, this.parseShapes(this.stringifyShapes(shapes)));
   }
 
   addShapesToFrame(frame: number, shapes: IShape[]) {
+    this.pushUndoForFrame(frame);
     const existingShapes = this.timeStack.get(frame) || [];
     this.timeStack.set(frame, [
       ...existingShapes,
@@ -1338,7 +1388,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
 
   setFrameRate(fps: number) {
-    this.destructors.find((d) => d.name === "frameRateDetector")?.();
+    // Ignore invalid rates (0, NaN, Infinity) - they break frame/time math
+    if (!Number.isFinite(fps) || fps <= 0) {
+      return;
+    }
+    const detectorIndex = this.destructors.findIndex((d) => d.name === "frameRateDetector");
+    if (detectorIndex !== -1) {
+      const [destructor] = this.destructors.splice(detectorIndex, 1);
+      destructor();
+    }
     this.fps = fps;
   }
 
@@ -1443,16 +1501,16 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.loadAllFrames(session.frames);
 
     // Load ghost settings if present
+    // Go through the public setters so values are clamped and the UI is notified
     if (session.ghost) {
-      this._ghostEnabled = session.ghost.enabled;
-      this.config.ghost = {
-        enabled: session.ghost.enabled,
+      this.setGhostConfig({
         framesBefore: session.ghost.framesBefore,
         framesAfter: session.ghost.framesAfter,
         opacity: session.ghost.opacity,
         tintBefore: session.ghost.tintBefore,
         tintAfter: session.ghost.tintAfter,
-      };
+      });
+      this.setGhostEnabled(session.ghost.enabled);
     }
 
     // Set FPS if provided

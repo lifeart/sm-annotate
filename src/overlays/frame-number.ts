@@ -6,10 +6,12 @@ export function addFrameSquareOverlay(
 ) {
   this.ctx.save();
   this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  // put it on right bottom corner
-  const width = 50;
-  const height = 30;
+  // put it on right bottom corner, wide enough for 4+ digit frame numbers
   const fontSize = 20;
+  const label = `${frame}`.padStart(3, "0");
+  this.ctx.font = `${fontSize}px sans-serif`;
+  const width = Math.max(50, Math.ceil(this.ctx.measureText(label).width) + 20);
+  const height = 30;
   this.ctx.fillRect(
     this.canvasWidth - width,
     this.canvasHeight - height,
@@ -17,10 +19,9 @@ export function addFrameSquareOverlay(
     height
   );
   this.ctx.fillStyle = "white";
-  this.ctx.font = `${fontSize}px sans-serif`;
   this.ctx.fillText(
-    `${frame}`.padStart(3, "0"),
-    this.canvasWidth - 40,
+    label,
+    this.canvasWidth - width + 10,
     this.canvasHeight - 7
   );
   this.ctx.restore();
