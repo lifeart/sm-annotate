@@ -103,6 +103,30 @@ export interface GhostConfig {
 }
 
 /**
+ * How the reference video is layered over the main video in compare mode.
+ *
+ * - `wipe`: split view, main video left of the divider, reference right of it
+ * - `overlay`: reference drawn over the whole main frame at the overlay opacity
+ * - `difference`: colored difference of the two videos (red where the main
+ *   video is brighter, blue where the reference is brighter, grayscale where
+ *   they match)
+ */
+export type CompareMode = 'wipe' | 'overlay' | 'difference';
+
+/**
+ * Video compare (layering) configuration.
+ */
+export interface CompareConfig {
+  /** Initial compare mode */
+  mode: CompareMode;
+  /**
+   * Summed RGB difference (0-765) at or below which pixels count as equal in
+   * `difference` mode. Raise it to hide video compression noise.
+   */
+  differenceThreshold: number;
+}
+
+/**
  * Main configuration interface for SmAnnotate
  */
 export interface SmAnnotateConfig {
@@ -118,6 +142,8 @@ export interface SmAnnotateConfig {
   features: FeatureFlags;
   /** Ghost mode (onion skinning) settings */
   ghost: GhostConfig;
+  /** Video compare (layering) settings */
+  compare: CompareConfig;
 }
 
 /**
@@ -151,6 +177,10 @@ export const defaultConfig: SmAnnotateConfig = {
     tintBefore: 'rgba(255, 0, 0, 0.3)',
     tintAfter: 'rgba(0, 128, 0, 0.3)',
   },
+  compare: {
+    mode: 'wipe',
+    differenceThreshold: 30,
+  },
 };
 
 /**
@@ -179,6 +209,10 @@ export function mergeConfig(partial?: Partial<SmAnnotateConfig>): SmAnnotateConf
     ghost: {
       ...defaultConfig.ghost,
       ...partial.ghost,
+    },
+    compare: {
+      ...defaultConfig.compare,
+      ...partial.compare,
     },
   };
 }

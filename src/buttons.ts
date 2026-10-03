@@ -1,6 +1,7 @@
 import type { AnnotationTool } from "./core";
 import { createDownloadCurrentFrameButton } from "./ui/download-current-frame-button";
 import { createGhostToggleButton } from "./ui/ghost-toggle-button";
+import { createCompareModeButton } from "./ui/compare-mode-button";
 import { createMuteUnmuteButton } from "./ui/mute-unmute-button";
 import { createOverlayOpacityButton } from "./ui/overlay-opacity-button";
 import { createPlayPauseButton } from "./ui/play-pause-button";
@@ -208,6 +209,7 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
     Button.uiContainer,
     "Compare videos"
   );
+  createCompareModeButton(tool);
 
   createOverlayOpacityButton(tool);
   createGhostToggleButton(tool);

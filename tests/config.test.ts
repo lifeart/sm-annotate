@@ -131,6 +131,10 @@ describe('config', () => {
           tintBefore: 'rgba(255, 128, 0, 0.3)',
           tintAfter: 'rgba(0, 255, 128, 0.3)',
         },
+        compare: {
+          mode: 'difference',
+          differenceThreshold: 12,
+        },
       };
 
       const result = mergeConfig(customConfig);

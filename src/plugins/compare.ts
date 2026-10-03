@@ -1,5 +1,12 @@
 import type { ShapeMap } from ".";
 import { IShapeBase, BasePlugin, ToolPlugin } from "./base";
+import { computeDifferenceImage, fitRect } from "./utils/image-difference";
+
+type FrameSource = ImageBitmap;
+
+// Max width of the offscreen buffer the difference is computed on
+const DIFF_MAX_WIDTH = 1280;
+const DIFF_MAX_WIDTH_MOBILE = 640;
 
 export interface ICompare extends IShapeBase {
   type: "compare";
@@ -15,6 +22,13 @@ export class CompareToolPlugin
   comparisonLine = 0;
   leftOpacity = 1;
   isDrawing = false;
+  // Share of pixels that differed in the last rendered difference frame (0-1)
+  differentPixelRatio = 0;
+  private diffCanvas: HTMLCanvasElement | null = null;
+  private diffCtx: CanvasRenderingContext2D | null = null;
+  private diffImage: ImageData | null = null;
+  // Set once pixel readback fails (tainted canvas) so it isn't retried per frame
+  private diffReadbackBlocked = false;
   get rightOpacity() {
     return this.annotationTool.overlayOpacity;
   }
@@ -25,6 +39,7 @@ export class CompareToolPlugin
   onActivate(): void {
     this.comparisonLine = this.annotationTool.canvasWidth / 2;
     this.leftOpacity = 1;
+    this.diffReadbackBlocked = false;
     this.annotationTool.canvas.style.cursor = "col-resize";
   }
   onDeactivate(): void {
@@ -74,7 +89,9 @@ export class CompareToolPlugin
     } as ICompare;
 
     this.draw(item);
-    this.drawDelimiter(item);
+    if (this.annotationTool.compareMode === "wipe") {
+      this.drawDelimiter(item);
+    }
   }
   onPointerUp() {
     if (!this.isDrawing) {
@@ -135,19 +152,28 @@ export class CompareToolPlugin
       return;
     }
     const globalAlpha = this.ctx.globalAlpha;
-    const w = this.annotationTool.canvasWidth;
-    const h = this.annotationTool.canvasHeight;
-    const x = shape.x;
+    const { videoFrame, referenceVideoFrame } = this.getFrames(video1, video2);
 
+    switch (this.annotationTool.compareMode) {
+      case "overlay":
+        this.drawOverlay(video1, video2, videoFrame, referenceVideoFrame);
+        break;
+      case "difference":
+        this.drawDifference(video1, video2, videoFrame, referenceVideoFrame);
+        break;
+      default:
+        this.drawWipe(shape, video1, video2, videoFrame, referenceVideoFrame);
+    }
+
+    this.ctx.globalAlpha = globalAlpha;
+  }
+
+  /**
+   * Resolve the main and reference frames shown for the current time.
+   */
+  getFrames(video1: HTMLVideoElement, video2: HTMLVideoElement) {
     const heightDiff = video2.videoHeight - video1.videoHeight;
     const widthDiff = video2.videoWidth - video1.videoWidth;
-
-    const isMobile = this.annotationTool.isMobile;
-
-    // const strokeStyle = this.ctx.strokeStyle;
-
-    this.ctx.globalAlpha = this.leftOpacity;
-    // const filter = this.ctx.filter;
 
     // Each buffer maps time to frames with its own fps
     const frameNumber =
@@ -182,10 +208,224 @@ export class CompareToolPlugin
     const referenceVideoFrame =
       this.annotationTool.referenceVideoFrameBuffer?.getFrame(
         referenceVideoFrameNumber
-      );
+      ) ?? null;
 
     const videoFrame =
-      this.annotationTool.videoFrameBuffer?.getFrame(frameNumber);
+      this.annotationTool.videoFrameBuffer?.getFrame(frameNumber) ?? null;
+
+    return { videoFrame, referenceVideoFrame };
+  }
+
+  /**
+   * Draw the main video frame over the whole canvas.
+   */
+  drawMainFrame(video1: HTMLVideoElement, videoFrame: FrameSource | null) {
+    const w = this.annotationTool.canvasWidth;
+    const h = this.annotationTool.canvasHeight;
+    const vw = videoFrame ? videoFrame.width : video1.videoWidth;
+    const vh = videoFrame ? videoFrame.height : video1.videoHeight;
+    this.ctx.globalAlpha = this.leftOpacity;
+    this.ctx.drawImage(videoFrame ?? video1, 0, 0, vw, vh, 0, 0, w, h);
+  }
+
+  /**
+   * Where the reference frame lands on the canvas: aspect-correct and centered.
+   */
+  referenceRect(video2: HTMLVideoElement, referenceVideoFrame: FrameSource) {
+    return fitRect(
+      video2.videoWidth || referenceVideoFrame.width,
+      video2.videoHeight || referenceVideoFrame.height,
+      this.annotationTool.canvasWidth,
+      this.annotationTool.canvasHeight
+    );
+  }
+
+  /**
+   * Overlay mode: reference video layered over the full main frame at the
+   * overlay opacity.
+   */
+  drawOverlay(
+    video1: HTMLVideoElement,
+    video2: HTMLVideoElement,
+    videoFrame: FrameSource | null,
+    referenceVideoFrame: FrameSource | null
+  ) {
+    this.drawMainFrame(video1, videoFrame);
+    if (!referenceVideoFrame || this.rightOpacity <= 0) {
+      return;
+    }
+    const rect = this.referenceRect(video2, referenceVideoFrame);
+    this.ctx.globalAlpha = this.rightOpacity;
+    this.ctx.drawImage(
+      referenceVideoFrame,
+      0,
+      0,
+      referenceVideoFrame.width,
+      referenceVideoFrame.height,
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height
+    );
+  }
+
+  /**
+   * Difference mode: grayscale where both videos match, red where the main
+   * video is brighter, blue where the reference is brighter. The result is
+   * layered over the main frame at the overlay opacity.
+   */
+  drawDifference(
+    video1: HTMLVideoElement,
+    video2: HTMLVideoElement,
+    videoFrame: FrameSource | null,
+    referenceVideoFrame: FrameSource | null
+  ) {
+    this.drawMainFrame(video1, videoFrame);
+    if (!referenceVideoFrame || this.rightOpacity <= 0) {
+      return;
+    }
+    const w = this.annotationTool.canvasWidth;
+    const h = this.annotationTool.canvasHeight;
+    const rect = this.referenceRect(video2, referenceVideoFrame);
+
+    const diffCanvas = this.renderDifference(
+      videoFrame ?? video1,
+      videoFrame ? videoFrame.width : video1.videoWidth,
+      videoFrame ? videoFrame.height : video1.videoHeight,
+      referenceVideoFrame,
+      rect,
+      w,
+      h
+    );
+
+    this.ctx.globalAlpha = this.rightOpacity;
+    if (diffCanvas) {
+      this.ctx.drawImage(
+        diffCanvas,
+        0,
+        0,
+        diffCanvas.width,
+        diffCanvas.height,
+        0,
+        0,
+        w,
+        h
+      );
+      return;
+    }
+    // Pixels can't be read (e.g. cross-origin video without CORS):
+    // fall back to the GPU difference blend, which needs no readback.
+    const composite = this.ctx.globalCompositeOperation;
+    this.ctx.globalCompositeOperation = "difference";
+    this.ctx.drawImage(
+      referenceVideoFrame,
+      0,
+      0,
+      referenceVideoFrame.width,
+      referenceVideoFrame.height,
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height
+    );
+    this.ctx.globalCompositeOperation = composite;
+  }
+
+  /**
+   * Render the colored difference into an offscreen canvas, downscaled to at
+   * most DIFF_MAX_WIDTH pixels wide to keep per-frame cost bounded.
+   * Returns null when pixel data can't be read.
+   */
+  renderDifference(
+    mainSource: CanvasImageSource,
+    mainWidth: number,
+    mainHeight: number,
+    referenceSource: FrameSource,
+    rect: { x: number; y: number; width: number; height: number },
+    w: number,
+    h: number
+  ): HTMLCanvasElement | null {
+    const maxWidth = this.annotationTool.isMobile
+      ? DIFF_MAX_WIDTH_MOBILE
+      : DIFF_MAX_WIDTH;
+    const scale = Math.min(1, maxWidth / w);
+    const dw = Math.max(1, Math.round(w * scale));
+    const dh = Math.max(1, Math.round(h * scale));
+
+    if (!this.diffCanvas) {
+      this.diffCanvas = document.createElement("canvas");
+      this.diffCtx = this.diffCanvas.getContext("2d", {
+        willReadFrequently: true,
+      });
+    }
+    const canvas = this.diffCanvas;
+    const ctx = this.diffCtx;
+    if (!ctx || this.diffReadbackBlocked) {
+      return null;
+    }
+    if (canvas.width !== dw || canvas.height !== dh) {
+      canvas.width = dw;
+      canvas.height = dh;
+      this.diffImage = null;
+    }
+
+    try {
+      ctx.globalAlpha = 1;
+      ctx.drawImage(mainSource, 0, 0, mainWidth, mainHeight, 0, 0, dw, dh);
+      const main = ctx.getImageData(0, 0, dw, dh);
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, dw, dh);
+      ctx.drawImage(
+        referenceSource,
+        0,
+        0,
+        referenceSource.width,
+        referenceSource.height,
+        rect.x * scale,
+        rect.y * scale,
+        rect.width * scale,
+        rect.height * scale
+      );
+      const reference = ctx.getImageData(0, 0, dw, dh);
+
+      if (!this.diffImage) {
+        this.diffImage = ctx.createImageData(dw, dh);
+      }
+      this.differentPixelRatio =
+        computeDifferenceImage(
+          main.data,
+          reference.data,
+          this.diffImage.data,
+          this.annotationTool.differenceThreshold
+        ) /
+        (dw * dh);
+      ctx.putImageData(this.diffImage, 0, 0);
+      return canvas;
+    } catch (e) {
+      // SecurityError on a tainted canvas
+      this.diffReadbackBlocked = true;
+      return null;
+    }
+  }
+
+  drawWipe(
+    shape: ICompare,
+    video1: HTMLVideoElement,
+    video2: HTMLVideoElement,
+    videoFrame: FrameSource | null,
+    referenceVideoFrame: FrameSource | null
+  ) {
+    const w = this.annotationTool.canvasWidth;
+    const h = this.annotationTool.canvasHeight;
+    const x = shape.x;
+
+    const heightDiff = video2.videoHeight - video1.videoHeight;
+    const widthDiff = video2.videoWidth - video1.videoWidth;
+
+    const isMobile = this.annotationTool.isMobile;
+
+    this.ctx.globalAlpha = this.leftOpacity;
 
     if (isMobile) {
       this.ctx.imageSmoothingQuality = "low";
@@ -295,7 +535,6 @@ export class CompareToolPlugin
     }
 
     // this.ctx.filter = filter;
-    this.ctx.globalAlpha = globalAlpha;
   }
 
   draw(shape: ICompare) {
