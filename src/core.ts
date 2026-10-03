@@ -7,7 +7,7 @@ import { ToolPlugin } from "./plugins/base";
 import { detectFrameRate } from "./utils/detect-framerate";
 import { VideoFrameBuffer } from "./plugins/utils/video-frame-buffer";
 import { FFmpegFrameExtractor } from "./plugins/utils/ffmpeg-frame-extractor";
-import { Theme, injectThemeStyles } from "./ui/theme";
+import { Theme, injectThemeStyles, getCSSPrefix } from "./ui/theme";
 import {
   SmAnnotateConfig,
   LayoutMode,
@@ -17,6 +17,7 @@ import {
 } from "./config";
 import { LayoutManager } from "./ui/layout";
 import { CollapseController } from "./ui/collapse-controller";
+import { MobileDock } from "./ui/mobile-dock";
 import { GestureHandler, GestureState } from "./gestures/gesture-handler";
 
 const pixelRatio = window.devicePixelRatio || 1;
@@ -95,6 +96,10 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   private layoutManager: LayoutManager | null = null;
   // Collapse controller for toolbar visibility
   private collapseController: CollapseController | null = null;
+  // Touch-first docked layout used below the mobile breakpoint
+  mobileDock: MobileDock | null = null;
+  // Swipe-to-scrub state (mobile dock, no tool selected)
+  private scrubState: { startX: number; startFrame: number; moved: boolean } | null = null;
   // Gesture handler for pinch-to-zoom and pan
   private gestureHandler: GestureHandler | null = null;
   // Current gesture transform state
@@ -661,8 +666,15 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
   }
   showControls() {
     this.uiContainer.style.display = "";
+    this.uiContainer.classList.remove(`${getCSSPrefix()}-dimmed`);
   }
   hideControls() {
+    // The dock sits outside the video, so keep it in place (no layout jump)
+    // and only dim it; tapping a tool pauses playback.
+    if (this.mobileDock?.active) {
+      this.uiContainer.classList.add(`${getCSSPrefix()}-dimmed`);
+      return;
+    }
     this.uiContainer.style.display = "none";
   }
   showCanvas() {
@@ -733,6 +745,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.layoutManager.setLayout(this.config.layout, {
       sidebarPosition: this.config.toolbar.sidebarPosition,
     });
+
+    this.mobileDock = new MobileDock(this);
+    this.mobileDock.init();
 
     // Initialize collapse controller on mobile if enabled
     if (this.isMobile && this.config.mobile.collapsibleToolbars) {
@@ -910,6 +925,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     this.layoutManager = null;
     this.collapseController?.destroy();
     this.collapseController = null;
+    this.mobileDock?.destroy();
+    this.mobileDock = null;
+    this.scrubState = null;
     this.gestureHandler?.destroy();
     this.gestureHandler = null;
     this.gestureState = { scale: 1, panX: 0, panY: 0 };
@@ -943,13 +961,31 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     const isFullscreen = !!(document.fullscreenElement ?? (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement);
     let width = Math.min(rawWidth, video.videoWidth);
     let height = Math.floor(width / trueAspectRatio);
+    // Honour a CSS max-height (e.g. short landscape phone screens) by
+    // shrinking the width too, so canvas and video keep the same box
+    const maxHeight = parseFloat(style.maxHeight);
+    if (!isNaN(maxHeight) && maxHeight > 0 && height > maxHeight) {
+      height = Math.floor(maxHeight);
+      width = Math.floor(height * trueAspectRatio);
+    }
 
     if (isFullscreen && container) {
         // Calculate dimensions maintaining aspect ratio in fullscreen
-        const CONTROLS_HEIGHT = 50;
-        const TOOLS_HEIGHT = 40;
-        const containerWidth = window.innerWidth;
-        const containerHeight = window.innerHeight - (CONTROLS_HEIGHT + TOOLS_HEIGHT);
+        // Docked toolbars are in the flow around the video; floating ones
+        // overlay it, so reserve fixed margins for those instead
+        const dock = this.mobileDock?.active ? this.mobileDock.reservedSpace() : null;
+        const CONTROLS_HEIGHT = dock ? 0 : 50;
+        const TOOLS_HEIGHT = dock ? 0 : 40;
+        let availableWidth = window.innerWidth;
+        let availableHeight = window.innerHeight;
+        if (dock) {
+            // The dock lays out inside the container, so fit its content box
+            const cs = getComputedStyle(container);
+            availableWidth = container.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+            availableHeight = container.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+        }
+        const containerWidth = Math.floor(availableWidth - (dock?.width ?? 0));
+        const containerHeight = Math.floor(availableHeight - (CONTROLS_HEIGHT + TOOLS_HEIGHT) - (dock?.height ?? 0));
         const containerRatio = containerWidth / containerHeight;
 
         if (containerRatio > trueAspectRatio) {
@@ -961,12 +997,16 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
             width = containerWidth;
             height = width / trueAspectRatio;
         }
+        if (dock && !isNaN(maxHeight) && maxHeight > 0 && height > maxHeight) {
+            height = Math.floor(maxHeight);
+            width = Math.floor(height * trueAspectRatio);
+        }
 
         // Ensure video is centered and sized correctly
         video.style.width = `${width}px`;
         video.style.height = `${height}px`;
-        video.style.marginTop = `${TOOLS_HEIGHT}px`;
-        video.style.marginBottom = `${CONTROLS_HEIGHT}px`;
+        video.style.marginTop = dock ? '' : `${TOOLS_HEIGHT}px`;
+        video.style.marginBottom = dock ? '' : `${CONTROLS_HEIGHT}px`;
     } else {
         // Normal mode sizing
         video.style.width = `${width}px`;
@@ -1178,8 +1218,19 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
       return;
     }
 
-    // Auto-collapse toolbar when drawing starts on mobile
-    if (this.currentTool && this.collapseController?.autoCollapseEnabled) {
+    // Docked layout without a tool: horizontal swipe scrubs frames
+    if (!this.currentTool && this.mobileDock?.active && this.isVideoPaused && this.videoElement.tagName === "VIDEO") {
+      this.scrubState = {
+        startX: this.getEventX(event),
+        startFrame: this.playbackFrame,
+        moved: false,
+      };
+      return;
+    }
+
+    // Auto-collapse toolbar when drawing starts on mobile (the dock never
+    // covers the video, so it stays put)
+    if (this.currentTool && !this.mobileDock?.active && this.collapseController?.autoCollapseEnabled) {
       this.collapseController.collapse();
     }
 
@@ -1216,6 +1267,11 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     if (isMultiTouch(event)) return;
 
+    if (this.isMouseDown && this.scrubState) {
+      this.scrubTo(this.getEventX(event));
+      return;
+    }
+
     if (this.isMouseDown) {
       const maybeFrame = this.isProgressBarNavigation
         ? this.frameFromProgressBar(event, false)
@@ -1239,7 +1295,9 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
         this.addProgressBarOverlay();
         return;
       } else {
-        this.hideControls();
+        if (!this.mobileDock?.active) {
+          this.hideControls();
+        }
         this.clearCanvas();
         if (!this.hasGlobalOverlays) {
           this.addVideoOverlay();
@@ -1262,9 +1320,39 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     return event.clientY;
   }
 
+  /**
+   * Step frames by horizontal finger travel: one frame per SCRUB_PX_PER_FRAME.
+   */
+  private scrubTo(clientX: number) {
+    const state = this.scrubState;
+    if (!state) return;
+    const SCRUB_PX_PER_FRAME = 8;
+    const delta = Math.round((clientX - state.startX) / SCRUB_PX_PER_FRAME);
+    if (delta === 0 && !state.moved) return;
+    state.moved = true;
+    const total = Math.max(1, this.totalFrames || 1);
+    const frame = Math.min(total, Math.max(1, state.startFrame + delta));
+    if (frame === this.lastNavigatedFrame) return;
+    this.lastNavigatedFrame = frame;
+    this.activeTimeFrame = frame;
+    this.playbackFrame = frame;
+    this.clearCanvas();
+    if (!this.hasGlobalOverlays) {
+      this.addVideoOverlay();
+    }
+    this.drawShapesOverlay();
+    this.addProgressBarOverlay();
+  }
+
   handleMouseUp(event: PointerEvent) {
     this.isMouseDown = false;
     this.isProgressBarNavigation = false;
+    if (this.scrubState) {
+      this.scrubState = null;
+      this.showControls();
+      this.redrawFullCanvas();
+      return;
+    }
 
     this.showControls();
     if (isMultiTouch(event)) return;
@@ -1274,7 +1362,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
     }
 
     // Auto-expand toolbar when drawing ends on mobile
-    if (this.collapseController?.autoCollapseEnabled) {
+    if (!this.mobileDock?.active && this.collapseController?.autoCollapseEnabled) {
       this.collapseController.expand();
     }
 

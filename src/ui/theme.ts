@@ -722,6 +722,381 @@ function generateStyles(): string {
         gap: 2px;
       }
     }
+
+    /* ==================== MOBILE DOCK ==================== */
+    /* Below the mobile breakpoint the toolbars leave the video and sit in the
+       flow under it (side rails in landscape), sized for thumbs. Kept last so
+       it wins over the floating-layout and fullscreen rules above. */
+
+    .${PREFIX}-root.${PREFIX}-mobile {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .${PREFIX}-root.${PREFIX}-mobile > video {
+      order: 0;
+      align-self: center;
+      max-width: 100%;
+      min-width: 0;
+      flex: 0 1 auto;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-player-controls,
+    .${PREFIX}-mobile .${PREFIX}-container {
+      position: static;
+      transform: none;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      margin: 0;
+      max-width: none;
+      width: 100%;
+      overflow: visible;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-player-controls {
+      order: 1;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 4px;
+      gap: 2px;
+      background: transparent;
+      border: none;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-container {
+      order: 2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 2px;
+      column-gap: 4px;
+      padding: 6px;
+      border-radius: 16px;
+      background: var(--${PREFIX}-bg-secondary);
+      border: 1px solid var(--${PREFIX}-border);
+      transition: opacity 0.2s ease;
+    }
+
+    /* Row break between drawing tools and edit/view actions */
+    .${PREFIX}-mobile .${PREFIX}-container::after {
+      content: '';
+      order: 9;
+      flex-basis: 100%;
+      height: 0;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-container > * { order: 20; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="curve"] { order: 1; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="arrow"] { order: 2; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="line"] { order: 3; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="rectangle"] { order: 4; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="circle"] { order: 5; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="text"] { order: 6; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="eraser"] { order: 7; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="style"] { order: 8; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="undo"] { order: 10; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="move"] { order: 11; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="selection"] { order: 12; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="compare"] { order: 13; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-linked-tool="compare"] { order: 14; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="opacity"] { order: 15; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-tool="ghost"] { order: 16; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="theme"] { order: 30; }
+
+    /* Colour and width live in the style sheet; dividers are replaced by the row break */
+    .${PREFIX}-mobile .${PREFIX}-container > .${PREFIX}-divider,
+    .${PREFIX}-mobile .${PREFIX}-dock-hidden {
+      /* the stroke wrapper carries an inline display */
+      display: none !important;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-container .${PREFIX}-btn,
+    .${PREFIX}-mobile .${PREFIX}-player-controls .${PREFIX}-btn,
+    .${PREFIX}-mobile .${PREFIX}-fullscreen-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 56px;
+      width: auto;
+      height: 44px;
+      border-radius: 12px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-btn:active,
+    .${PREFIX}-mobile .${PREFIX}-fullscreen-btn:active {
+      transform: scale(0.92);
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-btn svg,
+    .${PREFIX}-mobile .${PREFIX}-fullscreen-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* No hover on touch: don't leave the last tapped button highlighted */
+    @media (hover: none) {
+      .${PREFIX}-mobile .${PREFIX}-btn:hover:not(.active),
+      .${PREFIX}-mobile .${PREFIX}-fullscreen-btn:hover {
+        background: transparent;
+        color: var(--${PREFIX}-text-secondary);
+      }
+    }
+
+    /* While playing the dock stays in place (no layout jump), dimmed */
+    .${PREFIX}-mobile .${PREFIX}-container.${PREFIX}-dimmed {
+      opacity: 0.45;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-container.${PREFIX}-collapsed {
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-collapse-btn {
+      display: none;
+    }
+
+    .${PREFIX}-root.${PREFIX}-mobile:fullscreen,
+    .${PREFIX}-root.${PREFIX}-mobile:-webkit-full-screen {
+      justify-content: center;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+      background: #000;
+    }
+
+    /* Style button: shows the current colour, dot size follows stroke width */
+    .${PREFIX}-style-btn {
+      display: none;
+    }
+
+    .${PREFIX}-mobile .${PREFIX}-style-btn {
+      display: inline-flex;
+    }
+
+    .${PREFIX}-style-dot {
+      display: block;
+      width: var(--${PREFIX}-style-size, 13px);
+      height: var(--${PREFIX}-style-size, 13px);
+      max-width: 22px;
+      max-height: 22px;
+      border-radius: 50%;
+      background: var(--${PREFIX}-style-color, #d31a3b);
+      box-shadow: 0 0 0 2px var(--${PREFIX}-bg-secondary), 0 0 0 4px var(--${PREFIX}-border-hover);
+      transition: width 0.15s ease, height 0.15s ease;
+    }
+
+    /* Bottom sheet for colour and width */
+    .${PREFIX}-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: calc(var(--${PREFIX}-z-index-tooltip) + 1);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-family: var(--${PREFIX}-font-family);
+    }
+
+    .${PREFIX}-sheet[hidden] {
+      display: none;
+    }
+
+    .${PREFIX}-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .${PREFIX}-sheet-panel {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      padding: 8px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+      background: var(--${PREFIX}-bg-tertiary);
+      color: var(--${PREFIX}-text-primary);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 32px var(--${PREFIX}-shadow);
+      transform: translateY(100%);
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .${PREFIX}-sheet-open .${PREFIX}-sheet-backdrop { opacity: 1; }
+    .${PREFIX}-sheet-open .${PREFIX}-sheet-panel { transform: translateY(0); }
+
+    .${PREFIX}-sheet-handle {
+      width: 36px;
+      height: 4px;
+      margin: 0 auto 12px;
+      border-radius: 2px;
+      background: var(--${PREFIX}-border-hover);
+    }
+
+    .${PREFIX}-sheet-label {
+      margin: 4px 0 10px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--${PREFIX}-text-secondary);
+    }
+
+    .${PREFIX}-swatches {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      justify-items: center;
+      margin-bottom: 16px;
+    }
+
+    .${PREFIX}-swatch {
+      position: relative;
+      width: 100%;
+      max-width: 44px;
+      aspect-ratio: 1;
+      padding: 0;
+      border: 1px solid var(--${PREFIX}-border-hover);
+      border-radius: 50%;
+      background: var(--${PREFIX}-swatch-color);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease, box-shadow 0.15s ease;
+    }
+
+    .${PREFIX}-swatch:active { transform: scale(0.9); }
+
+    .${PREFIX}-swatch.active {
+      box-shadow: 0 0 0 3px var(--${PREFIX}-bg-tertiary), 0 0 0 5px var(--${PREFIX}-accent);
+    }
+
+    .${PREFIX}-swatch-custom {
+      background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+      overflow: hidden;
+    }
+
+    .${PREFIX}-swatch-custom input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .${PREFIX}-size-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .${PREFIX}-size-range {
+      flex: 1;
+      height: 44px;
+      margin: 0;
+      accent-color: var(--${PREFIX}-accent);
+    }
+
+    .${PREFIX}-size-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--${PREFIX}-bg-hover);
+    }
+
+    .${PREFIX}-size-preview-line {
+      width: 36px;
+      border-radius: 6px;
+    }
+
+    .${PREFIX}-sheet-done {
+      display: block;
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
+      background: var(--${PREFIX}-accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Phone landscape: tools in a rail on the left, player controls on the right */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .${PREFIX}-root.${PREFIX}-mobile {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      .${PREFIX}-root.${PREFIX}-mobile > video {
+        order: 1;
+        align-self: flex-start;
+      }
+
+      .${PREFIX}-mobile .${PREFIX}-container {
+        order: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 40px);
+        grid-auto-rows: 40px;
+        align-content: start;
+        gap: 2px;
+        width: auto;
+        padding: 4px;
+        border-radius: 14px;
+      }
+
+      .${PREFIX}-mobile .${PREFIX}-container::after {
+        display: none;
+      }
+
+      @media (max-height: 380px) {
+        .${PREFIX}-mobile .${PREFIX}-container {
+          grid-template-columns: repeat(3, 40px);
+        }
+      }
+
+      .${PREFIX}-mobile .${PREFIX}-player-controls {
+        order: 2;
+        display: grid;
+        grid-template-columns: 40px;
+        grid-auto-rows: 40px;
+        gap: 2px;
+        width: auto;
+        padding: 0;
+      }
+
+      .${PREFIX}-mobile .${PREFIX}-container .${PREFIX}-btn,
+      .${PREFIX}-mobile .${PREFIX}-player-controls .${PREFIX}-btn,
+      .${PREFIX}-mobile .${PREFIX}-fullscreen-btn {
+        width: 40px;
+        height: 40px;
+        max-width: none;
+        border-radius: 10px;
+      }
+
+      .${PREFIX}-mobile .${PREFIX}-btn svg,
+      .${PREFIX}-mobile .${PREFIX}-fullscreen-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
   `;
 }
 
@@ -789,6 +1164,8 @@ export function createThemeToggleButton(tool: AnnotationTool): HTMLButtonElement
   const button = document.createElement('button');
   button.type = 'button';
   button.dataset.tooltip = 'Toggle theme';
+  button.dataset.control = 'theme';
+  button.setAttribute('aria-label', 'Toggle theme');
   applyButtonStyle(button);
 
   const updateIcon = () => {

@@ -20,6 +20,7 @@ export type VideoEventNames =
   | "pause"
   | "stalled"
   | "error"
+  | "loadeddata"
   | "requestVideoFrameCallback";
 export type WindowEventNames = "resize";
 export type TouchEventNames = "touchmove" | "touchstart" | "touchend" | "touchcancel";

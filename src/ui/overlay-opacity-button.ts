@@ -41,6 +41,7 @@ export function createOverlayOpacityButton(tool: AnnotationTool) {
   const button = document.createElement("button");
   button.type = "button";
   button.dataset.tooltip = "Opacity";
+  button.dataset.control = "opacity";
 
   // Track overlay opacity index separately
   let overlayIndex = findStateIndex(tool.overlayOpacity);

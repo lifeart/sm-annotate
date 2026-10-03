@@ -28,6 +28,8 @@ function setupLongPress(
     isLongPress = false;
     longPressTimer = setTimeout(() => {
       isLongPress = true;
+      // Confirm the long press on devices that support it
+      navigator.vibrate?.(10);
       onLongPress();
       tool.redrawFullCanvas();
     }, LONG_PRESS_DURATION);
@@ -106,6 +108,8 @@ export class ButtonConstructor {
 
     if (tooltip) {
       button.dataset.tooltip = tooltip;
+      // Tooltips are hidden on touch screens; keep the name for screen readers
+      button.setAttribute("aria-label", tooltip);
       if (tooltipPosition === "bottom") {
         button.dataset.tooltipPosition = "bottom";
       }
@@ -120,6 +124,11 @@ export class ButtonConstructor {
     } else {
       button.dataset.tool = tool;
       const onClick = () => {
+        // Picking a drawing tool while the video plays means "let me draw here"
+        const media = this.tool.videoElement;
+        if (tool !== "compare" && media instanceof HTMLVideoElement && !media.paused) {
+          media.pause();
+        }
         if (this.currentTool === tool) {
           this.currentTool = null;
         } else {
@@ -214,7 +223,7 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
   createOverlayOpacityButton(tool);
   createGhostToggleButton(tool);
 
-  Button.create(
+  const undoButton = Button.create(
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>',
     () => {
       tool.handleUndo();
@@ -222,6 +231,7 @@ export function addButtons(tool: AnnotationTool, Button: ButtonConstructor) {
     Button.uiContainer,
     "Undo (Ctrl+Z)"
   );
+  undoButton.dataset.control = "undo";
 
   // Button.create(
   //   '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',

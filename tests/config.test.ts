@@ -110,6 +110,7 @@ describe('config', () => {
           gesturesEnabled: false,
           autoCollapse: false,
           breakpoint: 768,
+          dock: false,
         },
         toolbar: {
           draggable: true,
