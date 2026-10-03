@@ -61,29 +61,26 @@ export function rgbaToHex(rgba: number[]): string {
 }
 
 /**
- * Convert OpenRV normalized coordinates to sm-annotate coordinates.
+ * Convert OpenRV paint coordinates to sm-annotate coordinates.
  *
- * OpenRV uses NDC where:
+ * OpenRV paint space is normalized by image height:
  * - (0, 0) is the center of the image
- * - X: -1 (left) to 1 (right)
- * - Y: -1/aspect (bottom) to 1/aspect (top), where aspect = width/height
+ * - X: -aspect/2 (left) to +aspect/2 (right), where aspect = width/height
+ * - Y: -0.5 (bottom) to +0.5 (top)
  *
  * sm-annotate uses:
  * - (0, 0) is the top-left corner
  * - X: 0 (left) to 1 (right)
  * - Y: 0 (top) to 1 (bottom)
  */
-function convertOpenRVToSmAnnotate(
+export function convertOpenRVToSmAnnotate(
   openrvX: number,
   openrvY: number,
   aspectRatio: number
 ): { x: number; y: number } {
-  // OpenRV X: -1 to +1 centered
-  // OpenRV Y: -1/aspect to +1/aspect centered (Y+ is up, so we invert)
-  // The Y range is scaled by aspect ratio to maintain proper proportions
   return {
-    x: (openrvX + 1) / 2,
-    y: (1 - openrvY * aspectRatio) / 2,
+    x: openrvX / aspectRatio + 0.5,
+    y: 0.5 - openrvY,
   };
 }
 

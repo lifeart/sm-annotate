@@ -195,11 +195,17 @@ export class TextToolPlugin
       okButton.style.opacity = '1';
     });
 
+    // Enter can reach both the input and the document listener; save once
+    let finished = false;
     const closePopup = () => {
+      finished = true;
       this.destroyPopup();
     };
 
     const handleSave = () => {
+      if (finished) {
+        return;
+      }
       const inputText = input.value.trim();
       if (inputText) {
         this.save({
@@ -217,6 +223,10 @@ export class TextToolPlugin
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Enter confirming an IME composition must not submit partial text
+      if (e.isComposing) {
+        return;
+      }
       if (e.key === 'Escape') {
         closePopup();
       } else if (e.key === 'Enter') {
@@ -227,7 +237,7 @@ export class TextToolPlugin
 
     okButton.onclick = handleSave;
     cancelButton.onclick = closePopup;
-    input.onkeyup = handleKeyDown;
+    input.onkeydown = handleKeyDown;
 
     // Add event listener for ESC key
     document.addEventListener('keydown', handleKeyDown);

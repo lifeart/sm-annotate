@@ -75,7 +75,12 @@ export function hexToRGBA(hex: string, opacity: number = 1): [number, number, nu
     r = parseInt(cleanHex.substring(0, 2), 16) / 255;
     g = parseInt(cleanHex.substring(2, 4), 16) / 255;
     b = parseInt(cleanHex.substring(4, 6), 16) / 255;
-    opacity = parseInt(cleanHex.substring(6, 8), 16) / 255;
+    opacity *= parseInt(cleanHex.substring(6, 8), 16) / 255;
+  }
+
+  // Unparseable input (e.g. named colors) must not leak NaN into the GTO file
+  if (![r, g, b].every(Number.isFinite)) {
+    return [1, 0, 0, opacity];
   }
 
   return [r, g, b, opacity];
@@ -94,7 +99,7 @@ function extractColor(style: string | CanvasGradient | CanvasPattern, opacity: n
           parseInt(match[1]) / 255,
           parseInt(match[2]) / 255,
           parseInt(match[3]) / 255,
-          match[4] ? parseFloat(match[4]) : opacity
+          match[4] ? parseFloat(match[4]) * opacity : opacity
         ];
       }
     }
@@ -105,65 +110,72 @@ function extractColor(style: string | CanvasGradient | CanvasPattern, opacity: n
 }
 
 /**
- * Rotate a point around a center by given angle (radians)
+ * Rotate a normalized (0-1) point around a normalized center by an angle (radians).
+ * The canvas rotates in pixel space, so the rotation is done in pixels
+ * (scaled by width/height) to avoid shearing on non-square frames.
  */
-function rotatePoint(point: IPoint, centerX: number, centerY: number, angle: number): IPoint {
+function rotatePoint(
+  point: IPoint,
+  centerX: number,
+  centerY: number,
+  angle: number,
+  width = 1,
+  height = 1
+): IPoint {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
-  const dx = point.x - centerX;
-  const dy = point.y - centerY;
+  const dx = (point.x - centerX) * width;
+  const dy = (point.y - centerY) * height;
   return {
-    x: centerX + dx * cos - dy * sin,
-    y: centerY + dx * sin + dy * cos
+    x: centerX + (dx * cos - dy * sin) / width,
+    y: centerY + (dx * sin + dy * cos) / height
   };
 }
 
 /**
- * Apply rotation to an array of points if shape has rotation
- * Note: Points, defaultCenter, and rotationCenterX/Y should all be denormalized (pixel coords)
+ * Apply rotation to an array of normalized points if shape has rotation.
+ * Points, defaultCenter and rotationCenterX/Y are all normalized (0-1).
  */
 function applyRotationToPoints(
   points: IPoint[],
   shape: IShape,
   defaultCenterX: number,
-  defaultCenterY: number
+  defaultCenterY: number,
+  width: number,
+  height: number
 ): IPoint[] {
   if (!shape.rotation) {
     return points;
   }
 
-  // Use custom rotation center if set, otherwise use default (both should be denormalized)
+  // Use custom rotation center if set, otherwise use default
   const centerX = shape.rotationCenterX !== undefined ? shape.rotationCenterX : defaultCenterX;
   const centerY = shape.rotationCenterY !== undefined ? shape.rotationCenterY : defaultCenterY;
 
-  return points.map(p => rotatePoint(p, centerX, centerY, shape.rotation!));
+  return points.map(p => rotatePoint(p, centerX, centerY, shape.rotation!, width, height));
 }
 
 /**
- * Convert sm-annotate coordinates to OpenRV normalized device coordinates.
+ * Convert sm-annotate coordinates to OpenRV paint coordinates.
  *
  * sm-annotate uses:
  * - (0, 0) is the top-left corner
  * - X: 0 (left) to 1 (right)
  * - Y: 0 (top) to 1 (bottom)
  *
- * OpenRV uses NDC where:
+ * OpenRV paint space is normalized by image height:
  * - (0, 0) is the center of the image
- * - X: -1 (left) to +1 (right)
- * - Y: -1/aspect (bottom) to +1/aspect (top), where aspect = width/height
+ * - X: -aspect/2 (left) to +aspect/2 (right), where aspect = width/height
+ * - Y: -0.5 (bottom) to +0.5 (top)
  */
-function convertSmAnnotateToOpenRV(
+export function convertSmAnnotateToOpenRV(
   smX: number,
   smY: number,
   aspectRatio: number
 ): { x: number; y: number } {
-  // Convert from 0..1 to OpenRV NDC
-  // X: -1 to +1
-  // Y: -1/aspect to +1/aspect (inverted because sm-annotate Y+ is down, OpenRV Y+ is up)
-  // The Y range is scaled by aspect ratio to maintain proper proportions
   return {
-    x: smX * 2 - 1,
-    y: (1 - smY * 2) / aspectRatio,
+    x: (smX - 0.5) * aspectRatio,
+    y: 0.5 - smY,
   };
 }
 
@@ -208,7 +220,7 @@ function curveToPenData(shape: ICurve, id: number, frame: number, width: number,
   centerX /= shape.points.length;
   centerY /= shape.points.length;
 
-  const points = applyRotationToPoints(shape.points, shape, centerX, centerY);
+  const points = applyRotationToPoints(shape.points, shape, centerX, centerY, width, height);
 
   // Create width array (one value per point) - OpenRV format uses normalized width (relative to height)
   const normalizedWidth = shape.lineWidth / height;
@@ -245,7 +257,7 @@ function lineToPenData(shape: ILine, id: number, frame: number, width: number, h
     { x: shape.x1, y: shape.y1 },
     { x: shape.x2, y: shape.y2 }
   ];
-  points = applyRotationToPoints(points, shape, centerX, centerY);
+  points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
 
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
@@ -282,32 +294,31 @@ function arrowToPenDataArray(shape: IArrow, id: number, frame: number, width: nu
     { x: shape.x2, y: shape.y2 }
   ];
 
-  // Arrowhead calculation - normalize to coordinate system (0-1)
+  // Arrowhead calculation in pixel space (as drawn), then back to 0-1
   const headLengthPx = 10 + 2.5 * shape.lineWidth;
-  const headLength = headLengthPx / ((width + height) / 2);
   const headAngle = Math.PI / 6;
-  const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
+  const angle = Math.atan2((shape.y2 - shape.y1) * height, (shape.x2 - shape.x1) * width);
 
   let arrowHead1: IPoint[] = [
     { x: shape.x2, y: shape.y2 },
     {
-      x: shape.x2 - headLength * Math.cos(angle + headAngle),
-      y: shape.y2 - headLength * Math.sin(angle + headAngle)
+      x: shape.x2 - (headLengthPx * Math.cos(angle + headAngle)) / width,
+      y: shape.y2 - (headLengthPx * Math.sin(angle + headAngle)) / height
     }
   ];
 
   let arrowHead2: IPoint[] = [
     { x: shape.x2, y: shape.y2 },
     {
-      x: shape.x2 - headLength * Math.cos(angle - headAngle),
-      y: shape.y2 - headLength * Math.sin(angle - headAngle)
+      x: shape.x2 - (headLengthPx * Math.cos(angle - headAngle)) / width,
+      y: shape.y2 - (headLengthPx * Math.sin(angle - headAngle)) / height
     }
   ];
 
   // Apply rotation to all points
-  linePoints = applyRotationToPoints(linePoints, shape, centerX, centerY);
-  arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY);
-  arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY);
+  linePoints = applyRotationToPoints(linePoints, shape, centerX, centerY, width, height);
+  arrowHead1 = applyRotationToPoints(arrowHead1, shape, centerX, centerY, width, height);
+  arrowHead2 = applyRotationToPoints(arrowHead2, shape, centerX, centerY, width, height);
 
   const normalizedWidth = shape.lineWidth / height;
   const widthArray2 = new Array(2).fill(normalizedWidth);
@@ -365,7 +376,7 @@ function rectangleToPenData(shape: IRectangle, id: number, frame: number, width:
     { x: shape.x, y: shape.y }, // Close the path
   ];
 
-  points = applyRotationToPoints(points, shape, centerX, centerY);
+  points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
 
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
@@ -401,12 +412,13 @@ function circleToPenData(shape: ICircle, id: number, frame: number, width: numbe
   for (let i = 0; i <= segments; i++) {
     const angle = (i / segments) * Math.PI * 2;
     points.push({
+      // radius is normalized by canvas width; scale Y so the circle stays round
       x: shape.x + Math.cos(angle) * shape.radius,
-      y: shape.y + Math.sin(angle) * shape.radius
+      y: shape.y + Math.sin(angle) * shape.radius * (width / height)
     });
   }
 
-  points = applyRotationToPoints(points, shape, centerX, centerY);
+  points = applyRotationToPoints(points, shape, centerX, centerY, width, height);
 
   const normalizedWidth = shape.lineWidth / height;
   const widthArray = new Array(points.length).fill(normalizedWidth);
@@ -440,7 +452,7 @@ function textToTextData(shape: IText, id: number, frame: number, width: number, 
   if (shape.rotation) {
     const centerX = shape.rotationCenterX ?? shape.x;
     const centerY = shape.rotationCenterY ?? shape.y;
-    const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation);
+    const rotated = rotatePoint({ x: shape.x, y: shape.y }, centerX, centerY, shape.rotation, width, height);
     posX = rotated.x;
     posY = rotated.y;
     // OpenRV text rotation is in degrees
@@ -668,7 +680,7 @@ export function exportToOpenRV(
     'GTOa (4)',
     '',
     '# Generated by sm-annotate OpenRV exporter',
-    `# Media: ${mediaPath}`,
+    `# Media: ${mediaPath.replace(/[\r\n]+/g, ' ')}`,
     `# Resolution: ${width}x${height}`,
     ''
   ].join('\n');

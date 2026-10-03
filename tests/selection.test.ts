@@ -234,7 +234,7 @@ describe('SelectionToolPlugin', () => {
         expect(mockAnnotationTool.redrawFullCanvas).toHaveBeenCalled();
       });
 
-      it('should return early if video element is not HTMLVideoElement', () => {
+      it('should end drawing without capturing if video element is not HTMLVideoElement', () => {
         plugin.isDrawing = true;
         plugin.startX = 50;
         plugin.startY = 50;
@@ -243,7 +243,10 @@ describe('SelectionToolPlugin', () => {
 
         plugin.onPointerUp(event);
 
-        expect(mockAnnotationTool.redrawFullCanvas).not.toHaveBeenCalled();
+        // Selection overlay must not stay stuck on screen
+        expect(plugin.isDrawing).toBe(false);
+        expect(mockAnnotationTool.redrawFullCanvas).toHaveBeenCalled();
+        expect(mockAnnotationTool.addShape).not.toHaveBeenCalled();
       });
 
       it('should handle wider video than canvas (letterboxing vertically)', () => {

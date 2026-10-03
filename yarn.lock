@@ -772,6 +772,11 @@ fsevents@~2.3.2, fsevents@~2.3.3:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
+gto-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/gto-js/-/gto-js-1.0.0.tgz#5b4a4d74f1257f24916475d51bc8064165e3fa34"
+  integrity sha512-xHns9vzE28Mg1r+YcyOex0Cabh3DRnnuVdUP1jc8vKnI2vklMRF16rJilFG/htrMUCw4QZw4XhVNcT5CtyDsow==
+
 has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"

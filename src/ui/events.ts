@@ -15,9 +15,9 @@ export type VideoEventNames =
   | "timeupdate"
   | "volumechange"
   | "seeking"
+  | "seeked"
   | "play"
   | "pause"
-  | "seek"
   | "stalled"
   | "error"
   | "requestVideoFrameCallback";

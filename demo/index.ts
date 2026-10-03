@@ -354,8 +354,8 @@ async function initAnnotator() {
 
   // Reset button handler
   rvResetButton.addEventListener("click", () => {
-    rvScaleInput.value = "0.85";
-    rvScaleValue.textContent = "0.85";
+    rvScaleInput.value = "1";
+    rvScaleValue.textContent = "1";
     rvOffsetXInput.value = "0";
     rvOffsetXValue.textContent = "0";
     rvOffsetYInput.value = "0";

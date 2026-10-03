@@ -111,7 +111,7 @@ export function initUI(this: AnnotationTool) {
     this.addEvent(video, "pause", () => {
       this.show();
     });
-    this.addEvent(video, "seek", () => {
+    this.addEvent(video, "seeked", () => {
       if (video.paused) {
         this.show();
       }
@@ -148,11 +148,6 @@ export function initUI(this: AnnotationTool) {
     this.addEvent(document, "keydown", (event: KeyboardEvent) => {
       onDocumentKeydown(event, this);
     });
-    this.addEvent(document.body.querySelector('div')!, "drop", (event: DragEvent) => {
-      if (event.dataTransfer?.types) {
-        // fine
-      }
-    })
 
     // Add fullscreen button to player controls (as last button in flow)
     const fullscreenButton = createFullscreenButton(this);

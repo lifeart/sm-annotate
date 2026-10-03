@@ -94,6 +94,8 @@ export class SelectionToolPlugin
 
     const video = this.annotationTool.videoElement;
     if (!(video instanceof HTMLVideoElement)) {
+      this.isDrawing = false;
+      this.annotationTool.redrawFullCanvas();
       return;
     }
 
