@@ -176,6 +176,9 @@ under it, sized for thumbs (44px targets):
   sheet with swatches, a custom colour and a width slider.
 - With no tool selected, swiping horizontally across the paused video scrubs
   frame by frame. Picking a drawing tool while the video plays pauses it.
+- The move tool uses fingertip-sized hit areas and handles; a selected shape
+  can be dragged from anywhere inside its box, and delete and duplicate
+  buttons appear in the dock while a shape is selected.
 - During playback the dock dims instead of disappearing, so the layout never jumps.
 - On phones in landscape the tools move to a rail on the left and the player
   controls to a rail on the right.

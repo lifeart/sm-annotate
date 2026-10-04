@@ -58,13 +58,16 @@ function setupLongPress(
     }
   };
 
-  tool.addEvent(button, "click", onClick);
+  // Capture phase: the button's own click handler (single frame step) was
+  // registered first, so a bubble listener could not stop it after a long press
+  button.addEventListener("click", onClick, true);
   button.addEventListener("pointerdown", onPointerDown);
   button.addEventListener("pointerup", onPointerUp);
   button.addEventListener("pointerleave", onPointerLeave);
 
   // Add cleanup to tool destructors
   tool.destructors.push(() => {
+    button.removeEventListener("click", onClick, true);
     button.removeEventListener("pointerdown", onPointerDown);
     button.removeEventListener("pointerup", onPointerUp);
     button.removeEventListener("pointerleave", onPointerLeave);

@@ -803,6 +803,8 @@ function generateStyles(): string {
     .${PREFIX}-mobile .${PREFIX}-container > [data-control="style"] { order: 8; }
     .${PREFIX}-mobile .${PREFIX}-container > [data-control="undo"] { order: 10; }
     .${PREFIX}-mobile .${PREFIX}-container > [data-tool="move"] { order: 11; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="duplicate"] { order: 11; }
+    .${PREFIX}-mobile .${PREFIX}-container > [data-control="delete"] { order: 11; }
     .${PREFIX}-mobile .${PREFIX}-container > [data-tool="selection"] { order: 12; }
     .${PREFIX}-mobile .${PREFIX}-container > [data-tool="compare"] { order: 13; }
     .${PREFIX}-mobile .${PREFIX}-container > [data-linked-tool="compare"] { order: 14; }
@@ -827,6 +829,9 @@ function generateStyles(): string {
       height: 44px;
       border-radius: 12px;
       -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
       touch-action: manipulation;
       transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
     }
@@ -880,6 +885,11 @@ function generateStyles(): string {
 
     .${PREFIX}-mobile .${PREFIX}-style-btn {
       display: inline-flex;
+    }
+
+    /* Dock-only buttons never show in the floating toolbars */
+    .${PREFIX}-root:not(.${PREFIX}-mobile) .${PREFIX}-dock-only {
+      display: none !important;
     }
 
     .${PREFIX}-style-dot {

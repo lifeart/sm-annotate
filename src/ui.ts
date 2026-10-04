@@ -101,17 +101,6 @@ export function initUI(this: AnnotationTool) {
 
   if (video) {
     this.hide();
-    // Without this the canvas and tools stay hidden after the first frame
-    // loads until the user happens to seek or pause.
-    const showWhenPaused = () => {
-      if (video.paused) {
-        this.show();
-      }
-    };
-    this.addEvent(video, "loadeddata", showWhenPaused);
-    if (video.readyState >= 2) {
-      this.raf(showWhenPaused);
-    }
     this.addEvent(video, "pause", () => {
       this.show();
     });

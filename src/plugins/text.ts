@@ -128,7 +128,7 @@ export class TextToolPlugin
       margin-bottom: 16px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      font-size: 14px;
+      font-size: 16px; /* below 16px iOS zooms the page on focus */
       line-height: 20px;
       box-sizing: border-box;
       outline: none;
@@ -250,9 +250,9 @@ export class TextToolPlugin
     // Insert popup after canvas in its container
     this.annotationTool.canvas.parentElement?.appendChild(popup);
     
-    requestAnimationFrame(() => {
-      input.focus();
-    });
+    // Focus right away: we're still inside the pointer handler, which mobile
+    // browsers require before they open the on-screen keyboard
+    input.focus();
   }
   onPointerUp(event: PointerEvent) {
     const { x, y } = this.annotationTool.getRelativeCoords(event);

@@ -41,6 +41,17 @@ export class MoveToolPlugin
   // Resize handle tracking
   private activeHandle: HandlePosition | null = null;
   private handleSize = 8;
+
+  /**
+   * Finger-sized targets when the touch-first mobile dock is active.
+   */
+  private get isTouchLayout(): boolean {
+    return !!this.annotationTool.mobileDock?.active;
+  }
+
+  private get handleDrawSize(): number {
+    return this.isTouchLayout ? 14 : this.handleSize;
+  }
   private resizeStartBounds: BoundingBox | null = null;
   private resizeOriginalShape: IShape | null = null;
 
@@ -156,7 +167,7 @@ export class MoveToolPlugin
   /**
    * Duplicate the currently selected shape with an offset
    */
-  private duplicateSelectedShape(): void {
+  duplicateSelectedShape(): void {
     const shape = this.getSelectedShape();
     if (!shape) return;
 
@@ -365,7 +376,7 @@ export class MoveToolPlugin
     if (!bounds) return;
 
     const ctx = this.annotationTool.ctx;
-    const hs = this.handleSize;
+    const hs = this.handleDrawSize;
     const halfHs = hs / 2;
 
     // Handle positions
@@ -473,7 +484,8 @@ export class MoveToolPlugin
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#5b9fff';
     ctx.lineWidth = 1.5;
-    ctx.arc(handleX, handleY, 6, 0, Math.PI * 2);
+    const handleRadius = this.isTouchLayout ? 10 : 6;
+    ctx.arc(handleX, handleY, handleRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
@@ -481,7 +493,7 @@ export class MoveToolPlugin
     ctx.beginPath();
     ctx.strokeStyle = '#5b9fff';
     ctx.lineWidth = 1;
-    ctx.arc(handleX, handleY, 3, -Math.PI * 0.7, Math.PI * 0.5);
+    ctx.arc(handleX, handleY, handleRadius / 2, -Math.PI * 0.7, Math.PI * 0.5);
     ctx.stroke();
 
     ctx.restore();
@@ -505,13 +517,16 @@ export class MoveToolPlugin
     const dx = x - handleX;
     const dy = y - handleY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance <= 12; // Larger hit area than visual size
+    return distance <= (this.isTouchLayout ? 24 : 12); // Larger hit area than visual size
   }
 
   /**
    * Check if pointer is at the rotation center
    */
   private isPointerAtRotationCenter(x: number, y: number): boolean {
+    // On touch the centre is where a finger grabs a shape to move it, so the
+    // rotation centre stays put there (rotation itself still works)
+    if (this.isTouchLayout) return false;
     const shape = this.getSelectedShape();
     if (!shape) return false;
 
@@ -542,7 +557,7 @@ export class MoveToolPlugin
     const bounds = this.getShapeBounds(shape);
     if (!bounds) return null;
 
-    const hs = this.handleSize + 4; // Slightly larger hit area
+    const hs = this.isTouchLayout ? 32 : this.handleSize + 4; // Slightly larger hit area
     const halfHs = hs / 2;
 
     const handles: { pos: HandlePosition; x: number; y: number }[] = [
@@ -807,7 +822,7 @@ export class MoveToolPlugin
     }
   }
 
-  private deleteSelectedShape(): void {
+  deleteSelectedShape(): void {
     if (this.selectedShapeIndex < 0 || this.selectedShapeIndex >= this.annotationTool.shapes.length) {
       return;
     }
@@ -875,17 +890,14 @@ export class MoveToolPlugin
     }
 
     const originalShapes = this.annotationTool.shapes;
-    const shapes = originalShapes.slice().reverse();
+    const hit = this.findShapeAt(x, y);
     let foundShape = false;
-    for (const shape of shapes) {
-      if (this.isPointerAtShape(shape, x, y)) {
-        // Deep clone to preserve original styles
-        this.shape = this.cloneShape(shape);
-        this.shapeIndex = originalShapes.indexOf(shape);
-        this.selectedShapeIndex = this.shapeIndex;
-        foundShape = true;
-        break;
-      }
+    if (hit) {
+      // Deep clone to preserve original styles
+      this.shape = this.cloneShape(hit);
+      this.shapeIndex = originalShapes.indexOf(hit);
+      this.selectedShapeIndex = this.shapeIndex;
+      foundShape = true;
     }
     if (!foundShape) {
       // Clicked on empty area - deselect
@@ -911,6 +923,58 @@ export class MoveToolPlugin
     } else {
       this.annotationTool.canvas.style.cursor = 'move';
     }
+  }
+
+  /**
+   * Topmost shape under the pointer. On touch a fingertip is far less precise
+   * than a mouse, so there the selected shape can be grabbed anywhere inside
+   * its box, and other shapes are also found within a fingertip of the touch.
+   */
+  private findShapeAt(x: number, y: number): IShape | null {
+    const shapes = this.annotationTool.shapes.slice().reverse();
+    if (this.isTouchLayout) {
+      const selected = this.getSelectedShape();
+      if (selected && this.isPointerInShapeBounds(selected, x, y, 8)) {
+        return selected;
+      }
+    }
+    const exact = shapes.find((shape) => this.isPointerAtShape(shape, x, y));
+    if (exact || !this.isTouchLayout) {
+      return exact ?? null;
+    }
+    const offsets: Array<[number, number]> = [];
+    for (const radius of [8, 16]) {
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        offsets.push([Math.cos(angle) * radius, Math.sin(angle) * radius]);
+      }
+    }
+    return (
+      shapes.find((shape) =>
+        offsets.some(([dx, dy]) => this.isPointerAtShape(shape, x + dx, y + dy))
+      ) ?? null
+    );
+  }
+
+  private isPointerInShapeBounds(shape: IShape, x: number, y: number, padding: number): boolean {
+    const bounds = this.getShapeBounds(shape);
+    if (!bounds) return false;
+    const rotation = shape.rotation ?? 0;
+    if (rotation) {
+      const center = this.getShapeRotationCenter(shape, bounds);
+      const cos = Math.cos(-rotation);
+      const sin = Math.sin(-rotation);
+      const dx = x - center.x;
+      const dy = y - center.y;
+      x = center.x + dx * cos - dy * sin;
+      y = center.y + dx * sin + dy * cos;
+    }
+    return (
+      x >= bounds.x - padding &&
+      x <= bounds.x + bounds.width + padding &&
+      y >= bounds.y - padding &&
+      y <= bounds.y + bounds.height + padding
+    );
   }
 
   isPointerAtShape(shape: IShape, x: number, y: number): boolean {

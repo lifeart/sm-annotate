@@ -6,6 +6,7 @@ import { addFrameSquareOverlay } from '../src/overlays/frame-number';
 import { addVideoOverlay } from '../src/overlays/video';
 import { addProgressBarOverlay } from '../src/overlays/progress-bar';
 import type { SmAnnotateConfig } from '../src/config';
+import type { MoveToolPlugin } from '../src/plugins/move';
 
 AnnotationTool.prototype.initUI = initUI;
 AnnotationTool.prototype.initCanvas = initCanvas;
@@ -143,5 +144,65 @@ describe('mobile dock', () => {
     tool.getButtonForTool('rectangle').click();
     expect(pause).toHaveBeenCalled();
     expect(tool.currentTool).toBe('rectangle');
+  });
+
+  describe('shape actions', () => {
+    const button = (control: string) =>
+      tool.uiContainer.querySelector(`[data-control="${control}"]`) as HTMLButtonElement;
+
+    it('shows delete and duplicate only while the move tool has a selection', () => {
+      create();
+      const move = tool.pluginForTool('move') as unknown as MoveToolPlugin;
+      const selected = vi.spyOn(move, 'getSelectedShape').mockReturnValue(null);
+      tool.currentTool = 'move';
+      tool.redrawFullCanvas();
+      expect(button('delete').style.display).toBe('none');
+
+      selected.mockReturnValue({ type: 'rectangle' } as never);
+      tool.redrawFullCanvas();
+      expect(button('delete').style.display).toBe('');
+      expect(button('duplicate').style.display).toBe('');
+
+      tool.currentTool = 'curve';
+      tool.redrawFullCanvas();
+      expect(button('delete').style.display).toBe('none');
+    });
+
+    it('runs delete and duplicate on the move tool', () => {
+      create();
+      const move = tool.pluginForTool('move') as unknown as MoveToolPlugin;
+      const del = vi.spyOn(move, 'deleteSelectedShape').mockImplementation(() => {});
+      const dup = vi.spyOn(move, 'duplicateSelectedShape').mockImplementation(() => {});
+      button('duplicate').click();
+      button('delete').click();
+      expect(dup).toHaveBeenCalledTimes(1);
+      expect(del).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('long-pressing previous frame jumps to the previous annotation without also stepping a frame', () => {
+    vi.useFakeTimers();
+    try {
+      create();
+      const prev = vi.spyOn(tool, 'prevFrame').mockImplementation(() => {});
+      const prevAnnotated = vi.spyOn(tool, 'prevAnnotatedFrame').mockImplementation(() => {});
+      const button = tool.playerControlsContainer.querySelector('[data-tooltip^="Previous frame"]') as HTMLButtonElement;
+
+      button.dispatchEvent(new Event('pointerdown'));
+      vi.advanceTimersByTime(600);
+      button.dispatchEvent(new Event('pointerup'));
+      button.click();
+
+      expect(prevAnnotated).toHaveBeenCalledTimes(1);
+      expect(prev).not.toHaveBeenCalled();
+
+      // A normal tap still steps one frame
+      button.dispatchEvent(new Event('pointerdown'));
+      button.dispatchEvent(new Event('pointerup'));
+      button.click();
+      expect(prev).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -1540,4 +1540,79 @@ describe('MoveToolPlugin', () => {
       expect(mockAnnotationTool.timeStack.get(0)).toBeUndefined();
     });
   });
+
+  describe('touch layout (mobile dock)', () => {
+    const rect = (): IRectangle => ({
+      type: 'rectangle',
+      x: 100,
+      y: 50,
+      width: 200,
+      height: 100,
+      strokeStyle: '#000',
+      fillStyle: '#fff',
+      lineWidth: 1,
+    });
+
+    const setTouch = (active: boolean) => {
+      (mockAnnotationTool as unknown as { mobileDock: { active: boolean } }).mobileDock = { active };
+    };
+
+    it('uses finger-sized resize handle hit areas', () => {
+      mockAnnotationTool.shapes = [rect()];
+      plugin.selectedShapeIndex = 0;
+      expect(plugin.getHandleAtPosition(112, 62)).toBeNull();
+      setTouch(true);
+      expect(plugin.getHandleAtPosition(112, 62)).toBe('nw');
+    });
+
+    it('grabs the selected shape anywhere inside its box', () => {
+      setTouch(true);
+      mockAnnotationTool.shapes = [rect()];
+      mockAnnotationTool.pluginForTool = vi.fn(() => ({
+        isPointerAtShape: vi.fn(() => false),
+        move: vi.fn((s: IShape) => s),
+        draw: vi.fn(),
+      }));
+      plugin.selectedShapeIndex = 0;
+
+      // Inside the box but away from the centre, handles and outline
+      plugin.onPointerDown(createMockPointerEvent(150, 120));
+
+      expect(plugin.selectedShapeIndex).toBe(0);
+      expect(plugin.isDrawing).toBe(true);
+    });
+
+    it('finds a shape within a fingertip of the touch', () => {
+      mockAnnotationTool.shapes = [rect()];
+      mockAnnotationTool.pluginForTool = vi.fn(() => ({
+        // Only the exact outline (x = 100) counts as a hit
+        isPointerAtShape: vi.fn((_s: IShape, x: number) => Math.abs(x - 100) < 1),
+        move: vi.fn((s: IShape) => s),
+        draw: vi.fn(),
+      }));
+
+      plugin.onPointerDown(createMockPointerEvent(108, 100));
+      expect(plugin.selectedShapeIndex).toBe(-1);
+
+      setTouch(true);
+      plugin.onPointerDown(createMockPointerEvent(108, 100));
+      expect(plugin.selectedShapeIndex).toBe(0);
+    });
+
+    it('does not start a rotation-centre drag at the shape centre', () => {
+      setTouch(true);
+      mockAnnotationTool.shapes = [rect()];
+      mockAnnotationTool.pluginForTool = vi.fn(() => ({
+        isPointerAtShape: vi.fn(() => false),
+        move: vi.fn((s: IShape) => s),
+        draw: vi.fn(),
+      }));
+      plugin.selectedShapeIndex = 0;
+
+      plugin.onPointerDown(createMockPointerEvent(200, 100));
+
+      expect(mockAnnotationTool.canvas.style.cursor).toBe('move');
+      expect((plugin as unknown as { centerDragActive: boolean }).centerDragActive).toBe(false);
+    });
+  });
 });

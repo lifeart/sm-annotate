@@ -10,7 +10,11 @@
  */
 
 import type { AnnotationTool } from "../core";
+import type { MoveToolPlugin } from "../plugins/move";
 import { getCSSPrefix } from "./theme";
+
+const duplicateIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+const deleteIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
 
 /** Colours offered in the style sheet; the last swatch opens the native picker */
 export const DOCK_SWATCHES = [
@@ -37,6 +41,7 @@ export class MobileDock {
   private customColorInput: HTMLInputElement | null = null;
   private sizeInput: HTMLInputElement | null = null;
   private sizePreview: HTMLDivElement | null = null;
+  private shapeActionButtons: HTMLButtonElement[] = [];
   private cleanups: Array<() => void> = [];
 
   constructor(private tool: AnnotationTool) {}
@@ -61,6 +66,7 @@ export class MobileDock {
     this.tool.strokeSizePicker.classList.add(`${this.prefix}-dock-hidden`);
     this.tool.strokeSizePicker.parentElement?.classList.add(`${this.prefix}-dock-hidden`);
     this.createStyleButton();
+    this.createShapeActions();
     this.createSheet();
 
     const onResize = () => this.update();
@@ -171,6 +177,7 @@ export class MobileDock {
     this.styleButton = null;
     this.sheet = null;
     this.swatchButtons = [];
+    this.shapeActionButtons = [];
     this.isActive = false;
     this.root = null;
   }
@@ -232,6 +239,64 @@ export class MobileDock {
       this.sizePreview.style.height = `${size}px`;
       this.sizePreview.style.background = color;
     }
+  }
+
+  /**
+   * Delete and duplicate for the shape picked with the move tool; on desktop
+   * these are the Delete key and Ctrl+D, which phones don't have.
+   */
+  private createShapeActions() {
+    const movePlugin = () =>
+      this.tool.pluginForTool("move") as unknown as MoveToolPlugin;
+    const actions: Array<[string, string, string, () => void]> = [
+      ["duplicate", "Duplicate shape", duplicateIcon, () => movePlugin().duplicateSelectedShape()],
+      ["delete", "Delete shape", deleteIcon, () => movePlugin().deleteSelectedShape()],
+    ];
+    for (const [control, label, icon, run] of actions) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.classList.add(`${this.prefix}-btn`, `${this.prefix}-dock-only`);
+      button.dataset.control = control;
+      button.setAttribute("aria-label", label);
+      button.innerHTML = icon;
+      button.style.display = "none";
+      const onClick = () => {
+        run();
+        this.syncShapeActions();
+      };
+      button.addEventListener("click", onClick);
+      this.cleanups.push(() => {
+        button.removeEventListener("click", onClick);
+        button.remove();
+      });
+      this.tool.uiContainer.appendChild(button);
+      this.shapeActionButtons.push(button);
+    }
+
+    // Selection changes always end in a redraw
+    const tool = this.tool;
+    const previousRedraw = tool.redrawFullCanvas;
+    const wrappedRedraw = () => {
+      previousRedraw.call(tool);
+      this.syncShapeActions();
+    };
+    tool.redrawFullCanvas = wrappedRedraw;
+    this.cleanups.push(() => {
+      if (tool.redrawFullCanvas === wrappedRedraw) {
+        tool.redrawFullCanvas = previousRedraw;
+      }
+    });
+  }
+
+  private syncShapeActions() {
+    let hasSelection = false;
+    if (this.isActive && this.tool.currentTool === "move") {
+      const plugin = this.tool.pluginForTool("move") as unknown as MoveToolPlugin;
+      hasSelection = !!plugin.getSelectedShape();
+    }
+    this.shapeActionButtons.forEach((button) => {
+      button.style.display = hasSelection ? "" : "none";
+    });
   }
 
   private createStyleButton() {
