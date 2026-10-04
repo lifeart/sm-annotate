@@ -134,6 +134,12 @@ export class ButtonConstructor {
         }
         if (this.currentTool === tool) {
           this.currentTool = null;
+          // Toggling compare off hides the comparison too; before, the only
+          // way out was dragging the split line to the edge of the frame
+          if (tool === "compare") {
+            this.tool.removeGlobalShape("compare");
+            this.tool.redrawFullCanvas();
+          }
         } else {
           this.currentTool = tool;
         }

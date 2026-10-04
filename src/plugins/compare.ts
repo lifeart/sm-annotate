@@ -166,6 +166,44 @@ export class CompareToolPlugin
     }
 
     this.ctx.globalAlpha = globalAlpha;
+
+    if (!referenceVideoFrame) {
+      this.showReferenceLoading();
+    }
+  }
+
+  private referenceRetryTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * The reference video fills its frame buffer while it plays in the
+   * background, so right after loading some frames aren't there yet. Say so
+   * instead of silently showing only the main video, and redraw once the
+   * frame has had time to arrive.
+   */
+  private showReferenceLoading() {
+    const label = "Loading reference frame…";
+    this.ctx.save();
+    this.ctx.globalAlpha = 1;
+    this.ctx.font = "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const padX = 8;
+    const width = this.ctx.measureText(label).width + padX * 2;
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    this.ctx.fillRect(8, 8, width, 24);
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.textBaseline = "middle";
+    this.ctx.fillText(label, 8 + padX, 20);
+    this.ctx.restore();
+
+    if (this.referenceRetryTimer || !this.annotationTool.isVideoPaused) {
+      return;
+    }
+    this.referenceRetryTimer = setTimeout(() => {
+      this.referenceRetryTimer = null;
+      const tool = this.annotationTool;
+      if (!tool.isDestroyed && tool.isCompareActive && tool.isVideoPaused) {
+        tool.redrawFullCanvas();
+      }
+    }, 300);
   }
 
   /**

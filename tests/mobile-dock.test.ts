@@ -205,4 +205,14 @@ describe('mobile dock', () => {
       vi.useRealTimers();
     }
   });
+
+  it('toggling the compare button off also hides the comparison', () => {
+    create();
+    tool.currentTool = 'compare';
+    tool.addGlobalShape({ type: 'compare', x: 0.5, disabled: false, strokeStyle: '#000', fillStyle: '#000', lineWidth: 1 } as never);
+    expect(tool.isCompareActive).toBe(true);
+    tool.getButtonForTool('compare').click();
+    expect(tool.currentTool).toBe(null);
+    expect(tool.isCompareActive).toBe(false);
+  });
 });
