@@ -706,3 +706,55 @@ kbd {
   border: none;
 }
 
+
+/* Phones: the annotator docks its toolbars under the video, so the card no
+   longer needs room for floating bars above and below it */
+@media screen and (max-width: 959px) {
+  .main {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .video-container {
+    width: 100%;
+    padding: 8px;
+    border-radius: var(--radius-lg);
+  }
+
+  video {
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .header {
+    padding: 10px 16px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  .main {
+    padding: 8px;
+  }
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .header {
+    display: none;
+  }
+
+  .main {
+    padding: 8px;
+  }
+
+  video {
+    max-height: calc(100vh - 32px);
+  }
+}

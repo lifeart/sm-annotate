@@ -52,6 +52,11 @@ export interface MobileConfig {
   autoCollapse: boolean;
   /** Viewport width breakpoint for mobile mode (default: 960) */
   breakpoint: number;
+  /**
+   * Below the breakpoint, dock the toolbars under the video instead of
+   * floating them over it, with colour and width in a bottom sheet (default: true)
+   */
+  dock: boolean;
 }
 
 /**
@@ -156,6 +161,7 @@ export const defaultConfig: SmAnnotateConfig = {
     gesturesEnabled: true,
     autoCollapse: true,
     breakpoint: 960,
+    dock: true,
   },
   theme: 'dark',
   toolbar: {

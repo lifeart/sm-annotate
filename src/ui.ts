@@ -69,13 +69,6 @@ export function initUI(this: AnnotationTool) {
 
   addButtons(this, Button);
 
-  if (this.isMobile) {
-    this.hideButton("line");
-    this.hideButton("circle");
-    this.hideButton("rectangle");
-    this.hideButton("eraser");
-  }
-
   this.hideButton("compare");
 
   // Divider before color/stroke controls

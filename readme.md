@@ -124,6 +124,7 @@ const annotationTool = new SmAnnotate(video, {
     gesturesEnabled: true,      // Enable pinch-to-zoom and pan
     autoCollapse: true,         // Auto-collapse toolbar when drawing
     breakpoint: 960,            // Mobile breakpoint in pixels
+    dock: true,                 // Dock toolbars under the video below the breakpoint
   },
 
   // Toolbar options
@@ -163,9 +164,34 @@ annotationTool.setLayout('bottom-dock');
 const currentLayout = annotationTool.getLayout();
 ```
 
+#### Mobile Dock
+
+Below the mobile breakpoint the toolbars stop floating over the video and dock
+under it, sized for thumbs (44px targets):
+
+- Player controls sit directly under the video; drawing tools (pen, arrow, line,
+  rectangle, circle, text, eraser) form the first row of the dock, and undo,
+  move, select, compare and view toggles the second.
+- Colour and stroke width live behind one style button that opens a bottom
+  sheet with swatches, a custom colour and a width slider.
+- With no tool selected, swiping horizontally across the paused video scrubs
+  frame by frame. Picking a drawing tool while the video plays pauses it.
+- The move tool uses fingertip-sized hit areas and handles; a selected shape
+  can be dragged from anywhere inside its box, and delete and duplicate
+  buttons appear in the dock while a shape is selected.
+- During playback the dock dims instead of disappearing, so the layout never jumps.
+- On phones in landscape the tools move to a rail on the left and the player
+  controls to a rail on the right.
+- Fullscreen keeps the dock. On iPhone, where Safari has no fullscreen API for
+  page elements, the fullscreen button pins the player over the page instead
+  (Escape or the button again leaves it).
+
+The dock follows the viewport (rotate or resize across the breakpoint). Set
+`mobile.dock: false` to keep the floating toolbars on small screens.
+
 #### Collapsible Toolbars (Mobile)
 
-On mobile devices, toolbars can be collapsed to maximize drawing space:
+When the mobile dock is off, toolbars can be collapsed to maximize drawing space:
 
 ```javascript
 // Programmatic control

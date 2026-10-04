@@ -205,6 +205,51 @@ describe('CompareToolPlugin modes', () => {
     });
   });
 
+  describe('reference frame not buffered yet', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const setupMissingReference = (paused: boolean) => {
+      setupVideos();
+      mockTool.referenceVideoFrameBuffer.getFrame = vi.fn(() => null);
+      mockTool.compareMode = 'wipe';
+      mockTool.isVideoPaused = paused;
+      mockTool.isCompareActive = true;
+      mockTool.redrawFullCanvas = vi.fn();
+      mockCtx.fillText = vi.fn();
+      mockCtx.measureText = vi.fn(() => ({ width: 100 }));
+    };
+
+    it('says the reference is loading and redraws once it may have arrived', () => {
+      setupMissingReference(true);
+      plugin.drawShape(shape);
+      expect(mockCtx.fillText).toHaveBeenCalledWith('Loading reference frame…', expect.any(Number), expect.any(Number));
+      // A second draw while waiting doesn't stack another retry
+      plugin.drawShape(shape);
+      vi.advanceTimersByTime(300);
+      expect(mockTool.redrawFullCanvas).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not schedule redraws during playback', () => {
+      setupMissingReference(false);
+      plugin.drawShape(shape);
+      vi.advanceTimersByTime(1000);
+      expect(mockTool.redrawFullCanvas).not.toHaveBeenCalled();
+    });
+
+    it('shows no label when the reference frame is there', () => {
+      setupVideos();
+      mockTool.compareMode = 'wipe';
+      mockCtx.fillText = vi.fn();
+      plugin.drawShape(shape);
+      expect(mockCtx.fillText).not.toHaveBeenCalled();
+    });
+  });
+
   describe('difference', () => {
     let offscreenCtx: MockCanvasContext;
 
