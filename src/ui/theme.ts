@@ -328,16 +328,56 @@ function generateStyles(): string {
       margin-bottom: 4px;
     }
 
+    /* Fullscreen: the video fills the screen between the toolbars. Host page
+       padding and max-height limits are for the inline layout and would leave
+       the video smaller than (and offset from) the annotation canvas. */
+    .${PREFIX}-root:fullscreen,
+    .${PREFIX}-root:-webkit-full-screen,
+    .${PREFIX}-root.${PREFIX}-fullscreen-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: #000;
+    }
+
+    /* No Fullscreen API (iPhone): pin the container over the page instead */
+    .${PREFIX}-root.${PREFIX}-fullscreen-fallback {
+      position: fixed !important;
+      inset: 0;
+      z-index: 2147483000;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    .${PREFIX}-root:fullscreen > video,
+    .${PREFIX}-root:-webkit-full-screen > video,
+    .${PREFIX}-root.${PREFIX}-fullscreen-fallback > video {
+      max-width: none !important;
+      max-height: none !important;
+      flex-shrink: 0;
+    }
+
     /* Fullscreen mode - toolbars inside the fullscreen container */
     :fullscreen .${PREFIX}-container,
-    :-webkit-full-screen .${PREFIX}-container {
+    :-webkit-full-screen .${PREFIX}-container,
+    .${PREFIX}-fullscreen-fallback .${PREFIX}-container {
       position: fixed;
       top: 0;
       margin-top: 8px;
     }
 
     :fullscreen .${PREFIX}-player-controls,
-    :-webkit-full-screen .${PREFIX}-player-controls {
+    :-webkit-full-screen .${PREFIX}-player-controls,
+    .${PREFIX}-fullscreen-fallback .${PREFIX}-player-controls {
       position: fixed;
       bottom: 0;
       margin-bottom: 8px;
@@ -647,26 +687,30 @@ function generateStyles(): string {
 
     /* Fullscreen mode with safe area support */
     :fullscreen .${PREFIX}-container,
-    :-webkit-full-screen .${PREFIX}-container {
+    :-webkit-full-screen .${PREFIX}-container,
+    .${PREFIX}-fullscreen-fallback .${PREFIX}-container {
       margin-top: max(8px, env(safe-area-inset-top, 8px));
     }
 
     :fullscreen .${PREFIX}-player-controls,
-    :-webkit-full-screen .${PREFIX}-player-controls {
+    :-webkit-full-screen .${PREFIX}-player-controls,
+    .${PREFIX}-fullscreen-fallback .${PREFIX}-player-controls {
       margin-bottom: max(8px, env(safe-area-inset-bottom, 8px));
     }
 
     /* Mobile fullscreen - extra adjustments */
     @media (max-width: 960px) {
       :fullscreen .${PREFIX}-container,
-      :-webkit-full-screen .${PREFIX}-container {
+      :-webkit-full-screen .${PREFIX}-container,
+      .${PREFIX}-fullscreen-fallback .${PREFIX}-container {
         margin-top: max(4px, env(safe-area-inset-top, 4px));
         padding-left: max(6px, env(safe-area-inset-left, 6px));
         padding-right: max(6px, env(safe-area-inset-right, 6px));
       }
 
       :fullscreen .${PREFIX}-player-controls,
-      :-webkit-full-screen .${PREFIX}-player-controls {
+      :-webkit-full-screen .${PREFIX}-player-controls,
+      .${PREFIX}-fullscreen-fallback .${PREFIX}-player-controls {
         margin-bottom: max(4px, env(safe-area-inset-bottom, 4px));
         padding-left: max(6px, env(safe-area-inset-left, 6px));
         padding-right: max(6px, env(safe-area-inset-right, 6px));
@@ -872,7 +916,8 @@ function generateStyles(): string {
     }
 
     .${PREFIX}-root.${PREFIX}-mobile:fullscreen,
-    .${PREFIX}-root.${PREFIX}-mobile:-webkit-full-screen {
+    .${PREFIX}-root.${PREFIX}-mobile:-webkit-full-screen,
+    .${PREFIX}-root.${PREFIX}-mobile.${PREFIX}-fullscreen-fallback {
       justify-content: center;
       padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
       background: #000;

@@ -18,6 +18,7 @@ import {
 import { LayoutManager } from "./ui/layout";
 import { CollapseController } from "./ui/collapse-controller";
 import { MobileDock } from "./ui/mobile-dock";
+import { isContainerFullscreen } from "./ui/toggle-fullscreen-button";
 import { GestureHandler, GestureState } from "./gestures/gesture-handler";
 
 const pixelRatio = window.devicePixelRatio || 1;
@@ -958,7 +959,7 @@ export class AnnotationTool extends AnnotationToolBase<IShape> {
 
     // Get the container dimensions
     const container = video.parentElement;
-    const isFullscreen = !!(document.fullscreenElement ?? (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement);
+    const isFullscreen = isContainerFullscreen(container);
     let width = Math.min(rawWidth, video.videoWidth);
     let height = Math.floor(width / trueAspectRatio);
     // Honour a CSS max-height (e.g. short landscape phone screens) by

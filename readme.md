@@ -182,6 +182,9 @@ under it, sized for thumbs (44px targets):
 - During playback the dock dims instead of disappearing, so the layout never jumps.
 - On phones in landscape the tools move to a rail on the left and the player
   controls to a rail on the right.
+- Fullscreen keeps the dock. On iPhone, where Safari has no fullscreen API for
+  page elements, the fullscreen button pins the player over the page instead
+  (Escape or the button again leaves it).
 
 The dock follows the viewport (rotate or resize across the breakpoint). Set
 `mobile.dock: false` to keep the floating toolbars on small screens.
